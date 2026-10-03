@@ -30,8 +30,15 @@ class Settings:
     # repr=False keeps the password out of logs, tracebacks and debug output
     neo4j_password: str = field(default="", repr=False)
     neo4j_database: str = "neo4j"
+    #: seconds a single graph query may run
+    neo4j_query_timeout: float = 15.0
     #: origins allowed to call the API (the Vite dev server by default)
     cors_origins: tuple[str, ...] = ("http://localhost:5180",)
+    log_level: str = "INFO"
+
+    @property
+    def graph_configured(self) -> bool:
+        return bool(self.neo4j_uri and self.neo4j_username and self.neo4j_password)
 
 
 @lru_cache
@@ -42,5 +49,7 @@ def get_settings() -> Settings:
         neo4j_username=os.environ.get("NEO4J_USERNAME", ""),
         neo4j_password=os.environ.get("NEO4J_PASSWORD", ""),
         neo4j_database=os.environ.get("NEO4J_DATABASE", "neo4j"),
+        neo4j_query_timeout=float(os.environ.get("NEO4J_QUERY_TIMEOUT", "15")),
         cors_origins=tuple(o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5180").split(",") if o.strip()),
+        log_level=os.environ.get("LOG_LEVEL", "INFO").upper(),
     )

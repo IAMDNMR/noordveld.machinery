@@ -1,16 +1,66 @@
-"""API entry point. Scaffolding only: routes and business logic come in the next phase.
+"""API entry point.
 
 Run (from backend/):  python -m uvicorn app.main:app --reload --port 8000
 """
-from fastapi import FastAPI
+from __future__ import annotations
+
+import logging
+
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.api.dependencies import Catalogue, get_graph
+from app.api.routes import catalogue, parts
 from app.core.config import get_settings
+from app.core.exceptions import GraphUnavailableError, NotFoundError
+from app.core.logging import setup_logging
 
-app = FastAPI(title="Noordveld Parts Intelligence API", version="0.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origins), allow_methods=["GET"], allow_headers=["*"])
+log = logging.getLogger(__name__)
 
 
-@app.get("/health", tags=["system"])
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def _error(status: int, code: str, message: str) -> JSONResponse:
+    return JSONResponse(status_code=status, content={"error": {"code": code, "message": message}})
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    setup_logging(settings.log_level)
+
+    app = FastAPI(title="Noordveld Parts Intelligence API", version="1.0.0")
+    app.add_middleware(
+        CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST"], allow_headers=["*"]
+    )
+
+    @app.exception_handler(NotFoundError)
+    async def not_found(_: Request, exc: NotFoundError) -> JSONResponse:
+        return _error(404, "not_found", str(exc))
+
+    @app.exception_handler(GraphUnavailableError)
+    async def graph_unavailable(_: Request, __: GraphUnavailableError) -> JSONResponse:
+        return _error(503, "graph_unavailable", "The parts catalogue is temporarily unavailable.")
+
+    @app.exception_handler(Exception)
+    async def unexpected(_: Request, exc: Exception) -> JSONResponse:
+        log.exception("unhandled error: %s", type(exc).__name__)
+        return _error(500, "internal_error", "Something went wrong.")
+
+    system = APIRouter(tags=["system"])
+
+    @system.get("/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok"}
+
+    @system.get("/health/ready")
+    def ready(service: Catalogue) -> dict[str, str]:
+        service.ready()  # raises GraphUnavailableError -> 503
+        return {"status": "ready"}
+
+    app.include_router(system)
+    app.include_router(parts.router, prefix="/api/v1")
+    app.include_router(catalogue.router, prefix="/api/v1")
+    app.add_event_handler("shutdown", lambda: get_graph().close())
+    return app
+
+
+app = create_app()

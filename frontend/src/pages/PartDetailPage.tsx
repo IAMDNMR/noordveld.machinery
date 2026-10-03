@@ -1,475 +1,396 @@
-import { ArrowLeft, BadgeCheck, CalendarClock, Check, ChevronRight, CircleAlert, Copy, Factory, Mail, RotateCcw, ScanSearch, ShieldCheck, ShoppingCart, Truck, Warehouse, Weight } from 'lucide-react'
-import { useState, type KeyboardEvent } from 'react'
+import { Check, ChevronRight, ShoppingCart } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { AvailabilityBadge } from '../components/store/Badges'
-import { PartCard } from '../components/store/PartCard'
-import { PartVisual } from '../components/store/PartVisual'
+import { getPart, type PartDetail, type RelationKind } from '../api'
+import { AvailabilityBadge, DemoTag, StatusFlag } from '../components/store/Badges'
+import { PartImage } from '../components/store/PartImage'
 import { QtyStepper } from '../components/store/QtyStepper'
-import { company } from '../data/content'
-import { machines } from '../data/machines'
-import {
-  bandLabel,
-  cheapestStandard,
-  eur,
-  partById,
-  partBySlug,
-  ratesByBand,
-  statusMeta,
-  stockLine,
-  storeCompliance,
-  storeCountries,
-  storeShippingRates,
-  storeWarehouses,
-  STORE_DISCLAIMER,
-  STORE_ROUTE,
-  totalStock,
-  type StorePart,
-} from '../data/store'
+import { ErrorView } from '../components/store/StateViews'
+import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { formatMoney, humanize, NOT_AVAILABLE } from '../lib/format'
+import { categoryPath, machinePath, partPath, STORE_ROUTE } from '../lib/storeQuery'
 import { useCart } from '../store/CartContext'
 
-type Tab = 'specs' | 'fit' | 'stock' | 'compliance'
-const TABS: readonly { id: Tab; label: string }[] = [
-  { id: 'specs', label: 'Specifications' },
-  { id: 'fit', label: 'Fits machines' },
-  { id: 'stock', label: 'Stock & delivery' },
-  { id: 'compliance', label: 'Compliance' },
-]
+const NOT_CONFIGURED = 'Not configured'
 
-const CERT_LABEL: Record<string, string> = { VALID_DEMO: 'Valid', RENEWAL_PENDING_DEMO: 'Renewal pending' }
-const NL_VAT = storeCountries.find((c) => c.code === 'NL')?.vat ?? 0.21
-const expressFrom = Math.min(...storeShippingRates.filter((r) => r.method === 'EXPRESS').map((r) => r.price))
+/** What each graph relationship means. None of them says the parts are interchangeable. */
+const RELATION: Record<RelationKind, string> = {
+  SAME_NAME_GROUP_AS: 'Shares a part name',
+  RELATED_COMPONENT: 'Related component',
+  CO_ORDERED_WITH: 'Often ordered together',
+}
+
+const Section = ({ id, title, children, note }: { id: string; title: string; children: ReactNode; note?: string }) => (
+  <section className="pds" aria-labelledby={`${id}-title`} id={id}>
+    <div className="container">
+      <h2 id={`${id}-title`}>{title}</h2>
+      {note ? <p className="pds__note">{note}</p> : null}
+      {children}
+    </div>
+  </section>
+)
+
+const Facts = ({ rows }: { rows: [string, ReactNode][] }) => (
+  <dl className="spec">
+    {rows.map(([label, value]) => (
+      <div key={label}>
+        <dt>{label}</dt>
+        <dd>{value}</dd>
+      </div>
+    ))}
+  </dl>
+)
+
+const place = (city: string | null, country: string | null) => [city, country].filter(Boolean).join(', ')
 
 export default function PartDetailPage() {
   const { partNo = '' } = useParams()
-  const part = partBySlug(partNo)
-  return part ? <PartDetail key={part.id} part={part} /> : <MissingPart partNo={partNo} />
-}
+  const detail = useApi((signal) => getPart(partNo, signal), partNo)
 
-function MissingPart({ partNo }: { partNo: string }) {
-  usePageMeta({ title: 'Part not found', description: 'This part is not in the Noordveld Parts Store.', path: `${STORE_ROUTE}/${partNo}` })
-  return (
-    <section className="pd-missing container">
-      <h1 className="h2">We can’t find that part</h1>
-      <p className="lead">No part with the number “{partNo}” is in the catalogue.</p>
-      <Link to={STORE_ROUTE} className="button button--primary">
-        Browse all parts
-      </Link>
-    </section>
-  )
-}
-
-function PartDetail({ part }: { part: StorePart }) {
   usePageMeta({
-    title: `${part.name} (${part.no})`,
-    description: `${part.name}, part ${part.no}. ${part.category}${part.fits.length ? `, fits ${part.fits.join(', ')}` : ''}. ${eur(part.price)} excluding VAT. Demonstration store.`,
-    path: `${STORE_ROUTE}/${part.slug}`,
+    title: detail.data ? `${detail.data.part.name} (${detail.data.part.part_number})` : 'Part',
+    description: detail.data ? `${detail.data.part.name}, Noordveld part ${detail.data.part.part_number}: compatible machines, specifications and legacy references.` : 'Noordveld part details.',
+    path: `${STORE_ROUTE}/${partNo}`,
   })
 
-  const { add, setOpen, justAdded, items } = useCart()
+  useEffect(() => window.scrollTo(0, 0), [partNo])
+
+  if (detail.error?.notFound)
+    return (
+      <div className="container pd-missing">
+        <h1>Part not found</h1>
+        <p>No part “{partNo}” exists in the Noordveld catalogue.</p>
+        <Link to={STORE_ROUTE} className="button button--primary">
+          Back to the Parts Store
+        </Link>
+      </div>
+    )
+  if (detail.error)
+    return (
+      <div className="container pd-missing">
+        <ErrorView error={detail.error} onRetry={detail.reload} what="This part" />
+      </div>
+    )
+  if (!detail.data)
+    return (
+      <div className="container pd-missing" role="status">
+        <p>Loading part…</p>
+      </div>
+    )
+  return <PartView d={detail.data} />
+}
+
+function PartView({ d }: { d: PartDetail }) {
+  const { part, profile, price } = d
+  const { add, lines, setOpen } = useCart()
   const [qty, setQty] = useState(1)
-  const [tab, setTab] = useState<Tab>('specs')
-  const [copied, setCopied] = useState(false)
-  const inCart = items.find((i) => i.part.id === part.id)?.qty ?? 0
-  const added = justAdded === part.id
+  const [added, setAdded] = useState(false)
+  const inCart = lines.find((l) => l.partId === part.part_id)
+  const orderable = profile?.orderable
+  const totalStock = d.warehouses.length > 0 ? d.warehouses.reduce((n, w) => n + (w.available ?? 0), 0) : null
+  const attention = d.identification.filter((i) => i.identification_needed)
+  const specGroups = [...new Set(d.specifications.map((s) => s.group ?? ''))]
 
-  const copy = () => {
-    void navigator.clipboard?.writeText(part.no).then(() => {
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1600)
-    })
+  const addToCart = () => {
+    add(part.part_id, qty)
+    setAdded(true)
+    window.setTimeout(() => setAdded(false), 1800)
   }
-
-  const together = part.related.filter((r) => r.kind === 'together').flatMap((r) => partById(r.id) ?? [])
-  const family = part.related.filter((r) => r.kind === 'family').flatMap((r) => partById(r.id) ?? [])
-
-  const onTabKey = (e: KeyboardEvent, i: number) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
-    const next = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length]
-    setTab(next.id)
-    document.getElementById(`tab-${next.id}`)?.focus()
-  }
-
-  const notice =
-    part.status !== 'VERIFIED' || !part.orderable
-      ? {
-          title: part.orderable ? statusMeta[part.status].label : 'Not orderable online yet',
-          text: part.statusReason || 'Please confirm this part with the Noordveld parts team before ordering.',
-        }
-      : null
 
   return (
-    <>
-      <section className="pd container" aria-labelledby="pd-title">
+    <article>
+      <div className="pd container">
         <nav className="pd__crumbs" aria-label="Breadcrumb">
-          <Link to={STORE_ROUTE}>
-            <ArrowLeft size={15} strokeWidth={2} aria-hidden="true" />
-            Parts Store
-          </Link>
-          <ChevronRight size={14} aria-hidden="true" />
-          <Link to={`${STORE_ROUTE}?cat=${encodeURIComponent(part.category)}`}>{part.category}</Link>
-          {part.subcategory ? (
+          <Link to={STORE_ROUTE}>Parts Store</Link>
+          {part.category ? (
             <>
               <ChevronRight size={14} aria-hidden="true" />
-              <span>{part.subcategory}</span>
+              <Link to={categoryPath(part.category)}>{part.category}</Link>
             </>
           ) : null}
+          <ChevronRight size={14} aria-hidden="true" />
+          <span aria-current="page">{part.part_number}</span>
         </nav>
 
         <div className="pd__grid">
           <div className="pd__media">
-            <PartVisual part={part} variant="large" />
-            <dl className="pd__facts">
-              <div>
-                <Weight size={19} strokeWidth={1.4} aria-hidden="true" />
-                <dt>Weight</dt>
-                <dd>{part.weightKg} kg</dd>
-              </div>
-              <div>
-                <ShieldCheck size={19} strokeWidth={1.4} aria-hidden="true" />
-                <dt>Warranty</dt>
-                <dd>{part.warrantyMonths} months</dd>
-              </div>
-              <div>
-                <RotateCcw size={19} strokeWidth={1.4} aria-hidden="true" />
-                <dt>Returns</dt>
-                <dd>{part.returnDays} days</dd>
-              </div>
-              <div>
-                <Factory size={19} strokeWidth={1.4} aria-hidden="true" />
-                <dt>Made at</dt>
-                <dd>{part.plant || 'Noordveld plant'}</dd>
-              </div>
-            </dl>
+            <PartImage partNumber={part.part_number} category={part.category} name={part.name} variant="large" />
           </div>
 
           <div className="pd__buy">
-            <p className="label">{part.category}</p>
-            <h1 id="pd-title" className="pd__title">
-              {part.name}
-            </h1>
+            <h1 className="pd__title">{part.name}</h1>
             <div className="pd__ids">
-              <button type="button" className="pd__no" onClick={copy} aria-label={`Copy part number ${part.no}`}>
-                <span className="mono">{part.no}</span>
-                {copied ? <Check size={15} strokeWidth={2.2} aria-hidden="true" /> : <Copy size={15} strokeWidth={1.6} aria-hidden="true" />}
-              </button>
-              {part.legacyNo ? (
-                <span className="pd__legacy">
-                  Previously <span className="mono">{part.legacyNo}</span>
-                  {part.legacyBusiness && part.legacyBusiness !== 'Noordveld' ? ` (${part.legacyBusiness})` : ''}
-                </span>
+              <p className="pd__no">
+                <span className="pd__no-label">Noordveld part number</span>
+                <span className="mono">{part.part_number}</span>
+              </p>
+              {d.legacy_references.length > 0 ? (
+                <a className="pd__legacy" href="#legacy">
+                  {d.legacy_references.length} legacy {d.legacy_references.length === 1 ? 'reference' : 'references'}
+                </a>
               ) : null}
             </div>
-            <p className="pd__desc">{part.desc}</p>
+            {part.note ? <p className="pd__desc">{part.note}</p> : null}
 
             <div className="pd__price">
-              <strong>{eur(part.price)}</strong>
-              <span>excl. VAT</span>
-              <small>{eur(part.price * (1 + NL_VAT))} incl. {Math.round(NL_VAT * 100)}% VAT (NL)</small>
+              {price ? (
+                <>
+                  <strong>{formatMoney(price)}</strong>
+                  <span>ex VAT</span>
+                  <small>
+                    {price.price_status ? `${humanize(price.price_status)}. ` : ''}
+                    {price.valid_from && price.valid_to ? `Valid ${price.valid_from} to ${price.valid_to}. ` : ''}
+                    <DemoTag status={price.data_status} />
+                  </small>
+                </>
+              ) : (
+                <strong className="pd__price--none">Price not available</strong>
+              )}
             </div>
 
             <div className="pd__stock">
-              <AvailabilityBadge part={part} />
-              <span>{stockLine(part)}</span>
+              <AvailabilityBadge availability={profile ? { state: profile.availability_state, orderable: profile.orderable, part_status: profile.part_status, total_available: totalStock, data_status: profile.data_status } : null} />
+              {totalStock !== null ? <span>{totalStock} units across {d.warehouses.length} warehouses</span> : null}
+              <StatusFlag status={profile?.part_status} />
             </div>
 
-            {notice ? (
+            {attention.length > 0 ? (
               <div className="pd__notice" role="note">
-                <CircleAlert size={20} strokeWidth={1.6} aria-hidden="true" />
                 <div>
-                  <h2>{notice.title}</h2>
-                  <p>{notice.text}</p>
-                  {part.ident.map((r) => (
-                    <p key={r.model} className="pd__ident">
-                      <ScanSearch size={15} strokeWidth={1.7} aria-hidden="true" /> <strong>{r.model}</strong>: check your machine’s serial number.{' '}
-                      {r.variants.map((v) => `${v.name} (${v.from} to ${v.to})`).join(' or ')}.
+                  <h2>Confirm before ordering</h2>
+                  {attention.map((i) => (
+                    <p key={`${i.model_code}-${i.identification_needed}`}>
+                      {i.model_code ? `${i.model_code}: ` : ''}
+                      {i.reason ?? i.identification_needed}
                     </p>
                   ))}
                 </div>
               </div>
             ) : null}
 
-            {part.orderable ? (
-              <div className="pd__order">
-                <QtyStepper value={qty} onChange={setQty} label="Quantity" />
-                <button type="button" className={`button button--primary pd__add ${added ? 'is-added' : ''}`} onClick={() => add(part, qty)}>
-                  {added ? <Check size={20} strokeWidth={2.2} aria-hidden="true" /> : <ShoppingCart size={20} strokeWidth={1.8} aria-hidden="true" />}
-                  {added ? 'Added to cart' : part.availability === 'BACKORDER' ? 'Order on backorder' : 'Add to cart'}
-                </button>
-              </div>
+            {orderable === true ? (
+              <>
+                <div className="pd__order">
+                  <QtyStepper value={qty} onChange={setQty} label="Quantity" />
+                  <button type="button" className={`button button--primary pd__add ${added ? 'is-added' : ''}`} onClick={addToCart}>
+                    {added ? <Check size={18} strokeWidth={2.2} aria-hidden="true" /> : <ShoppingCart size={18} strokeWidth={1.8} aria-hidden="true" />}
+                    {added ? 'Added to cart' : 'Add to cart'}
+                  </button>
+                </div>
+                {inCart ? (
+                  <button type="button" className="pd__incart" onClick={() => setOpen(true)}>
+                    {inCart.qty} in your cart · View cart
+                  </button>
+                ) : null}
+              </>
             ) : (
-              <a className="button button--primary pd__confirm" href={`mailto:${company.serviceEmail}?subject=${encodeURIComponent(`Parts enquiry ${part.no}`)}`}>
-                <Mail size={20} strokeWidth={1.8} aria-hidden="true" />
-                Ask the parts team to confirm
-              </a>
+              <p className="pd__desc">{orderable === false ? 'This part cannot be ordered online.' : 'Online ordering is not configured for this part.'}</p>
             )}
-            {inCart > 0 ? (
-              <button type="button" className="pd__incart" onClick={() => setOpen(true)}>
-                {inCart} in your cart · View cart
-              </button>
-            ) : null}
+          </div>
+        </div>
+      </div>
 
-            <ul className="pd__promises">
-              <li>
-                <Truck size={18} strokeWidth={1.5} aria-hidden="true" />
-                Standard delivery from {eur(cheapestStandard)}, express from {eur(expressFrom)}
-              </li>
-              <li>
-                <Warehouse size={18} strokeWidth={1.5} aria-hidden="true" />
-                {part.dealers > 0 ? `${part.dealers} dealers also hold stock` : 'Ships from Noordveld warehouses'}
-              </li>
-              <li>
-                <BadgeCheck size={18} strokeWidth={1.5} aria-hidden="true" />
-                {part.fits.length ? `Fits ${part.fits.join(', ')}` : 'Fitment on request'}
-              </li>
+      <Section id="overview" title="Overview">
+        <Facts
+          rows={[
+            ['Category', part.category ?? NOT_AVAILABLE],
+            ['Subcategory', part.subcategory ?? NOT_AVAILABLE],
+            ['Brand', part.brand ?? NOT_AVAILABLE],
+            ['Plant of origin', part.origin_plant ?? NOT_AVAILABLE],
+            ['Weight', profile?.weight_kg != null ? `${profile.weight_kg} kg` : NOT_AVAILABLE],
+            ['Warranty', profile?.warranty_months != null ? `${profile.warranty_months} months` : NOT_AVAILABLE],
+            ['Return window', profile?.return_window_days != null ? `${profile.return_window_days} days` : NOT_AVAILABLE],
+            ...(profile?.status_reason ? ([['Catalogue status', `${profile.part_status ? humanize(profile.part_status) : ''} ${profile.status_reason}`.trim()]] as [string, ReactNode][]) : []),
+          ]}
+        />
+        {d.assemblies.length > 0 ? (
+          <>
+            <h3 className="pds__sub">Used in</h3>
+            <ul className="pds__list">
+              {d.assemblies.map((a) => (
+                <li key={a.assembly_id}>
+                  <strong>{a.name ?? a.assembly_id}</strong>
+                  <span>{a.quantity != null ? `${a.quantity} per assembly` : 'Quantity not stated'}</span>
+                </li>
+              ))}
             </ul>
-          </div>
-        </div>
-      </section>
+          </>
+        ) : null}
+      </Section>
 
-      <section className="pdt container" aria-label="Part information">
-        <div className="pdt__tabs" role="tablist" aria-label="Part information">
-          {TABS.map((t, i) => (
-            <button key={t.id} id={`tab-${t.id}`} type="button" role="tab" aria-selected={tab === t.id} aria-controls={`panel-${t.id}`} tabIndex={tab === t.id ? 0 : -1} onClick={() => setTab(t.id)} onKeyDown={(e) => onTabKey(e, i)}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className="pdt__panel" key={tab}>
-          {tab === 'specs' ? <SpecsPanel part={part} /> : null}
-          {tab === 'fit' ? <FitPanel part={part} /> : null}
-          {tab === 'stock' ? <StockPanel part={part} /> : null}
-          {tab === 'compliance' ? <CompliancePanel part={part} /> : null}
-        </div>
-      </section>
-
-      {together.length > 0 ? (
-        <section className="prel container" aria-labelledby="together-title">
-          <div className="prel__head">
-            <h2 id="together-title" className="h3">
-              Often ordered together
-            </h2>
-            <p>A demo purchase signal. These are suggestions, not substitutes.</p>
-          </div>
-          <ul className="prel__grid">
-            {together.slice(0, 4).map((p) => (
-              <li key={p.id}>
-                <PartCard part={p} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {family.length > 0 ? (
-        <section className="prel container" aria-labelledby="family-title">
-          <div className="prel__head">
-            <h2 id="family-title" className="h3">
-              More in {part.subcategory || part.category}
-            </h2>
-            <p>Parts that share a name group. Check the specifications before choosing.</p>
-          </div>
-          <ul className="prel__grid">
-            {family.slice(0, 4).map((p) => (
-              <li key={p.id}>
-                <PartCard part={p} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <p className="pd__note container">{STORE_DISCLAIMER}</p>
-    </>
-  )
-}
-
-function SpecsPanel({ part }: { part: StorePart }) {
-  const groups = Array.from(new Set(part.specs.map((s) => s.group)))
-  const details: [string, string][] = [
-    ['Part number', part.no],
-    ['Previous number', part.legacyNo ? `${part.legacyNo}${part.legacyBusiness && part.legacyBusiness !== 'Noordveld' ? ` (${part.legacyBusiness})` : ''}` : ''],
-    ['Type', part.type],
-    ['Category', part.category],
-    ['Subcategory', part.subcategory],
-    ['Brand', part.brand],
-    ['Made at', part.plant],
-  ]
-  return (
-    <div className="pdt__cols">
-      <section>
-        <h3>Part details</h3>
-        <dl className="spec">
-          {details
-            .filter(([, v]) => v)
-            .map(([k, v]) => (
-              <div key={k}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
-              </div>
-            ))}
-        </dl>
-      </section>
-      <section>
-        <h3>Specifications</h3>
-        {groups.length ? (
-          groups.map((g) => (
-            <dl key={g} className="spec">
-              <p className="spec__group">{g}</p>
-              {part.specs
-                .filter((s) => s.group === g)
-                .map((s) => (
-                  <div key={`${s.name}-${s.value}`}>
-                    <dt>{s.name}</dt>
-                    <dd>
-                      {s.value}
-                      {s.unit ? ` ${s.unit}` : ''}
-                    </dd>
-                  </div>
-                ))}
-            </dl>
-          ))
+      <Section id="specifications" title="Specifications">
+        {d.specifications.length === 0 ? (
+          <p className="pds__none">No specifications are recorded for this part.</p>
         ) : (
-          <p className="pdt__muted">No measured values are listed for this part.</p>
+          specGroups.map((group) => (
+            <div key={group}>
+              {group ? <h3 className="spec__group">{group}</h3> : null}
+              <Facts rows={d.specifications.filter((s) => (s.group ?? '') === group).map((s) => [s.name, s.value ? `${s.value}${s.unit ? ` ${s.unit}` : ''}` : NOT_AVAILABLE])} />
+            </div>
+          ))
         )}
-        {part.specNote ? (
-          <p className="spec__note">
-            <span>Catalogue note</span>
-            {part.specNote}
-          </p>
-        ) : null}
-      </section>
-    </div>
-  )
-}
+      </Section>
 
-function FitPanel({ part }: { part: StorePart }) {
-  if (!part.fits.length) return <p className="pdt__muted">The catalogue does not state which machines this part fits.</p>
-  return (
-    <div>
-      <p className="pdt__lead">Fitment is stated in the Noordveld catalogue. Nothing is inferred from names or categories.</p>
-      <ul className="fit">
-        {part.fits.map((model) => {
-          const m = machines.find((x) => x.model === model)
-          const ident = part.ident.find((r) => r.model === model)
-          return (
-            <li key={model}>
-              <div>
-                <p className="fit__model mono">{model}</p>
-                <p className="fit__name">{m ? m.name : 'Machine'}</p>
-                {m ? <p className="fit__meta">Built at {m.plant}</p> : null}
-                {ident ? <p className="fit__ident">Check serial range before ordering</p> : null}
-              </div>
-              {m ? (
-                <Link to={`/machines/${m.slug}`} className="text-link">
-                  View machine
-                </Link>
-              ) : null}
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
-}
+      <Section id="machines" title="Compatible machines" note="Fitment is recorded per machine model. Conditional fitment depends on the stated condition.">
+        {d.fitment.length === 0 ? (
+          <p className="pds__none">No fitment is recorded for this part.</p>
+        ) : (
+          <ul className="fit">
+            {d.fitment.map((f) => {
+              const ident = d.identification.find((i) => i.model_code === f.model_code)
+              return (
+                <li key={f.machine_id}>
+                  <div>
+                    <Link className="fit__model" to={machinePath(f.model_code)}>
+                      {f.model_code}
+                    </Link>
+                    <p className="fit__name">{f.name}</p>
+                    {f.condition_note ? <p className="fit__meta">{f.condition_note}</p> : null}
+                    {ident?.identification_needed ? <p className="fit__ident">{ident.reason ?? 'Machine identification needed'}</p> : null}
+                  </div>
+                  <span className={`comp__status ${f.fitment_status === 'CONFIRMED' ? 'is-ok' : 'is-warn'}`}>{f.fitment_status ? humanize(f.fitment_status) : 'Status not stated'}</span>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </Section>
 
-function StockPanel({ part }: { part: StorePart }) {
-  const max = Math.max(1, ...Object.values(part.stock))
-  return (
-    <div className="pdt__cols">
-      <section>
-        <h3>Stock by warehouse</h3>
-        <ul className="wh">
-          {storeWarehouses.map((w) => {
-            const n = part.stock[w.id] ?? 0
-            return (
-              <li key={w.id}>
-                <div className="wh__row">
-                  <span className="wh__name">
-                    {w.name}
-                    <small>
-                      {w.city}, {w.country}
-                    </small>
-                  </span>
-                  <strong className={n === 0 ? 'is-zero' : undefined}>{n === 0 ? 'None' : `${n} available`}</strong>
-                </div>
-                <div className="wh__bar" aria-hidden="true">
-                  <span style={{ width: `${(n / max) * 100}%` }} />
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-        <p className="pdt__muted">
-          {totalStock(part)} units in total. {part.dealers > 0 ? `${part.dealers} dealers in the network also hold this part.` : 'No dealer stock is listed.'}
-        </p>
-        {part.backorder ? (
-          <p className="wh__backorder">
-            <CalendarClock size={18} strokeWidth={1.5} aria-hidden="true" />
-            {part.backorder.qty} units are on order from the supplier, with restock expected in about {part.backorder.days} days.
-          </p>
-        ) : null}
-      </section>
-      <section>
-        <h3>Delivery rates</h3>
-        <table className="rates">
-          <thead>
-            <tr>
-              <th scope="col">Distance</th>
-              <th scope="col">Standard</th>
-              <th scope="col">Express</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ratesByBand.map((r) => (
-              <tr key={r.band}>
-                <th scope="row">{bandLabel[r.band]}</th>
-                <td>
-                  {eur(r.standard?.price ?? 0)}
-                  <small>{r.standard?.days} {r.standard?.days === 1 ? 'day' : 'days'}</small>
-                </td>
-                <td>
-                  {eur(r.express?.price ?? 0)}
-                  <small>{r.express?.days} {r.express?.days === 1 ? 'day' : 'days'}</small>
-                </td>
+      <Section id="legacy" title="Legacy references" note={`Numbers this part was known by before the unified Noordveld number ${part.part_number}. They are references, not alternatives.`}>
+        {d.legacy_references.length === 0 ? (
+          <p className="pds__none">No legacy references are recorded for this part.</p>
+        ) : (
+          <table className="rates">
+            <thead>
+              <tr>
+                <th scope="col">Legacy number</th>
+                <th scope="col">Legacy business</th>
+                <th scope="col">Mapping</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="pdt__muted">Demo rates per shipment, excluding VAT, by road distance from the dispatching warehouse. Transit days exclude one handling day.</p>
-      </section>
-    </div>
-  )
-}
+            </thead>
+            <tbody>
+              {d.legacy_references.map((l, i) => (
+                <tr key={`${l.legacy_part_number}-${i}`}>
+                  <th scope="row" className="mono">{l.legacy_part_number ?? NOT_AVAILABLE}</th>
+                  <td>
+                    {l.legacy_business ?? NOT_AVAILABLE}
+                    <small>{l.legacy_plant}</small>
+                  </td>
+                  <td>
+                    {l.mapping_type ? humanize(l.mapping_type) : NOT_AVAILABLE}
+                    <small>{[l.mapping_confidence ? humanize(l.mapping_confidence) : null, l.note].filter(Boolean).join(' · ')}</small>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Section>
 
-function CompliancePanel({ part }: { part: StorePart }) {
-  const records = part.compliance.flatMap((id) => (storeCompliance[id] ? [{ id, ...storeCompliance[id] }] : []))
-  if (!records.length) return <p className="pdt__muted">No compliance record is listed for this part.</p>
-  return (
-    <ul className="comp">
-      {records.map((c) => (
-        <li key={c.id}>
-          <div className="comp__top">
-            <h3>{c.requirement}</h3>
-            <span className={`comp__status ${c.status === 'VALID_DEMO' ? 'is-ok' : 'is-warn'}`}>{CERT_LABEL[c.status] ?? c.status}</span>
+      <Section id="supply" title="Supply and availability" note="Stock and supply values are demonstration data.">
+        <div className="pdt__cols">
+          <div>
+            <h3>Warehouses</h3>
+            {d.warehouses.length === 0 ? (
+              <p className="pds__none">{NOT_CONFIGURED}</p>
+            ) : (
+              <ul className="pds__list">
+                {d.warehouses.map((w) => (
+                  <li key={w.warehouse_id}>
+                    <strong>{w.name ?? w.warehouse_id}</strong>
+                    <span>{place(w.city, w.country_code)}</span>
+                    <span>{w.available != null ? `${w.available} available` : NOT_AVAILABLE}{w.stock_status ? ` · ${humanize(w.stock_status)}` : ''}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <dl>
-            <div>
-              <dt>Standard</dt>
-              <dd>{c.standard}</dd>
-            </div>
-            <div>
-              <dt>Document</dt>
-              <dd>{c.certification}</dd>
-            </div>
-            <div>
-              <dt>Valid until</dt>
-              <dd>{c.validUntil}</dd>
-            </div>
-          </dl>
-        </li>
-      ))}
-    </ul>
+          <div>
+            <h3>Dealers</h3>
+            {d.dealers.length === 0 ? (
+              <p className="pds__none">{NOT_CONFIGURED}</p>
+            ) : (
+              <ul className="pds__list">
+                {d.dealers.map((x) => (
+                  <li key={x.dealer_id}>
+                    <strong>{x.name ?? x.dealer_id}</strong>
+                    <span>{place(x.city, x.country_code)}</span>
+                    <span>
+                      {x.available != null ? `${x.available} available` : NOT_AVAILABLE}
+                      {x.pickup_allowed ? ' · Collection possible' : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div>
+            <h3>Suppliers</h3>
+            {d.suppliers.length === 0 ? (
+              <p className="pds__none">{NOT_CONFIGURED}</p>
+            ) : (
+              <ul className="pds__list">
+                {d.suppliers.map((s) => (
+                  <li key={s.supplier_id}>
+                    <strong>
+                      {s.name ?? s.supplier_id}
+                      {s.is_primary ? ' · Primary' : ''}
+                    </strong>
+                    <span>{place(s.city, s.country_code)}</span>
+                    <span>{s.lead_time_days != null ? `Lead time ${s.lead_time_days} days` : 'Lead time not available'}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+        <p className="pds__none">Delivery options and fulfilment: {NOT_CONFIGURED}.</p>
+      </Section>
+
+      {d.compliance.length > 0 ? (
+        <Section id="compliance" title="Compliance">
+          <ul className="pds__list">
+            {d.compliance.map((c, i) => (
+              <li key={i}>
+                <strong>{c.requirement ?? c.standard ?? c.certification}</strong>
+                <span>{[c.standard, c.certificate_status ? humanize(c.certificate_status) : null, c.valid_until ? `valid until ${c.valid_until}` : null].filter(Boolean).join(' · ')}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      {d.related.length > 0 ? (
+        <Section id="related" title="Related parts" note="Connected in the catalogue. Interchangeability is not established.">
+          <ul className="prel__grid">
+            {d.related.map((r) => (
+              <li key={`${r.part_id}-${r.relation}`}>
+                <Link to={partPath(r.part_number)} className="prel__card">
+                  <PartImage partNumber={r.part_number} category={r.category} name={r.name} variant="mini" />
+                  <span>
+                    <strong>{r.name}</strong>
+                    <span className="mono">{r.part_number}</span>
+                    <em>{RELATION[r.relation]}</em>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      <Section id="provenance" title="Where this data comes from">
+        <Facts
+          rows={[
+            ['Part record', part.data_status ? humanize(part.data_status) : NOT_AVAILABLE],
+            ['Confidence', part.confidence ? humanize(part.confidence) : NOT_AVAILABLE],
+            ['Source', [part.source_sheet, part.source_record_id].filter(Boolean).join(' · ') || NOT_AVAILABLE],
+            ['Price, stock and supply', price?.data_status ? humanize(price.data_status) : NOT_AVAILABLE],
+          ]}
+        />
+        <p className="pds__none">Demonstration store: none of the data here is authoritative for ordering.</p>
+      </Section>
+    </article>
   )
 }

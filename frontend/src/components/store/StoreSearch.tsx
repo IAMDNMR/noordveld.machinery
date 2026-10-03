@@ -1,89 +1,106 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { eur, partPath, searchParts, STORE_ROUTE } from '../../data/store'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { searchParts } from '../../api'
+import { useApi } from '../../hooks/useApi'
+import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { formatMoney } from '../../lib/format'
+import { partPath, STORE_ROUTE, toParams } from '../../lib/storeQuery'
 
-interface StoreSearchProps {
-  variant: 'hero' | 'bar'
+const SUGGESTIONS = 6
+
+/** Typeahead over the catalogue API. Suggestions are the API's own results; nothing is matched locally. */
+export function StoreSearch({ variant }: { variant: 'hero' | 'bar' }) {
+  const { pathname } = useLocation()
+  const [params] = useSearchParams()
+  const urlQuery = pathname === STORE_ROUTE ? (params.get('q') ?? '') : ''
+  // Remount when the URL's query changes (back button, chip removal) so the box always shows what is being searched
+  return <SearchBox key={urlQuery} variant={variant} initial={urlQuery} />
 }
 
-/** Search across names, part numbers, old (legacy) numbers, categories and the machines a part fits. */
-export function StoreSearch({ variant }: StoreSearchProps) {
+function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: string }) {
   const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const urlQuery = params.get('q') ?? ''
-  const [value, setValue] = useState(urlQuery)
+  const [text, setText] = useState(initial)
   const [open, setOpen] = useState(false)
-  const [active, setActive] = useState(-1)
+  const root = useRef<HTMLDivElement>(null)
+  const input = useRef<HTMLInputElement>(null)
   const listId = useId()
-  const wrap = useRef<HTMLDivElement>(null)
 
-  useEffect(() => setValue(urlQuery), [urlQuery])
+  const term = useDebouncedValue(text.trim(), 250)
+  const suggest = useApi(
+    (signal) =>
+      term.length < 2
+        ? Promise.resolve(null)
+        : searchParts({ q: term, category: '', machine: '', availability: [], orderable: false, sort: 'relevance', offset: 0, limit: SUGGESTIONS }, signal),
+    term,
+  )
+  const items = suggest.data?.items ?? []
+  const showList = open && term.length >= 2 && term === text.trim() && (suggest.data !== null || suggest.error !== null)
 
-  const results = value.trim() ? searchParts(value, 6) : []
-  const show = open && results.length > 0
+  useEffect(() => {
+    const close = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [])
 
-  const submit = (e?: FormEvent) => {
-    e?.preventDefault()
+  const resultsUrl = (q: string) => ({ pathname: STORE_ROUTE, search: toParams({ q }).toString() })
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
     setOpen(false)
-    const q = value.trim()
-    navigate(q ? `${STORE_ROUTE}?q=${encodeURIComponent(q)}` : STORE_ROUTE)
+    navigate(resultsUrl(text))
   }
 
-  const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setOpen(true)
-      setActive((i) => Math.min(results.length - 1, i + 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActive((i) => Math.max(-1, i - 1))
-    } else if (e.key === 'Escape') {
+  const links = () => Array.from(root.current?.querySelectorAll<HTMLAnchorElement>(`#${CSS.escape(listId)} a`) ?? [])
+  const move = (e: KeyboardEvent, from: number, step: number) => {
+    const all = links()
+    if (!all.length) return
+    e.preventDefault()
+    const next = from + step
+    if (next < 0) input.current?.focus()
+    else all[Math.min(next, all.length - 1)]?.focus()
+  }
+  const onInputKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') setOpen(false)
+    else if (e.key === 'ArrowDown' && showList) move(e, -1, 1)
+  }
+  const onLinkKey = (e: KeyboardEvent<HTMLAnchorElement>) => {
+    const at = links().indexOf(document.activeElement as HTMLAnchorElement)
+    if (e.key === 'ArrowDown') move(e, at, 1)
+    else if (e.key === 'ArrowUp') move(e, at, -1)
+    else if (e.key === 'Escape') {
       setOpen(false)
-      setActive(-1)
-    } else if (e.key === 'Enter' && show && active >= 0) {
-      e.preventDefault()
-      setOpen(false)
-      navigate(partPath(results[active]))
+      input.current?.focus()
     }
   }
 
   return (
-    <div
-      ref={wrap}
-      className={`ssearch ssearch--${variant}`}
-      onBlur={(e) => {
-        if (!wrap.current?.contains(e.relatedTarget as Node | null)) setOpen(false)
-      }}
-    >
+    <div className={`ssearch ssearch--${variant}`} ref={root}>
       <form role="search" onSubmit={submit}>
         <Search className="ssearch__icon" size={variant === 'hero' ? 22 : 18} strokeWidth={1.8} aria-hidden="true" />
         <input
+          ref={input}
           type="search"
-          value={value}
-          placeholder={variant === 'hero' ? 'Search by part name, part number or machine, e.g. hydraulic hose NV-3200' : 'Search parts'}
-          aria-label="Search parts"
-          role="combobox"
-          aria-expanded={show}
+          aria-label="Search parts, machines or part numbers"
           aria-controls={listId}
-          aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
+          placeholder="Search parts, machines or part numbers..."
+          value={text}
           autoComplete="off"
           onChange={(e) => {
-            setValue(e.target.value)
+            setText(e.target.value)
             setOpen(true)
-            setActive(-1)
           }}
           onFocus={() => setOpen(true)}
-          onKeyDown={onKey}
+          onKeyDown={onInputKey}
         />
-        {value ? (
+        {text ? (
           <button
             type="button"
             className="ssearch__clear"
             aria-label="Clear search"
             onClick={() => {
-              setValue('')
-              if (urlQuery) navigate(STORE_ROUTE)
+              setText('')
+              if (initial) navigate(resultsUrl(''))
+              input.current?.focus()
             }}
           >
             <X size={16} strokeWidth={2} aria-hidden="true" />
@@ -95,36 +112,30 @@ export function StoreSearch({ variant }: StoreSearchProps) {
           </button>
         ) : null}
       </form>
-
-      {show ? (
-        <ul id={listId} className="ssearch__list" role="listbox" aria-label="Matching parts">
-          {results.map((p, i) => (
-            <li key={p.id} id={`${listId}-${i}`} role="option" aria-selected={i === active}>
-              <a
-                href={partPath(p)}
-                className={i === active ? 'is-active' : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={(e) => {
-                  e.preventDefault()
-                  setOpen(false)
-                  navigate(partPath(p))
-                }}
-              >
-                <span className="ssearch__name">{p.name}</span>
-                <span className="ssearch__sub">
-                  <span className="mono">{p.no}</span> · {p.category}
-                </span>
-                <span className="ssearch__price">{eur(p.price)}</span>
-              </a>
+      <ul id={listId} className="ssearch__list" aria-label="Suggestions" hidden={!showList}>
+        {suggest.error ? (
+          <li className="ssearch__msg">Suggestions are unavailable right now.</li>
+        ) : items.length === 0 ? (
+          <li className="ssearch__msg">No parts match “{term}”.</li>
+        ) : (
+          <>
+            {items.map((p) => (
+              <li key={p.part_id}>
+                <Link to={partPath(p.part_number)} onClick={() => setOpen(false)} onKeyDown={onLinkKey}>
+                  <span className="ssearch__name">{p.name}</span>
+                  <span className="ssearch__sub">{p.part_number}</span>
+                  {p.price ? <span className="ssearch__price">{formatMoney(p.price)}</span> : null}
+                </Link>
+              </li>
+            ))}
+            <li className="ssearch__all">
+              <Link to={resultsUrl(text)} onClick={() => setOpen(false)} onKeyDown={onLinkKey}>
+                See all results for “{term}”
+              </Link>
             </li>
-          ))}
-          <li className="ssearch__all" role="presentation">
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => submit()}>
-              See all results for “{value.trim()}”
-            </button>
-          </li>
-        </ul>
-      ) : null}
+          </>
+        )}
+      </ul>
     </div>
   )
 }

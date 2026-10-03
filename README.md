@@ -7,10 +7,10 @@ The project has two independent halves.
 | | Folder | What it is |
 |---|---|---|
 | **Frontend** | [`frontend/`](frontend/) | React 19, TypeScript, Vite. The website, the Parts Store UI and the Agentic Commerce experience (scroll-driven evolution hero, theory section, demo film). |
-| **Backend** | [`backend/`](backend/) | Python. The Parts Intelligence and Agentic Commerce layer: catalogue and synthetic data, the Neo4j graph (schema, Cypher, validation, audits), and the API scaffolding that will serve the frontend. |
+| **Backend** | [`backend/`](backend/) | Python. The Parts Intelligence and Agentic Commerce layer: catalogue and synthetic data, the Neo4j graph (schema, Cypher, validation, audits), and the FastAPI service that serves the Parts Store from the graph. |
 
-The frontend is not the source of truth for business data. It still presents data generated from the backend's master files
-(`frontend/src/data/*.generated.ts`, built by `frontend/scripts/`); this is temporary and will be replaced by calls to the backend API.
+The frontend is not the source of truth for business data. The Parts Store reads the backend API, which reads the Neo4j graph. Only the machine
+pages and homepage still use data generated from the backend's master files (`frontend/src/data/catalog.generated.ts`); this is temporary.
 
 ## Structure
 
@@ -23,7 +23,7 @@ The frontend is not the source of truth for business data. It still presents dat
 │   ├── scripts/                 build-time generators for frontend data and film encoding
 │   └── package.json, vite.config.ts, tsconfig.json
 ├── backend/
-│   ├── app/                     FastAPI scaffolding (health route only): api, core, graph, models, schemas, services, intelligence, agents
+│   ├── app/                     FastAPI service: routes, services, graph repositories: api, core, graph, models, schemas, services, intelligence, agents
 │   ├── data/
 │   │   ├── catalogue/           supplied source catalogue (15 machines, 100 parts)
 │   │   └── processed/           complete workbook: catalogue layers + synthetic demo layers + edge list
@@ -50,7 +50,7 @@ npm run typecheck
 npm run build
 ```
 
-## Run the backend scaffolding
+## Run the backend (needed by the Parts Store)
 
 ```bash
 cd backend

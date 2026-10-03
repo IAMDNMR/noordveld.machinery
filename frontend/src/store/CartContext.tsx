@@ -1,46 +1,35 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { partById, type StorePart } from '../data/store'
-
-interface Line {
-  id: string
-  qty: number
-}
-
-export interface CartItem {
-  part: StorePart
-  qty: number
-  total: number
-}
+import type { CartLine } from '../api'
 
 interface CartValue {
-  items: readonly CartItem[]
+  /** Part ids and quantities only. Names and prices are never stored: the API supplies them when the cart is shown. */
+  lines: readonly CartLine[]
   count: number
-  subtotal: number
   open: boolean
   /** Part last added, shown briefly as feedback */
   justAdded: string | null
   setOpen: (open: boolean) => void
-  add: (part: StorePart, qty?: number) => void
-  setQty: (id: string, qty: number) => void
-  remove: (id: string) => void
+  add: (partId: string, qty?: number) => void
+  setQty: (partId: string, qty: number) => void
+  remove: (partId: string) => void
   clear: () => void
 }
 
-const KEY = 'noordveld-parts-cart-v1'
+const KEY = 'noordveld-parts-cart-v2'
 const MAX_QTY = 99
 const Cart = createContext<CartValue | null>(null)
 
-const read = (): Line[] => {
+const read = (): CartLine[] => {
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? '[]') as Line[]
-    return raw.filter((l) => partById(l.id) && l.qty > 0).map((l) => ({ id: l.id, qty: Math.min(MAX_QTY, Math.floor(l.qty)) }))
+    const raw = JSON.parse(localStorage.getItem(KEY) ?? '[]') as Partial<CartLine>[]
+    return raw.filter((l): l is CartLine => typeof l.partId === 'string' && Number.isInteger(l.qty) && (l.qty ?? 0) > 0).map((l) => ({ partId: l.partId, qty: Math.min(MAX_QTY, l.qty) }))
   } catch {
     return []
   }
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [lines, setLines] = useState<Line[]>(read)
+  const [lines, setLines] = useState<CartLine[]>(read)
   const [open, setOpen] = useState(false)
   const [justAdded, setJustAdded] = useState<string | null>(null)
 
@@ -58,25 +47,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t)
   }, [justAdded])
 
-  const add = useCallback((part: StorePart, qty = 1) => {
-    setLines((cur) => {
-      const found = cur.find((l) => l.id === part.id)
-      return found ? cur.map((l) => (l.id === part.id ? { ...l, qty: Math.min(MAX_QTY, l.qty + qty) } : l)) : [...cur, { id: part.id, qty: Math.min(MAX_QTY, qty) }]
-    })
-    setJustAdded(part.id)
+  const add = useCallback((partId: string, qty = 1) => {
+    setLines((cur) =>
+      cur.some((l) => l.partId === partId) ? cur.map((l) => (l.partId === partId ? { ...l, qty: Math.min(MAX_QTY, l.qty + qty) } : l)) : [...cur, { partId, qty: Math.min(MAX_QTY, qty) }],
+    )
+    setJustAdded(partId)
   }, [])
-  const setQty = useCallback((id: string, qty: number) => setLines((cur) => (qty <= 0 ? cur.filter((l) => l.id !== id) : cur.map((l) => (l.id === id ? { ...l, qty: Math.min(MAX_QTY, qty) } : l)))), [])
-  const remove = useCallback((id: string) => setLines((cur) => cur.filter((l) => l.id !== id)), [])
+  const setQty = useCallback((partId: string, qty: number) => setLines((cur) => (qty <= 0 ? cur.filter((l) => l.partId !== partId) : cur.map((l) => (l.partId === partId ? { ...l, qty: Math.min(MAX_QTY, qty) } : l)))), [])
+  const remove = useCallback((partId: string) => setLines((cur) => cur.filter((l) => l.partId !== partId)), [])
   const clear = useCallback(() => setLines([]), [])
 
-  const value = useMemo<CartValue>(() => {
-    const items = lines.flatMap((l) => {
-      const part = partById(l.id)
-      return part ? [{ part, qty: l.qty, total: Math.round(part.price * l.qty * 100) / 100 }] : []
-    })
-    return { items, count: items.reduce((n, i) => n + i.qty, 0), subtotal: Math.round(items.reduce((n, i) => n + i.total, 0) * 100) / 100, open, justAdded, setOpen, add, setQty, remove, clear }
-  }, [lines, open, justAdded, add, setQty, remove, clear])
-
+  const value = useMemo<CartValue>(
+    () => ({ lines, count: lines.reduce((n, l) => n + l.qty, 0), open, justAdded, setOpen, add, setQty, remove, clear }),
+    [lines, open, justAdded, add, setQty, remove, clear],
+  )
   return <Cart.Provider value={value}>{children}</Cart.Provider>
 }
 

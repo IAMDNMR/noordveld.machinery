@@ -1,7 +1,7 @@
 import { ShoppingBag } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { STORE_ROUTE } from '../../data/store'
+import { STORE_ROUTE } from '../../lib/storeQuery'
 import { CartProvider, useCart } from '../../store/CartContext'
 import { CartDrawer } from './CartDrawer'
 import { StoreSearch } from './StoreSearch'

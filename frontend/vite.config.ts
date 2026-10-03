@@ -23,6 +23,9 @@ const agenticRedirect = (): Plugin => ({
 // Two pages in one site: the Noordveld website (/) and the Agentic E-Commerce introduction (/agentic-commerce/).
 export default defineConfig({
   plugins: [react(), agenticRedirect()],
+  // The Parts Store reads the catalogue from the FastAPI backend (backend/, port 8000)
+  server: { proxy: { '/api': 'http://localhost:8000' } },
+  preview: { proxy: { '/api': 'http://localhost:8000' } },
   build: {
     target: 'es2022',
     rollupOptions: {

@@ -1,19 +1,31 @@
 # Backend
 
-Python. Parts Intelligence and Agentic Commerce: data, graph, and (next phase) the API.
+Python. Parts Intelligence and Agentic Commerce: data, graph, and the catalogue API that the Parts Store reads.
 
-Status: **architecture only.** `app/main.py` exposes `/health`; no business logic yet.
+The API only **reads** the validated Neo4j graph; it has no second catalogue and never writes. Layers: routes (`app/api`) call services
+(`app/services`), which call repositories (`app/graph/repositories`), which run the named Cypher in `app/graph/queries` through `GraphClient`.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/v1/parts` | search, filter (`category`, `machine`, `availability`, `orderable`), sort, paginate |
+| `GET /api/v1/parts/{key}` | part detail by part number or id: fitment, specifications, legacy references, price, stock, suppliers, compliance, assemblies, related |
+| `GET /api/v1/catalogue/filters` | categories, machines and availability states with live counts |
+| `POST /api/v1/cart/quote` | prices part ids and quantities; stateless, places no order |
+| `GET /health`, `/health/ready` | liveness; readiness (graph reachable) |
+
+Errors are `{"error": {"code", "message"}}`. Unknown values stay `null`; nothing is defaulted, inferred or converted to zero. Related parts carry the
+graph relationship that links them and never imply interchangeability.
 
 ## Layout
 
 | Path | Purpose |
 |---|---|
-| `app/main.py` | API entry point (health route only) |
-| `app/api/routes/` | HTTP routes, one module per resource (later) |
+| `app/main.py` | app factory: CORS, error handlers, routers |
+| `app/api/` | routes and dependencies |
 | `app/core/` | configuration (`config.py` reads `backend/.env`; the password never appears in repr or logs) |
-| `app/graph/` | Neo4j client, named queries and repositories (later) |
-| `app/services/`, `app/intelligence/`, `app/agents/` | business logic, Parts Intelligence, Agentic Commerce orchestration (later) |
-| `app/models/`, `app/schemas/` | domain models and API schemas (later) |
+| `app/graph/` | Neo4j client, named queries, repositories |
+| `app/services/`, `app/intelligence/`, `app/agents/` | services (search, detail, cart quote); `intelligence/` and `agents/` are reserved |
+| `app/models/`, `app/schemas/` | API response models |
 | `data/catalogue/` | `noordveld-parts-catalog.xlsx`: the supplied catalogue |
 | `data/processed/` | `noordveld-complete-dataset-synthetic-demo.xlsx`: catalogue layers plus synthetic demo layers (`SYN_` sheets) |
 | `graph/cypher/` | the Neo4j import package, files `00` to `25`, idempotent |
@@ -35,8 +47,9 @@ copy .env.example .env            # macOS/Linux: cp .env.example .env ; then fil
 ## Run
 
 ```bash
-python -m uvicorn app.main:app --reload --port 8000      # API scaffolding: http://localhost:8000/health
-python -m unittest discover -s tests -t .                # scaffold checks
+python -m uvicorn app.main:app --reload --port 8000      # http://localhost:8000/docs
+python -m pip install -r requirements-dev.txt
+python -m pytest                                         # API tests run against the live graph; skipped without Neo4j credentials
 ```
 
 ## Graph tooling (run from `backend/`)

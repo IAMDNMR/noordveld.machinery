@@ -1,113 +1,87 @@
-import { iconFor, availabilityMeta, fitModels, storeCategories } from '../../data/store'
-import { activeFilterCount, applyFilters, PRICE_BANDS, type Filters } from '../../data/storeFilters'
-import type { Availability } from '../../types/store'
+import { Cog } from 'lucide-react'
+import type { CatalogueFilters, PartQuery } from '../../api'
+import { humanize } from '../../lib/format'
+import { activeFilterCount } from '../../lib/storeQuery'
 
 interface FilterPanelProps {
-  filters: Filters
-  onChange: (next: Partial<Filters>) => void
+  query: PartQuery
+  /** Options come from /catalogue/filters; null while they load or if that call failed */
+  options: CatalogueFilters | null
+  onChange: (next: Partial<PartQuery>) => void
   onClear: () => void
 }
 
-const AV: readonly Availability[] = ['IN_STOCK', 'LIMITED', 'BACKORDER']
-
-/** Facet counts show what you would get if you picked an option, given every other filter. */
-export function FilterPanel({ filters, onChange, onClear }: FilterPanelProps) {
-  const catPool = applyFilters(filters, 'cat')
-  const fitPool = applyFilters(filters, 'fit')
-  const avPool = applyFilters(filters, 'av')
-  const pricePool = applyFilters(filters, 'price')
-  const orderPool = applyFilters(filters, 'orderable')
-  const active = activeFilterCount(filters)
+export function FilterPanel({ query, options, onChange, onClear }: FilterPanelProps) {
+  const active = activeFilterCount(query)
+  const toggleAvailability = (state: string) =>
+    onChange({ availability: query.availability.includes(state) ? query.availability.filter((s) => s !== state) : [...query.availability, state] })
 
   return (
-    <div className="filters">
+    <form className="filters" onSubmit={(e) => e.preventDefault()} aria-label="Filter parts">
       <div className="filters__head">
         <h2>Filters</h2>
         {active > 0 ? (
           <button type="button" onClick={onClear}>
-            Clear all ({active})
+            Clear all
           </button>
         ) : null}
       </div>
 
-      <fieldset>
-        <legend>Category</legend>
-        <ul className="filters__cats">
-          <li>
-            <label className={!filters.cat ? 'is-on' : undefined}>
-              <input type="radio" name="cat" checked={!filters.cat} onChange={() => onChange({ cat: '' })} />
-              <span className="filters__label">All categories</span>
-              <span className="filters__n">{catPool.length}</span>
-            </label>
-          </li>
-          {storeCategories.map((c) => {
-            const Icon = iconFor(c.name)
-            const n = catPool.filter((p) => p.category === c.name).length
-            return (
-              <li key={c.id}>
-                <label className={filters.cat === c.name ? 'is-on' : n === 0 ? 'is-empty' : undefined}>
-                  <input type="radio" name="cat" checked={filters.cat === c.name} onChange={() => onChange({ cat: c.name })} />
-                  <Icon size={17} strokeWidth={1.5} aria-hidden="true" />
-                  <span className="filters__label">{c.name}</span>
-                  <span className="filters__n">{n}</span>
-                </label>
-              </li>
-            )
-          })}
-        </ul>
-      </fieldset>
-
-      <fieldset>
-        <legend>Fits machine</legend>
-        <div className="filters__select">
-          <select value={filters.fit} onChange={(e) => onChange({ fit: e.target.value })} aria-label="Fits machine">
-            <option value="">Any machine</option>
-            {fitModels.map((m) => (
-              <option key={m} value={m}>
-                {m} ({fitPool.filter((p) => p.fits.includes(m)).length})
-              </option>
-            ))}
-          </select>
-        </div>
-        <p className="filters__hint">Fitment is stated in the Noordveld catalogue.</p>
-      </fieldset>
-
-      <fieldset>
-        <legend>Availability</legend>
-        <ul className="filters__checks">
-          {AV.map((a) => (
-            <li key={a}>
-              <label>
-                <input type="checkbox" checked={filters.av.includes(a)} onChange={(e) => onChange({ av: e.target.checked ? [...filters.av, a] : filters.av.filter((x) => x !== a) })} />
-                <span className={`filters__dot filters__dot--${availabilityMeta[a].tone}`} aria-hidden="true" />
-                <span className="filters__label">{availabilityMeta[a].label}</span>
-                <span className="filters__n">{avPool.filter((p) => p.availability === a).length}</span>
+      {options === null ? (
+        <p className="filters__hint">Filter options are not available right now.</p>
+      ) : (
+        <>
+          <fieldset className="filters__cats">
+            <legend>Category</legend>
+            {options.categories.map((c) => (
+              <label key={c.category_id} className={`${query.category === c.name ? 'is-on' : ''} ${c.part_count === 0 ? 'is-empty' : ''}`}>
+                <input type="radio" name="category" checked={query.category === c.name} onChange={() => onChange({ category: c.name })} onClick={() => query.category === c.name && onChange({ category: '' })} />
+                <Cog size={17} strokeWidth={1.5} aria-hidden="true" />
+                <span className="filters__label">{c.name}</span>
+                <span className="filters__n">{c.part_count}</span>
               </label>
-            </li>
-          ))}
-        </ul>
-      </fieldset>
+            ))}
+          </fieldset>
+
+          <fieldset className="filters__select">
+            <legend>Machine</legend>
+            <label>
+              <span className="sr-only">Fits machine</span>
+              <select value={query.machine} onChange={(e) => onChange({ machine: e.target.value })}>
+                <option value="">All machines</option>
+                {options.machines.map((m) => (
+                  <option key={m.machine_id} value={m.model_code}>
+                    {m.model_code} · {m.part_count} parts
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="filters__hint">Parts with a recorded fitment for the model.</p>
+          </fieldset>
+
+          {options.availability.length > 0 ? (
+            <fieldset className="filters__checks">
+              <legend>Availability</legend>
+              {options.availability.map((a) => (
+                <label key={a.state}>
+                  <input type="checkbox" checked={query.availability.includes(a.state)} onChange={() => toggleAvailability(a.state)} />
+                  <span className="filters__label">{humanize(a.state)}</span>
+                  <span className="filters__n">{a.part_count}</span>
+                </label>
+              ))}
+            </fieldset>
+          ) : null}
+        </>
+      )}
 
       <fieldset>
-        <legend>Price, excluding VAT</legend>
-        <div className="filters__chips">
-          {PRICE_BANDS.map((b) => (
-            <button key={b.id} type="button" className={filters.price === b.id ? 'is-on' : undefined} aria-pressed={filters.price === b.id} onClick={() => onChange({ price: filters.price === b.id ? '' : b.id })}>
-              {b.label}
-              <span>{pricePool.filter((p) => b.test(p.price)).length}</span>
-            </button>
-          ))}
-        </div>
+        <legend>Ordering</legend>
+        <label className="filters__switch">
+          <input type="checkbox" checked={query.orderable} onChange={(e) => onChange({ orderable: e.target.checked })} />
+          <span className="filters__track" aria-hidden="true" />
+          <span className="filters__label">Orderable online</span>
+        </label>
       </fieldset>
-
-      <label className="filters__switch">
-        <input type="checkbox" role="switch" checked={filters.orderable} onChange={(e) => onChange({ orderable: e.target.checked })} />
-        <span className="filters__track" aria-hidden="true" />
-        <span className="filters__label">
-          Orderable online only
-          <small>{orderPool.filter((p) => p.orderable).length} parts</small>
-        </span>
-      </label>
-    </div>
+    </form>
   )
 }

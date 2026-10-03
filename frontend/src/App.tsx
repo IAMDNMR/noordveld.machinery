@@ -9,6 +9,7 @@ const MachineDetailPage = lazy(() => import('./pages/MachineDetailPage'))
 const StoreLayout = lazy(() => import('./components/store/StoreLayout').then((m) => ({ default: m.StoreLayout })))
 const PartsStorePage = lazy(() => import('./pages/PartsStorePage'))
 const PartDetailPage = lazy(() => import('./pages/PartDetailPage'))
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
 const LegalPage = lazy(() => import('./pages/LegalPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="machines/:model" element={<MachineDetailPage />} />
           <Route path="parts-store" element={<StoreLayout />}>
             <Route index element={<PartsStorePage />} />
+            <Route path="checkout" element={<CheckoutPage />} />
             <Route path=":partNo" element={<PartDetailPage />} />
           </Route>
           <Route path="legal" element={<LegalPage kind="legal" />} />
