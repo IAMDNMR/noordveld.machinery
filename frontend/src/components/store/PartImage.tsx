@@ -1,6 +1,7 @@
 import { Cog } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { partImageUrl } from '../../lib/assets'
+import './part-image.css'
 
 const hash = (s: string): number => {
   let h = 2166136261

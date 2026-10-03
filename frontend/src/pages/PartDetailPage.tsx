@@ -33,8 +33,8 @@ const Section = ({ id, title, children, note }: { id: string; title: string; chi
 
 const Facts = ({ rows }: { rows: [string, ReactNode][] }) => (
   <dl className="spec">
-    {rows.map(([label, value]) => (
-      <div key={label}>
+    {rows.map(([label, value], i) => (
+      <div key={`${i}-${label}`}>
         <dt>{label}</dt>
         <dd>{value}</dd>
       </div>

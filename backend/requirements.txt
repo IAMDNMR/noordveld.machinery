@@ -4,3 +4,4 @@ uvicorn>=0.34,<1
 neo4j>=6,<7          # AuraDB driver (Bolt over TLS)
 certifi              # trusted root certificates for the Aura connection
 openpyxl>=3.1,<4     # reads the catalogue / processed workbooks in scripts/
+httpx>=0.27,<1      # Gemini REST calls

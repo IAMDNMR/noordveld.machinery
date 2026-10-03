@@ -1,0 +1,23 @@
+/* The part picture and its placeholder: shared by the Parts Store and Parts Intelligence. */
+.pvis { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: radial-gradient(60% 70% at var(--gx, 50%) var(--gy, 40%), rgb(0 191 165 / 0.2), transparent 70%), linear-gradient(rgb(0 191 165 / 0.07) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, rgb(0 191 165 / 0.07) 1px, transparent 1px) 0 0 / 24px 24px, var(--charcoal-2); color: var(--teal); }
+.pvis--large { border-radius: var(--radius-m); aspect-ratio: 5 / 4; }
+.pvis--large .pvis__cat { font-size: 0.78rem; left: 1.4rem; top: 1.2rem; }
+.pvis--large .pvis__no { font-size: 1rem; left: 1.4rem; bottom: 1.2rem; }
+.pvis--mini { flex: none; width: 4.25rem; height: 4.25rem; aspect-ratio: 1; border-radius: var(--radius-s); }
+.pvis--mini .pvis__cat, .pvis--mini .pvis__no, .pvis--mini .pvis__mark { display: none; }
+.pvis--mini .pvis__icon { width: 52%; height: 52%; }
+.pimg { aspect-ratio: 4 / 3; background: #fff; display: grid; place-items: center; overflow: hidden; }
+.pimg img { width: 100%; height: 100%; object-fit: contain; }
+.pimg--large { border-radius: var(--radius-m); border: 1px solid var(--line); aspect-ratio: 5 / 4; }
+.pimg--mini { flex: none; width: 4.25rem; height: 4.25rem; aspect-ratio: 1; border-radius: var(--radius-s); border: 1px solid var(--line); }
+.pvis--mini .pvis__soon { display: none; }
+.pvis--large .pvis__soon { right: 1.4rem; bottom: 1.2rem; font-size: 0.76rem; }
+.pvis__icon { position: absolute; left: 50%; top: 50%; width: 40%; height: 40%; transform: translate(-50%, -52%); }
+.pvis__cat { position: absolute; left: 0.9rem; top: 0.8rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--on-dark-2); }
+.pvis__no { position: absolute; left: 0.9rem; bottom: 0.8rem; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.78rem; color: var(--on-dark); }
+.pvis__mark { position: absolute; width: 0.7rem; height: 0.7rem; border-color: rgb(0 191 165 / 0.55); border-style: solid; border-width: 0; }
+.pvis__mark--tl { right: 0.7rem; top: 0.7rem; border-top-width: 1px; border-right-width: 1px; }
+.pvis__mark--tr { display: none; }
+.pvis__mark--bl { right: 0.7rem; bottom: 0.7rem; border-bottom-width: 1px; border-right-width: 1px; }
+.pvis__mark--br { display: none; }
+.pvis__soon { position: absolute; right: 0.9rem; bottom: 0.8rem; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-dark-2); }

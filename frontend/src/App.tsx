@@ -9,6 +9,7 @@ const MachineDetailPage = lazy(() => import('./pages/MachineDetailPage'))
 const StoreLayout = lazy(() => import('./components/store/StoreLayout').then((m) => ({ default: m.StoreLayout })))
 const PartsStorePage = lazy(() => import('./pages/PartsStorePage'))
 const PartDetailPage = lazy(() => import('./pages/PartDetailPage'))
+const PartsIntelligencePage = lazy(() => import('./pages/PartsIntelligencePage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
 const LegalPage = lazy(() => import('./pages/LegalPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path=":partNo" element={<PartDetailPage />} />
           </Route>
+          <Route path="parts-intelligence" element={<PartsIntelligencePage />} />
           <Route path="legal" element={<LegalPage kind="legal" />} />
           <Route path="privacy" element={<LegalPage kind="privacy" />} />
           <Route path="*" element={<NotFoundPage />} />

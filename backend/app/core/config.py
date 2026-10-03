@@ -35,6 +35,16 @@ class Settings:
     #: origins allowed to call the API (the Vite dev server by default)
     cors_origins: tuple[str, ...] = ("http://localhost:5180",)
     log_level: str = "INFO"
+    #: Gemini language layer (understanding and grounded wording only). Empty key = language model disabled.
+    gemini_api_key: str = field(default="", repr=False)
+    gemini_model: str = "gemini-2.5-flash"
+    #: free tier allows 15 requests/minute; stay under it
+    gemini_requests_per_minute: int = 12
+    gemini_timeout: float = 20.0
+
+    @property
+    def llm_configured(self) -> bool:
+        return bool(self.gemini_api_key)
 
     @property
     def graph_configured(self) -> bool:
@@ -52,4 +62,8 @@ def get_settings() -> Settings:
         neo4j_query_timeout=float(os.environ.get("NEO4J_QUERY_TIMEOUT", "15")),
         cors_origins=tuple(o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5180").split(",") if o.strip()),
         log_level=os.environ.get("LOG_LEVEL", "INFO").upper(),
+        gemini_api_key=os.environ.get("GEMINI_API_KEY", ""),
+        gemini_model=os.environ.get("GEMINI_MODEL", "") or "gemini-2.5-flash",
+        gemini_requests_per_minute=int(os.environ.get("GEMINI_REQUESTS_PER_MINUTE", "12")),
+        gemini_timeout=float(os.environ.get("GEMINI_TIMEOUT", "20")),
     )

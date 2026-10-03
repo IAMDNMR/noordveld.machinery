@@ -36,6 +36,12 @@ The master data lives in the backend: `../backend/data/catalogue/noordveld-parts
 (`src/api/`, proxied to `localhost:8000` in dev), which reads the Neo4j graph. Start the API before opening `/parts-store`. The machine pages and homepage
 still use the generated file above; that is temporary.
 
+### Parts Intelligence (`/parts-intelligence`)
+
+Question workspace and part investigation drawer (12 lazily loaded tabs) over `/api/v1/intelligence`. State is in the URL (`?q=`, `?part=`, `?tab=`), so
+refresh and back/forward work. Code: `src/components/intelligence/`, `src/api/intelligence*.ts`, `src/pages/PartsIntelligencePage.tsx`. It reuses the
+Parts Store's `PartImage`. Nothing in it names a catalogue entry (tested). Architecture and limits: [`../backend/INTELLIGENCE.md`](../backend/INTELLIGENCE.md).
+
 ### Parts Store (API-driven)
 
 `src/api/` is the only code that calls the network (typed client, parts, filters, cart quote). `src/lib/storeQuery.ts` maps the URL to API filters,

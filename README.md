@@ -38,6 +38,9 @@ pages and homepage still use data generated from the backend's master files (`fr
 └── README.md
 ```
 
+The three experiences stay distinct: **Parts Store** (find, view, buy), **Parts Intelligence** (understand, investigate, verify, explore; see
+[`backend/INTELLIGENCE.md`](backend/INTELLIGENCE.md)) and **Agentic Commerce** (need to fulfilment).
+
 Run commands for each half are in [`frontend/README.md`](frontend/README.md) and [`backend/README.md`](backend/README.md).
 
 ## Run the frontend

@@ -14,7 +14,7 @@ interface SiteNavProps {
   Link: ChromeLink
 }
 
-const isCurrent = (item: NavItem, pathname: string): boolean => (item.to === '/parts-store' || item.to === '/machines') && pathname.startsWith(item.to)
+const isCurrent = (item: NavItem, pathname: string): boolean => (item.to === '/parts-store' || item.to === '/parts-intelligence' || item.to === '/machines') && pathname.startsWith(item.to)
 
 export function SiteNav({ pathname, heroTone, Link }: SiteNavProps) {
   const [open, setOpen] = useState(false)

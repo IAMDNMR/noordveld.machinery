@@ -22,6 +22,7 @@ export const AGENTIC_ROUTE = '/agentic-commerce/'
 export const nav: readonly NavItem[] = [
   { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true },
   { label: 'Parts Store', to: '/parts-store', tag: 'Agentic' },
+  { label: 'Parts Intelligence', to: '/parts-intelligence' },
 ]
 
 export interface Industry {

@@ -11,6 +11,7 @@ The API only **reads** the validated Neo4j graph; it has no second catalogue and
 | `GET /api/v1/parts/{key}` | part detail by part number or id: fitment, specifications, legacy references, price, stock, suppliers, compliance, assemblies, related |
 | `GET /api/v1/catalogue/filters` | categories, machines and availability states with live counts |
 | `POST /api/v1/cart/quote` | prices part ids and quantities; stateless, places no order |
+| `/api/v1/intelligence/*` | Parts Intelligence: questions, part workspace, KPIs. See [INTELLIGENCE.md](INTELLIGENCE.md) |
 | `GET /health`, `/health/ready` | liveness; readiness (graph reachable) |
 
 Errors are `{"error": {"code", "message"}}`. Unknown values stay `null`; nothing is defaulted, inferred or converted to zero. Related parts carry the
@@ -24,7 +25,7 @@ graph relationship that links them and never imply interchangeability.
 | `app/api/` | routes and dependencies |
 | `app/core/` | configuration (`config.py` reads `backend/.env`; the password never appears in repr or logs) |
 | `app/graph/` | Neo4j client, named queries, repositories |
-| `app/services/`, `app/intelligence/`, `app/agents/` | services (search, detail, cart quote); `intelligence/` and `agents/` are reserved |
+| `app/services/`, `app/intelligence/`, `app/llm/`, `app/agents/` | services (search, detail, cart quote); Parts Intelligence and its language-model layer; `agents/` is reserved |
 | `app/models/`, `app/schemas/` | API response models |
 | `data/catalogue/` | `noordveld-parts-catalog.xlsx`: the supplied catalogue |
 | `data/processed/` | `noordveld-complete-dataset-synthetic-demo.xlsx`: catalogue layers plus synthetic demo layers (`SYN_` sheets) |

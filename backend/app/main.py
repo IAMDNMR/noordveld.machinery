@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.dependencies import Catalogue, get_graph
-from app.api.routes import catalogue, parts
+from app.api.routes import catalogue, intelligence, parts
 from app.core.config import get_settings
 from app.core.exceptions import GraphUnavailableError, NotFoundError
 from app.core.logging import setup_logging
@@ -59,6 +59,7 @@ def create_app() -> FastAPI:
     app.include_router(system)
     app.include_router(parts.router, prefix="/api/v1")
     app.include_router(catalogue.router, prefix="/api/v1")
+    app.include_router(intelligence.router, prefix="/api/v1")
     app.add_event_handler("shutdown", lambda: get_graph().close())
     return app
 
