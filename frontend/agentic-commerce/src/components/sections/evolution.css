@@ -1,0 +1,32 @@
+.evolution { position: relative; height: calc(var(--span, 4) * 140vh); background: var(--paper); }
+.evolution__sticky { position: sticky; top: 0; height: 100svh; display: flex; flex-direction: column; padding-top: var(--nav-height); overflow: clip; }
+.evolution__stage { flex: 1; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-7); align-items: center; min-height: 0; }
+.evolution__copy { display: grid; }
+.evolution__text { grid-area: 1 / 1; will-change: opacity, transform; max-width: 32rem; }
+.evolution__name { font-size: var(--text-h1); margin-bottom: var(--space-5); }
+.evolution__idea { font-size: var(--text-h3); line-height: 1.2; letter-spacing: var(--tracking-heading); margin-bottom: var(--space-5); text-wrap: balance; }
+.evolution__summary { color: var(--ink-2); font-size: var(--text-lead); line-height: 1.5; max-width: 30em; }
+
+.evolution__visual { position: relative; aspect-ratio: 8 / 5; width: 100%; max-height: calc(100svh - var(--nav-height) - 7rem); margin-inline: auto; }
+.evolution__scene { position: absolute; inset: 0; will-change: opacity, transform; }
+.evolution__scene svg { position: relative; }
+
+@media (max-width: 1023px) {
+  .evolution__stage { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; gap: var(--space-5); }
+  .evolution__visual { grid-row: 1; max-height: 44svh; }
+  .evolution__copy { grid-row: 2; }
+  .evolution__text { max-width: none; }
+  .evolution__name { font-size: var(--text-h2); margin-bottom: var(--space-3); }
+  .evolution__idea { font-size: var(--text-lead); margin-bottom: var(--space-3); }
+  .evolution__summary { font-size: var(--text-body); }
+}
+@media (max-width: 719px) {
+  .evolution { height: calc(var(--span, 4) * 130vh); }
+  .evolution__scene { --scene-label: 25px; --scene-meta: 24px; --scene-caption: 38px; }
+  /* Six icons don't leave room for six labels on a phone: only the active step is named */
+  .evolution__scene .scene-label--minor { display: none; }
+  .evolution__summary { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .evolution__text, .evolution__scene { transition: none; }
+}

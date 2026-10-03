@@ -1,0 +1,56 @@
+kind,entity_or_domain,field_or_relationship,records_missing,records_total,classification,why_it_matters,dependent_relationship,synthetic_could_supply,authoritative_required
+FIELD,BusinessUnit,acquired_year,1,3,PARTIAL,,,,
+FIELD,Category,description,101,101,MISSING,,,,
+FIELD,Category,review_flags,10,101,PARTIAL,,,,
+FIELD,LegacyReference,legacy_code_prefix,5,100,PARTIAL,,,,
+FIELD,LegacyReference,legacy_part_number,5,100,PARTIAL,,,,
+FIELD,LegacyReference,legacy_system,100,100,MISSING,,,,
+FIELD,LegacyReference,review_flags,93,100,PARTIAL,,,,
+FIELD,Location,postal_code,5,5,MISSING,,,,
+FIELD,Location,region,5,5,MISSING,,,,
+FIELD,Machine,description,15,15,MISSING,Search and agent answers,-,"Yes, if marked synthetic",Preferred
+FIELD,Machine,introduction_year,15,15,MISSING,Needed for date-bounded fitment and supersession,FITS (effective dates),No,YES
+FIELD,Machine,machine_category,15,15,MISSING,Navigation and filtering,-,"Possibly, if marked synthetic",Preferred
+FIELD,Machine,production_status,15,15,MISSING,In-production vs service-only affects availability promises,-,No,YES
+FIELD,Machine,review_flags,15,15,MISSING,,,,
+FIELD,Machine,status,15,15,MISSING,Lifecycle (active / discontinued) gates which machines parts are offered for,-,No: a guessed lifecycle would mislead,YES
+FIELD,MachineSpecification,unit,15,83,PARTIAL,,,,
+FIELD,Part,criticality,100,100,MISSING,Prioritises urgent / machine-down orders,-,No,YES
+FIELD,Part,oem_status,100,100,MISSING,OEM vs aftermarket affects sourcing and warranty,SUPPLIED_BY,No,YES
+FIELD,Part,part_nature,85,100,PARTIAL,Classifies the part,-,No,YES
+FIELD,Part,part_status,100,100,MISSING,,,,
+FIELD,Part,part_type,100,100,MISSING,Distinguishes wear part / assembly / consumable,PART_OF,No,YES
+FIELD,Part,review_flags,90,100,PARTIAL,,,,
+FIELD,PartSpecification,normalized_unit,208,279,PARTIAL,,,,
+FIELD,PartSpecification,normalized_value,208,279,PARTIAL,,,,
+FIELD,PartSpecification,source_label,247,279,PARTIAL,,,,
+FIELD,PartSpecification,unit,208,279,PARTIAL,,,,
+FIELD,Plant,manufacturing_role,3,3,MISSING,,,,
+RELATIONSHIP,Warehouse WH-001,SHIPS_TO_COUNTRY,1,1,MISSING,The warehouse cannot be traced to a plant,SHIPS_TO_COUNTRY,"Only as explicitly synthetic data, if the business wants it",YES (if used for planning)
+RELATIONSHIP,Warehouse WH-002,SHIPS_TO_COUNTRY,1,1,MISSING,The warehouse cannot be traced to a plant,SHIPS_TO_COUNTRY,"Only as explicitly synthetic data, if the business wants it",YES (if used for planning)
+RELATIONSHIP,Warehouse WH-003,SHIPS_TO_COUNTRY,1,1,MISSING,The warehouse cannot be traced to a plant,SHIPS_TO_COUNTRY,"Only as explicitly synthetic data, if the business wants it",YES (if used for planning)
+RELATIONSHIP,Warehouse WH-004,SHIPS_TO_COUNTRY,1,1,MISSING,The warehouse cannot be traced to a plant,SHIPS_TO_COUNTRY,"Only as explicitly synthetic data, if the business wants it",YES (if used for planning)
+RELATIONSHIP,Warehouse WH-004,LOCATED_AT_PLANT,1,1,MISSING,The warehouse cannot be traced to a plant,LOCATED_AT_PLANT,"Only as explicitly synthetic data, if the business wants it",YES (if used for planning)
+DOMAIN,MACHINE_UNITS (serial-numbered machines),,,,MISSING,Only 30 synthetic variant serial ranges (MachineVariant).,,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,CONFIGURATIONS,,,,MISSING,No configuration level in any source,,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,ASSEMBLIES / COMPONENTS,,,,PARTIAL,"Assembly (15), PART_OF (35); 43 of 100 parts",,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,LOCATIONS,,,,PARTIAL,"Location (5, no coordinates); Address (44, synthetic placeholders); Region (14, synthetic)",,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,FULFILMENT,,,,PARTIAL,"DeliveryEstimate (100), ShippingRate (8)",,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,TRANSPORTATION / CARRIERS,,,,PARTIAL,One fictional carrier; real carriers MISSING,,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,REQUESTS / REQUEST_LINES,,,,MISSING,No requests (carts are not requests),,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,ALLOCATIONS,,,,PARTIAL,ALLOCATED_FROM (10) / PLANNED_FULFILMENT_FROM (4); no allocation records,,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,SHIPMENTS,,,,PARTIAL,Shipment (9) for 4 of 8 orders,,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,DELIVERY (confirmation),,,,PARTIAL,Shipment status DELIVERED only; no delivery records,,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,SERVICE_JOBS,,,,MISSING,Only synthetic ServicePlan templates (60),,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,SERVICE_PLANS,,,,PARTIAL,"ServicePlan (60), REQUIRES_PART (71) covering 33 parts",,Only if explicitly marked SYNTHETIC_DEMO,YES
+DOMAIN,INSTALLATIONS / COMPLETION,,,,MISSING,None,,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,ALTERNATIVES,,,,MISSING,No authoritative alternative data,,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,SUPERSESSIONS,,,,MISSING,None; legacy references are previous numbers of the same part,,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,RISKS,,,,MISSING,None,,NO for alternatives / supersessions / risk; others only as marked demo data,YES
+DOMAIN,AUDIT TRAIL,,,,PARTIAL,last_updated per row; no change history,,Only if explicitly marked SYNTHETIC_DEMO,YES
+UNRESOLVED_SOURCE,LegacyReference LEG-010,legacy_part_number,1,1,UNKNOWN,Free-text legacy note for NVM-1090-HY; the old number cannot be resolved,HAS_LEGACY_REFERENCE,NO,YES
+UNRESOLVED_SOURCE,LegacyReference LEG-014,legacy_part_number,1,1,UNKNOWN,Free-text legacy note for NVM-1130-HY; the old number cannot be resolved,HAS_LEGACY_REFERENCE,NO,YES
+UNRESOLVED_SOURCE,LegacyReference LEG-022,legacy_part_number,1,1,UNKNOWN,Free-text legacy note for NVM-1060-DT; the old number cannot be resolved,HAS_LEGACY_REFERENCE,NO,YES
+UNRESOLVED_SOURCE,LegacyReference LEG-037,legacy_part_number,1,1,UNKNOWN,Free-text legacy note for NVM-1070-EL; the old number cannot be resolved,HAS_LEGACY_REFERENCE,NO,YES
+UNRESOLVED_SOURCE,LegacyReference LEG-043,legacy_part_number,1,1,UNKNOWN,Free-text legacy note for NVM-2205-BH; the old number cannot be resolved,HAS_LEGACY_REFERENCE,NO,YES
+UNRESOLVED_SOURCE,Machine KFT-120,FITS,all,,MISSING,The catalogue lists no parts for this machine,FITS,NO (fitment is never synthesised),YES

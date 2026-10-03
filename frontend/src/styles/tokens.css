@@ -1,0 +1,71 @@
+/*
+  Noordveld design tokens: colour, type, space, shape, motion, layout.
+  Breakpoints (keep in sync with src/lib/breakpoints.ts): tablet 760px · laptop 1100px · desktop 1440px
+*/
+:root {
+  /* Colour: warm white and graphite carry the brand; teal is used selectively */
+  --paper: #f7f5f0;
+  --white: #ffffff;
+  --mist: #ecebe6;
+  --stone: #d9d8d1;
+  --graphite: #2b2f32;
+  --graphite-2: #4a4f53;
+  --graphite-3: #666b6f;
+  --charcoal: #14181a;
+  --charcoal-2: #1d2326;
+  --line: rgb(20 24 26 / 0.14);
+  --line-strong: rgb(20 24 26 / 0.34);
+  --on-dark: #f2f1ec;
+  --on-dark-2: #aeb4b3;
+  --line-dark: rgb(242 241 236 / 0.18);
+
+  --teal: #00bfa5;
+  --teal-ink: #00756a;
+  --teal-hover: #00a892;
+  --teal-soft: rgb(0 191 165 / 0.12);
+
+  /* Typography */
+  --font-sans: "Inter Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --text-hero: clamp(3rem, 1.4rem + 7vw, 8rem);
+  --text-h1: clamp(2.5rem, 1.4rem + 4.4vw, 5.25rem);
+  --text-h2: clamp(2rem, 1.2rem + 3vw, 3.75rem);
+  --text-h3: clamp(1.375rem, 1.1rem + 1.1vw, 2rem);
+  --text-lead: clamp(1.125rem, 1.02rem + 0.5vw, 1.4rem);
+  --text-body: 1.0625rem;
+  --text-small: 0.9375rem;
+  --leading-tight: 1.02;
+  --leading-snug: 1.15;
+  --leading-body: 1.6;
+  --tracking-display: -0.04em;
+  --tracking-heading: -0.025em;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+  --space-9: clamp(5rem, 3.5rem + 7vw, 10rem);
+
+  /* Layout */
+  --container: 88rem;
+  --gutter: clamp(1.25rem, 0.5rem + 3.4vw, 4rem);
+  --nav-height: 4.5rem;
+
+  /* Shape and depth: precise, lightly rounded */
+  --radius-s: 2px;
+  --radius-m: 6px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 1px 2px rgb(20 24 26 / 0.06), 0 30px 60px -30px rgb(20 24 26 / 0.35);
+  --focus-ring: 0 0 0 3px var(--paper), 0 0 0 5px var(--teal-ink);
+
+  /* Motion: weighty, controlled */
+  --ease-weight: cubic-bezier(0.22, 0.8, 0.2, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 200ms;
+  --dur-base: 520ms;
+  --dur-slow: 1100ms;
+}

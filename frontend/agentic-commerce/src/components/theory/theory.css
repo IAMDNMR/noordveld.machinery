@@ -1,0 +1,85 @@
+/*
+  Theory: a continuation of the hero's story, in writing. One thin line runs down the page, one stage per stop.
+  Graphite for the first three, teal only for the stage where commerce begins to understand.
+*/
+.theory { background: var(--paper); padding-block: var(--space-9) var(--space-8); color: var(--ink); }
+.theory__head { max-width: 62rem; padding-bottom: var(--space-8); }
+.theory__title { font-size: var(--text-display); font-size: clamp(2.6rem, 1.2rem + 6vw, 6.4rem); line-height: 1; letter-spacing: -0.05em; font-weight: 600; text-wrap: balance; }
+.theory__lead { margin-top: var(--space-5); font-size: var(--text-lead); line-height: 1.45; color: var(--ink-2); max-width: 28em; letter-spacing: -0.01em; }
+
+/* stages */
+.stage { position: relative; display: grid; grid-template-columns: 3rem minmax(0, 5fr) minmax(0, 6fr); column-gap: var(--space-7); row-gap: var(--space-6); padding-block: var(--space-8); }
+.stage__rail { grid-column: 1; grid-row: 1 / span 2; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 0.55rem; }
+.stage__dot { flex: none; width: 0.95rem; height: 0.95rem; border-radius: 50%; border: 2px solid var(--line-strong); background: var(--paper); transition: background var(--dur-slow) var(--ease-cinema), border-color var(--dur-slow) var(--ease-cinema), transform var(--dur-slow) var(--ease-cinema); }
+.stage__line { flex: 1; width: 2px; margin-top: 0.5rem; background: var(--ink-2); transform: scaleY(0); transform-origin: top; transition: transform 1.6s var(--ease-inout) 0.2s; border-radius: 2px; }
+.stage.is-in .stage__dot { background: var(--ink); border-color: var(--ink); transform: scale(1.12); }
+.stage.is-in .stage__line { transform: scaleY(1); }
+/* the line is faint underneath, so the stop reads as part of one spine before it is drawn */
+.stage__rail::before { content: ""; position: absolute; left: 50%; top: 1.6rem; bottom: 0; width: 2px; margin-left: -1px; background: var(--line); border-radius: 2px; }
+.stage:last-child .stage__rail::before { bottom: 55%; }
+.stage:last-child .stage__line { max-height: 45%; }
+.stage.is-agentic .stage__dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 7px rgb(0 191 165 / 0.14); }
+.stage.is-agentic .stage__line { background: var(--accent); }
+
+.stage__head { grid-column: 2; }
+.stage__no { font-size: var(--text-small); font-weight: 600; letter-spacing: 0.14em; color: var(--ink-3); }
+.stage__no span { display: inline-block; padding-right: 0.7rem; margin-right: 0.7rem; border-right: 1px solid var(--line-strong); }
+.stage__name { margin-top: var(--space-4); font-size: clamp(2.5rem, 1.2rem + 4.2vw, 5.2rem); line-height: 1; letter-spacing: -0.05em; font-weight: 600; }
+.stage.is-agentic .stage__name { color: var(--accent-ink); }
+.stage__statement { margin-top: var(--space-4); font-size: var(--text-lead); line-height: 1.3; color: var(--ink-2); letter-spacing: -0.015em; max-width: 18em; }
+
+.stage__body { grid-column: 3; align-self: end; }
+.stage__text { font-size: var(--text-lead); line-height: 1.5; color: var(--ink-2); max-width: 30em; letter-spacing: -0.005em; }
+.stage__traits { margin-top: var(--space-6); display: flex; flex-wrap: wrap; gap: 0.3rem 0; font-weight: 600; letter-spacing: -0.01em; }
+.stage__traits li { display: inline-flex; align-items: center; font-size: var(--text-body); }
+.stage__traits li + li::before { content: ""; width: 1.6rem; height: 1px; margin-inline: 0.8rem; background: var(--line-strong); }
+.stage.is-agentic .stage__traits li + li::before { background: var(--accent); }
+.stage__idea { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--line); max-width: 30em; }
+.stage__idea-label { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.stage__idea p { margin-top: 0.5rem; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.2rem); line-height: 1.15; letter-spacing: -0.03em; font-weight: 600; text-wrap: balance; }
+.stage.is-agentic .stage__idea p { color: var(--accent-ink); }
+.stage.is-agentic .stage__idea { border-top-color: var(--accent); }
+
+/* subtle imagery: quieter than the brand photography, drawn open as the stage arrives */
+.stage__fig { grid-column: 2 / -1; margin: 0; height: clamp(9rem, 20vw, 17rem); border-radius: var(--radius-m); overflow: hidden; background: var(--paper-3); clip-path: inset(0 100% 0 0 round var(--radius-m)); transition: clip-path 1.5s var(--ease-inout) 0.5s; }
+.stage.is-in .stage__fig { clip-path: inset(0 0 0 0 round var(--radius-m)); }
+.stage__fig img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.7) contrast(1.02) brightness(1.03); transform: scale(1.1); transition: transform 2.2s var(--ease-cinema) 0.5s, filter 1.4s ease; }
+.stage.is-in .stage__fig img { transform: scale(1); }
+.stage.is-agentic .stage__fig img { filter: grayscale(0.45) contrast(1.02); }
+
+/* sequenced reveal */
+.rv { opacity: 0; transform: translateY(1.1rem); transition: opacity 1s var(--ease-cinema), transform 1s var(--ease-cinema); transition-delay: var(--d, 0ms); }
+.stage.is-in .rv { opacity: 1; transform: none; }
+
+/* ending */
+.theory__outro { padding-top: var(--space-8); border-top: 1px solid var(--line); display: grid; justify-items: start; gap: var(--space-5); }
+.theory__outro-line { font-size: clamp(2.4rem, 1rem + 5.4vw, 5.8rem); line-height: 1.02; letter-spacing: -0.05em; font-weight: 600; }
+.theory__outro-line span { display: block; }
+.theory__outro-line .is-teal { color: var(--accent-ink); }
+.theory__next { font-size: var(--text-lead); color: var(--ink-2); letter-spacing: -0.01em; max-width: 22em; line-height: 1.35; }
+.theory__arrow { display: inline-grid; place-items: center; width: 3.25rem; height: 3.25rem; margin-top: var(--space-3); border-radius: 50%; border: 1px solid var(--line-strong); color: var(--ink); transition: background var(--dur-base) var(--ease-cinema), border-color var(--dur-base), transform var(--dur-base) var(--ease-cinema); }
+.theory__arrow:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(4px); }
+
+@media (max-width: 1023px) {
+  .stage { grid-template-columns: 2rem minmax(0, 1fr); column-gap: var(--space-5); }
+  .stage__head, .stage__body { grid-column: 2; }
+  .stage__body { align-self: start; }
+  .stage__fig { grid-column: 2; }
+  .stage__rail { grid-row: 1 / span 4; }
+}
+@media (max-width: 719px) {
+  .stage { padding-block: var(--space-7); }
+  /* on a phone the characteristics read as a short list rather than a wrapped line */
+  .stage__traits { flex-direction: column; gap: 0.35rem; }
+  .stage__traits li { font-size: var(--text-small); }
+  .stage__traits li::before, .stage__traits li + li::before { content: ""; width: 1rem; height: 1px; margin: 0 0.7rem 0 0; background: var(--line-strong); }
+  .stage.is-agentic .stage__traits li::before { background: var(--accent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv, .stage__fig, .stage__fig img, .stage__line, .stage__dot { transition: none; }
+  .rv { opacity: 1; transform: none; }
+  .stage__line { transform: none; }
+  .stage__fig { clip-path: none; }
+  .stage__fig img { transform: none; }
+  .stage .stage__dot { background: var(--ink); border-color: var(--ink); }
+}

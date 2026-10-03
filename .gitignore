@@ -1,0 +1,21 @@
+# Dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/dist-*/
+frontend/*.tsbuildinfo
+*.local
+
+# Large originals (not code): source images/videos and Remotion masters
+frontend/assets-source/
+frontend/agentic-commerce/film-masters/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Environment files: ignored by default. backend/.env is added deliberately (private repo, by the owner's request).
+.env
+.env.*
+!.env.example

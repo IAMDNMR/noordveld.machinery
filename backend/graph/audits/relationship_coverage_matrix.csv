@@ -1,0 +1,101 @@
+DOMAIN,SOURCE_NODE,RELATIONSHIP,TARGET_NODE,DATA_AVAILABLE,RECORD_COUNT,PROVENANCE,SYNTHETIC_ALLOWED,CURRENTLY_IMPLEMENTED,MISSING_DATA,STATUS
+Fitment,Machine,Machine -> Part (inverse traversal of FITS),Part,YES,219,SOURCE_DERIVED,NO,"YES: Stored once as (Part)-[:FITS]->(Machine) and traversed in reverse. 216 confirmed, 3 conditional.",KFT-120 has no parts in the catalogue,IMPLEMENTED_WITH_DATA
+Fitment,Part,FITS,Machine,YES,219,SOURCE_DERIVED,NO,YES: Canonical fitment direction.,KFT-120 has no parts in the catalogue,IMPLEMENTED_WITH_DATA
+Classification,Part,IN_CATEGORY,Category,YES,100,SOURCE_DERIVED,NO,YES: Source-stated category (level 1).,none,IMPLEMENTED_WITH_DATA
+Classification,Part,IN_SUBCATEGORY,Category (sub-category),YES,100,DERIVED,NO,YES: Rule-derived name head (level 2); awaits taxonomy approval.,none,IMPLEMENTED_WITH_DATA
+Specification,Part,HAS_SPECIFICATION,PartSpecification,YES,279,DERIVED / SOURCE_DERIVED,NO,YES: Verbatim spec note plus parsed values.,none,IMPLEMENTED_WITH_DATA
+Legacy,Part,HAS_LEGACY_REFERENCE,LegacyReference,YES,100,SOURCE_DERIVED,NO,YES: One legacy record per part.,5 records are unresolved free text (no legacy number),IMPLEMENTED_WITH_DATA
+Assembly,Part,PART_OF,Assembly,YES,35,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic demo BOM.,Only 43 of 100 parts are in an assembly,IMPLEMENTED_SYNTHETIC
+Assembly,Assembly,Assembly -> Part (inverse of PART_OF; IDENTIFIED_BY_PART gives the assembly's own part number),Part,YES,50,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Contents are the inverse traversal of PART_OF; no second relationship is stored.,Only 43 of 100 parts are in an assembly,IMPLEMENTED_SYNTHETIC
+Sourcing,Part,SUPPLIED_BY,Supplier,YES,157,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Synthetic supplier links with cost, lead time, MOQ and primary flag.",none,IMPLEMENTED_SYNTHETIC
+Sourcing,Supplier,Supplier -> Part (inverse of SUPPLIED_BY),Part,YES,157,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Inverse traversal; no second relationship stored.,none,IMPLEMENTED_SYNTHETIC
+Sourcing,Part,STOCKED_BY,Dealer,YES,315,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic dealer stocking list with quantities.,1 of 100 parts has no dealer listing; 26 dealer zero-rows excluded as UNKNOWN,IMPLEMENTED_SYNTHETIC
+Sourcing,Dealer,Dealer -> Part (inverse of STOCKED_BY),Part,YES,315,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Inverse traversal.,none,IMPLEMENTED_SYNTHETIC
+Inventory,Part,AVAILABLE_AT,Warehouse,YES,400,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Synthetic warehouse stock (on_hand, reserved, available).",none,IMPLEMENTED_SYNTHETIC
+Inventory,Warehouse,Warehouse -> Part (inverse of AVAILABLE_AT),Part,YES,400,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Inverse traversal.,none,IMPLEMENTED_SYNTHETIC
+Manufacturing,Plant,Plant -> Machine (inverse of MANUFACTURED_AT),Machine,YES,15,SOURCE_DERIVED,NO,YES: Inverse traversal; no second relationship stored.,none,IMPLEMENTED_WITH_DATA
+Manufacturing,Machine,MANUFACTURED_AT,Plant,YES,15,SOURCE_DERIVED,NO,YES: Catalogue Plant column.,none,IMPLEMENTED_WITH_DATA
+Location,Dealer,LOCATED_AT_ADDRESS (the dealer's place),Address,YES,15,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Catalogue Location nodes cover plants and countries only; dealers sit at synthetic placeholder addresses (city, region, postal code, country).",none,IMPLEMENTED_SYNTHETIC
+Location,Supplier,LOCATED_AT_ADDRESS (the supplier's place),Address,YES,12,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic placeholder addresses.,none,IMPLEMENTED_SYNTHETIC
+Location,Warehouse,LOCATED_AT_ADDRESS (the warehouse's place),Address,YES,4,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic placeholder addresses.,none,IMPLEMENTED_SYNTHETIC
+Part relationships,Part,SAME_NAME_GROUP_AS,Part,YES,9,DERIVED,NO,YES: Rule-derived naming group. Not an alternative; interchangeability UNKNOWN.,none,IMPLEMENTED_WITH_DATA
+Part relationships,Part,RELATED_COMPONENT,Part,YES,2,DERIVED,NO,YES: Catalogue mentions a related component. Not an alternative; interchangeability UNKNOWN.,none,IMPLEMENTED_WITH_DATA
+Part relationships,Part,CO_ORDERED_WITH,Part,YES,75,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Synthetic co-purchase signal, stored once per pair.",none,IMPLEMENTED_SYNTHETIC
+Inventory,Part,Part -> Inventory (stock quantities live on AVAILABLE_AT and STOCKED_BY; no separate Inventory node),Inventory,YES,715,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Inventory is a property of the stock relationship, so a stock record cannot float free of its part and place.",26 dealer zero-rows excluded as UNKNOWN,IMPLEMENTED_SYNTHETIC
+Pricing,Part,Part -> Price (inverse of PRICES_PART),Price,YES,100,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic demo list price.,none,IMPLEMENTED_SYNTHETIC
+Orders,Customer,Customer -> Order (inverse of ORDERED_BY),Order,YES,8,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Inverse traversal.,none,IMPLEMENTED_SYNTHETIC
+Orders,Order,ORDERED_BY,Customer,YES,8,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic orders.,none,IMPLEMENTED_SYNTHETIC
+Orders,Order,CONTAINS_LINE,OrderLine,YES,14,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic order lines.,none,IMPLEMENTED_SYNTHETIC
+Orders,OrderLine,REFERENCES_PART,Part,YES,14,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Each order line names one part.,none,IMPLEMENTED_SYNTHETIC
+Allocation,Order,Order -> Allocation,Allocation,NO,0,MISSING,NO: never fabricated,NO: No Allocation entity exists. Allocation status lives on the order line (allocation_status) and on ALLOCATED_FROM; nothing is invented to fill the gap.,"Allocation records (quantity per warehouse, timestamps)",SCHEMA_ONLY_NO_DATA
+Allocation,Allocation,Allocation -> Warehouse (line-level ALLOCATED_FROM),Warehouse,YES,10,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Implemented on the order line, not on an Allocation node. Only RESERVED or SHIPPED lines; not-yet-allocated lines use PLANNED_FULFILMENT_FROM.",No separate Allocation entity,IMPLEMENTED_SYNTHETIC
+Fulfilment,Order,Order -> Fulfilment,Fulfilment,NO,0,MISSING,NO: never fabricated,NO: No Fulfilment entity exists in the data. The planned source (PLANNED_FULFILMENT_FROM) and the dispatch warehouse (DISPATCHED_FROM) are the only fulfilment facts.,Fulfilment records,SCHEMA_ONLY_NO_DATA
+Fulfilment,Fulfilment,Fulfilment -> Warehouse (line-level PLANNED_FULFILMENT_FROM),Warehouse,YES,4,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Planned source of lines that are not yet allocated.,No separate Fulfilment entity,IMPLEMENTED_SYNTHETIC
+Shipping,Order,HAS_SHIPMENT,Shipment,YES,9,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic; only 4 of 8 orders have shipments (not filled).,Shipments for 4 of 8 orders,IMPLEMENTED_SYNTHETIC
+Shipping,Shipment,CARRIED_BY,Carrier,YES,9,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: One fictional carrier; its key is derived from its name because the workbook has no carrier id. Real carriers do not exist in the data.,Real carriers,IMPLEMENTED_SYNTHETIC
+Shipping,Shipment,HAS_TRACKING_EVENT,TrackingEvent,YES,27,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic tracking events.,none,IMPLEMENTED_SYNTHETIC
+Service,ServicePlan,FOR_MACHINE,Machine,YES,60,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),"YES: Synthetic service plans (interval templates), not jobs.",none,IMPLEMENTED_SYNTHETIC
+Service,ServicePlan,REQUIRES_PART,Part,YES,71,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic; covers 33 of 100 parts.,Service plans for 67 of 100 parts,IMPLEMENTED_SYNTHETIC
+Service,ServiceJob,FOR_MACHINE,Machine,NO,0,MISSING,NO: never fabricated,NO: No service jobs exist; service plans are not relabelled as jobs.,ServiceJob records,SCHEMA_ONLY_NO_DATA
+Service,ServiceJob,REQUIRES_PART,Part,NO,0,MISSING,NO: never fabricated,NO: No service jobs exist.,ServiceJob records,SCHEMA_ONLY_NO_DATA
+Service,ServiceJob,PERFORMED_BY,Dealer,NO,0,MISSING,NO: never fabricated,"NO: No service jobs exist, and dealers are not linked to service work in the data (dealers serve machine families only).",ServiceJob records and dealer service assignments,SCHEMA_ONLY_NO_DATA
+Compliance,Part,HAS_COMPLIANCE,ComplianceRequirement,YES,100,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic compliance records.,none,IMPLEMENTED_SYNTHETIC
+Risk,Part,HAS_RISK,SourceRisk,NO,0,MISSING,NO: never fabricated,NO: No risk data exists.,Risk records,SCHEMA_ONLY_NO_DATA
+Part relationships,Part,ALTERNATIVE_TO,Part,NO,0,MISSING,NO: never fabricated,"NO: No authoritative alternative data. Never inferred from names, categories or shared fitment.",Authoritative alternative / interchangeability evidence,SCHEMA_ONLY_NO_DATA
+Part relationships,Part,SUPERSEDES / SUPERSEDED_BY,Part,NO,0,MISSING,NO: never fabricated,"NO: No supersession data. Legacy references are previous numbers of the SAME part, not a successor part.",Supersession records,SCHEMA_ONLY_NO_DATA
+Machine hierarchy,Machine,Machine -> Configuration,Configuration,NO,0,MISSING,NO: never fabricated,NO: No configuration level exists in any source.,Configuration records,SCHEMA_ONLY_NO_DATA
+Machine hierarchy,Machine,Machine -> Serial Range (inverse of VARIANT_OF),MachineVariant,YES,30,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: 30 synthetic variants with serial_from / serial_to. Individual serial-numbered machines do not exist.,Serial-numbered machine units,IMPLEMENTED_SYNTHETIC
+Requests,Customer,Customer -> Request,Request,NO,0,MISSING,NO: never fabricated,NO: No requests exist. Carts are not requests.,Request records,SCHEMA_ONLY_NO_DATA
+Requests,Request,Request -> Part,Part,NO,0,MISSING,NO: never fabricated,NO: No requests exist.,Request lines,SCHEMA_ONLY_NO_DATA
+Installation,Installation,Installation -> Machine,Machine,NO,0,MISSING,NO: never fabricated,NO: No installations exist.,Installation records,SCHEMA_ONLY_NO_DATA
+Installation,Installation,Installation -> Part,Part,NO,0,MISSING,NO: never fabricated,NO: No installations exist.,Installation records,SCHEMA_ONLY_NO_DATA
+Catalogue structure,Machine,OF_TYPE,MachineType,YES,15,SOURCE_DERIVED,NO,YES: Catalogue Machine Type column.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Machine,MEMBER_OF_FAMILY,MachineFamily,YES,15,DERIVED,NO,YES: Derived from the model-code prefix (provenance DERIVED).,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Machine,BRANDED_AS,BusinessUnit,YES,15,SOURCE_DERIVED,NO,YES: Catalogue Brand / Origin column.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,MachineFamily,PRODUCT_FAMILY_OF,BusinessUnit,YES,3,DERIVED,NO,YES: Derived.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Plant,OWNED_BY,BusinessUnit,YES,3,USER_PROVIDED,NO,YES: Project brief (USER_PROVIDED).,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,BusinessUnit,HOME_PLANT,Plant,YES,3,SOURCE_DERIVED,NO,YES: ADDED by this audit: business_units.home_plant_id was only a column.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Plant,LOCATED_IN,Location,YES,3,USER_PROVIDED,NO,YES: Catalogue city location.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Location,IN_COUNTRY,Location,YES,3,SOURCE_DERIVED,NO,YES: City in country.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Category,SUBCATEGORY_OF,Category,YES,91,DERIVED,NO,YES: Derived sub-categories under source categories.,none,IMPLEMENTED_WITH_DATA
+Catalogue structure,Part,ORIGINATES_AT,Plant,YES,100,SOURCE_DERIVED,NO,YES: Catalogue Plant of Origin.,none,IMPLEMENTED_WITH_DATA
+Legacy,LegacyReference,ISSUED_BY_BUSINESS_UNIT,BusinessUnit,YES,100,DERIVED,NO,YES: Mostly rule-derived from prefix and plant (provenance DERIVED).,none,IMPLEMENTED_WITH_DATA
+Location,Warehouse,LOCATED_AT_PLANT,Plant,YES,3,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic; 3 of 4 warehouses.,none,IMPLEMENTED_SYNTHETIC
+Location,Warehouse (WH-004),LOCATED_AT_PLANT,Plant,PARTIAL,0,MISSING,NO: never fabricated,NO: The source states no plant for the Zwolle warehouse; none is guessed.,plant_id for WH-004,BLOCKED_BY_MISSING_DATA
+Location,Plant,LOCATED_AT_ADDRESS,Address,YES,3,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic placeholder addresses for the fictional plants.,none,IMPLEMENTED_SYNTHETIC
+Location,Customer,LOCATED_AT_ADDRESS,Address,YES,10,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Location,Address,IN_REGION,Region,YES,44,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic region (VAT reference).,none,IMPLEMENTED_SYNTHETIC
+Location,Warehouse,SHIPS_TO_COUNTRY,"Location (NL, DE)",YES,8,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: ADDED by this audit: warehouses.ships_to was only text.,none,IMPLEMENTED_SYNTHETIC
+Location,Warehouse,SHIPS_TO_COUNTRY (Belgium),Location (BE),PARTIAL,0,MISSING,NO: never fabricated,"NO: The workbook says every warehouse ships to BE, but the catalogue has no Belgium location node; none is invented.",A Belgium country Location,BLOCKED_BY_MISSING_DATA
+Sourcing,Supplier,SUPPLIES_CATEGORY,Category,YES,25,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: ADDED by this audit: declared category scope (SYN_suppliers.categories_supplied). Does NOT imply SUPPLIED_BY for any part.,none,IMPLEMENTED_SYNTHETIC
+Sourcing,SupplierBackorder,PLACED_WITH,Supplier,YES,4,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic backorders.,none,IMPLEMENTED_SYNTHETIC
+Sourcing,SupplierBackorder,FOR_PART,Part,YES,4,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic backorders.,none,IMPLEMENTED_SYNTHETIC
+Sourcing,Dealer,SERVES_FAMILY,MachineFamily,YES,30,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Family level only. Never read as dealer-supports-model or dealer-stocks-part.,Dealer-to-model support is not in the data,IMPLEMENTED_SYNTHETIC
+Compliance,ComplianceRequirement,COVERS_CATEGORY,Category,YES,10,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: ADDED by this audit: declared category scope (SYN_compliance.categories_covered).,none,IMPLEMENTED_SYNTHETIC
+Part profile,PartCatalogProfile,PROFILES_PART,Part,YES,100,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic store profile kept apart from the catalogue Part.,none,IMPLEMENTED_SYNTHETIC
+Pricing,Price,PRICES_PART,Part,YES,100,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Machine detail,Machine,HAS_MACHINE_SPECIFICATION,MachineSpecification,YES,83,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic machine specs (not engineering data).,none,IMPLEMENTED_SYNTHETIC
+Machine detail,MachineVariant,VARIANT_OF,Machine,YES,30,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Identification,IdentificationRequirement,FOR_PART,Part,YES,6,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Identification,IdentificationRequirement,FOR_MACHINE,Machine,YES,6,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Identification,IdentificationRequirement,ADMITS_VARIANT,MachineVariant,YES,10,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic; does not add catalogue fitment.,none,IMPLEMENTED_SYNTHETIC
+Orders,Order,DELIVERS_TO_ADDRESS,Address,YES,8,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Orders,Order,HAS_STATUS_EVENT,OrderStatusEvent,YES,32,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic status history.,none,IMPLEMENTED_SYNTHETIC
+Orders,OrderStatusEvent,RECORDS_STATUS,OrderStatus,YES,32,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Status vocabulary from the brief.,none,IMPLEMENTED_SYNTHETIC
+Orders,OrderLine,PLANNED_FULFILMENT_FROM,Warehouse,YES,4,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic; lines not yet allocated.,none,IMPLEMENTED_SYNTHETIC
+Shipping,Shipment,SHIPS_LINE,OrderLine,YES,9,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic; 9 of 14 order lines.,5 order lines have no shipment,IMPLEMENTED_SYNTHETIC
+Shipping,Shipment,DISPATCHED_FROM,Warehouse,YES,9,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Shipping,Shipment,DELIVERS_TO_CUSTOMER,Customer,YES,9,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Fulfilment,DeliveryEstimate,FROM_WAREHOUSE,Warehouse,YES,100,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic delivery estimates.,none,IMPLEMENTED_SYNTHETIC
+Fulfilment,DeliveryEstimate,TO_CUSTOMER,Customer,YES,40,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Fulfilment,DeliveryEstimate,TO_DEALER,Dealer,YES,60,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic.,none,IMPLEMENTED_SYNTHETIC
+Ordering,Cart,OPENED_BY,Customer,YES,3,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic carts.,none,IMPLEMENTED_SYNTHETIC
+Ordering,Cart,CONTAINS_LINE,CartLine,YES,6,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic carts.,none,IMPLEMENTED_SYNTHETIC
+Ordering,CartLine,REFERENCES_PART,Part,YES,6,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic carts.,none,IMPLEMENTED_SYNTHETIC
+Search,Part,HAS_ALIAS,SearchAlias,YES,448,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic aliases.,none,IMPLEMENTED_SYNTHETIC
+Search,Machine,HAS_ALIAS,SearchAlias,YES,45,SYNTHETIC_DEMO,YES (marked SYNTHETIC_DEMO),YES: Synthetic aliases.,none,IMPLEMENTED_SYNTHETIC
+Fulfilment,DeliveryEstimate,DeliveryEstimate -> ShippingRate,ShippingRate,NO,0,n/a,n/a,"NO: The workbook states no link; the rate is only derivable from the distance band. A derivable link is not a stated one, so it is not created.",none,NOT_APPLICABLE
+Access control,User / Role,"User -> Customer, User -> Role",Customer / Role,NO,0,n/a,n/a,"NO: SYN_users / SYN_roles are access-control demo data, not part of Parts Intelligence for this phase.",none,NOT_APPLICABLE
+Geography,Any place,"DISTANCE_TO (SYN_distances, 946 pairs)",Any place,NO,0,n/a,n/a,NO: Proximity must never create a business relationship; distances are not imported.,none,NOT_APPLICABLE
+Inference guard,Supplier / Dealer,Supplier or Dealer -> Plant / Machine / Customer by proximity or country,Plant / Machine / Customer,NO,0,n/a,n/a,"NO: Forbidden inference: no supplier, dealer or customer relationship is derived from location.",none,NOT_APPLICABLE
+Inference guard,Part,Part -> Part by shared machines or similar names,Part,NO,0,n/a,n/a,NO: Forbidden inference: shared fitment or naming never creates an alternative or interchangeable relationship.,none,NOT_APPLICABLE

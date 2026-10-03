@@ -1,0 +1,19 @@
+.mcard { display: grid; gap: var(--space-4); align-content: start; color: inherit; }
+.mcard__media { position: relative; }
+.mcard__media .mimg { transition: box-shadow var(--dur-base) var(--ease-weight); }
+.mcard:hover .mimg__inner, .mcard:focus-visible .mimg__inner { --img-scale: 1.06; }
+.mcard:hover .mimg { box-shadow: var(--shadow-soft); }
+.mcard__go { position: absolute; top: var(--space-3); right: var(--space-3); display: grid; place-items: center; width: 2.5rem; aspect-ratio: 1; background: var(--teal); color: var(--charcoal); opacity: 0; transform: translate(-6px, 6px); transition: opacity var(--dur-base) var(--ease-weight), transform var(--dur-base) var(--ease-weight); }
+.mcard:hover .mcard__go, .mcard:focus-visible .mcard__go { opacity: 1; transform: none; }
+.mcard__body { display: grid; gap: 2px; padding-top: var(--space-1); }
+.mcard__model { font-size: var(--text-small); font-weight: 700; letter-spacing: 0.04em; color: var(--teal-ink); }
+.mcard__name { font-size: 1.375rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.mcard__meta { font-size: var(--text-small); color: var(--graphite-3); }
+.mcard__origin { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: var(--text-small); color: var(--graphite-2); position: relative; }
+.mcard__origin::after { content: ""; position: absolute; left: 0; top: -1px; height: 1px; width: 100%; background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-base) var(--ease-weight); }
+.mcard:hover .mcard__origin::after, .mcard:focus-visible .mcard__origin::after { transform: scaleX(1); }
+.mcard__explore { font-weight: 600; color: var(--teal-ink); opacity: 0; transform: translateX(-8px); transition: opacity var(--dur-base) var(--ease-weight), transform var(--dur-base) var(--ease-weight); }
+.mcard:hover .mcard__explore, .mcard:focus-visible .mcard__explore { opacity: 1; transform: none; }
+@media (hover: none) {
+  .mcard__explore { opacity: 1; transform: none; }
+}

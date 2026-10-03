@@ -1,0 +1,1970 @@
+{
+ "checks": [
+  {
+   "id": "V01",
+   "check": "Total nodes",
+   "status": "PASS",
+   "expected": 1840,
+   "actual": 1840
+  },
+  {
+   "id": "V02",
+   "check": "Total relationships",
+   "status": "PASS",
+   "expected": 3812,
+   "actual": 3812
+  },
+  {
+   "id": "V03",
+   "check": "Nodes per label",
+   "status": "PASS",
+   "expected": {
+    "Address": 44,
+    "Assembly": 15,
+    "BusinessUnit": 3,
+    "Carrier": 1,
+    "Cart": 3,
+    "CartLine": 6,
+    "Category": 101,
+    "ComplianceRequirement": 8,
+    "Customer": 10,
+    "DataSource": 4,
+    "Dealer": 15,
+    "DeliveryEstimate": 100,
+    "IdentificationRequirement": 6,
+    "LegacyReference": 100,
+    "Location": 5,
+    "Machine": 15,
+    "MachineFamily": 3,
+    "MachineSpecification": 83,
+    "MachineType": 15,
+    "MachineVariant": 30,
+    "Order": 8,
+    "OrderLine": 14,
+    "OrderStatus": 6,
+    "OrderStatusEvent": 32,
+    "Part": 100,
+    "PartCatalogProfile": 100,
+    "PartSpecification": 279,
+    "Plant": 3,
+    "Price": 100,
+    "Region": 14,
+    "SearchAlias": 493,
+    "ServicePlan": 60,
+    "Shipment": 9,
+    "ShippingRate": 8,
+    "Supplier": 12,
+    "SupplierBackorder": 4,
+    "TrackingEvent": 27,
+    "Warehouse": 4
+   },
+   "actual": {
+    "Address": 44,
+    "Assembly": 15,
+    "BusinessUnit": 3,
+    "Carrier": 1,
+    "Cart": 3,
+    "CartLine": 6,
+    "Category": 101,
+    "ComplianceRequirement": 8,
+    "Customer": 10,
+    "DataSource": 4,
+    "Dealer": 15,
+    "DeliveryEstimate": 100,
+    "IdentificationRequirement": 6,
+    "LegacyReference": 100,
+    "Location": 5,
+    "Machine": 15,
+    "MachineFamily": 3,
+    "MachineSpecification": 83,
+    "MachineType": 15,
+    "MachineVariant": 30,
+    "Order": 8,
+    "OrderLine": 14,
+    "OrderStatus": 6,
+    "OrderStatusEvent": 32,
+    "Part": 100,
+    "PartCatalogProfile": 100,
+    "PartSpecification": 279,
+    "Plant": 3,
+    "Price": 100,
+    "Region": 14,
+    "SearchAlias": 493,
+    "ServicePlan": 60,
+    "Shipment": 9,
+    "ShippingRate": 8,
+    "Supplier": 12,
+    "SupplierBackorder": 4,
+    "TrackingEvent": 27,
+    "Warehouse": 4
+   }
+  },
+  {
+   "id": "V04",
+   "check": "Relationships per type",
+   "status": "PASS",
+   "expected": "61 types",
+   "actual": "61 types; differences []"
+  },
+  {
+   "id": "V05",
+   "check": "Counts per data_status",
+   "status": "PASS",
+   "expected": [
+    "node DERIVED 165",
+    "node SOURCE_DERIVED 456",
+    "node SYNTHETIC_DEMO 1209",
+    "node USER_PROVIDED 10",
+    "relationship DERIVED 391",
+    "relationship SOURCE_DERIVED 778",
+    "relationship SYNTHETIC_DEMO 2637",
+    "relationship USER_PROVIDED 6"
+   ],
+   "actual": [
+    "node DERIVED 165",
+    "node SOURCE_DERIVED 456",
+    "node SYNTHETIC_DEMO 1209",
+    "node USER_PROVIDED 10",
+    "relationship DERIVED 391",
+    "relationship SOURCE_DERIVED 778",
+    "relationship SYNTHETIC_DEMO 2637",
+    "relationship USER_PROVIDED 6"
+   ]
+  },
+  {
+   "id": "V06",
+   "check": "Duplicate canonical ids",
+   "status": "PASS",
+   "expected": "0 rows",
+   "actual": []
+  },
+  {
+   "id": "V07",
+   "check": "Duplicate relationships",
+   "status": "PASS",
+   "expected": "0 rows",
+   "actual": []
+  },
+  {
+   "id": "V08",
+   "check": "Missing provenance",
+   "status": "PASS",
+   "expected": "node 0, relationship 0",
+   "actual": [
+    {
+     "kind": "node",
+     "c": 0
+    },
+    {
+     "kind": "relationship",
+     "c": 0
+    }
+   ]
+  },
+  {
+   "id": "V09",
+   "check": "Synthetic sheets not marked",
+   "status": "PASS",
+   "expected": 0,
+   "actual": [
+    {
+     "nodes_unmarked": 0
+    }
+   ]
+  },
+  {
+   "id": "V10",
+   "check": "Wrong endpoint labels",
+   "status": "PASS",
+   "expected": "61 types, bad = 0",
+   "actual": "61 types, bad total 0"
+  },
+  {
+   "id": "V11",
+   "check": "Forbidden relationship types",
+   "status": "PASS",
+   "expected": 0,
+   "actual": [
+    {
+     "forbidden": 0
+    }
+   ]
+  },
+  {
+   "id": "V12",
+   "check": "Interchangeability asserted",
+   "status": "PASS",
+   "expected": 0,
+   "actual": [
+    {
+     "asserted": 0
+    }
+   ]
+  },
+  {
+   "id": "V13",
+   "check": "Fitment status",
+   "status": "PASS",
+   "expected": "CONDITIONAL 3, CONFIRMED 216",
+   "actual": [
+    {
+     "status": "CONDITIONAL",
+     "c": 3
+    },
+    {
+     "status": "CONFIRMED",
+     "c": 216
+    }
+   ]
+  },
+  {
+   "id": "V14",
+   "check": "Conditional fitments",
+   "status": "PASS",
+   "expected": [
+    "NVM-1010-ST -> BTS-250: cross-compatible after 2019 unification",
+    "NVM-1020-ST -> BTS-250: cross-compatible after 2019 unification",
+    "NVM-1140-DT -> NV-7500: For tracked NV-7500 variant"
+   ],
+   "actual": [
+    "NVM-1010-ST -> BTS-250: cross-compatible after 2019 unification",
+    "NVM-1020-ST -> BTS-250: cross-compatible after 2019 unification",
+    "NVM-1140-DT -> NV-7500: For tracked NV-7500 variant"
+   ]
+  },
+  {
+   "id": "V15",
+   "check": "Mirrored co-order pairs",
+   "status": "PASS",
+   "expected": 0,
+   "actual": [
+    {
+     "mirrored": 0
+    }
+   ]
+  },
+  {
+   "id": "V16",
+   "check": "Co-order relationships",
+   "status": "PASS",
+   "expected": "c 75, merged 14",
+   "actual": [
+    {
+     "c": 75,
+     "merged": 14
+    }
+   ]
+  },
+  {
+   "id": "V17",
+   "check": "Part -> machines",
+   "status": "PASS",
+   "expected": "NV-3200 CONFIRMED, NV-4500 CONFIRMED",
+   "actual": [
+    {
+     "m.model_code": "NV-3200",
+     "f.fitment_status": "CONFIRMED"
+    },
+    {
+     "m.model_code": "NV-4500",
+     "f.fitment_status": "CONFIRMED"
+    }
+   ]
+  },
+  {
+   "id": "V18",
+   "check": "Machine -> parts (NV-4500)",
+   "status": "PASS",
+   "expected": 52,
+   "actual": [
+    {
+     "parts": 52
+    }
+   ]
+  },
+  {
+   "id": "V19",
+   "check": "Machine with no parts",
+   "status": "PASS",
+   "expected": "KFT-120",
+   "actual": [
+    {
+     "m.model_code": "KFT-120"
+    }
+   ]
+  },
+  {
+   "id": "V20",
+   "check": "Part -> category, sub-category, legacy",
+   "status": "PASS",
+   "expected": "Hydraulics, Hydraulic hose, AS-771",
+   "actual": [
+    {
+     "c.name": "Hydraulics",
+     "s.name": "Hydraulic hose",
+     "l.legacy_part_number": "AS-771"
+    }
+   ]
+  },
+  {
+   "id": "V21",
+   "check": "Part -> suppliers",
+   "status": "PASS",
+   "expected": "Veldstra Hydraulics (demo) true 28 SYNTHETIC_DEMO; Rijnmond Hydraulic Supply (demo) false 10 SYNTHETIC_DEMO",
+   "actual": [
+    "Veldstra Hydraulics (demo) true 28 SYNTHETIC_DEMO",
+    "Rijnmond Hydraulic Supply (demo) false 10 SYNTHETIC_DEMO"
+   ]
+  },
+  {
+   "id": "V22",
+   "check": "Part -> dealers",
+   "status": "PASS",
+   "expected": "Brabant Heavy Parts (demo) 8; Drenthe Techniek (demo) 5; IJsselvallei Equipment (demo) 7",
+   "actual": [
+    "Brabant Heavy Parts (demo) 8",
+    "Drenthe Techniek (demo) 5",
+    "IJsselvallei Equipment (demo) 7"
+   ]
+  },
+  {
+   "id": "V23",
+   "check": "Part -> warehouse inventory",
+   "status": "PASS",
+   "expected": "Bakker Parts Depot Coevorden (demo) 9; Kessler Parts Depot Lingen (demo) 20; Noordveld Central Warehouse Assen (demo) 56; Regional Distribution Centre Zwolle (demo) 11",
+   "actual": [
+    "Bakker Parts Depot Coevorden (demo) 9",
+    "Kessler Parts Depot Lingen (demo) 20",
+    "Noordveld Central Warehouse Assen (demo) 56",
+    "Regional Distribution Centre Zwolle (demo) 11"
+   ]
+  },
+  {
+   "id": "V24",
+   "check": "Excluded dealer zero-rows absent",
+   "status": "PASS",
+   "expected": 0,
+   "actual": [
+    {
+     "imported": 0
+    }
+   ]
+  },
+  {
+   "id": "V25",
+   "check": "Part -> orders",
+   "status": "PASS",
+   "expected": "parts_ordered 14, orders 8",
+   "actual": [
+    {
+     "parts_ordered": 14,
+     "orders": 8
+    }
+   ]
+  },
+  {
+   "id": "V26",
+   "check": "Order -> customer and shipments",
+   "status": "PASS",
+   "expected": "8 rows; 4 orders with at least one shipment",
+   "actual": "8 rows; 4 with shipments"
+  },
+  {
+   "id": "V27",
+   "check": "Shipment -> tracking events",
+   "status": "PASS",
+   "expected": "9 shipments, 27 events",
+   "actual": "9 shipments, 27 events"
+  },
+  {
+   "id": "V28",
+   "check": "Service plan -> machine and parts",
+   "status": "PASS",
+   "expected": "plans 60, machines 15, parts 33",
+   "actual": [
+    {
+     "plans": 60,
+     "machines": 15,
+     "parts": 33
+    }
+   ]
+  },
+  {
+   "id": "V29",
+   "check": "No service jobs / alternatives / supersessions / risks",
+   "status": "PASS",
+   "expected": "0, 0",
+   "actual": [
+    {
+     "c": 0
+    },
+    {
+     "c": 0
+    }
+   ]
+  },
+  {
+   "id": "V30",
+   "check": "Trace part -> machine -> order -> shipment -> service",
+   "status": "PASS",
+   "expected": "rows for NV-3200 and NV-4500; 4 service plans each",
+   "actual": [
+    {
+     "m.model_code": "NV-3200",
+     "orders": [],
+     "shipments": [],
+     "service_plans": 4
+    },
+    {
+     "m.model_code": "NV-4500",
+     "orders": [],
+     "shipments": [],
+     "service_plans": 4
+    }
+   ]
+  },
+  {
+   "id": "V31",
+   "check": "Impact analysis",
+   "status": "PASS",
+   "expected": "machines 2, orders 0, service_plans 1",
+   "actual": [
+    {
+     "machines": 2,
+     "orders": 0,
+     "service_plans": 1
+    }
+   ]
+  },
+  {
+   "id": "V32",
+   "check": "Provenance traversal",
+   "status": "PASS",
+   "expected": "NV-3200 SOURCE_DERIVED machine_part_fitment FIT-0002 Catalog workbook (supplied); NV-4500 SOURCE_DERIVED machine_part_fitment FIT-0003 Catalog workbook (supplied)",
+   "actual": [
+    "NV-3200 SOURCE_DERIVED machine_part_fitment FIT-0002 Catalog workbook (supplied)",
+    "NV-4500 SOURCE_DERIVED machine_part_fitment FIT-0003 Catalog workbook (supplied)"
+   ]
+  },
+  {
+   "id": "V33",
+   "check": "Totals (idempotency reference)",
+   "status": "PASS",
+   "expected": "1840 and 3812",
+   "actual": [
+    1840,
+    3812
+   ]
+  },
+  {
+   "id": "C01",
+   "check": "Every coverage-matrix row matches AuraDB",
+   "status": "PASS",
+   "expected": "100 of 100",
+   "actual": "100 of 100"
+  },
+  {
+   "id": "C02",
+   "check": "Newly added relationships exist with the right counts",
+   "status": "PASS",
+   "expected": {
+    "HOME_PLANT": 3,
+    "SUPPLIES_CATEGORY": 25,
+    "COVERS_CATEGORY": 10,
+    "SHIPS_TO_COUNTRY": 8
+   },
+   "actual": {
+    "HOME_PLANT": 3,
+    "SUPPLIES_CATEGORY": 25,
+    "COVERS_CATEGORY": 10,
+    "SHIPS_TO_COUNTRY": 8
+   }
+  },
+  {
+   "id": "C02-HOME_PLANT",
+   "check": "(BusinessUnit)-[:HOME_PLANT]->(Plant) endpoints correct",
+   "status": "PASS",
+   "expected": 3,
+   "actual": 3
+  },
+  {
+   "id": "C02-SUPPLIES_CATEGORY",
+   "check": "(Supplier)-[:SUPPLIES_CATEGORY]->(Category) endpoints correct",
+   "status": "PASS",
+   "expected": 25,
+   "actual": 25
+  },
+  {
+   "id": "C02-COVERS_CATEGORY",
+   "check": "(ComplianceRequirement)-[:COVERS_CATEGORY]->(Category) endpoints correct",
+   "status": "PASS",
+   "expected": 10,
+   "actual": 10
+  },
+  {
+   "id": "C02-SHIPS_TO_COUNTRY",
+   "check": "(Warehouse)-[:SHIPS_TO_COUNTRY]->(Location) endpoints correct",
+   "status": "PASS",
+   "expected": 8,
+   "actual": 8
+  },
+  {
+   "id": "C03",
+   "check": "Schema-only labels have no records",
+   "status": "PASS",
+   "expected": "all 0",
+   "actual": {
+    "ServiceJob": 0,
+    "Installation": 0,
+    "Request": 0,
+    "SourceRisk": 0,
+    "Configuration": 0,
+    "Allocation": 0,
+    "Fulfilment": 0,
+    "MachineUnit": 0,
+    "SerialNumberedMachine": 0
+   }
+  },
+  {
+   "id": "C04",
+   "check": "Schema-only / generic relationship types have no records",
+   "status": "PASS",
+   "expected": "all 0",
+   "actual": {}
+  },
+  {
+   "id": "S01",
+   "check": "SUPPLIES_CATEGORY does not imply supplying every part: supplier-category-part triples with no SUPPLIED_BY exist, and SUPPLIED_BY is unchanged",
+   "status": "PASS",
+   "expected": "declared_only > 0 and SUPPLIED_BY = 157",
+   "actual": {
+    "declared_only_pairs": 101,
+    "supplied_by": 157
+   }
+  },
+  {
+   "id": "S02",
+   "check": "The only Supplier-Part relationship is SUPPLIED_BY (no supply inferred from category or location)",
+   "status": "PASS",
+   "expected": [
+    "SUPPLIED_BY"
+   ],
+   "actual": [
+    "SUPPLIED_BY"
+   ]
+  },
+  {
+   "id": "S03",
+   "check": "COVERS_CATEGORY is separate from part-level HAS_COMPLIANCE (the latter only from SYN_part_compliance rows, 100)",
+   "status": "PASS",
+   "expected": "100 from SYN_part_compliance",
+   "actual": {
+    "has_compliance": 100,
+    "sheet": "SYN_part_compliance",
+    "category_scope_without_explicit_part_link": 0
+   }
+  },
+  {
+   "id": "S04",
+   "check": "SHIPS_TO_COUNTRY is not 'located in': warehouses ship to countries other than their own, and it is their only link to a Location",
+   "status": "PASS",
+   "expected": "> 0 and only SHIPS_TO_COUNTRY",
+   "actual": {
+    "ships_to_other_country": 4,
+    "warehouse_location_types": [
+     "SHIPS_TO_COUNTRY"
+    ]
+   }
+  },
+  {
+   "id": "S05",
+   "check": "HOME_PLANT = the business unit's home plant",
+   "status": "PASS",
+   "expected": "NOORDVELD->PLT-001, KESSLER->PLT-002, BAKKER->PLT-003",
+   "actual": {
+    "BU-BAKKER": "PLT-003",
+    "BU-KESSLER": "PLT-002",
+    "BU-NOORDVELD": "PLT-001"
+   }
+  },
+  {
+   "id": "S06",
+   "check": "PLANNED_FULFILMENT_FROM is never an allocation (no line has both; planned lines are not RESERVED/SHIPPED)",
+   "status": "PASS",
+   "expected": "0, 0, 0",
+   "actual": {
+    "lines": 14,
+    "both": 0,
+    "bad_alloc": 0,
+    "bad_plan": 0
+   }
+  },
+  {
+   "id": "S07",
+   "check": "CONDITIONAL fitments stay conditional with their condition",
+   "status": "PASS",
+   "expected": "3 conditional, 3 with condition_note",
+   "actual": {
+    "c": 3,
+    "with_note": 3
+   }
+  },
+  {
+   "id": "S08",
+   "check": "SAME_NAME_GROUP_AS / RELATED_COMPONENT carry interchangeability_status UNKNOWN (11 of 11), not alternatives",
+   "status": "PASS",
+   "expected": "11 of 11 UNKNOWN",
+   "actual": {
+    "c": 11,
+    "unknown": 11
+   }
+  },
+  {
+   "id": "P01",
+   "check": "Synthetic records = 3,846, all SYNTHETIC_DEMO",
+   "status": "PASS",
+   "expected": 3846,
+   "actual": {
+    "nodes": 1209,
+    "relationships": 2637,
+    "total": 3846
+   }
+  },
+  {
+   "id": "P02",
+   "check": "Provenance classes stay distinct and complete",
+   "status": "PASS",
+   "expected": "SOURCE_DERIVED 1234, DERIVED 556, USER_PROVIDED (project brief) 16, SYNTHETIC_DEMO 3846",
+   "actual": {
+    "SOURCE_DERIVED": 1234,
+    "DERIVED": 556,
+    "USER_PROVIDED": 16,
+    "SYNTHETIC_DEMO": 3846
+   }
+  },
+  {
+   "id": "P03",
+   "check": "No SYN_ record is unmarked",
+   "status": "PASS",
+   "expected": "0, 0",
+   "actual": [
+    0,
+    0
+   ]
+  },
+  {
+   "id": "P04",
+   "check": "No catalogue record is labelled synthetic",
+   "status": "PASS",
+   "expected": 0,
+   "actual": 0
+  },
+  {
+   "id": "P05",
+   "check": "Catalogue Part carries no synthetic operational values (price, stock, availability...)",
+   "status": "PASS",
+   "expected": "none",
+   "actual": []
+  },
+  {
+   "id": "P06",
+   "check": "Supplier, Dealer, Warehouse, Price, Order, Shipment, ServicePlan, Compliance, Tracking, stock and sourcing relationships all SYNTHETIC_DEMO",
+   "status": "PASS",
+   "expected": "all ['SYNTHETIC_DEMO']",
+   "actual": {}
+  },
+  {
+   "id": "P07",
+   "check": "Every FITS relationship is SOURCE_DERIVED",
+   "status": "PASS",
+   "expected": 0,
+   "actual": 0
+  },
+  {
+   "id": "M01",
+   "check": "5 unresolved legacy references stay without a legacy number",
+   "status": "PASS",
+   "expected": 5,
+   "actual": 5
+  },
+  {
+   "id": "M02",
+   "check": "WH-004 has no plant",
+   "status": "PASS",
+   "expected": 0,
+   "actual": 0
+  },
+  {
+   "id": "M03",
+   "check": "No Belgium location exists, and no shipping relationship was invented for it",
+   "status": "PASS",
+   "expected": "BE locations 0; SHIPS_TO_COUNTRY 8 to DE and NL",
+   "actual": {
+    "be_locations": 0,
+    "ships_to": 8,
+    "codes": [
+     "DE",
+     "NL"
+    ]
+   }
+  },
+  {
+   "id": "M04",
+   "check": "KFT-120 still has no parts",
+   "status": "PASS",
+   "expected": 0,
+   "actual": 0
+  },
+  {
+   "id": "M05",
+   "check": "Machine status / year / category / description and part type / OEM status / criticality stay unstated",
+   "status": "PASS",
+   "expected": "0, 0",
+   "actual": [
+    0,
+    0
+   ]
+  },
+  {
+   "id": "M06",
+   "check": "No relationship without a source record id",
+   "status": "PASS",
+   "expected": 0,
+   "actual": 0
+  }
+ ],
+ "coverage": [
+  {
+   "group": "REQUIRED",
+   "source": "Machine",
+   "relationship": "Machine -> Part (inverse traversal of FITS)",
+   "target": "Part",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 219,
+   "aura_count": 219,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "FITS",
+   "target": "Machine",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 219,
+   "aura_count": 219,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "IN_CATEGORY",
+   "target": "Category",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "IN_SUBCATEGORY",
+   "target": "Category (sub-category)",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "HAS_SPECIFICATION",
+   "target": "PartSpecification",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 279,
+   "aura_count": 279,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "HAS_LEGACY_REFERENCE",
+   "target": "LegacyReference",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "PART_OF",
+   "target": "Assembly",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 35,
+   "aura_count": 35,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Assembly",
+   "relationship": "Assembly -> Part (inverse of PART_OF; IDENTIFIED_BY_PART gives the assembly's own part number)",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 50,
+   "aura_count": 50,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "SUPPLIED_BY",
+   "target": "Supplier",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 157,
+   "aura_count": 157,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Supplier",
+   "relationship": "Supplier -> Part (inverse of SUPPLIED_BY)",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 157,
+   "aura_count": 157,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "STOCKED_BY",
+   "target": "Dealer",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 315,
+   "aura_count": 315,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Dealer",
+   "relationship": "Dealer -> Part (inverse of STOCKED_BY)",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 315,
+   "aura_count": 315,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "AVAILABLE_AT",
+   "target": "Warehouse",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 400,
+   "aura_count": 400,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Warehouse",
+   "relationship": "Warehouse -> Part (inverse of AVAILABLE_AT)",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 400,
+   "aura_count": 400,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Plant",
+   "relationship": "Plant -> Machine (inverse of MANUFACTURED_AT)",
+   "target": "Machine",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 15,
+   "aura_count": 15,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Machine",
+   "relationship": "MANUFACTURED_AT",
+   "target": "Plant",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 15,
+   "aura_count": 15,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Dealer",
+   "relationship": "LOCATED_AT_ADDRESS (the dealer's place)",
+   "target": "Address",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 15,
+   "aura_count": 15,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Supplier",
+   "relationship": "LOCATED_AT_ADDRESS (the supplier's place)",
+   "target": "Address",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 12,
+   "aura_count": 12,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Warehouse",
+   "relationship": "LOCATED_AT_ADDRESS (the warehouse's place)",
+   "target": "Address",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 4,
+   "aura_count": 4,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "SAME_NAME_GROUP_AS",
+   "target": "Part",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 9,
+   "aura_count": 9,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "RELATED_COMPONENT",
+   "target": "Part",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 2,
+   "aura_count": 2,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "CO_ORDERED_WITH",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 75,
+   "aura_count": 75,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "Part -> Inventory (stock quantities live on AVAILABLE_AT and STOCKED_BY; no separate Inventory node)",
+   "target": "Inventory",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 715,
+   "aura_count": 715,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "Part -> Price (inverse of PRICES_PART)",
+   "target": "Price",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Customer",
+   "relationship": "Customer -> Order (inverse of ORDERED_BY)",
+   "target": "Order",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 8,
+   "aura_count": 8,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Order",
+   "relationship": "ORDERED_BY",
+   "target": "Customer",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 8,
+   "aura_count": 8,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Order",
+   "relationship": "CONTAINS_LINE",
+   "target": "OrderLine",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 14,
+   "aura_count": 14,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "OrderLine",
+   "relationship": "REFERENCES_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 14,
+   "aura_count": 14,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Order",
+   "relationship": "Order -> Allocation",
+   "target": "Allocation",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Allocation",
+   "relationship": "Allocation -> Warehouse (line-level ALLOCATED_FROM)",
+   "target": "Warehouse",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 10,
+   "aura_count": 10,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Order",
+   "relationship": "Order -> Fulfilment",
+   "target": "Fulfilment",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Fulfilment",
+   "relationship": "Fulfilment -> Warehouse (line-level PLANNED_FULFILMENT_FROM)",
+   "target": "Warehouse",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 4,
+   "aura_count": 4,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Order",
+   "relationship": "HAS_SHIPMENT",
+   "target": "Shipment",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 9,
+   "aura_count": 9,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Shipment",
+   "relationship": "CARRIED_BY",
+   "target": "Carrier",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 9,
+   "aura_count": 9,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Shipment",
+   "relationship": "HAS_TRACKING_EVENT",
+   "target": "TrackingEvent",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 27,
+   "aura_count": 27,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "ServicePlan",
+   "relationship": "FOR_MACHINE",
+   "target": "Machine",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 60,
+   "aura_count": 60,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "ServicePlan",
+   "relationship": "REQUIRES_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 71,
+   "aura_count": 71,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "ServiceJob",
+   "relationship": "FOR_MACHINE",
+   "target": "Machine",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "ServiceJob",
+   "relationship": "REQUIRES_PART",
+   "target": "Part",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "ServiceJob",
+   "relationship": "PERFORMED_BY",
+   "target": "Dealer",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "HAS_COMPLIANCE",
+   "target": "ComplianceRequirement",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "HAS_RISK",
+   "target": "SourceRisk",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "ALTERNATIVE_TO",
+   "target": "Part",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Part",
+   "relationship": "SUPERSEDES / SUPERSEDED_BY",
+   "target": "Part",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Machine",
+   "relationship": "Machine -> Configuration",
+   "target": "Configuration",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Machine",
+   "relationship": "Machine -> Serial Range (inverse of VARIANT_OF)",
+   "target": "MachineVariant",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 30,
+   "aura_count": 30,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Customer",
+   "relationship": "Customer -> Request",
+   "target": "Request",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Request",
+   "relationship": "Request -> Part",
+   "target": "Part",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Installation",
+   "relationship": "Installation -> Machine",
+   "target": "Machine",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "REQUIRED",
+   "source": "Installation",
+   "relationship": "Installation -> Part",
+   "target": "Part",
+   "status": "SCHEMA_ONLY_NO_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Machine",
+   "relationship": "OF_TYPE",
+   "target": "MachineType",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 15,
+   "aura_count": 15,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Machine",
+   "relationship": "MEMBER_OF_FAMILY",
+   "target": "MachineFamily",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 15,
+   "aura_count": 15,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Machine",
+   "relationship": "BRANDED_AS",
+   "target": "BusinessUnit",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 15,
+   "aura_count": 15,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "MachineFamily",
+   "relationship": "PRODUCT_FAMILY_OF",
+   "target": "BusinessUnit",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Plant",
+   "relationship": "OWNED_BY",
+   "target": "BusinessUnit",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "BusinessUnit",
+   "relationship": "HOME_PLANT",
+   "target": "Plant",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Plant",
+   "relationship": "LOCATED_IN",
+   "target": "Location",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Location",
+   "relationship": "IN_COUNTRY",
+   "target": "Location",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Category",
+   "relationship": "SUBCATEGORY_OF",
+   "target": "Category",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 91,
+   "aura_count": 91,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Part",
+   "relationship": "ORIGINATES_AT",
+   "target": "Plant",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "LegacyReference",
+   "relationship": "ISSUED_BY_BUSINESS_UNIT",
+   "target": "BusinessUnit",
+   "status": "IMPLEMENTED_WITH_DATA",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Warehouse",
+   "relationship": "LOCATED_AT_PLANT",
+   "target": "Plant",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Warehouse (WH-004)",
+   "relationship": "LOCATED_AT_PLANT",
+   "target": "Plant",
+   "status": "BLOCKED_BY_MISSING_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Plant",
+   "relationship": "LOCATED_AT_ADDRESS",
+   "target": "Address",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Customer",
+   "relationship": "LOCATED_AT_ADDRESS",
+   "target": "Address",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 10,
+   "aura_count": 10,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Address",
+   "relationship": "IN_REGION",
+   "target": "Region",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 44,
+   "aura_count": 44,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Warehouse",
+   "relationship": "SHIPS_TO_COUNTRY",
+   "target": "Location (NL, DE)",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 8,
+   "aura_count": 8,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Warehouse",
+   "relationship": "SHIPS_TO_COUNTRY (Belgium)",
+   "target": "Location (BE)",
+   "status": "BLOCKED_BY_MISSING_DATA",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Supplier",
+   "relationship": "SUPPLIES_CATEGORY",
+   "target": "Category",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 25,
+   "aura_count": 25,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "SupplierBackorder",
+   "relationship": "PLACED_WITH",
+   "target": "Supplier",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 4,
+   "aura_count": 4,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "SupplierBackorder",
+   "relationship": "FOR_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 4,
+   "aura_count": 4,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Dealer",
+   "relationship": "SERVES_FAMILY",
+   "target": "MachineFamily",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 30,
+   "aura_count": 30,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "ComplianceRequirement",
+   "relationship": "COVERS_CATEGORY",
+   "target": "Category",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 10,
+   "aura_count": 10,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "PartCatalogProfile",
+   "relationship": "PROFILES_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Price",
+   "relationship": "PRICES_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Machine",
+   "relationship": "HAS_MACHINE_SPECIFICATION",
+   "target": "MachineSpecification",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 83,
+   "aura_count": 83,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "MachineVariant",
+   "relationship": "VARIANT_OF",
+   "target": "Machine",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 30,
+   "aura_count": 30,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "IdentificationRequirement",
+   "relationship": "FOR_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 6,
+   "aura_count": 6,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "IdentificationRequirement",
+   "relationship": "FOR_MACHINE",
+   "target": "Machine",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 6,
+   "aura_count": 6,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "IdentificationRequirement",
+   "relationship": "ADMITS_VARIANT",
+   "target": "MachineVariant",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 10,
+   "aura_count": 10,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Order",
+   "relationship": "DELIVERS_TO_ADDRESS",
+   "target": "Address",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 8,
+   "aura_count": 8,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Order",
+   "relationship": "HAS_STATUS_EVENT",
+   "target": "OrderStatusEvent",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 32,
+   "aura_count": 32,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "OrderStatusEvent",
+   "relationship": "RECORDS_STATUS",
+   "target": "OrderStatus",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 32,
+   "aura_count": 32,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "OrderLine",
+   "relationship": "PLANNED_FULFILMENT_FROM",
+   "target": "Warehouse",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 4,
+   "aura_count": 4,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Shipment",
+   "relationship": "SHIPS_LINE",
+   "target": "OrderLine",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 9,
+   "aura_count": 9,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Shipment",
+   "relationship": "DISPATCHED_FROM",
+   "target": "Warehouse",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 9,
+   "aura_count": 9,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Shipment",
+   "relationship": "DELIVERS_TO_CUSTOMER",
+   "target": "Customer",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 9,
+   "aura_count": 9,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "DeliveryEstimate",
+   "relationship": "FROM_WAREHOUSE",
+   "target": "Warehouse",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 100,
+   "aura_count": 100,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "DeliveryEstimate",
+   "relationship": "TO_CUSTOMER",
+   "target": "Customer",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 40,
+   "aura_count": 40,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "DeliveryEstimate",
+   "relationship": "TO_DEALER",
+   "target": "Dealer",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 60,
+   "aura_count": 60,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Cart",
+   "relationship": "OPENED_BY",
+   "target": "Customer",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 3,
+   "aura_count": 3,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Cart",
+   "relationship": "CONTAINS_LINE",
+   "target": "CartLine",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 6,
+   "aura_count": 6,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "CartLine",
+   "relationship": "REFERENCES_PART",
+   "target": "Part",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 6,
+   "aura_count": 6,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Part",
+   "relationship": "HAS_ALIAS",
+   "target": "SearchAlias",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 448,
+   "aura_count": 448,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Machine",
+   "relationship": "HAS_ALIAS",
+   "target": "SearchAlias",
+   "status": "IMPLEMENTED_SYNTHETIC",
+   "offline_count": 45,
+   "aura_count": 45,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "DeliveryEstimate",
+   "relationship": "DeliveryEstimate -> ShippingRate",
+   "target": "ShippingRate",
+   "status": "NOT_APPLICABLE",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "User / Role",
+   "relationship": "User -> Customer, User -> Role",
+   "target": "Customer / Role",
+   "status": "NOT_APPLICABLE",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Any place",
+   "relationship": "DISTANCE_TO (SYN_distances, 946 pairs)",
+   "target": "Any place",
+   "status": "NOT_APPLICABLE",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Supplier / Dealer",
+   "relationship": "Supplier or Dealer -> Plant / Machine / Customer by proximity or country",
+   "target": "Plant / Machine / Customer",
+   "status": "NOT_APPLICABLE",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  },
+  {
+   "group": "ADDITIONAL",
+   "source": "Part",
+   "relationship": "Part -> Part by shared machines or similar names",
+   "target": "Part",
+   "status": "NOT_APPLICABLE",
+   "offline_count": 0,
+   "aura_count": 0,
+   "match": true
+  }
+ ],
+ "traversals": [
+  {
+   "traversal": "Machine -> FITS -> Part",
+   "rows": 3,
+   "sample": {
+    "machine": "NV-4500",
+    "part": "NVM-1010-AT",
+    "status": "CONFIRMED"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> FITS -> Machine",
+   "rows": 2,
+   "sample": {
+    "part": "NVM-1010-HY",
+    "machine": "NV-3200",
+    "status": "CONFIRMED"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> IN_CATEGORY -> Category",
+   "rows": 1,
+   "sample": {
+    "part": "NVM-1010-HY",
+    "category": "Hydraulics",
+    "level": 1
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> IN_SUBCATEGORY -> Category",
+   "rows": 1,
+   "sample": {
+    "part": "NVM-1010-HY",
+    "subcategory": "Hydraulic hose",
+    "level": 2
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> HAS_SPECIFICATION -> PartSpecification",
+   "rows": 3,
+   "sample": {
+    "spec": "Spec Note",
+    "value": "3/4 in, 2-wire braid, 900mm",
+    "unit": null
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> HAS_LEGACY_REFERENCE -> LegacyReference",
+   "rows": 1,
+   "sample": {
+    "legacy": "AS-771",
+    "mapping": "CODE_ONLY"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> PART_OF -> Assembly",
+   "rows": 3,
+   "sample": {
+    "part": "NVM-1010-CB",
+    "assembly": "Seat belt assembly",
+    "qty": 2
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> SUPPLIED_BY -> Supplier",
+   "rows": 2,
+   "sample": {
+    "supplier": "Veldstra Hydraulics (demo)",
+    "primary": true,
+    "lead_days": 28
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Supplier -> SUPPLIES_CATEGORY -> Category",
+   "rows": 2,
+   "sample": {
+    "supplier": "Veldstra Hydraulics (demo)",
+    "category": "Hydraulics"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> STOCKED_BY -> Dealer",
+   "rows": 3,
+   "sample": {
+    "dealer": "Brabant Heavy Parts (demo)",
+    "available": 8
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> AVAILABLE_AT -> Warehouse",
+   "rows": 4,
+   "sample": {
+    "warehouse": "Bakker Parts Depot Coevorden (demo)",
+    "available": 9
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Warehouse -> SHIPS_TO_COUNTRY -> Country",
+   "rows": 2,
+   "sample": {
+    "warehouse": "Noordveld Central Warehouse Assen (demo)",
+    "country": "Germany"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "BusinessUnit -> HOME_PLANT -> Plant",
+   "rows": 3,
+   "sample": {
+    "business_unit": "Bakker",
+    "home_plant": "Coevorden (NL)"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "ComplianceRequirement -> COVERS_CATEGORY -> Category",
+   "rows": 4,
+   "sample": {
+    "requirement": "Machinery safety (demo)",
+    "category": "Attachments"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Order -> ORDERED_BY -> Customer",
+   "rows": 3,
+   "sample": {
+    "order_id": "ORD-0001",
+    "customer": "De Linde Verhuur (demo)"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Order -> CONTAINS_LINE -> OrderLine -> REFERENCES_PART -> Part",
+   "rows": 3,
+   "sample": {
+    "order_id": "ORD-0001",
+    "line": 1,
+    "part": "NVM-1080-CB"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Order -> HAS_SHIPMENT -> Shipment",
+   "rows": 3,
+   "sample": {
+    "order_id": "ORD-0001",
+    "shipment": "SHP-0001",
+    "status": "SHIPPED"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Shipment -> HAS_TRACKING_EVENT -> TrackingEvent",
+   "rows": 3,
+   "sample": {
+    "shipment": "SHP-0001",
+    "seq": 1,
+    "status": "PICKED"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "ServicePlan -> FOR_MACHINE -> Machine",
+   "rows": 4,
+   "sample": {
+    "plan": "Basic service (demo)",
+    "hours": 250,
+    "machine": "NV-4500"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "ServicePlan -> REQUIRES_PART -> Part",
+   "rows": 3,
+   "sample": {
+    "plan": "SVC-1000-001",
+    "part": "NVM-1020-HY",
+    "qty": 1
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> CO_ORDERED_WITH -> Part (undirected)",
+   "rows": 2,
+   "sample": {
+    "part": "NVM-1010-HY",
+    "co_ordered_with": "NVM-1040-HY",
+    "interchangeable": "UNKNOWN"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> SAME_NAME_GROUP_AS -> Part (undirected)",
+   "rows": 1,
+   "sample": {
+    "part": "NVM-1010-HY",
+    "same_name_group": "NVM-1020-HY",
+    "interchangeable": "UNKNOWN"
+   },
+   "status": "PASS"
+  },
+  {
+   "traversal": "Part -> RELATED_COMPONENT -> Part",
+   "rows": 2,
+   "sample": {
+    "part": "NVM-1020-FL",
+    "related_component": "NVM-1010-FL",
+    "interchangeable": "UNKNOWN"
+   },
+   "status": "PASS"
+  }
+ ],
+ "summary": {
+  "checks": 62,
+  "passed": 62,
+  "failed": 0,
+  "traversals": 23,
+  "coverage_rows": 100,
+  "coverage_matching": 100
+ }
+}

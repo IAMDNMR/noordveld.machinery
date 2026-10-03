@@ -1,0 +1,44 @@
+/*
+  Tokens for the shared site chrome (nav bar and footer).
+  The chrome is used on two documents: the Noordveld site and the Agentic E-Commerce page, which has its own
+  design tokens. Scoping these to .nvx-chrome keeps the nav and footer identical on both pages.
+  Keep the values in sync with src/styles/tokens.css.
+*/
+.nvx-chrome {
+  --paper: #f7f5f0;
+  --graphite: #2b2f32;
+  --charcoal: #14181a;
+  --line: rgb(20 24 26 / 0.14);
+  --on-dark: #f2f1ec;
+  --on-dark-2: #aeb4b3;
+  --line-dark: rgb(242 241 236 / 0.18);
+  --teal: #00bfa5;
+  --teal-ink: #00756a;
+  --teal-hover: #00a892;
+
+  --font-sans: "Inter Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --text-h2: clamp(2rem, 1.2rem + 3vw, 3.75rem);
+  --text-small: 0.9375rem;
+  --tracking-heading: -0.025em;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+  --container: 88rem;
+  --gutter: clamp(1.25rem, 0.5rem + 3.4vw, 4rem);
+  --nav-height: 4.5rem;
+  --radius-s: 2px;
+  --ease-weight: cubic-bezier(0.22, 0.8, 0.2, 1);
+  --dur-fast: 200ms;
+  --dur-base: 520ms;
+
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}

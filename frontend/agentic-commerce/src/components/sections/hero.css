@@ -1,0 +1,11 @@
+.hero { position: relative; min-height: 86svh; display: flex; align-items: center; padding-block: calc(var(--nav-height) + var(--space-8)) var(--space-8); background: radial-gradient(closest-side at 80% 30%, rgb(0 191 165 / 0.12), transparent) , var(--paper); }
+.hero__content { display: grid; gap: var(--space-6); justify-items: start; }
+.hero__title { max-width: 14ch; }
+.hero__title-accent { color: var(--accent-ink); display: block; margin-top: 0.06em; }
+.hero__lead { max-width: 34rem; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+
+@media (max-width: 719px) {
+  .hero { min-height: auto; padding-block: var(--space-8) var(--space-7); }
+  .hero__actions .button--primary { flex: 1 1 100%; }
+}

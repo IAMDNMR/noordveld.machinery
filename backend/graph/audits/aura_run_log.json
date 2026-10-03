@@ -1,0 +1,501 @@
+[
+ {
+  "at": "2026-10-03 (time not preserved)",
+  "command": "preflight (before import)",
+  "database": "fd5aaf87",
+  "database_id": "B18808B9F591F5CB358ED6A25F56780B4E45CA0F1018DC52ACBF6EA0313EDD69",
+  "server": "Neo4j Kernel 5.27-aura enterprise",
+  "nodes": 0,
+  "relationships": 0,
+  "labels": [],
+  "relationship_types": [],
+  "constraints": [],
+  "indexes": [
+   {
+    "name": "index_1b9dcc97",
+    "type": "LOOKUP",
+    "labelsOrTypes": null,
+    "properties": null
+   },
+   {
+    "name": "index_460996c0",
+    "type": "LOOKUP",
+    "labelsOrTypes": null,
+    "properties": null
+   }
+  ],
+  "empty": true,
+  "reconstructed_from_console_output": true,
+  "note": "Reconstructed: the original log entry was deleted when the package was rebuilt (graph_build.py cleared graph_audit/) to fix two validation queries. Figures are copied exactly from the console output printed during the run; properties_set was not shown. graph_build.py now preserves aura_*.json."
+ },
+ {
+  "at": "2026-10-03 (time not preserved)",
+  "command": "import",
+  "run": "first import",
+  "files": [
+   {
+    "file": "00_constraints.cypher",
+    "statements": 99,
+    "ok": 99,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 99,
+    "properties_set": null
+   },
+   {
+    "file": "01_reference_nodes.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 35,
+    "relationships_created": 3,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "02_machines.cypher",
+    "statements": 8,
+    "ok": 8,
+    "nodes_created": 128,
+    "relationships_created": 158,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "03_parts.cypher",
+    "statements": 18,
+    "ok": 18,
+    "nodes_created": 1072,
+    "relationships_created": 1072,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "04_categories.cypher",
+    "statements": 4,
+    "ok": 4,
+    "nodes_created": 101,
+    "relationships_created": 291,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "05_plants.cypher",
+    "statements": 5,
+    "ok": 5,
+    "nodes_created": 3,
+    "relationships_created": 121,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "06_locations.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 63,
+    "relationships_created": 53,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "07_fitment.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 6,
+    "relationships_created": 241,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "08_assemblies.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 15,
+    "relationships_created": 50,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "09_suppliers.cypher",
+    "statements": 8,
+    "ok": 8,
+    "nodes_created": 16,
+    "relationships_created": 202,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "10_dealers.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 15,
+    "relationships_created": 360,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "11_inventory.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 4,
+    "relationships_created": 415,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "12_pricing.cypher",
+    "statements": 2,
+    "ok": 2,
+    "nodes_created": 100,
+    "relationships_created": 100,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "13_customers.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 19,
+    "relationships_created": 25,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "15_orders.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 40,
+    "relationships_created": 80,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "16_order_lines.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 14,
+    "relationships_created": 28,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "17_allocations.cypher",
+    "statements": 2,
+    "ok": 2,
+    "nodes_created": 0,
+    "relationships_created": 14,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "18_fulfilment.cypher",
+    "statements": 4,
+    "ok": 4,
+    "nodes_created": 100,
+    "relationships_created": 200,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "19_shipments.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 10,
+    "relationships_created": 45,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "20_tracking_events.cypher",
+    "statements": 2,
+    "ok": 2,
+    "nodes_created": 27,
+    "relationships_created": 27,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "21_service.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 60,
+    "relationships_created": 131,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "22_part_relationships.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 0,
+    "relationships_created": 86,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "23_compliance.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 8,
+    "relationships_created": 110,
+    "constraints_added": 0,
+    "properties_set": null
+   },
+   {
+    "file": "25_provenance.cypher",
+    "statements": 1,
+    "ok": 1,
+    "nodes_created": 4,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": null
+   }
+  ],
+  "nodes_created": 1840,
+  "relationships_created": 3812,
+  "statements": 220,
+  "ok": 220,
+  "failed": 0,
+  "constraints_added": 99,
+  "error": null,
+  "final_nodes": 1840,
+  "final_relationships": 3812,
+  "reconstructed_from_console_output": true,
+  "note": "Reconstructed: the original log entry was deleted when the package was rebuilt (graph_build.py cleared graph_audit/) to fix two validation queries. Figures are copied exactly from the console output printed during the run; properties_set was not shown. graph_build.py now preserves aura_*.json."
+ },
+ {
+  "at": "2026-10-03T08:16:36",
+  "command": "rerun",
+  "run": "second run (idempotency)",
+  "files": [
+   {
+    "file": "00_constraints.cypher",
+    "statements": 99,
+    "ok": 99,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 0
+   },
+   {
+    "file": "01_reference_nodes.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 543
+   },
+   {
+    "file": "02_machines.cypher",
+    "statements": 8,
+    "ok": 8,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 3635
+   },
+   {
+    "file": "03_parts.cypher",
+    "statements": 18,
+    "ok": 18,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 30283
+   },
+   {
+    "file": "04_categories.cypher",
+    "statements": 4,
+    "ok": 4,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 5098
+   },
+   {
+    "file": "05_plants.cypher",
+    "statements": 5,
+    "ok": 5,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 1500
+   },
+   {
+    "file": "06_locations.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 1724
+   },
+   {
+    "file": "07_fitment.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 3843
+   },
+   {
+    "file": "08_assemblies.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 815
+   },
+   {
+    "file": "09_suppliers.cypher",
+    "statements": 8,
+    "ok": 8,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 3448
+   },
+   {
+    "file": "10_dealers.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 6420
+   },
+   {
+    "file": "11_inventory.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 6629
+   },
+   {
+    "file": "12_pricing.cypher",
+    "statements": 2,
+    "ok": 2,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 2800
+   },
+   {
+    "file": "13_customers.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 555
+   },
+   {
+    "file": "15_orders.cypher",
+    "statements": 6,
+    "ok": 6,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 1496
+   },
+   {
+    "file": "16_order_lines.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 546
+   },
+   {
+    "file": "17_allocations.cypher",
+    "statements": 2,
+    "ok": 2,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 168
+   },
+   {
+    "file": "18_fulfilment.cypher",
+    "statements": 4,
+    "ok": 4,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 4000
+   },
+   {
+    "file": "19_shipments.cypher",
+    "statements": 7,
+    "ok": 7,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 643
+   },
+   {
+    "file": "20_tracking_events.cypher",
+    "statements": 2,
+    "ok": 2,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 729
+   },
+   {
+    "file": "21_service.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 2543
+   },
+   {
+    "file": "22_part_relationships.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 1304
+   },
+   {
+    "file": "23_compliance.cypher",
+    "statements": 3,
+    "ok": 3,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 1346
+   },
+   {
+    "file": "25_provenance.cypher",
+    "statements": 1,
+    "ok": 1,
+    "nodes_created": 0,
+    "relationships_created": 0,
+    "constraints_added": 0,
+    "properties_set": 55
+   }
+  ],
+  "nodes_created": 0,
+  "relationships_created": 0,
+  "statements": 220,
+  "ok": 220,
+  "failed": 0,
+  "constraints_added": 0,
+  "error": null,
+  "before_nodes": 1840,
+  "before_relationships": 3812,
+  "final_nodes": 1840,
+  "final_relationships": 3812,
+  "node_delta": 0,
+  "relationship_delta": 0
+ }
+]

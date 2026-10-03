@@ -1,0 +1,20 @@
+.comparison { background: var(--paper); }
+.comparison__title { max-width: 16ch; margin-bottom: var(--space-8); }
+.comparison__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-6); }
+.comparison__rule { display: block; height: 2px; background: var(--line-strong); margin-bottom: var(--space-5); }
+.comparison__item:last-child .comparison__rule { background: var(--accent); height: 3px; }
+.comparison__name { font-size: var(--text-h3); line-height: 1.15; letter-spacing: var(--tracking-heading); font-weight: 500; margin-bottom: var(--space-4); }
+.comparison__line { color: var(--ink-2); font-size: var(--text-lead); line-height: 1.4; text-wrap: pretty; }
+.comparison__item:last-child .comparison__line { color: var(--ink); }
+
+.closing { padding-block: calc(var(--space-9) + var(--space-6)) var(--space-9); }
+.closing__inner { display: grid; gap: var(--space-6); justify-items: start; }
+.closing__title { max-width: 14ch; }
+.closing__lead { max-width: 36em; }
+
+@media (max-width: 1023px) {
+  .comparison__list { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-7); }
+}
+@media (max-width: 719px) {
+  .comparison__list { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,6 @@
+# Backend dependencies (Python 3.12). Install: python -m pip install -r requirements.txt
+fastapi>=0.115,<1
+uvicorn>=0.34,<1
+neo4j>=6,<7          # AuraDB driver (Bolt over TLS)
+certifi              # trusted root certificates for the Aura connection
+openpyxl>=3.1,<4     # reads the catalogue / processed workbooks in scripts/

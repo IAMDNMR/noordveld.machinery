@@ -1,0 +1,38 @@
+{
+  "name": "noordveld-machinery",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5180",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 5180",
+    "typecheck": "tsc -b",
+    "lint": "oxlint src agentic-commerce/src agentic-commerce/remotion",
+    "data": "python scripts/build-data.py",
+    "film:preview": "remotion studio agentic-commerce/remotion/index.ts",
+    "film:render": "remotion render agentic-commerce/remotion/index.ts EvolutionFilm --crf=18 agentic-commerce/film-masters/16x9.mp4",
+    "film:render:square": "remotion render agentic-commerce/remotion/index.ts EvolutionFilmSquare --crf=18 agentic-commerce/film-masters/1x1.mp4",
+    "film:render:vertical": "remotion render agentic-commerce/remotion/index.ts EvolutionFilmVertical --crf=18 agentic-commerce/film-masters/9x16.mp4",
+    "film:poster": "remotion still agentic-commerce/remotion/index.ts EvolutionFilm --frame=560 public/evolution-film-16x9.jpg && remotion still agentic-commerce/remotion/index.ts EvolutionFilmSquare --frame=560 public/evolution-film-1x1.jpg",
+    "film:encode": "node scripts/encode-film.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@remotion/cli": "^4.0.532",
+    "lucide-react": "^1.49.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
+    "remotion": "^4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.86.0",
+    "playwright-core": "^1.63.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  }
+}

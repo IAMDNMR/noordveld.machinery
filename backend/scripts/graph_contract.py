@@ -1,0 +1,112 @@
+"""The relationship and node contracts for the Parts Intelligence graph: what each label and relationship means, where it
+may come from, and what may never be inferred. graph_build.py validates the built graph against this file."""
+from __future__ import annotations
+
+# (type, from, to): meaning, cardinality (from-side : to-side), allowed source sheets, synthetic allowed, required props
+REL = {
+    ("FITS", "Part", "Machine"): ("The catalogue states the part fits this machine model. Interchangeability is NOT implied.", "N:M", ["machine_part_fitment"], False, ["fitment_status", "fitment_type", "source_confidence"]),
+    ("MANUFACTURED_AT", "Machine", "Plant"): ("The machine model is built at this plant (catalogue Plant column).", "N:1 (exactly one per machine)", ["machines"], False, []),
+    ("OF_TYPE", "Machine", "MachineType"): ("The machine model is of this machine type (catalogue Machine Type column).", "N:1 (exactly one per machine)", ["machines"], False, []),
+    ("MEMBER_OF_FAMILY", "Machine", "MachineFamily"): ("Rule-derived: the model-code prefix places the machine in this family. Needs business confirmation.", "N:1", ["machines"], False, []),
+    ("BRANDED_AS", "Machine", "BusinessUnit"): ("The machine is sold under this brand / business unit (catalogue Brand / Origin column).", "N:1", ["machines"], False, []),
+    ("PRODUCT_FAMILY_OF", "MachineFamily", "BusinessUnit"): ("The derived family belongs to this business unit's range.", "N:1", ["machine_families"], False, []),
+    ("OWNED_BY", "Plant", "BusinessUnit"): ("The plant is owned by this business unit (project brief).", "N:1", ["plants"], False, []),
+    ("LOCATED_IN", "Plant", "Location"): ("The plant is in this catalogue location (city level).", "N:1", ["plants"], False, []),
+    ("IN_COUNTRY", "Location", "Location"): ("A city-level location lies in this country-level location.", "N:1", ["locations"], False, []),
+    ("SUBCATEGORY_OF", "Category", "Category"): ("A rule-derived sub-category (name head) sits under this catalogue category.", "N:1", ["categories"], False, []),
+    ("IN_CATEGORY", "Part", "Category"): ("The part's catalogue category (level 1, source-stated).", "N:1 (exactly one per part)", ["parts"], False, []),
+    ("IN_SUBCATEGORY", "Part", "Category"): ("The part's rule-derived sub-category (level 2, name head). Not a taxonomy fact until approved.", "N:1 (exactly one per part)", ["parts"], False, []),
+    ("ORIGINATES_AT", "Part", "Plant"): ("The catalogue's Plant of Origin for the part.", "N:1 (exactly one per part)", ["parts"], False, []),
+    ("HAS_LEGACY_REFERENCE", "Part", "LegacyReference"): ("The part's previous / legacy part-number record (may be unresolved free text).", "1:1", ["legacy_part_mapping"], False, []),
+    ("ISSUED_BY_BUSINESS_UNIT", "LegacyReference", "BusinessUnit"): ("The business whose numbering the legacy code belongs to (mostly rule-derived from prefix and plant).", "N:1", ["legacy_part_mapping"], False, []),
+    ("HAS_SPECIFICATION", "Part", "PartSpecification"): ("A specification row parsed or copied from the catalogue Spec Note.", "1:N", ["part_specifications"], False, []),
+    ("SAME_NAME_GROUP_AS", "Part", "Part"): ("Both parts share a name head in the same category. A naming group only: NOT an alternative, NOT interchangeable. Symmetric, stored once (lower id to higher id).", "N:M symmetric", ["part_relationships"], False, ["interchangeability_status"]),
+    ("RELATED_COMPONENT", "Part", "Part"): ("The catalogue mentions the other part as a related component. NOT an alternative, NOT interchangeable.", "N:M", ["part_relationships"], False, ["interchangeability_status"]),
+    ("CO_ORDERED_WITH", "Part", "Part"): ("Synthetic demo co-purchase signal. NOT engineering advice, NOT interchangeable. Symmetric, stored once (lower id to higher id).", "N:M symmetric", ["SYN_part_relationships"], True, ["interchangeability_status"]),
+    ("SUPPLIED_BY", "Part", "Supplier"): ("A synthetic supplier link for the part (cost, lead time, MOQ, primary flag).", "N:M", ["SYN_part_supplier"], True, ["is_primary"]),
+    ("PLACED_WITH", "SupplierBackorder", "Supplier"): ("The synthetic backorder is placed with this supplier.", "N:1", ["SYN_supplier_backorders"], True, []),
+    ("FOR_PART", "SupplierBackorder", "Part"): ("The synthetic backorder is for this part.", "N:1", ["SYN_supplier_backorders"], True, []),
+    ("FOR_PART", "IdentificationRequirement", "Part"): ("The synthetic identification requirement applies to this part.", "N:1", ["SYN_identification_requirements"], True, []),
+    ("FOR_MACHINE", "IdentificationRequirement", "Machine"): ("The identification requirement is for this machine model.", "N:1", ["SYN_identification_requirements"], True, []),
+    ("ADMITS_VARIANT", "IdentificationRequirement", "MachineVariant"): ("Synthetic: the variant/serial range the requirement lists as acceptable. Does NOT add catalogue fitment.", "N:M", ["SYN_identification_requirements"], True, []),
+    ("FOR_MACHINE", "ServicePlan", "Machine"): ("The synthetic service plan (interval template) is for this machine model. A plan is NOT a service job.", "N:1", ["SYN_services"], True, []),
+    ("REQUIRES_PART", "ServicePlan", "Part"): ("The synthetic service plan uses this part (quantity).", "N:M", ["SYN_service_parts"], True, ["quantity"]),
+    ("LOCATED_AT_PLANT", "Warehouse", "Plant"): ("The synthetic warehouse is attached to this plant.", "N:1", ["SYN_warehouses"], True, []),
+    ("LOCATED_AT_ADDRESS", "Warehouse", "Address"): ("The synthetic placeholder address of the warehouse.", "1:1", ["SYN_warehouses"], True, []),
+    ("LOCATED_AT_ADDRESS", "Supplier", "Address"): ("The synthetic placeholder address of the supplier.", "1:1", ["SYN_suppliers"], True, []),
+    ("LOCATED_AT_ADDRESS", "Dealer", "Address"): ("The synthetic placeholder address of the dealer.", "1:1", ["SYN_dealers"], True, []),
+    ("LOCATED_AT_ADDRESS", "Customer", "Address"): ("The synthetic placeholder address of the customer.", "1:1", ["SYN_customers"], True, []),
+    ("LOCATED_AT_ADDRESS", "Plant", "Address"): ("The synthetic placeholder address of the (fictional) plant.", "1:1", ["SYN_addresses"], True, []),
+    ("IN_REGION", "Address", "Region"): ("The address lies in this synthetic region (VAT rate reference).", "N:1", ["SYN_addresses"], True, []),
+    ("AVAILABLE_AT", "Part", "Warehouse"): ("Synthetic warehouse stock of the part (on_hand, reserved, available, stock_status). 0 here is an explicit warehouse record.", "N:M", ["SYN_inventory"], True, ["on_hand", "reserved", "available", "stock_status"]),
+    ("STOCKED_BY", "Part", "Dealer"): ("Synthetic: the dealer is listed as stocking the part (SYN_part_dealer), with its quantities (SYN_inventory).", "N:M", ["SYN_part_dealer"], True, ["stocking_status", "inventory_id", "available"]),
+    ("SERVES_FAMILY", "Dealer", "MachineFamily"): ("Synthetic: the dealer serves this machine family. Does NOT mean the dealer supports every model or stocks every part.", "N:M", ["SYN_dealers"], True, []),
+    ("PRICES_PART", "Price", "Part"): ("The synthetic demo list price of the part (EUR, ex VAT).", "1:1", ["SYN_pricing"], True, []),
+    ("PROFILES_PART", "PartCatalogProfile", "Part"): ("The synthetic store profile of the part (status, orderable, weight, warranty...). Kept apart so source facts are never overwritten.", "1:1", ["SYN_part_catalog"], True, []),
+    ("HAS_COMPLIANCE", "Part", "ComplianceRequirement"): ("A synthetic compliance record applies to the part.", "N:M", ["SYN_part_compliance"], True, []),
+    ("IDENTIFIED_BY_PART", "Assembly", "Part"): ("The synthetic assembly (demo BOM) is sold as this part number.", "1:1", ["SYN_assembly_master"], True, []),
+    ("PART_OF", "Part", "Assembly"): ("Synthetic demo BOM: the part is a component of the assembly (quantity).", "N:M", ["SYN_assembly_components"], True, ["quantity"]),
+    ("HAS_MACHINE_SPECIFICATION", "Machine", "MachineSpecification"): ("A synthetic machine specification. Not engineering data.", "1:N", ["SYN_machine_specifications"], True, []),
+    ("VARIANT_OF", "MachineVariant", "Machine"): ("A synthetic variant / serial range of the machine model.", "N:1", ["SYN_machine_variants"], True, []),
+    ("OPENED_BY", "Cart", "Customer"): ("The synthetic cart belongs to this customer. A cart is NOT a request.", "N:1", ["SYN_carts"], True, []),
+    ("CONTAINS_LINE", "Cart", "CartLine"): ("The cart contains this line.", "1:N", ["SYN_cart_items"], True, []),
+    ("CONTAINS_LINE", "Order", "OrderLine"): ("The order contains this line.", "1:N", ["SYN_order_items"], True, []),
+    ("REFERENCES_PART", "CartLine", "Part"): ("The cart line is for this part.", "N:1 (exactly one per line)", ["SYN_cart_items"], True, []),
+    ("REFERENCES_PART", "OrderLine", "Part"): ("The order line is for this part.", "N:1 (exactly one per line)", ["SYN_order_items"], True, []),
+    ("ORDERED_BY", "Order", "Customer"): ("The synthetic order was placed by this customer.", "N:1 (exactly one per order)", ["SYN_orders"], True, []),
+    ("DELIVERS_TO_ADDRESS", "Order", "Address"): ("The order's delivery address.", "N:1", ["SYN_orders"], True, []),
+    ("ALLOCATED_FROM", "OrderLine", "Warehouse"): ("Stock for the line is reserved at, or was shipped from, this warehouse (allocation_status RESERVED or SHIPPED).", "N:1", ["SYN_order_items"], True, ["allocation_status"]),
+    ("PLANNED_FULFILMENT_FROM", "OrderLine", "Warehouse"): ("The line is NOT yet allocated; this is only its planned fulfilment location.", "N:1", ["SYN_order_items"], True, ["allocation_status"]),
+    ("HAS_STATUS_EVENT", "Order", "OrderStatusEvent"): ("A step in the order's synthetic status history.", "1:N", ["SYN_order_status_history"], True, []),
+    ("RECORDS_STATUS", "OrderStatusEvent", "OrderStatus"): ("The status the history step records (workflow vocabulary).", "N:1", ["SYN_order_status_history"], True, []),
+    ("HAS_SHIPMENT", "Order", "Shipment"): ("The order has this synthetic shipment.", "1:N", ["SYN_shipments"], True, []),
+    ("SHIPS_LINE", "Shipment", "OrderLine"): ("The shipment carries this order line.", "N:1", ["SYN_shipments"], True, []),
+    ("DISPATCHED_FROM", "Shipment", "Warehouse"): ("The shipment left this warehouse.", "N:1", ["SYN_shipments"], True, []),
+    ("DELIVERS_TO_CUSTOMER", "Shipment", "Customer"): ("The shipment is addressed to this customer.", "N:1", ["SYN_shipments"], True, []),
+    ("CARRIED_BY", "Shipment", "Carrier"): ("The (fictional) carrier of the shipment.", "N:1", ["SYN_shipments"], True, []),
+    ("HAS_TRACKING_EVENT", "Shipment", "TrackingEvent"): ("A synthetic tracking event of the shipment.", "1:N", ["SYN_shipment_events"], True, []),
+    ("FROM_WAREHOUSE", "DeliveryEstimate", "Warehouse"): ("The synthetic delivery estimate starts at this warehouse.", "N:1", ["SYN_delivery_options"], True, []),
+    ("TO_CUSTOMER", "DeliveryEstimate", "Customer"): ("The estimate's destination is this customer.", "N:1", ["SYN_delivery_options"], True, []),
+    ("TO_DEALER", "DeliveryEstimate", "Dealer"): ("The estimate's destination is this dealer.", "N:1", ["SYN_delivery_options"], True, []),
+    ("HOME_PLANT", "BusinessUnit", "Plant"): ("The plant the project brief names as the business unit's home plant.", "1:1", ["business_units"], False, []),
+    ("SUPPLIES_CATEGORY", "Supplier", "Category"): ("Synthetic: the supplier's declared category scope. NOT a supply relationship for any specific part (SUPPLIED_BY is the only part-level link).", "N:M", ["SYN_suppliers"], True, []),
+    ("COVERS_CATEGORY", "ComplianceRequirement", "Category"): ("Synthetic: the compliance requirement's declared category scope. NOT a part-level statement (HAS_COMPLIANCE is).", "N:M", ["SYN_compliance"], True, []),
+    ("SHIPS_TO_COUNTRY", "Warehouse", "Location"): ("Synthetic: the warehouse ships to this country. Not a delivery estimate (DeliveryEstimate is).", "N:M", ["SYN_warehouses"], True, []),
+    ("HAS_ALIAS", "Part", "SearchAlias"): ("A synthetic search alias / synonym of the part.", "1:N", ["SYN_search_aliases"], True, []),
+    ("HAS_ALIAS", "Machine", "SearchAlias"): ("A synthetic search alias of the machine model.", "1:N", ["SYN_search_aliases"], True, []),
+}
+
+#: relationships the schema supports but the data does not contain. They must NOT be created.
+SCHEMA_ONLY = {
+    "ALTERNATIVE_TO": ("Part", "Part", "An authoritative statement that one part can replace another. No such evidence exists."),
+    "SUPERSEDES": ("Part", "Part", "A newer part number replaces an older one. No supersession data exists (legacy references are previous numbers of the SAME part)."),
+    "REPLACEMENT_FOR": ("Part", "Part", "No evidence exists."),
+    "INTERCHANGEABLE_WITH": ("Part", "Part", "Never asserted by any source."),
+    "FOR_MACHINE (ServiceJob)": ("ServiceJob", "Machine", "No service jobs exist; only synthetic service plans."),
+    "REQUIRES_PART (ServiceJob)": ("ServiceJob", "Part", "No service jobs exist."),
+    "INSTALLED_ON": ("Installation", "MachineUnit", "No installations or serial-numbered machine units exist."),
+    "REQUESTED_BY": ("Request", "Customer", "No customer requests exist (carts are not requests)."),
+    "HAS_RISK": ("Part", "SourceRisk", "No risk data exists."),
+}
+
+FORBIDDEN_TYPES = {"RELATED_TO", "CONNECTED_TO", "ASSOCIATED_WITH", "LINKED_TO", "HAS", "BELONGS_TO", "ALTERNATIVE_TO", "SUPERSEDES", "SUPERSEDED_BY", "REPLACEMENT_FOR", "INTERCHANGEABLE_WITH", "INTERCHANGEABLE"}
+
+#: exactly-one cardinalities checked on the from-side
+EXACTLY_ONE = [("Part", "IN_CATEGORY"), ("Part", "IN_SUBCATEGORY"), ("Part", "ORIGINATES_AT"), ("Part", "HAS_LEGACY_REFERENCE"), ("Machine", "MANUFACTURED_AT"), ("Machine", "OF_TYPE"), ("Machine", "MEMBER_OF_FAMILY"), ("Order", "ORDERED_BY"), ("OrderLine", "REFERENCES_PART"), ("CartLine", "REFERENCES_PART"), ("Shipment", "SHIPS_LINE"), ("Shipment", "DISPATCHED_FROM"), ("Shipment", "CARRIED_BY"), ("Price", "PRICES_PART"), ("PartCatalogProfile", "PROFILES_PART"), ("ServicePlan", "FOR_MACHINE"), ("MachineVariant", "VARIANT_OF")]
+#: at-most-one on the to-side (each target has a single owner)
+ONE_OWNER = [("OrderLine", "CONTAINS_LINE"), ("CartLine", "CONTAINS_LINE"), ("TrackingEvent", "HAS_TRACKING_EVENT"), ("Shipment", "HAS_SHIPMENT"), ("PartSpecification", "HAS_SPECIFICATION"), ("LegacyReference", "HAS_LEGACY_REFERENCE"), ("MachineSpecification", "HAS_MACHINE_SPECIFICATION"), ("OrderStatusEvent", "HAS_STATUS_EVENT"), ("SearchAlias", "HAS_ALIAS")]
+
+NODE_DOC = {
+    "Part": ("A catalogue part (unified part number).", "SOURCE_DERIVED", ["part_id", "part_number", "name", "category"]),
+    "Machine": ("A machine MODEL from the catalogue (one row per model). Not a serial-numbered unit; units do not exist in the data.", "SOURCE_DERIVED", ["machine_id", "model_code", "name"]),
+    "MachineType": ("Catalogue machine type.", "SOURCE_DERIVED", ["machine_type_id", "name"]),
+    "MachineFamily": ("Family derived from the model-code prefix. Needs business confirmation.", "DERIVED", ["family_id", "name"]),
+    "BusinessUnit": ("Noordveld and its legacy businesses.", "SOURCE_DERIVED", ["business_unit_id", "name"]),
+    "Plant": ("A plant declared fictional by the project brief.", "USER_PROVIDED", ["plant_id", "name"]),
+    "Location": ("Catalogue country / city locations.", "SOURCE_DERIVED", ["location_id", "name", "location_type"]),
+    "Category": ("Level 1: catalogue category (source). Level 2: name-head sub-category (derived).", "SOURCE_DERIVED / DERIVED", ["category_id", "name", "level"]),
+    "LegacyReference": ("A previous part number of the same part, or an unresolved free-text note.", "SOURCE_DERIVED", ["legacy_reference_id", "mapping_type"]),
+    "PartSpecification": ("Verbatim spec note or a value parsed from it.", "SOURCE_DERIVED / DERIVED", ["specification_id", "group", "name"]),
+    "OrderStatus": ("Workflow status vocabulary from the brief.", "USER_PROVIDED", ["order_status_code", "label"]),
+    "DataSource": ("A provenance source the workbook declares (plus the project brief it cites).", "SYNTHETIC_DEMO / USER_PROVIDED", ["source_id", "name"]),
+}

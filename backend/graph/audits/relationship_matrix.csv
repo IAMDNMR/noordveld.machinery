@@ -1,0 +1,80 @@
+relationship,from_label,direction,to_label,cardinality,meaning,allowed_sources,synthetic_allowed,inference_allowed,required_properties,present_in_data
+FITS,Part,(Part)-[:FITS]->(Machine),Machine,N:M,The catalogue states the part fits this machine model. Interchangeability is NOT implied.,machine_part_fitment,NO,NO,fitment_status|fitment_type|source_confidence,YES
+MANUFACTURED_AT,Machine,(Machine)-[:MANUFACTURED_AT]->(Plant),Plant,N:1 (exactly one per machine),The machine model is built at this plant (catalogue Plant column).,machines,NO,NO,,YES
+OF_TYPE,Machine,(Machine)-[:OF_TYPE]->(MachineType),MachineType,N:1 (exactly one per machine),The machine model is of this machine type (catalogue Machine Type column).,machines,NO,NO,,YES
+MEMBER_OF_FAMILY,Machine,(Machine)-[:MEMBER_OF_FAMILY]->(MachineFamily),MachineFamily,N:1,Rule-derived: the model-code prefix places the machine in this family. Needs business confirmation.,machines,NO,NO,,YES
+BRANDED_AS,Machine,(Machine)-[:BRANDED_AS]->(BusinessUnit),BusinessUnit,N:1,The machine is sold under this brand / business unit (catalogue Brand / Origin column).,machines,NO,NO,,YES
+PRODUCT_FAMILY_OF,MachineFamily,(MachineFamily)-[:PRODUCT_FAMILY_OF]->(BusinessUnit),BusinessUnit,N:1,The derived family belongs to this business unit's range.,machine_families,NO,NO,,YES
+OWNED_BY,Plant,(Plant)-[:OWNED_BY]->(BusinessUnit),BusinessUnit,N:1,The plant is owned by this business unit (project brief).,plants,NO,NO,,YES
+LOCATED_IN,Plant,(Plant)-[:LOCATED_IN]->(Location),Location,N:1,The plant is in this catalogue location (city level).,plants,NO,NO,,YES
+IN_COUNTRY,Location,(Location)-[:IN_COUNTRY]->(Location),Location,N:1,A city-level location lies in this country-level location.,locations,NO,NO,,YES
+SUBCATEGORY_OF,Category,(Category)-[:SUBCATEGORY_OF]->(Category),Category,N:1,A rule-derived sub-category (name head) sits under this catalogue category.,categories,NO,NO,,YES
+IN_CATEGORY,Part,(Part)-[:IN_CATEGORY]->(Category),Category,N:1 (exactly one per part),"The part's catalogue category (level 1, source-stated).",parts,NO,NO,,YES
+IN_SUBCATEGORY,Part,(Part)-[:IN_SUBCATEGORY]->(Category),Category,N:1 (exactly one per part),"The part's rule-derived sub-category (level 2, name head). Not a taxonomy fact until approved.",parts,NO,NO,,YES
+ORIGINATES_AT,Part,(Part)-[:ORIGINATES_AT]->(Plant),Plant,N:1 (exactly one per part),The catalogue's Plant of Origin for the part.,parts,NO,NO,,YES
+HAS_LEGACY_REFERENCE,Part,(Part)-[:HAS_LEGACY_REFERENCE]->(LegacyReference),LegacyReference,1:1,The part's previous / legacy part-number record (may be unresolved free text).,legacy_part_mapping,NO,NO,,YES
+ISSUED_BY_BUSINESS_UNIT,LegacyReference,(LegacyReference)-[:ISSUED_BY_BUSINESS_UNIT]->(BusinessUnit),BusinessUnit,N:1,The business whose numbering the legacy code belongs to (mostly rule-derived from prefix and plant).,legacy_part_mapping,NO,NO,,YES
+HAS_SPECIFICATION,Part,(Part)-[:HAS_SPECIFICATION]->(PartSpecification),PartSpecification,1:N,A specification row parsed or copied from the catalogue Spec Note.,part_specifications,NO,NO,,YES
+SAME_NAME_GROUP_AS,Part,(Part)-[:SAME_NAME_GROUP_AS]->(Part),Part,N:M symmetric,"Both parts share a name head in the same category. A naming group only: NOT an alternative, NOT interchangeable. Symmetric, stored once (lower id to higher id).",part_relationships,NO,NO,interchangeability_status,YES
+RELATED_COMPONENT,Part,(Part)-[:RELATED_COMPONENT]->(Part),Part,N:M,"The catalogue mentions the other part as a related component. NOT an alternative, NOT interchangeable.",part_relationships,NO,NO,interchangeability_status,YES
+CO_ORDERED_WITH,Part,(Part)-[:CO_ORDERED_WITH]->(Part),Part,N:M symmetric,"Synthetic demo co-purchase signal. NOT engineering advice, NOT interchangeable. Symmetric, stored once (lower id to higher id).",SYN_part_relationships,YES (marked SYNTHETIC_DEMO),NO,interchangeability_status,YES
+SUPPLIED_BY,Part,(Part)-[:SUPPLIED_BY]->(Supplier),Supplier,N:M,"A synthetic supplier link for the part (cost, lead time, MOQ, primary flag).",SYN_part_supplier,YES (marked SYNTHETIC_DEMO),NO,is_primary,YES
+PLACED_WITH,SupplierBackorder,(SupplierBackorder)-[:PLACED_WITH]->(Supplier),Supplier,N:1,The synthetic backorder is placed with this supplier.,SYN_supplier_backorders,YES (marked SYNTHETIC_DEMO),NO,,YES
+FOR_PART,SupplierBackorder,(SupplierBackorder)-[:FOR_PART]->(Part),Part,N:1,The synthetic backorder is for this part.,SYN_supplier_backorders,YES (marked SYNTHETIC_DEMO),NO,,YES
+FOR_PART,IdentificationRequirement,(IdentificationRequirement)-[:FOR_PART]->(Part),Part,N:1,The synthetic identification requirement applies to this part.,SYN_identification_requirements,YES (marked SYNTHETIC_DEMO),NO,,YES
+FOR_MACHINE,IdentificationRequirement,(IdentificationRequirement)-[:FOR_MACHINE]->(Machine),Machine,N:1,The identification requirement is for this machine model.,SYN_identification_requirements,YES (marked SYNTHETIC_DEMO),NO,,YES
+ADMITS_VARIANT,IdentificationRequirement,(IdentificationRequirement)-[:ADMITS_VARIANT]->(MachineVariant),MachineVariant,N:M,Synthetic: the variant/serial range the requirement lists as acceptable. Does NOT add catalogue fitment.,SYN_identification_requirements,YES (marked SYNTHETIC_DEMO),NO,,YES
+FOR_MACHINE,ServicePlan,(ServicePlan)-[:FOR_MACHINE]->(Machine),Machine,N:1,The synthetic service plan (interval template) is for this machine model. A plan is NOT a service job.,SYN_services,YES (marked SYNTHETIC_DEMO),NO,,YES
+REQUIRES_PART,ServicePlan,(ServicePlan)-[:REQUIRES_PART]->(Part),Part,N:M,The synthetic service plan uses this part (quantity).,SYN_service_parts,YES (marked SYNTHETIC_DEMO),NO,quantity,YES
+LOCATED_AT_PLANT,Warehouse,(Warehouse)-[:LOCATED_AT_PLANT]->(Plant),Plant,N:1,The synthetic warehouse is attached to this plant.,SYN_warehouses,YES (marked SYNTHETIC_DEMO),NO,,YES
+LOCATED_AT_ADDRESS,Warehouse,(Warehouse)-[:LOCATED_AT_ADDRESS]->(Address),Address,1:1,The synthetic placeholder address of the warehouse.,SYN_warehouses,YES (marked SYNTHETIC_DEMO),NO,,YES
+LOCATED_AT_ADDRESS,Supplier,(Supplier)-[:LOCATED_AT_ADDRESS]->(Address),Address,1:1,The synthetic placeholder address of the supplier.,SYN_suppliers,YES (marked SYNTHETIC_DEMO),NO,,YES
+LOCATED_AT_ADDRESS,Dealer,(Dealer)-[:LOCATED_AT_ADDRESS]->(Address),Address,1:1,The synthetic placeholder address of the dealer.,SYN_dealers,YES (marked SYNTHETIC_DEMO),NO,,YES
+LOCATED_AT_ADDRESS,Customer,(Customer)-[:LOCATED_AT_ADDRESS]->(Address),Address,1:1,The synthetic placeholder address of the customer.,SYN_customers,YES (marked SYNTHETIC_DEMO),NO,,YES
+LOCATED_AT_ADDRESS,Plant,(Plant)-[:LOCATED_AT_ADDRESS]->(Address),Address,1:1,The synthetic placeholder address of the (fictional) plant.,SYN_addresses,YES (marked SYNTHETIC_DEMO),NO,,YES
+IN_REGION,Address,(Address)-[:IN_REGION]->(Region),Region,N:1,The address lies in this synthetic region (VAT rate reference).,SYN_addresses,YES (marked SYNTHETIC_DEMO),NO,,YES
+AVAILABLE_AT,Part,(Part)-[:AVAILABLE_AT]->(Warehouse),Warehouse,N:M,"Synthetic warehouse stock of the part (on_hand, reserved, available, stock_status). 0 here is an explicit warehouse record.",SYN_inventory,YES (marked SYNTHETIC_DEMO),NO,on_hand|reserved|available|stock_status,YES
+STOCKED_BY,Part,(Part)-[:STOCKED_BY]->(Dealer),Dealer,N:M,"Synthetic: the dealer is listed as stocking the part (SYN_part_dealer), with its quantities (SYN_inventory).",SYN_part_dealer,YES (marked SYNTHETIC_DEMO),NO,stocking_status|inventory_id|available,YES
+SERVES_FAMILY,Dealer,(Dealer)-[:SERVES_FAMILY]->(MachineFamily),MachineFamily,N:M,Synthetic: the dealer serves this machine family. Does NOT mean the dealer supports every model or stocks every part.,SYN_dealers,YES (marked SYNTHETIC_DEMO),NO,,YES
+PRICES_PART,Price,(Price)-[:PRICES_PART]->(Part),Part,1:1,"The synthetic demo list price of the part (EUR, ex VAT).",SYN_pricing,YES (marked SYNTHETIC_DEMO),NO,,YES
+PROFILES_PART,PartCatalogProfile,(PartCatalogProfile)-[:PROFILES_PART]->(Part),Part,1:1,"The synthetic store profile of the part (status, orderable, weight, warranty...). Kept apart so source facts are never overwritten.",SYN_part_catalog,YES (marked SYNTHETIC_DEMO),NO,,YES
+HAS_COMPLIANCE,Part,(Part)-[:HAS_COMPLIANCE]->(ComplianceRequirement),ComplianceRequirement,N:M,A synthetic compliance record applies to the part.,SYN_part_compliance,YES (marked SYNTHETIC_DEMO),NO,,YES
+IDENTIFIED_BY_PART,Assembly,(Assembly)-[:IDENTIFIED_BY_PART]->(Part),Part,1:1,The synthetic assembly (demo BOM) is sold as this part number.,SYN_assembly_master,YES (marked SYNTHETIC_DEMO),NO,,YES
+PART_OF,Part,(Part)-[:PART_OF]->(Assembly),Assembly,N:M,Synthetic demo BOM: the part is a component of the assembly (quantity).,SYN_assembly_components,YES (marked SYNTHETIC_DEMO),NO,quantity,YES
+HAS_MACHINE_SPECIFICATION,Machine,(Machine)-[:HAS_MACHINE_SPECIFICATION]->(MachineSpecification),MachineSpecification,1:N,A synthetic machine specification. Not engineering data.,SYN_machine_specifications,YES (marked SYNTHETIC_DEMO),NO,,YES
+VARIANT_OF,MachineVariant,(MachineVariant)-[:VARIANT_OF]->(Machine),Machine,N:1,A synthetic variant / serial range of the machine model.,SYN_machine_variants,YES (marked SYNTHETIC_DEMO),NO,,YES
+OPENED_BY,Cart,(Cart)-[:OPENED_BY]->(Customer),Customer,N:1,The synthetic cart belongs to this customer. A cart is NOT a request.,SYN_carts,YES (marked SYNTHETIC_DEMO),NO,,YES
+CONTAINS_LINE,Cart,(Cart)-[:CONTAINS_LINE]->(CartLine),CartLine,1:N,The cart contains this line.,SYN_cart_items,YES (marked SYNTHETIC_DEMO),NO,,YES
+CONTAINS_LINE,Order,(Order)-[:CONTAINS_LINE]->(OrderLine),OrderLine,1:N,The order contains this line.,SYN_order_items,YES (marked SYNTHETIC_DEMO),NO,,YES
+REFERENCES_PART,CartLine,(CartLine)-[:REFERENCES_PART]->(Part),Part,N:1 (exactly one per line),The cart line is for this part.,SYN_cart_items,YES (marked SYNTHETIC_DEMO),NO,,YES
+REFERENCES_PART,OrderLine,(OrderLine)-[:REFERENCES_PART]->(Part),Part,N:1 (exactly one per line),The order line is for this part.,SYN_order_items,YES (marked SYNTHETIC_DEMO),NO,,YES
+ORDERED_BY,Order,(Order)-[:ORDERED_BY]->(Customer),Customer,N:1 (exactly one per order),The synthetic order was placed by this customer.,SYN_orders,YES (marked SYNTHETIC_DEMO),NO,,YES
+DELIVERS_TO_ADDRESS,Order,(Order)-[:DELIVERS_TO_ADDRESS]->(Address),Address,N:1,The order's delivery address.,SYN_orders,YES (marked SYNTHETIC_DEMO),NO,,YES
+ALLOCATED_FROM,OrderLine,(OrderLine)-[:ALLOCATED_FROM]->(Warehouse),Warehouse,N:1,"Stock for the line is reserved at, or was shipped from, this warehouse (allocation_status RESERVED or SHIPPED).",SYN_order_items,YES (marked SYNTHETIC_DEMO),NO,allocation_status,YES
+PLANNED_FULFILMENT_FROM,OrderLine,(OrderLine)-[:PLANNED_FULFILMENT_FROM]->(Warehouse),Warehouse,N:1,The line is NOT yet allocated; this is only its planned fulfilment location.,SYN_order_items,YES (marked SYNTHETIC_DEMO),NO,allocation_status,YES
+HAS_STATUS_EVENT,Order,(Order)-[:HAS_STATUS_EVENT]->(OrderStatusEvent),OrderStatusEvent,1:N,A step in the order's synthetic status history.,SYN_order_status_history,YES (marked SYNTHETIC_DEMO),NO,,YES
+RECORDS_STATUS,OrderStatusEvent,(OrderStatusEvent)-[:RECORDS_STATUS]->(OrderStatus),OrderStatus,N:1,The status the history step records (workflow vocabulary).,SYN_order_status_history,YES (marked SYNTHETIC_DEMO),NO,,YES
+HAS_SHIPMENT,Order,(Order)-[:HAS_SHIPMENT]->(Shipment),Shipment,1:N,The order has this synthetic shipment.,SYN_shipments,YES (marked SYNTHETIC_DEMO),NO,,YES
+SHIPS_LINE,Shipment,(Shipment)-[:SHIPS_LINE]->(OrderLine),OrderLine,N:1,The shipment carries this order line.,SYN_shipments,YES (marked SYNTHETIC_DEMO),NO,,YES
+DISPATCHED_FROM,Shipment,(Shipment)-[:DISPATCHED_FROM]->(Warehouse),Warehouse,N:1,The shipment left this warehouse.,SYN_shipments,YES (marked SYNTHETIC_DEMO),NO,,YES
+DELIVERS_TO_CUSTOMER,Shipment,(Shipment)-[:DELIVERS_TO_CUSTOMER]->(Customer),Customer,N:1,The shipment is addressed to this customer.,SYN_shipments,YES (marked SYNTHETIC_DEMO),NO,,YES
+CARRIED_BY,Shipment,(Shipment)-[:CARRIED_BY]->(Carrier),Carrier,N:1,The (fictional) carrier of the shipment.,SYN_shipments,YES (marked SYNTHETIC_DEMO),NO,,YES
+HAS_TRACKING_EVENT,Shipment,(Shipment)-[:HAS_TRACKING_EVENT]->(TrackingEvent),TrackingEvent,1:N,A synthetic tracking event of the shipment.,SYN_shipment_events,YES (marked SYNTHETIC_DEMO),NO,,YES
+FROM_WAREHOUSE,DeliveryEstimate,(DeliveryEstimate)-[:FROM_WAREHOUSE]->(Warehouse),Warehouse,N:1,The synthetic delivery estimate starts at this warehouse.,SYN_delivery_options,YES (marked SYNTHETIC_DEMO),NO,,YES
+TO_CUSTOMER,DeliveryEstimate,(DeliveryEstimate)-[:TO_CUSTOMER]->(Customer),Customer,N:1,The estimate's destination is this customer.,SYN_delivery_options,YES (marked SYNTHETIC_DEMO),NO,,YES
+TO_DEALER,DeliveryEstimate,(DeliveryEstimate)-[:TO_DEALER]->(Dealer),Dealer,N:1,The estimate's destination is this dealer.,SYN_delivery_options,YES (marked SYNTHETIC_DEMO),NO,,YES
+HOME_PLANT,BusinessUnit,(BusinessUnit)-[:HOME_PLANT]->(Plant),Plant,1:1,The plant the project brief names as the business unit's home plant.,business_units,NO,NO,,YES
+SUPPLIES_CATEGORY,Supplier,(Supplier)-[:SUPPLIES_CATEGORY]->(Category),Category,N:M,Synthetic: the supplier's declared category scope. NOT a supply relationship for any specific part (SUPPLIED_BY is the only part-level link).,SYN_suppliers,YES (marked SYNTHETIC_DEMO),NO,,YES
+COVERS_CATEGORY,ComplianceRequirement,(ComplianceRequirement)-[:COVERS_CATEGORY]->(Category),Category,N:M,Synthetic: the compliance requirement's declared category scope. NOT a part-level statement (HAS_COMPLIANCE is).,SYN_compliance,YES (marked SYNTHETIC_DEMO),NO,,YES
+SHIPS_TO_COUNTRY,Warehouse,(Warehouse)-[:SHIPS_TO_COUNTRY]->(Location),Location,N:M,Synthetic: the warehouse ships to this country. Not a delivery estimate (DeliveryEstimate is).,SYN_warehouses,YES (marked SYNTHETIC_DEMO),NO,,YES
+HAS_ALIAS,Part,(Part)-[:HAS_ALIAS]->(SearchAlias),SearchAlias,1:N,A synthetic search alias / synonym of the part.,SYN_search_aliases,YES (marked SYNTHETIC_DEMO),NO,,YES
+HAS_ALIAS,Machine,(Machine)-[:HAS_ALIAS]->(SearchAlias),SearchAlias,1:N,A synthetic search alias of the machine model.,SYN_search_aliases,YES (marked SYNTHETIC_DEMO),NO,,YES
+ALTERNATIVE_TO,Part,(Part)-[:ALTERNATIVE_TO]->(Part),Part,-,An authoritative statement that one part can replace another. No such evidence exists.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+SUPERSEDES,Part,(Part)-[:SUPERSEDES]->(Part),Part,-,A newer part number replaces an older one. No supersession data exists (legacy references are previous numbers of the SAME part).,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+REPLACEMENT_FOR,Part,(Part)-[:REPLACEMENT_FOR]->(Part),Part,-,No evidence exists.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+INTERCHANGEABLE_WITH,Part,(Part)-[:INTERCHANGEABLE_WITH]->(Part),Part,-,Never asserted by any source.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+FOR_MACHINE,ServiceJob,(ServiceJob)-[:FOR_MACHINE]->(Machine),Machine,-,No service jobs exist; only synthetic service plans.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+REQUIRES_PART,ServiceJob,(ServiceJob)-[:REQUIRES_PART]->(Part),Part,-,No service jobs exist.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+INSTALLED_ON,Installation,(Installation)-[:INSTALLED_ON]->(MachineUnit),MachineUnit,-,No installations or serial-numbered machine units exist.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+REQUESTED_BY,Request,(Request)-[:REQUESTED_BY]->(Customer),Customer,-,No customer requests exist (carts are not requests).,authoritative evidence only,NO,NO,,NO (MISSING: not created)
+HAS_RISK,Part,(Part)-[:HAS_RISK]->(SourceRisk),SourceRisk,-,No risk data exists.,authoritative evidence only,NO,NO,,NO (MISSING: not created)
