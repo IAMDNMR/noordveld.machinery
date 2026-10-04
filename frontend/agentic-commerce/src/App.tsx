@@ -1,5 +1,6 @@
 import { Footer, Nav } from './components/Chrome'
 import { Agentic } from './components/sections/Agentic'
+import { AgenticIntro } from './components/sections/AgenticIntro'
 import { Closing } from './components/sections/Closing'
 import { Theory } from './components/theory/Theory'
 import { LaunchFilm } from './components/launch/LaunchFilm'
@@ -15,6 +16,7 @@ export default function App() {
       <main>
         <CommerceEvolutionHero />
         <Theory />
+        <AgenticIntro />
         <LaunchFilm />
         <Agentic />
         <Closing />

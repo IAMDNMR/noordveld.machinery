@@ -1,0 +1,932 @@
+{
+  "taken_at": "2026-10-03T16:30:28+00:00",
+  "totals": {
+    "nodes": 1840,
+    "relationships": 3812
+  },
+  "labels": {
+    "Address": {
+      "count": 44,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Assembly": {
+      "count": 15,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "BusinessUnit": {
+      "count": 3,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    "Carrier": {
+      "count": 1,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Cart": {
+      "count": 3,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "CartLine": {
+      "count": 6,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Category": {
+      "count": 101,
+      "data_status": [
+        "DERIVED",
+        "SOURCE_DERIVED"
+      ]
+    },
+    "ComplianceRequirement": {
+      "count": 8,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Customer": {
+      "count": 10,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "DataSource": {
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO",
+        "USER_PROVIDED"
+      ]
+    },
+    "Dealer": {
+      "count": 15,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "DeliveryEstimate": {
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "IdentificationRequirement": {
+      "count": 6,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "LegacyReference": {
+      "count": 100,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    "Location": {
+      "count": 5,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    "Machine": {
+      "count": 15,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    "MachineFamily": {
+      "count": 3,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    "MachineSpecification": {
+      "count": 83,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "MachineType": {
+      "count": 15,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    "MachineVariant": {
+      "count": 30,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Order": {
+      "count": 8,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "OrderLine": {
+      "count": 14,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "OrderStatus": {
+      "count": 6,
+      "data_status": [
+        "USER_PROVIDED"
+      ]
+    },
+    "OrderStatusEvent": {
+      "count": 32,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Part": {
+      "count": 100,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    "PartCatalogProfile": {
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "PartSpecification": {
+      "count": 279,
+      "data_status": [
+        "DERIVED",
+        "SOURCE_DERIVED"
+      ]
+    },
+    "Plant": {
+      "count": 3,
+      "data_status": [
+        "USER_PROVIDED"
+      ]
+    },
+    "Price": {
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Region": {
+      "count": 14,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "SearchAlias": {
+      "count": 493,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "ServicePlan": {
+      "count": 60,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Shipment": {
+      "count": 9,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "ShippingRate": {
+      "count": 8,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Supplier": {
+      "count": 12,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "SupplierBackorder": {
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "TrackingEvent": {
+      "count": 27,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    "Warehouse": {
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "from": "IdentificationRequirement",
+      "type": "ADMITS_VARIANT",
+      "to": "MachineVariant",
+      "count": 10,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "OrderLine",
+      "type": "ALLOCATED_FROM",
+      "to": "Warehouse",
+      "count": 10,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "AVAILABLE_AT",
+      "to": "Warehouse",
+      "count": 400,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "BRANDED_AS",
+      "to": "BusinessUnit",
+      "count": 15,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "CARRIED_BY",
+      "to": "Carrier",
+      "count": 9,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Cart",
+      "type": "CONTAINS_LINE",
+      "to": "CartLine",
+      "count": 6,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "CONTAINS_LINE",
+      "to": "OrderLine",
+      "count": 14,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "ComplianceRequirement",
+      "type": "COVERS_CATEGORY",
+      "to": "Category",
+      "count": 10,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "CO_ORDERED_WITH",
+      "to": "Part",
+      "count": 75,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "DELIVERS_TO_ADDRESS",
+      "to": "Address",
+      "count": 8,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "DELIVERS_TO_CUSTOMER",
+      "to": "Customer",
+      "count": 9,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "DISPATCHED_FROM",
+      "to": "Warehouse",
+      "count": 9,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "FITS",
+      "to": "Machine",
+      "count": 219,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "IdentificationRequirement",
+      "type": "FOR_MACHINE",
+      "to": "Machine",
+      "count": 6,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "ServicePlan",
+      "type": "FOR_MACHINE",
+      "to": "Machine",
+      "count": 60,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "IdentificationRequirement",
+      "type": "FOR_PART",
+      "to": "Part",
+      "count": 6,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "SupplierBackorder",
+      "type": "FOR_PART",
+      "to": "Part",
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "DeliveryEstimate",
+      "type": "FROM_WAREHOUSE",
+      "to": "Warehouse",
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "HAS_ALIAS",
+      "to": "SearchAlias",
+      "count": 45,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_ALIAS",
+      "to": "SearchAlias",
+      "count": 448,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_COMPLIANCE",
+      "to": "ComplianceRequirement",
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_LEGACY_REFERENCE",
+      "to": "LegacyReference",
+      "count": 100,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "HAS_MACHINE_SPECIFICATION",
+      "to": "MachineSpecification",
+      "count": 83,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "HAS_SHIPMENT",
+      "to": "Shipment",
+      "count": 9,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_SPECIFICATION",
+      "to": "PartSpecification",
+      "count": 279,
+      "data_status": [
+        "DERIVED",
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "HAS_STATUS_EVENT",
+      "to": "OrderStatusEvent",
+      "count": 32,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "HAS_TRACKING_EVENT",
+      "to": "TrackingEvent",
+      "count": 27,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "BusinessUnit",
+      "type": "HOME_PLANT",
+      "to": "Plant",
+      "count": 3,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Assembly",
+      "type": "IDENTIFIED_BY_PART",
+      "to": "Part",
+      "count": 15,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "IN_CATEGORY",
+      "to": "Category",
+      "count": 100,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Location",
+      "type": "IN_COUNTRY",
+      "to": "Location",
+      "count": 3,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Address",
+      "type": "IN_REGION",
+      "to": "Region",
+      "count": 44,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "IN_SUBCATEGORY",
+      "to": "Category",
+      "count": 100,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "LegacyReference",
+      "type": "ISSUED_BY_BUSINESS_UNIT",
+      "to": "BusinessUnit",
+      "count": 100,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "Customer",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "count": 10,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Dealer",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "count": 15,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Plant",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "count": 3,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Supplier",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "count": 12,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Warehouse",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Warehouse",
+      "type": "LOCATED_AT_PLANT",
+      "to": "Plant",
+      "count": 3,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Plant",
+      "type": "LOCATED_IN",
+      "to": "Location",
+      "count": 3,
+      "data_status": [
+        "USER_PROVIDED"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "MANUFACTURED_AT",
+      "to": "Plant",
+      "count": 15,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "MEMBER_OF_FAMILY",
+      "to": "MachineFamily",
+      "count": 15,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "OF_TYPE",
+      "to": "MachineType",
+      "count": 15,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Cart",
+      "type": "OPENED_BY",
+      "to": "Customer",
+      "count": 3,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "ORDERED_BY",
+      "to": "Customer",
+      "count": 8,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "ORIGINATES_AT",
+      "to": "Plant",
+      "count": 100,
+      "data_status": [
+        "SOURCE_DERIVED"
+      ]
+    },
+    {
+      "from": "Plant",
+      "type": "OWNED_BY",
+      "to": "BusinessUnit",
+      "count": 3,
+      "data_status": [
+        "USER_PROVIDED"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "PART_OF",
+      "to": "Assembly",
+      "count": 35,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "SupplierBackorder",
+      "type": "PLACED_WITH",
+      "to": "Supplier",
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "OrderLine",
+      "type": "PLANNED_FULFILMENT_FROM",
+      "to": "Warehouse",
+      "count": 4,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Price",
+      "type": "PRICES_PART",
+      "to": "Part",
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "MachineFamily",
+      "type": "PRODUCT_FAMILY_OF",
+      "to": "BusinessUnit",
+      "count": 3,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "PartCatalogProfile",
+      "type": "PROFILES_PART",
+      "to": "Part",
+      "count": 100,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "OrderStatusEvent",
+      "type": "RECORDS_STATUS",
+      "to": "OrderStatus",
+      "count": 32,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "CartLine",
+      "type": "REFERENCES_PART",
+      "to": "Part",
+      "count": 6,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "OrderLine",
+      "type": "REFERENCES_PART",
+      "to": "Part",
+      "count": 14,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "RELATED_COMPONENT",
+      "to": "Part",
+      "count": 2,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "ServicePlan",
+      "type": "REQUIRES_PART",
+      "to": "Part",
+      "count": 71,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "SAME_NAME_GROUP_AS",
+      "to": "Part",
+      "count": 9,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "Dealer",
+      "type": "SERVES_FAMILY",
+      "to": "MachineFamily",
+      "count": 30,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "SHIPS_LINE",
+      "to": "OrderLine",
+      "count": 9,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Warehouse",
+      "type": "SHIPS_TO_COUNTRY",
+      "to": "Location",
+      "count": 8,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "STOCKED_BY",
+      "to": "Dealer",
+      "count": 315,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Category",
+      "type": "SUBCATEGORY_OF",
+      "to": "Category",
+      "count": 91,
+      "data_status": [
+        "DERIVED"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "SUPPLIED_BY",
+      "to": "Supplier",
+      "count": 157,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "Supplier",
+      "type": "SUPPLIES_CATEGORY",
+      "to": "Category",
+      "count": 25,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "DeliveryEstimate",
+      "type": "TO_CUSTOMER",
+      "to": "Customer",
+      "count": 40,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "DeliveryEstimate",
+      "type": "TO_DEALER",
+      "to": "Dealer",
+      "count": 60,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    },
+    {
+      "from": "MachineVariant",
+      "type": "VARIANT_OF",
+      "to": "Machine",
+      "count": 30,
+      "data_status": [
+        "SYNTHETIC_DEMO"
+      ]
+    }
+  ],
+  "provenance": {
+    "nodes": {
+      "SOURCE_DERIVED": 456,
+      "DERIVED": 165,
+      "USER_PROVIDED": 10,
+      "SYNTHETIC_DEMO": 1209
+    },
+    "relationships": {
+      "SOURCE_DERIVED": 778,
+      "DERIVED": 391,
+      "SYNTHETIC_DEMO": 2637,
+      "USER_PROVIDED": 6
+    }
+  },
+  "constraints": 99,
+  "source_checksum": "f685de957e89985cd5b1d11d16d3895f23b25bdd995db0b6369eddc45cbeaaaa",
+  "schema_only_labels": [],
+  "gaps": {
+    "machines_without_profile_fields": [
+      "NV-2100",
+      "NV-3200",
+      "NV-4500",
+      "NV-6000",
+      "NV-7500",
+      "KFT-120",
+      "KFT-200",
+      "KFT-450",
+      "KFT-600",
+      "KFT-800",
+      "BTS-100",
+      "BTS-250",
+      "BTS-500",
+      "BTS-750",
+      "BTS-900"
+    ],
+    "machines_without_fitted_parts": [
+      "KFT-120"
+    ],
+    "parts_without_assembly": 72,
+    "parts_without_service_plan": 67,
+    "parts_without_supplier": 0,
+    "parts_without_inventory": 0,
+    "parts_without_dealer": 1,
+    "parts_without_compliance": 0,
+    "parts_in_any_order": 14,
+    "profile_fields_missing": {
+      "application": 100,
+      "maintenance_class": 100,
+      "criticality": 100
+    },
+    "warehouse_fields_missing": {
+      "warehouse_type": 4,
+      "operating_status": 4
+    },
+    "customer_requests": 0,
+    "orders": 8,
+    "inventory_rows_zero_but_in_stock": 0
+  },
+  "enrichment_batch_present": 0
+}

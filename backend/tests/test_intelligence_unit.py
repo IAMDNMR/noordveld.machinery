@@ -1,22 +1,30 @@
-"""Parts Intelligence without Neo4j or a live model: rules, registry, Cypher safety, grounding, routing and data-truth behaviour."""
+"""Parts Intelligence without Neo4j or a live model: registry, Cypher safety, grounding, Gemini-first routing and data-truth behaviour.
+
+`FakeLLM` stands in for Gemini. Unless a test hands it an explicit parse, it answers like a model would (tests/support/keyword_model.py is a
+test double; the application itself contains no keyword routing).
+"""
 from __future__ import annotations
 
 import re
 from typing import Any
 
 import httpx
+import json
+
 import pytest
 
 from app.core.config import Settings
 from app.graph.queries import intelligence as queries
-from app.intelligence import rules
+from app.intelligence.identifiers import identifiers
+from tests.support.keyword_model import model_parse
 from app.intelligence.grounding import is_grounded
 from app.intelligence.models import Intent
 from app.intelligence.registry import REGISTRY, answerable_intents
 from app.intelligence.service import IntelligenceService
-from app.llm import LLMParse, LLMUnavailable, create_llm
+from app.llm import LLMError, LLMParse, LLMUnavailable, create_llm
 from app.llm.base import LLMInvalidResponse
-from app.llm.gemini import GeminiClient, RateLimiter
+from app.llm.gemini import GeminiClient
+from app.llm.structured import RateLimiter
 from app.schemas.intelligence import QueryRequest, SelectedEntity
 
 
@@ -37,7 +45,9 @@ def test_intent_catalogue_matches_the_brief():
 
 
 def _all_cypher() -> dict[str, str]:
-    return {n: v for n, v in vars(queries).items() if n.isupper() and isinstance(v, str)}
+    found = {n: v for n, v in vars(queries).items() if n.isupper() and isinstance(v, str)}
+    found.update({f"{n}.{k}": t for n, v in vars(queries).items() if n.isupper() and isinstance(v, dict) for k, t in v.items()})  # e.g. SUBJECT per kind
+    return found
 
 
 def test_cypher_is_read_only():
@@ -53,38 +63,14 @@ def test_cypher_is_parameterised_and_bounded():
         assert bounded, f"{name} is unbounded"
 
 
-# ── rules ─────────────────────────────────────────────────────────────────────────────────────────
-@pytest.mark.parametrize(
-    "question,intent",
-    [
-        ("Which machines use ABC-1234-XY?", Intent.PART_TO_MACHINE),
-        ("What parts fit the AB-4500?", Intent.PART_TO_MACHINE),
-        ("What category is ABC-1234-XY?", Intent.PART_TO_CATEGORY),
-        ("What assemblies contain ABC-1234-XY?", Intent.PART_TO_ASSEMBLY),
-        ("Which suppliers are connected to ABC-1234-XY?", Intent.PART_TO_SUPPLIER),
-        ("Which parts does Acme supply?", Intent.PART_TO_SUPPLIER),
-        ("Which dealers stock ABC-1234-XY?", Intent.PART_TO_DEALER),
-        ("Where is ABC-1234-XY available?", Intent.PART_TO_LOCATION),
-        ("What is the stock of ABC-1234-XY?", Intent.PART_TO_INVENTORY),
-        ("compliance requirements for ABC-1234-XY", Intent.PART_TO_COMPLIANCE),
-        ("What is the provenance of ABC-1234-XY?", Intent.PART_PROVENANCE),
-        ("Show the relationships for ABC-1234-XY", Intent.PART_GRAPH),
-        ("Is there a replacement for ABC-1234-XY?", Intent.PART_TO_PART),
-        ("Where is the catalogue data incomplete?", Intent.DATA_QUALITY),
-        ("find hydraulic hose", Intent.PART_SEARCH),
-    ],
-)
-def test_rules_choose_the_intent(question, intent):
-    assert rules.parse(question).intent is intent
-
-
-def test_rules_extract_identifier_mentions_and_not_trailing_words():
-    assert "NVM-1010-HY" in rules.parse("Which machines use NVM-1010-HY fit").mentions
-    assert any(m.replace(" ", "-").lower() == "nvm-1010-hy" for m in rules.parse("show NVM 1010 HY").mentions)
-
-
-def test_rules_leave_unrelated_questions_undecided():
-    assert rules.parse("what is the weather in Paris").intent is None
+# ── exact identifiers (entity assistance only: they never choose an intent) ──────────────────────
+def test_identifiers_are_read_exactly_not_trailing_words():
+    # a trailing word may be captured with the identifier; the resolver trims trailing words until it matches
+    assert any(m.startswith("NVM-1010-HY") for m in identifiers("Which machines use NVM-1010-HY fit"))
+    assert any(m.lower() == "nvm 1050 cl" for m in identifiers("suppliers of nvm 1050 cl"))
+    assert "NVM1050CL" in identifiers("Which machines use NVM1050CL?")
+    assert any(m.replace(" ", "-").lower() == "nvm-1010-hy" for m in identifiers("show NVM 1010 HY"))
+    assert identifiers("what is the weather in Paris") == ()
 
 
 # ── grounding (hallucination prevention) ──────────────────────────────────────────────────────────
@@ -111,7 +97,7 @@ def test_grounding_rejects_invented_facts(claim):
     assert not is_grounded(claim, EVIDENCE, "P-1 is associated with 1 machine: M-2.", "q")
 
 
-# ── Gemini client ─────────────────────────────────────────────────────────────────────────────────
+# ── optional Gemini provider (Groq is covered in test_llm_providers.py) ─────────────────────────────────────────────────────────────────────────────────
 def _gemini(handler) -> GeminiClient:
     settings = Settings(gemini_api_key="test-key-123", gemini_model="m-test")
     return GeminiClient(settings, httpx.Client(transport=httpx.MockTransport(handler)))
@@ -136,11 +122,38 @@ def test_gemini_sends_key_in_header_not_url_and_uses_configured_model():
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen.update(url=str(request.url), key=request.headers.get("x-goog-api-key"))
-        return _reply('{"intent": "PART_TO_MACHINE", "mentions": ["P-1"], "requires_clarification": false}')
+        return _reply('{"in_scope": true, "domain": "parts_intelligence", "intent": "PART_TO_MACHINE", "entities": {"part": "P-1", "machine": null}, "filters": {}, "requires_clarification": false}')
 
     parse = _gemini(handler).parse_question("which machines use P-1", INTENTS)
     assert "test-key-123" not in seen["url"] and seen["key"] == "test-key-123" and "m-test" in seen["url"]
-    assert parse == LLMParse("PART_TO_MACHINE", ("P-1",), False, None)
+    assert parse == LLMParse("PART_TO_MACHINE", ("P-1",), False, None, {}, {"part": "P-1"})
+
+
+def test_gemini_returns_typed_entities_and_filters_and_nothing_executable():
+    body = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body.update(json.loads(request.content))
+        return _reply(json.dumps({"in_scope": True, "domain": "parts_intelligence", "intent": "MACHINE_LIST", "entities": {"machine": None, "cypher": "MATCH (n) DETACH DELETE n"}, "filters": {"location": "Assen", "query": "MATCH (n) RETURN n"},
+                                  "requires_clarification": False, "cypher": "MATCH (n) DETACH DELETE n"}))
+
+    parse = _gemini(handler).parse_question("show me the machines at Assen", {"MACHINE_LIST": "list machines", **INTENTS})
+    assert parse.intent == "MACHINE_LIST" and parse.entities == {} and parse.filters["location"] == "Assen"
+    assert "MATCH" not in repr(parse.entities) and not hasattr(parse, "cypher")  # only the declared fields survive; no query text is ever carried
+    schema = body["generationConfig"]["responseSchema"]
+    assert set(schema["properties"]) == {"in_scope", "intent", "entities", "filters", "requires_clarification", "clarification_question"}  # no query (domain and confidence were dropped to save tokens; a reply that still carries them is read)
+    assert "cypher" not in json.dumps(schema).lower() and "Do not generate" not in json.dumps(schema)
+    assert "do not answer the question" in body["systemInstruction"]["parts"][0]["text"].lower() and "cypher" in body["systemInstruction"]["parts"][0]["text"].lower()
+
+
+def test_gemini_scope_verdict_is_parsed_and_a_missing_verdict_is_invalid():
+    out = _gemini(lambda r: _reply('{"in_scope": false, "domain": "out_of_scope", "intent": "UNSUPPORTED", "entities": {}, "filters": {}, "requires_clarification": false, "confidence": 0.99}'))
+    parse = out.parse_question("What is the capital of France?", INTENTS)
+    assert parse.in_scope is False and parse.intent == "UNSUPPORTED" and parse.confidence == 0.99
+    contradictory = _gemini(lambda r: _reply('{"in_scope": true, "domain": "out_of_scope", "intent": "PART_TO_MACHINE", "entities": {}, "filters": {}, "requires_clarification": false}'))
+    assert contradictory.parse_question("q", INTENTS).in_scope is False  # either signal saying "out of scope" wins
+    with pytest.raises(LLMInvalidResponse):
+        _gemini(lambda r: _reply('{"intent": "PART_TO_MACHINE", "entities": {}, "filters": {}, "requires_clarification": false}')).parse_question("q", INTENTS)
 
 
 def test_gemini_invalid_and_unavailable_responses():
@@ -195,6 +208,8 @@ class FakeLLM:
 
     def parse_question(self, question, intents):
         self.calls += 1
+        if self.parse is None:
+            return model_parse(question)  # a model that understands the question
         if isinstance(self.parse, Exception):
             raise self.parse
         return self.parse
@@ -208,7 +223,7 @@ class FakeLLM:
 
 
 def service(repo: FakeRepo, llm: Any = None) -> IntelligenceService:
-    return IntelligenceService(repo, NoParts(), llm)  # type: ignore[arg-type]
+    return IntelligenceService(repo, NoParts(), llm if llm is not None else FakeLLM())  # type: ignore[arg-type]
 
 
 PART = row("PART", "PRT-1", "AB-1000-XY")
@@ -219,18 +234,56 @@ def ask(svc: IntelligenceService, question: str, **kw):
     return svc.query(QueryRequest(question=question, **kw))
 
 
-def test_deterministic_question_never_calls_the_model():
-    llm = FakeLLM(parse=LLMUnavailable("must not be used"), reply=LLMUnavailable("down"))
-    repo = FakeRepo({"ab-1000-xy": [PART]}, fitment=[{"machine_id": "MCH-1", "model_code": "ZZ-1", "name": "Zed", "machine_type": "Loader", "family": "Z", "fitment_status": "CONFIRMED",
-                                                      "condition_note": None, "data_status": "SOURCE_DERIVED"}])
+FIT = [{"machine_id": "MCH-1", "model_code": "ZZ-1", "name": "Zed", "machine_type": "Loader", "family": "Z", "fitment_status": "CONFIRMED", "condition_note": None, "data_status": "SOURCE_DERIVED"}]
+
+
+def test_every_question_goes_to_the_model_first_and_its_intent_is_what_runs():
+    llm = FakeLLM(parse=LLMParse("PART_TO_MACHINE", ("AB-1000-XY",)))
+    repo = FakeRepo({"ab-1000-xy": [PART]}, fitment=FIT)
     r = ask(service(repo, llm), "Which machines use AB-1000-XY?")
-    assert (r.intent, r.understood_by, r.total, r.answer.source) == ("PART_TO_MACHINE", "rules", 1, "template") and llm.calls == 0
-    assert r.evidence[0].relationship == "FITS" and r.provenance[0].data_class == "SOURCE_DERIVED"
+    assert (r.intent, r.understood_by, r.total) == ("PART_TO_MACHINE", "llm", 1) and llm.calls == 1
+    assert r.evidence[0].relationship == "FITS" and r.provenance[0].data_class == "SOURCE_DERIVED"  # the answer is the graph's, not the model's
+
+
+def test_the_model_decides_even_when_keywords_would_say_otherwise():
+    # the keyword rules read "Which machines use ..." as fitment; the model says suppliers, and the model is what runs
+    repo = FakeRepo({"ab-1000-xy": [PART]}, suppliers=[])
+    r = ask(service(repo, FakeLLM(parse=LLMParse("PART_TO_SUPPLIER", ("AB-1000-XY",)))), "Which machines use AB-1000-XY?")
+    assert r.intent == "PART_TO_SUPPLIER" and r.understood_by == "llm"
+
+
+def test_model_entities_are_resolved_against_the_graph_not_trusted():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, suppliers=[])
+    r = ask(service(repo, FakeLLM(parse=LLMParse("PART_TO_SUPPLIER", ("ZQ-0000-XX",)))), "who supplies that?")
+    assert r.results == [] and r.clarification is not None  # an entity the graph does not hold is asked about, never invented
+
+
+def test_no_model_means_a_clear_error_never_a_silent_keyword_router():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, fitment=FIT)
+    for llm in (FakeLLM(parse=LLMUnavailable("rate limit")), FakeLLM(parse=LLMInvalidResponse("bad json"))):
+        with pytest.raises(LLMError):
+            ask(service(repo, llm), "Which machines use AB-1000-XY?")
+    with pytest.raises(LLMUnavailable):
+        ask(IntelligenceService(repo, NoParts(), None), "Which machines use AB-1000-XY?")  # type: ignore[arg-type]
+
+
+def test_a_model_that_finds_nothing_is_not_second_guessed_by_keywords():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, fitment=FIT)
+    r = ask(service(repo, FakeLLM(parse=LLMParse("UNSUPPORTED"))), "Which machines use AB-1000-XY?")
+    assert r.intent == "UNSUPPORTED" and r.results == [] and r.understood_by == "llm"
+
+
+def test_the_same_question_is_understood_once():
+    llm = FakeLLM(parse=LLMParse("PART_TO_MACHINE", ("AB-1000-XY",)))
+    svc = service(FakeRepo({"ab-1000-xy": [PART]}, fitment=FIT), llm)
+    ask(svc, "Which machines use AB-1000-XY?")
+    ask(svc, "which machines use  ab-1000-xy?")
+    assert llm.calls == 1
 
 
 def test_unsupported_question_does_not_hallucinate():
     r = ask(service(FakeRepo()), "what is the weather in Paris")
-    assert r.intent == "UNSUPPORTED" and r.results == [] and "investigate parts" in r.answer.summary
+    assert r.intent == "UNSUPPORTED" and r.scope == "OUT_OF_SCOPE" and r.results == [] and "Parts Intelligence questions" in r.answer.summary
 
 
 def test_missing_entity_asks_instead_of_guessing():
@@ -257,11 +310,6 @@ def test_llm_unsupported_or_unknown_intent_is_rejected_without_a_query():
         assert r.intent == "UNSUPPORTED" and r.results == []
 
 
-def test_llm_unavailable_falls_back_to_a_clarification():
-    r = ask(service(FakeRepo(), FakeLLM(LLMUnavailable("down"))), "tell me something vague about stuff")
-    assert r.intent == "UNSUPPORTED" and r.answer.source == "template"
-
-
 def test_llm_intent_is_validated_then_executed_by_a_fixed_handler():
     repo = FakeRepo({"ab-1000-xy": [PART]}, suppliers=[])
     r = ask(service(repo, FakeLLM(LLMParse("PART_TO_SUPPLIER", ("AB-1000-XY",)))), "who provides that gizmo AB-1000-XY nowadays")
@@ -274,7 +322,7 @@ def test_model_summary_is_discarded_when_it_invents_facts():
     bad = ask(service(repo, FakeLLM(reply="AB-1000-XY is interchangeable with AB-2000-XY and has 40 in stock.")), "Which machines use AB-1000-XY?")
     good = ask(service(repo, FakeLLM(reply="AB-1000-XY is associated with ZZ-1 in the graph.")), "Which machines use AB-1000-XY?")
     assert bad.answer.source == "template" and "interchangeable" not in bad.answer.summary
-    assert good.answer.source == "gemini"
+    assert good.answer.source == "llm"
 
 
 def test_model_failure_on_wording_keeps_the_deterministic_answer():
@@ -331,7 +379,136 @@ def test_intelligence_source_names_no_catalogue_entries():
     app = Path(__file__).resolve().parents[1] / "app"
     files = [*(app / "intelligence").glob("*.py"), *(app / "llm").glob("*.py"), app / "api/routes/intelligence.py", app / "schemas/intelligence.py",
              app / "graph/queries/intelligence.py", app / "graph/repositories/intelligence.py"]
-    forbidden = re.compile(r"NVM-\d{4}|PRT-\d{3}|\b(NV|KFT|BTS)-\d{3,4}\b|\(demo\)|Hanselmann|Drenthe|Nordwest|Radiator|\bSUP-\d|\bDLR-\d|\bWH-\d|\bMCH-\d")
+    # a catalogue name looks like "<Name> (demo)"; the bare qualifier "(demo)" is vocabulary the answer checks need
+    forbidden = re.compile(r"NVM-\d{4}|PRT-\d{3}|\b(NV|KFT|BTS)-\d{3,4}\b|[A-Za-z]{3,} \(demo\)|Hanselmann|Drenthe|Nordwest|Radiator|\bSUP-\d|\bDLR-\d|\bWH-\d|\bMCH-\d")
     for f in files:
         assert not forbidden.search(f.read_text(encoding="utf-8")), f"{f.name} contains a catalogue entry"
     assert len(files) >= 12
+
+
+# ── demo qualifier in worded answers (QA fix 5) ───────────────────────────────────────────────────
+def test_keep_demo_qualifier_repairs_dropped_names():
+    from app.intelligence.grounding import keep_demo_qualifier
+    names = {"Acme Seals (demo)", "Beta Parts (demo)"}
+    assert keep_demo_qualifier("Acme Seals and Beta Parts (demo) supply it.", names) == "Acme Seals (demo) and Beta Parts (demo) supply it."
+
+
+SUPPLIER_ROW = {"supplier_id": "S1", "name": "Acme Seals (demo)", "city": "X", "country_code": "NL", "status": None, "is_primary": True, "lead_time_days": 3,
+                "supplier_part_number": None, "categories": [], "data_status": "SYNTHETIC_DEMO"}
+
+
+def test_model_wording_that_drops_the_qualifier_is_repaired_and_flagged_demo():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, suppliers=[SUPPLIER_ROW])
+    r = ask(service(repo, FakeLLM(reply="Acme Seals is connected to AB-1000-XY.")), "Which suppliers are connected to AB-1000-XY?")
+    assert r.answer.source == "llm" and "Acme Seals (demo)" in r.answer.summary and r.answer.demo is True
+
+
+def test_model_wording_that_drops_every_demo_qualifier_falls_back_to_the_template():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, suppliers=[SUPPLIER_ROW])
+    svc = service(repo, FakeLLM(reply="A supplier in the Netherlands is connected to AB-1000-XY."))
+    from app.intelligence.models import Outcome
+    from app.intelligence.models import Intent as I
+    outcome = Outcome("Acme Seals (demo) is connected to AB-1000-XY.", [], [ev_row()])
+    answer = svc._answer("q", I.PART_TO_SUPPLIER, outcome)
+    assert answer.source == "template" and "(demo)" in answer.summary and answer.demo is True
+
+
+def ev_row():
+    from app.schemas.intelligence import Evidence
+    return Evidence(entity="AB-1000-XY", entity_kind="PART", relationship="SUPPLIED_BY", target="Acme Seals (demo)", target_kind="SUPPLIER", data_class="SYNTHETIC_DEMO")
+
+
+def test_a_source_derived_name_is_never_labelled_demo_by_the_wording():
+    from app.intelligence.grounding import drop_false_demo_qualifier
+    demo = {"Hydraulic components (demo)", "ISO 4413 (demo)"}
+    text = "AB-1000-XY (demo) has the Hydraulic components (demo) compliance under ISO 4413 (demo)."
+    assert drop_false_demo_qualifier(text, demo, {"AB-1000-XY"}) == "AB-1000-XY has the Hydraulic components (demo) compliance under ISO 4413 (demo)."
+
+
+def test_gemini_retries_a_transient_overload_but_never_a_quota_error():
+    calls = {"n": 0}
+
+    def overloaded_then_ok(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(503, json={})
+        return _reply('{"in_scope": true, "domain": "parts_intelligence", "intent": "PART_TO_MACHINE", "entities": {}, "filters": {}, "requires_clarification": false}')
+
+    assert _gemini(overloaded_then_ok).parse_question("q", INTENTS).intent == "PART_TO_MACHINE" and calls["n"] == 2
+    quota = {"n": 0}
+
+    def limited(request: httpx.Request) -> httpx.Response:
+        quota["n"] += 1
+        return httpx.Response(429, json={})
+
+    with pytest.raises(LLMUnavailable):
+        _gemini(limited).parse_question("q", INTENTS)
+    assert quota["n"] == 1
+
+
+# ── entity context: an answer always says what it is about ───────────────────────────────────────
+PART_SUBJECT = {"label": "AB-1000-XY", "name": "Bucket, general purpose", "data_status": "SOURCE_DERIVED", "source": "Catalogue", "category": "Attachments", "subcategory": "Bucket", "part_status": "VERIFIED"}
+FIT2 = FIT + [{**FIT[0], "machine_id": "MCH-2", "model_code": "ZZ-2", "name": "Zed Two"}]
+
+
+def test_part_answers_carry_the_part_identity_and_name_it():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, fitment=FIT2, subject=lambda kind, id: PART_SUBJECT if (kind, id) == ("PART", "PRT-1") else None)
+    r = ask(service(repo, FakeLLM(parse=LLMParse("PART_TO_MACHINE", ("AB-1000-XY",)))), "Which machines use AB-1000-XY?")
+    assert r.subject is not None and (r.subject.kind, r.subject.label, r.subject.name) == ("PART", "AB-1000-XY", "Bucket, general purpose")
+    facts = {f.label: f.value for f in r.subject.facts}
+    assert facts == {"Category": "Attachments · Bucket", "Catalogue status": "Verified", "Source": "Catalogue"}
+    assert r.subject.data_class == "SOURCE_DERIVED"
+    assert r.answer.summary.startswith("AB-1000-XY (Bucket, general purpose) is associated with 2 machines")
+    assert [i.title for i in r.results] == ["ZZ-1", "ZZ-2"]  # the machines, and nothing else
+    assert all(i.kind == "machine" for i in r.results)
+
+
+def test_subject_is_the_required_entity_for_every_part_intent():
+    repo = FakeRepo({"ab-1000-xy": [PART]}, subject=lambda kind, id: PART_SUBJECT)
+    for intent in ("PART_TO_SUPPLIER", "PART_TO_DEALER", "PART_TO_ASSEMBLY", "PART_TO_COMPLIANCE", "PART_TO_INVENTORY", "PART_TO_ORDERS", "PART_TO_SERVICE_PLAN", "PART_TO_PART"):
+        r = ask(service(repo, FakeLLM(parse=LLMParse(intent, ("AB-1000-XY",)))), f"{intent} AB-1000-XY")
+        assert r.subject is not None and r.subject.label == "AB-1000-XY", intent
+        assert "Bucket, general purpose" in r.answer.summary, intent  # the empty answer names the part too
+
+
+def test_machine_subject_uses_the_machine_name():
+    sub = {"label": "ZZ-1", "name": "ZZ-1 Wheel Loader", "data_status": "SOURCE_DERIVED", "machine_type": "Wheel loader", "family": "Z"}
+    repo = FakeRepo({"zz-1": [MACHINE]}, machine_parts=(0, []), subject=lambda kind, id: sub)
+    r = ask(service(repo, FakeLLM(parse=LLMParse("MACHINE_TO_PART", ("ZZ-1",)))), "Which parts fit ZZ-1?")
+    assert r.subject is not None and r.subject.kind == "MACHINE" and r.answer.summary.startswith("No parts are recorded as fitting ZZ-1 Wheel Loader")
+
+
+def test_no_subject_when_the_results_are_the_entities():
+    repo = FakeRepo({}, low_stock_parts=(0, []), subject=lambda kind, id: PART_SUBJECT)
+    r = ask(service(repo, FakeLLM(parse=LLMParse("LOW_STOCK_PARTS", ()))), "Which parts are low on stock?")
+    assert r.subject is None
+
+
+# ── audit regressions: search plurals, naming one of several candidates, alternatives routing ──────────
+def test_plural_search_words_still_find_singular_names():
+    from app.graph.repositories.parts import search_tokens
+    assert search_tokens("hydraulic hoses") == ["hydraulic", "hos"]
+    assert search_tokens("air filters") == ["air", "filter"]
+    assert search_tokens("brake pads glass 1.2m3") == ["brake", "pad", "glass", "1.2m3"]  # no change to short words, 'ss' or identifiers
+
+
+def test_the_full_name_in_the_question_picks_one_of_several_candidates():
+    cands = [row("ASSEMBLY", f"ASM-{s}", f"Hydraulics module, {s} series (demo)", tier=2) for s in ("NV", "KFT", "BTS")]
+    repo = FakeRepo({"hydraulics module": cands}, assembly_core=None, assembly_parts=(0, []))
+    r = ask(service(repo, FakeLLM(parse=LLMParse("ASSEMBLY_TO_PART", ("Hydraulics module",)))), "Which parts are in the Hydraulics module, NV series?")
+    assert r.clarification is None and [e.label for e in r.entities] == ["Hydraulics module, NV series (demo)"]
+    r = ask(service(repo, FakeLLM(parse=LLMParse("ASSEMBLY_TO_PART", ("Hydraulics module",)))), "Which parts are in the hydraulics module?")
+    assert r.clarification is not None and len(r.clarification.candidates) == 3  # not named: still asked, never guessed
+
+
+def test_alternatives_and_replacements_are_routed_to_explicit_links():
+    desc = REGISTRY[Intent.PART_TO_PART].description.lower()
+    assert all(w in desc for w in ("alternative", "replacement", "interchangeab")) and "never states interchangeability" in desc
+
+
+def test_does_a_part_fit_one_machine_answers_for_that_pair_only():
+    repo = FakeRepo({"ab-1000-xy": [PART], "zz-2": [row("MACHINE", "MCH-2", "ZZ-2")], "zz-9": [row("MACHINE", "MCH-9", "ZZ-9")]}, fitment=FIT2)
+    r = ask(service(repo, FakeLLM(parse=LLMParse("PART_TO_MACHINE", ("AB-1000-XY", "ZZ-2")))), "Does AB-1000-XY fit the ZZ-2?")
+    assert [i.title for i in r.results] == ["ZZ-2"] and r.answer.summary.startswith("Yes: AB-1000-XY is recorded as fitting ZZ-2 (fitment: confirmed)")
+    r = ask(service(repo, FakeLLM(parse=LLMParse("PART_TO_MACHINE", ("AB-1000-XY", "ZZ-9")))), "Does AB-1000-XY fit the ZZ-9?")
+    assert r.results == [] and "not established that it fits" in r.answer.summary and "ZZ-1, ZZ-2" in r.answer.summary  # unknown, never "does not fit"

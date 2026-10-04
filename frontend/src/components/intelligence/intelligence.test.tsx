@@ -3,13 +3,16 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { MemoryRouter } from 'react-router-dom'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, askQuestion, type DataClass, type PartOverview, type ResultItem } from '../../api'
-import { ErrorNotice } from './Notices'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ApiError, askQuestion, type DataClass, type PartOverview, type QueryResponse, type ResultItem } from '../../api'
+import { ErrorNotice, errorMessage } from './Notices'
 import { TABS } from './PartWorkspace'
 import { DATA_CLASS_LABEL, ProvenanceBadge } from './provenance'
 import { ResultCard } from './ResultCard'
-import { StoreTab } from './tabs/InsightTabs'
+import { ResultView } from './ResultView'
+import { labelQuestion, rememberQuestion, whenAsked } from '../../store/recentQuestions'
+import { PartActions, StatusBadge } from './PartWorkspace'
+import { ActionTab } from './tabs/InsightTabs'
 
 afterEach(() => {
   cleanup()
@@ -59,6 +62,13 @@ describe('provenance', () => {
 })
 
 describe('errors', () => {
+  it('names the language model as the problem when it is unavailable, never the database', () => {
+    expect(errorMessage(new ApiError(503, 'llm_unavailable', 'x'))).toMatch(/question-understanding service is not available/)
+    expect(errorMessage(new ApiError(502, 'llm_invalid_response', 'x'))).toMatch(/rephrase/)
+    expect(errorMessage(new ApiError(503, 'graph_unavailable', 'x'))).toMatch(/Neo4j/)
+    expect(errorMessage(new ApiError(500, 'error', 'x'))).toMatch(/Check that the API is running/)
+  })
+
   it.each([
     [new ApiError(503, 'graph_unavailable', 'x'), /Neo4j is currently unavailable/],
     [new ApiError(0, 'network', 'x'), /could not be reached/],
@@ -78,39 +88,126 @@ describe('part workspace', () => {
   })
 
   const overview = (over: Partial<PartOverview>): PartOverview => ({
-    part_id: 'P', part_number: 'KEY-1', name: 'n', description: null, category: null, subcategory: null, manufacturer: null, origin_plant: null,
-    status: { code: 'VERIFIED', label: 'Verified' }, identification: [], data_class: 'SOURCE_DERIVED', source: null, last_updated: null, orderable: true, actions: [], ...over,
+    part_id: 'P', part_number: 'KEY-1', name: 'n', description: null, category: null, subcategory: null, families: ['F series'], manufacturer: null, origin_plant: null,
+    status: { code: 'VERIFIED', label: 'Verified', reason: null, data_class: 'SYNTHETIC_DEMO' }, identification: [], data_class: 'SOURCE_DERIVED', source: null, last_updated: null,
+    orderable: true, actions: [], ...over,
   })
+  const status = (code: PartOverview['status']['code'], label: string) => ({ code, label, reason: 'Because.', data_class: 'SYNTHETIC_DEMO' as const })
+  const action = (kind: 'parts_store' | 'identify' | 'request_identification', label: string, href: string | null = null) => [{ kind, label, href, question: null }]
+  const inRouter = (node: React.ReactNode) => render(<MemoryRouter>{node}</MemoryRouter>)
 
-  it('hands a verified, orderable part to the Parts Store using the real part number', () => {
-    render(
-      <MemoryRouter>
-        <StoreTab overview={overview({ actions: [{ kind: 'parts_store', label: 'View in Parts Store', href: '/parts-store/KEY-1', question: null }] })} onIdentify={() => {}} />
-      </MemoryRouter>,
-    )
+  beforeEach(() => localStorage.clear())
+
+  it('verified: the action hands the real part number to the Parts Store', () => {
+    const o = overview({ actions: action('parts_store', 'View in Parts Store', '/parts-store/KEY-1') })
+    inRouter(<ActionTab overview={o} onOpenFitment={() => {}} />)
     expect(screen.getByRole('link', { name: 'View in Parts Store' }).getAttribute('href')).toBe('/parts-store/KEY-1')
   })
 
-  it('never offers ordering for a part that still needs identification, and the next step is actionable', () => {
-    const onIdentify = vi.fn()
-    render(
-      <MemoryRouter>
-        <StoreTab overview={overview({ status: { code: 'IDENTIFICATION_REQUIRED', label: 'Identification required' }, orderable: true })} onIdentify={onIdentify} />
-      </MemoryRouter>,
-    )
-    expect(screen.queryByRole('link')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'Identify part' }))
-    expect(onIdentify).toHaveBeenCalled()
+  it.each([
+    ['IDENTIFICATION_REQUIRED', 'Identification required', 'Identify Part'],
+    ['AMBIGUOUS', 'Ambiguous', 'Identify machine / variant / serial'],
+  ] as const)('%s: no ordering; a form takes the machine and serial, stores it and shows it back without verifying', (code, label, actionLabel) => {
+    const o = overview({ status: status(code, label), orderable: false, actions: action('identify', actionLabel), identification: [{ model_code: 'M-1', reason: label, needed: 'Machine variant or serial range' }] })
+    inRouter(<><StatusBadge overview={o} /><ActionTab overview={o} onOpenFitment={() => {}} /></>)
+    expect(screen.queryByRole('link', { name: /parts store/i })).toBeNull()
+    expect(screen.getByRole('heading', { name: actionLabel })).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Machine model'), { target: { value: 'M-1' } })
+    fireEvent.change(screen.getByLabelText('Serial number or variant'), { target: { value: 'SN-42' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save identification' }))
+    expect(screen.getByRole('status').textContent).toMatch(/machine M-1, serial or variant SN-42/)
+    expect(screen.getByRole('status').textContent).toMatch(new RegExp(`stays ${label.toLowerCase()}`))
+    expect(document.querySelector('.pw__status')?.textContent).toMatch(new RegExp(`^${label}`)) // status unchanged; only 'details submitted' is added
+    cleanup()
+    inRouter(<ActionTab overview={o} onOpenFitment={() => {}} />) // "reload"
+    expect(screen.getByRole('status').textContent).toMatch(/SN-42/)
   })
 
-  it('does not offer ordering for an unverified part', () => {
-    render(
-      <MemoryRouter>
-        <StoreTab overview={overview({ status: { code: 'UNVERIFIED', label: 'Unverified' }, orderable: null })} onIdentify={() => {}} />
-      </MemoryRouter>,
-    )
-    expect(screen.queryByRole('link')).toBeNull()
-    expect(screen.getByText(/online ordering is not configured/)).toBeTruthy()
+  it('unverified: request identification is saved, shown as requested and disabled after a reload', () => {
+    const o = overview({ status: status('UNVERIFIED', 'Unverified'), orderable: false, actions: action('request_identification', 'Request identification') })
+    inRouter(<><StatusBadge overview={o} /><PartActions overview={o} onIdentify={() => {}} /></>)
+    fireEvent.click(screen.getByRole('button', { name: 'Request identification' }))
+    cleanup()
+    inRouter(<><StatusBadge overview={o} /><PartActions overview={o} onIdentify={() => {}} /><ActionTab overview={o} onOpenFitment={() => {}} /></>)
+    const button = screen.getByRole('button', { name: 'Identification requested' })
+    expect((button as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getAllByText('Identification requested').length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('never shows a raw status code', () => {
+    for (const [code, label] of [['VERIFIED', 'Verified'], ['IDENTIFICATION_REQUIRED', 'Identification required'], ['AMBIGUOUS', 'Ambiguous'], ['UNVERIFIED', 'Unverified']] as const) {
+      const { container } = inRouter(<StatusBadge overview={overview({ status: status(code, label) })} />)
+      expect(container.textContent).toBe(label)
+      cleanup()
+    }
+  })
+})
+
+describe('answers and recent questions (QA fixes 5 and 6)', () => {
+  const response = (demo: boolean): QueryResponse => ({
+    question: 'q', intent: 'PART_TO_SUPPLIER', intent_label: 'Part suppliers', understood_by: 'llm', entities: [],
+    answer: { summary: 'Acme (demo) is connected.', grounded: true, source: 'template', demo }, results: [], total: 0,
+    evidence: [{ entity: 'P', entity_kind: 'PART', relationship: 'SUPPLIED_BY', target: 'Acme (demo)', target_kind: 'SUPPLIER', data_class: 'SYNTHETIC_DEMO' }],
+    provenance: [], graph_path: ['Part', 'SUPPLIED_BY', 'Supplier'], warnings: [], actions: [], clarification: null, scope: 'IN_SCOPE',
+    stages: [{ name: 'understanding', ms: 900 }, { name: 'entities', ms: 40 }, { name: 'graph', ms: 120 }, { name: 'answer', ms: 700 }], elapsed_ms: 1,
+  })
+  const view = (demo: boolean) => render(<MemoryRouter><ResultView response={response(demo)} suggestions={null} limit={12} maxLimit={36} onInvestigate={() => {}} onAsk={() => {}} onSelect={() => {}} onMore={() => {}} /></MemoryRouter>)
+
+  it('shows a visible Demo data notice when the answer includes synthetic data', () => {
+    view(true)
+    expect(screen.getByRole('note').textContent).toMatch(/^Demo data\./)
+    cleanup()
+    view(false)
+    expect(screen.queryByText(/Demo data\./)).toBeNull()
+  })
+
+  it('names the part an answer is about before the machines that belong to it', () => {
+    const investigated: string[] = []
+    const r: QueryResponse = {
+      ...response(false), intent: 'PART_TO_MACHINE', intent_label: 'Part to machine',
+      subject: { kind: 'PART', key: 'P1', label: 'AB-1', name: 'Bucket, general purpose', facts: [{ label: 'Category', value: 'Attachments' }], data_class: 'SOURCE_DERIVED' },
+      answer: { summary: 'AB-1 (Bucket, general purpose) is associated with 2 machines.', grounded: true, source: 'template', demo: false },
+      results: [{ kind: 'machine', key: 'M1', title: 'ZZ-1', subtitle: 'ZZ-1 Wheel Loader', part_number: null, relationship: 'FITS', data_class: 'SOURCE_DERIVED', facts: [], groups: [] }], total: 1,
+    }
+    render(<MemoryRouter><ResultView response={r} suggestions={null} limit={12} maxLimit={36} onInvestigate={(pn) => investigated.push(pn)} onAsk={() => {}} onSelect={() => {}} onMore={() => {}} /></MemoryRouter>)
+    const subject = screen.getByLabelText('About part AB-1')
+    expect(subject.textContent).toMatch(/PartAB-1Bucket, general purpose.*Source-derived/)
+    expect(subject.textContent).toMatch(/CategoryAttachments/)
+    fireEvent.click(screen.getByRole('button', { name: 'AB-1' }))
+    expect(investigated).toEqual(['AB-1'])
+  })
+
+  it('lists evidence rows in "How this was answered"', () => {
+    view(true)
+    expect(screen.getAllByRole('row').length).toBe(2) // header + one evidence row
+  })
+
+  it('says the model understood the question and shows the measured steps, never a prompt', () => {
+    const { container } = view(true)
+    const text = container.querySelector('.evid')?.textContent ?? ''
+    expect(text).toMatch(/understood by the language model/)
+    expect(text).toMatch(/Understanding 900 ms · Entities 40 ms · Knowledge graph 120 ms · Answer 700 ms/)
+    expect(text).not.toMatch(/prompt|system instruction/i)
+  })
+
+  it('keeps a labelled, timestamped history: newest first, no duplicates, capped', () => {
+    localStorage.clear()
+    const read = () => JSON.parse(localStorage.getItem('noordveld-pi-history-v1') ?? '[]') as { question: string; label?: string }[]
+    rememberQuestion('first?')
+    rememberQuestion('second?')
+    labelQuestion('first?', 'Part suppliers')
+    rememberQuestion('FIRST?')
+    expect(read().map((q) => q.question)).toEqual(['FIRST?', 'second?'])
+    expect(read()[0].label).toBe('Part suppliers') // asking again keeps what it was understood as
+    for (let i = 0; i < 30; i++) rememberQuestion(`q${i}`)
+    expect(read()).toHaveLength(20)
+  })
+
+  it('words when a question was asked', () => {
+    const now = new Date(2026, 9, 3, 12, 0)
+    expect(whenAsked(new Date(2026, 9, 3, 10, 24).getTime(), now)).toBe('Today, 10:24')
+    expect(whenAsked(new Date(2026, 9, 2, 16, 12).getTime(), now)).toBe('Yesterday, 16:12')
+    expect(whenAsked(new Date(2026, 8, 28, 9, 5).getTime(), now)).toBe('28 Sep, 09:05')
   })
 })
 

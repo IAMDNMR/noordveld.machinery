@@ -1,0 +1,178 @@
+{
+  "before": {
+    "nodes": 1922,
+    "relationships": 4002
+  },
+  "after": {
+    "nodes": 1922,
+    "relationships": 4002
+  },
+  "delta": {
+    "nodes": 0,
+    "relationships": 0
+  },
+  "stages": [
+    {
+      "stage": "1 constraints for the new labels",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "2 reference: data source",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "3 machine profiles",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "4 part profile fields (null only)",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "5 warehouse classification (null only)",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "6 assemblies",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "7 customer requests",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "8 orders",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "9 order lines",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "10 order status history",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "11 shipments",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    },
+    {
+      "stage": "12 tracking events",
+      "nodes": 0,
+      "rels": 0,
+      "props": 0,
+      "deleted": 0
+    }
+  ],
+  "validation": {
+    "duplicate_nodes": 0,
+    "duplicate_relationship_ids": 0,
+    "relationships_without_rel_id": 0,
+    "duplicate_fitments": 0,
+    "duplicate_supplier_links": 0,
+    "duplicate_dealer_links": 0,
+    "duplicate_assembly_links": 0,
+    "duplicate_order_lines": 0,
+    "orphan_nodes": 8,
+    "orphan_nodes_by_label": {
+      "ShippingRate": 8,
+      "DataSource": 5
+    },
+    "order_lines_without_part": 0,
+    "orders_without_customer": 0,
+    "shipments_without_order": 0,
+    "invalid_data_status": 0,
+    "batch_nodes_missing_provenance": 0,
+    "batch_relationships_missing_provenance": 0,
+    "synthetic_fitments_created": 0,
+    "requests_for_parts_that_do_not_fit": 0,
+    "batch_orders_with_non_verified_parts": 0,
+    "contradictory_inventory": 0,
+    "contradictory_order_shipment": 0,
+    "shipped_orders_without_shipment": 0,
+    "status_history_gaps": 0,
+    "tracking_out_of_order": 0,
+    "delivered_shipments_without_delivered_event": 0,
+    "batch_records": {
+      "nodes": 82,
+      "relationships": 190,
+      "enriched_existing_nodes": 104
+    },
+    "problems": {}
+  },
+  "source_checksum_before": "f685de957e89985cd5b1d11d16d3895f23b25bdd995db0b6369eddc45cbeaaaa",
+  "source_checksum_after": "f685de957e89985cd5b1d11d16d3895f23b25bdd995db0b6369eddc45cbeaaaa",
+  "source_data_unchanged": true,
+  "provenance_after": {
+    "nodes": {
+      "SOURCE_DERIVED": 456,
+      "DERIVED": 165,
+      "USER_PROVIDED": 10,
+      "SYNTHETIC_DEMO": 1291
+    },
+    "relationships": {
+      "SOURCE_DERIVED": 778,
+      "DERIVED": 391,
+      "SYNTHETIC_DEMO": 2827,
+      "USER_PROVIDED": 6
+    }
+  },
+  "gaps_after": {
+    "machines_without_profile_fields": [],
+    "machines_without_fitted_parts": [
+      "KFT-120"
+    ],
+    "parts_without_assembly": 17,
+    "parts_without_service_plan": 62,
+    "parts_without_supplier": 0,
+    "parts_without_inventory": 0,
+    "parts_without_dealer": 1,
+    "parts_without_compliance": 0,
+    "parts_in_any_order": 21,
+    "profile_fields_missing": {
+      "application": 0,
+      "maintenance_class": 0,
+      "criticality": 0
+    },
+    "warehouse_fields_missing": {
+      "warehouse_type": 0,
+      "operating_status": 0
+    },
+    "customer_requests": 6,
+    "orders": 14,
+    "inventory_rows_zero_but_in_stock": 0
+  }
+}

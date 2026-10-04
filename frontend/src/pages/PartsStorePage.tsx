@@ -1,6 +1,6 @@
-import { Cog, LayoutGrid, Rows3, SlidersHorizontal, X } from 'lucide-react'
+import { SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { getFilters, searchParts, type PartQuery } from '../api'
 import { FilterPanel } from '../components/store/FilterPanel'
 import { PartCard } from '../components/store/PartCard'
@@ -14,14 +14,13 @@ import { activeFilterCount, PAGE_SIZE, parseQuery, SORTS, STORE_ROUTE, toParams 
 export default function PartsStorePage() {
   usePageMeta({
     title: 'Parts Store',
-    description: 'Find the right Noordveld part for the work. Search by part name, part number, legacy reference or machine, with fitment, specifications and availability from the Noordveld parts graph. Demonstration store.',
+    description: 'The right part for the machine. Search Noordveld parts by part number, description or machine, with fitment, specifications and availability from the Noordveld parts graph. Demonstration store.',
     path: STORE_ROUTE,
   })
 
   const [params, setParams] = useSearchParams()
   const query = parseQuery(params)
   const paramsKey = params.toString()
-  const [view, setView] = useState<'grid' | 'list'>('grid')
   const [sheet, setSheet] = useState(false)
 
   const parts = useApi((signal) => searchParts(query, signal), paramsKey)
@@ -47,10 +46,6 @@ export default function PartsStorePage() {
   }
   const clear = () => update({ category: '', machine: '', availability: [], orderable: false })
   const resetAll = () => setParams(new URLSearchParams(), { replace: true })
-  const browse = (next: Partial<PartQuery>) => {
-    update(next)
-    requestAnimationFrame(() => document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
-  }
 
   const active = activeFilterCount(query)
   const total = parts.data?.total
@@ -64,69 +59,36 @@ export default function PartsStorePage() {
   ]
 
   return (
-    <>
-      <section className="shero on-dark" aria-labelledby="store-title">
-        <div className="shero__glow" aria-hidden="true" />
-        <div className="container shero__inner">
-          <p className="label shero__label">Agentic E-Commerce · Parts Store</p>
-          <h1 id="store-title" className="hero-title shero__title">
-            Find the right part for the work.
-          </h1>
-          <p className="lead shero__lead">Search by part name, part number, legacy reference or machine, or browse by machine and category.</p>
-          <div className="shero__search">
-            <StoreSearch variant="hero" />
-          </div>
-          {options ? (
-            <>
-              <ul className="shero__cats" aria-label="Browse by category">
-                {options.categories.map((c) => (
-                  <li key={c.category_id}>
-                    <button type="button" onClick={() => browse({ category: c.name })}>
-                      <Cog size={18} strokeWidth={1.5} aria-hidden="true" />
-                      {c.name}
-                      <span>{c.part_count}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <ul className="shero__cats shero__cats--machines" aria-label="Browse by machine">
-                {options.machines.map((m) => (
-                  <li key={m.machine_id}>
-                    <button type="button" onClick={() => browse({ machine: m.model_code })}>
-                      <span className="mono shero__model">{m.model_code}</span>
-                      <span>{m.part_count}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null}
+    <div className="wf-container store-page">
+      <header className="store-hero">
+        <p className="eyebrow">Parts Store</p>
+        <h1 id="store-title">The right part for the machine.</h1>
+        <p className="lede">Precisely identified. Clearly sourced. Search by part number, description or machine.</p>
+        <div className="store-hero__search">
+          <StoreSearch variant="hero" />
         </div>
-      </section>
+        <p className="small muted">
+          Prefer to describe what you need? <Link className="link-more" to="/agentic-shopping">Tell the agent</Link> · Need to understand fitment, suppliers or how parts connect?{' '}
+          <Link className="link-more" to="/parts-intelligence">Ask Parts Intelligence</Link>
+        </p>
+      </header>
 
-      <section id="results" className="scat container" aria-labelledby="results-title">
-        <aside className="scat__side" aria-label="Filters">
+      <section id="results" className="store-layout" aria-labelledby="results-title">
+        <aside className="store-filters" aria-label="Filters">
           <FilterPanel query={query} options={options} onChange={update} onClear={clear} />
         </aside>
 
-        <div className="scat__main">
-          <div className="scat__bar">
-            <h2 id="results-title" className="scat__count" aria-live="polite">
-              {total === undefined ? (
-                'Parts'
-              ) : (
-                <>
-                  <strong>{total}</strong> {total === 1 ? 'part' : 'parts'}
-                  {query.category ? <span> in {query.category}</span> : null}
-                </>
-              )}
+        <div className="store-main">
+          <div className="store-toolbar">
+            <h2 id="results-title" className="store-count" aria-live="polite">
+              {total === undefined ? 'Parts' : `${total} ${total === 1 ? 'part' : 'parts'}${query.category ? ` in ${query.category}` : ''}`}
             </h2>
-            <div className="scat__tools">
-              <button type="button" className="scat__filter-btn" onClick={() => setSheet(true)}>
-                <SlidersHorizontal size={17} strokeWidth={1.8} aria-hidden="true" />
+            <div className="row">
+              <button type="button" className="btn btn-secondary btn-sm store-filter-btn" onClick={() => setSheet(true)}>
+                <SlidersHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                 Filters{active ? ` (${active})` : ''}
               </button>
-              <label className="scat__sort">
+              <label className="store-sort">
                 <span className="sr-only">Sort by</span>
                 <select value={query.sort} onChange={(e) => update({ sort: e.target.value as PartQuery['sort'] })}>
                   {SORTS.map((s) => (
@@ -136,30 +98,22 @@ export default function PartsStorePage() {
                   ))}
                 </select>
               </label>
-              <div className="scat__view" role="group" aria-label="Layout">
-                <button type="button" aria-pressed={view === 'grid'} onClick={() => setView('grid')} aria-label="Grid view">
-                  <LayoutGrid size={18} strokeWidth={1.7} aria-hidden="true" />
-                </button>
-                <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')} aria-label="List view">
-                  <Rows3 size={18} strokeWidth={1.7} aria-hidden="true" />
-                </button>
-              </div>
             </div>
           </div>
 
           {chips.length > 0 ? (
-            <ul className="scat__chips" aria-label="Active filters">
+            <ul className="chip-row store-chips" aria-label="Active filters">
               {chips.map((c) => (
                 <li key={c.key}>
-                  <button type="button" onClick={c.remove} aria-label={`Remove filter ${c.label}`}>
+                  <button type="button" className="chip" onClick={c.remove} aria-label={`Remove filter ${c.label}`}>
                     {c.label}
-                    <X size={14} strokeWidth={2} aria-hidden="true" />
+                    <X size={13} strokeWidth={2} aria-hidden="true" />
                   </button>
                 </li>
               ))}
               {chips.length > 1 ? (
                 <li>
-                  <button type="button" className="scat__chips-clear" onClick={resetAll}>
+                  <button type="button" className="link-more" onClick={resetAll}>
                     Clear everything
                   </button>
                 </li>
@@ -175,7 +129,7 @@ export default function PartsStorePage() {
             <EmptyView
               title="No parts match"
               action={
-                <button type="button" className="button button--secondary" onClick={resetAll}>
+                <button type="button" className="btn btn-secondary" onClick={resetAll}>
                   Reset search and filters
                 </button>
               }
@@ -184,22 +138,22 @@ export default function PartsStorePage() {
             </EmptyView>
           ) : (
             <>
-              <ul className={`scat__grid scat__grid--${view}`} aria-busy={parts.loading}>
+              <ul className="grid grid-3" aria-busy={parts.loading}>
                 {parts.data.items.map((p) => (
-                  <li key={p.part_id}>
-                    <PartCard part={p} layout={view === 'list' ? 'row' : 'tile'} />
+                  <li key={p.part_id} className="store-cell">
+                    <PartCard part={p} />
                   </li>
                 ))}
               </ul>
               {pages > 1 ? (
-                <nav className="scat__pager" aria-label="Pages">
-                  <button type="button" className="button button--secondary" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+                <nav className="store-pager" aria-label="Pages">
+                  <button type="button" className="btn btn-secondary btn-sm" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
                     Previous
                   </button>
-                  <p>
+                  <span className="small muted">
                     Page {page} of {pages}
-                  </p>
-                  <button type="button" className="button button--secondary" disabled={page >= pages} onClick={() => goToPage(page + 1)}>
+                  </span>
+                  <button type="button" className="btn btn-secondary btn-sm" disabled={page >= pages} onClick={() => goToPage(page + 1)}>
                     Next
                   </button>
                 </nav>
@@ -207,7 +161,7 @@ export default function PartsStorePage() {
             </>
           )}
 
-          <p className="scat__note">Demonstration store. Part, fitment and legacy data come from the Noordveld parts graph; prices, stock and supply values are demonstration data and are labelled as such.</p>
+          <p className="disclaimer">Demonstration store. Part, fitment and legacy data come from the Noordveld parts graph; prices, stock and supply values are demonstration data and are labelled as such.</p>
         </div>
       </section>
 
@@ -218,11 +172,11 @@ export default function PartsStorePage() {
             <X size={22} strokeWidth={1.8} aria-hidden="true" />
           </button>
           <FilterPanel query={query} options={options} onChange={update} onClear={clear} />
-          <button type="button" className="button button--primary sheet__apply" onClick={() => setSheet(false)}>
+          <button type="button" className="btn btn-primary btn-block sheet__apply" onClick={() => setSheet(false)}>
             {total === undefined ? 'Show parts' : `Show ${total} ${total === 1 ? 'part' : 'parts'}`}
           </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }

@@ -15,7 +15,12 @@ export function Closing() {
           <p className="lead closing__lead">Agentic E-Commerce moves beyond helping customers find products. It understands requirements, evaluates available options against real-world constraints, recommends a suitable path, and helps turn that decision into action.</p>
         </Reveal>
         <Reveal delay={260}>
-          <ButtonLink href="#evolution">Watch the demo</ButtonLink>
+          <div className="closing__actions">
+            <ButtonLink href="/agentic-shopping">See it work with real Noordveld data</ButtonLink>
+            <ButtonLink href="#evolution" variant="secondary">
+              Watch the demo
+            </ButtonLink>
+          </div>
         </Reveal>
       </div>
     </section>

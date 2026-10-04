@@ -8,6 +8,28 @@
 .requirement__line--lead { font-weight: 600; }
 .requirement__note { color: var(--on-night-2); font-size: var(--text-small); }
 
+/* conceptual flow: need -> constraints -> agent evaluates -> recommended action */
+.concept { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.concept__step { position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border: 1px solid var(--line-night); border-radius: 14px; background: var(--night-2); }
+.concept__step:not(:last-child)::after { content: "→"; position: absolute; top: 50%; right: calc(-1 * var(--space-4)); width: var(--space-4); text-align: center; transform: translateY(-50%); color: var(--accent-night); }
+.concept__label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-night); }
+.concept__need { font-size: clamp(1.4rem, 1rem + 1.2vw, 1.9rem); font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
+.concept__chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0; padding: 0; list-style: none; }
+.concept__chips li { padding: 0.3rem 0.75rem; border: 1px solid var(--line-night); border-radius: 999px; font-size: var(--text-small); color: var(--on-night); }
+.concept__options { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.concept__options li { display: grid; gap: 0.1rem; padding: 0.55rem 0.75rem; border: 1px solid var(--line-night); border-radius: 10px; font-size: var(--text-small); }
+.concept__options strong { font-weight: 600; }
+.concept__options span { color: var(--on-night-2); }
+.concept__options li.is-best { border-color: var(--accent-night); }
+.concept__options li.is-best span { color: var(--accent-night); }
+.concept__step--action { border-color: var(--accent-night); }
+.concept__action { font-size: 1.05rem; line-height: 1.45; color: var(--on-night); }
+.concept__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-6); }
+@media (max-width: 960px) {
+  .concept { grid-template-columns: 1fr; max-width: 34rem; }
+  .concept__step:not(:last-child)::after { content: "↓"; top: auto; bottom: calc(-1 * var(--space-4)); right: 50%; transform: translateX(50%); }
+}
+
 /* ───────── Process ───────── */
 .process { padding-top: var(--space-8); }
 .process__title { max-width: 14ch; margin-bottom: var(--space-5); }

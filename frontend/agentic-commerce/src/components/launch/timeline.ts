@@ -1,4 +1,5 @@
 import { clamp01, lerp, seg } from '../../lib/math'
+import { filmData as D } from './launchData'
 
 /*
   The launch film is a pure function of time `t` (seconds). One world, 1600 × 900, shared by every act, so elements
@@ -34,7 +35,8 @@ export const CHAPTERS: readonly { id: string; name: string; start: number }[] = 
 /** The frame shown for reduced motion and before the film has started: the finished reveal. */
 export const POSTER_TIME = 46.4 + HOOK
 
-export const QUERY = 'My NV-4500 is down. I need a hydraulic hose.'
+/** The customer's request, built from the film's graph records (machine model and part type). */
+export const QUERY = `My ${D.machine.model} is down. I need a ${(D.part.subcategory || D.part.name).toLowerCase()}.`
 
 /** Every key coordinate used by both the scenes and the cursor. */
 export const P = {

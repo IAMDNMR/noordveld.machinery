@@ -1,0 +1,830 @@
+[
+  {
+    "question": "What machines are available?",
+    "expected": "MACHINE_LIST",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "MACHINE_LIST",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 15,
+    "evidence": 12,
+    "answer": "The catalogue holds 15 machines. Ask which parts fit any of them.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2819
+      },
+      {
+        "name": "entities",
+        "ms": 0
+      },
+      {
+        "name": "graph",
+        "ms": 1271
+      },
+      {
+        "name": "answer",
+        "ms": 1287
+      }
+    ]
+  },
+  {
+    "question": "Which parts fit the NV-4500?",
+    "expected": "MACHINE_TO_PART",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "MACHINE_TO_PART",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 52,
+    "evidence": 12,
+    "answer": "NV-4500 is associated with 52 parts in the current graph.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 4089
+      },
+      {
+        "name": "entities",
+        "ms": 925
+      },
+      {
+        "name": "graph",
+        "ms": 238
+      },
+      {
+        "name": "answer",
+        "ms": 2312
+      }
+    ]
+  },
+  {
+    "question": "Which machines use NVM-1010-HY?",
+    "expected": "PART_TO_MACHINE",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_MACHINE",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 2,
+    "evidence": 2,
+    "answer": "NVM-1010-HY fits the NV-3200 (demo) and NV-4500 (demo) machines.",
+    "worded_by": "gemini",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1870
+      },
+      {
+        "name": "entities",
+        "ms": 319
+      },
+      {
+        "name": "graph",
+        "ms": 235
+      },
+      {
+        "name": "answer",
+        "ms": 3253
+      }
+    ]
+  },
+  {
+    "question": "What assemblies contain NVM-1010-HY?",
+    "expected": "PART_TO_ASSEMBLY",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_ASSEMBLY",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 1,
+    "answer": "NVM-1010-HY (demo) is part of the Hydraulics module, NV series (demo).",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 3488
+      },
+      {
+        "name": "entities",
+        "ms": 318
+      },
+      {
+        "name": "graph",
+        "ms": 291
+      },
+      {
+        "name": "answer",
+        "ms": 797
+      }
+    ]
+  },
+  {
+    "question": "Which suppliers are connected to NVM-1010-HY?",
+    "expected": "PART_TO_SUPPLIER",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_SUPPLIER",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 2,
+    "evidence": 2,
+    "answer": "NVM-1010-HY (demo) is supplied by Veldstra Hydraulics (demo) and Rijnmond Hydraulic Supply (demo). These are synthetic demo data entries.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1477
+      },
+      {
+        "name": "entities",
+        "ms": 323
+      },
+      {
+        "name": "graph",
+        "ms": 277
+      },
+      {
+        "name": "answer",
+        "ms": 872
+      }
+    ]
+  },
+  {
+    "question": "Where is NVM-1010-HY available?",
+    "expected": "PART_TO_LOCATION",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_LOCATION",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 9,
+    "evidence": 9,
+    "answer": "NVM-1010-HY (demo) is available at Bakker Parts Depot Coevorden (demo), Kessler Parts Depot Lingen (demo), Noordveld Central Warehouse Assen (demo), and Regional Distribution Centre Zwolle (demo).",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1632
+      },
+      {
+        "name": "entities",
+        "ms": 325
+      },
+      {
+        "name": "graph",
+        "ms": 706
+      },
+      {
+        "name": "answer",
+        "ms": 825
+      }
+    ]
+  },
+  {
+    "question": "Which warehouses have NVM-1010-HY?",
+    "expected": "PART_TO_INVENTORY|PART_TO_LOCATION",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_LOCATION",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 9,
+    "evidence": 9,
+    "answer": "NVM-1010-HY (demo) is available at Bakker Parts Depot Coevorden (demo), Kessler Parts Depot Lingen (demo), Noordveld Central Warehouse Assen (demo), and Regional Distribution Centre Zwolle (demo). These are all synthetic demo data locations.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1526
+      },
+      {
+        "name": "entities",
+        "ms": 320
+      },
+      {
+        "name": "graph",
+        "ms": 707
+      },
+      {
+        "name": "answer",
+        "ms": 3260
+      }
+    ]
+  },
+  {
+    "question": "What compliance requirements are associated with NVM-1010-HY?",
+    "expected": "PART_TO_COMPLIANCE",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_COMPLIANCE",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 1,
+    "answer": "NVM-1010-HY (demo) is associated with Hydraulic components (demo) compliance.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2196
+      },
+      {
+        "name": "entities",
+        "ms": 329
+      },
+      {
+        "name": "graph",
+        "ms": 254
+      },
+      {
+        "name": "answer",
+        "ms": 832
+      }
+    ]
+  },
+  {
+    "question": "Which service plans require NVM-1010-HY?",
+    "expected": "PART_TO_SERVICE_PLAN",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_SERVICE_PLAN",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 2,
+    "answer": "SVC-2000-002 (demo) requires NVM-1010-HY (demo). This is a synthetic demo data item.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2385
+      },
+      {
+        "name": "entities",
+        "ms": 321
+      },
+      {
+        "name": "graph",
+        "ms": 579
+      },
+      {
+        "name": "answer",
+        "ms": 1810
+      }
+    ]
+  },
+  {
+    "question": "Which orders contain NVM-1010-HY?",
+    "expected": "PART_TO_ORDERS",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_ORDERS",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 2,
+    "evidence": 2,
+    "answer": "The orders ORD-0010 (demo) and ORD-0013 (demo) contain NVM-1010-HY (demo).",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 7240
+      },
+      {
+        "name": "entities",
+        "ms": 319
+      },
+      {
+        "name": "graph",
+        "ms": 325
+      },
+      {
+        "name": "answer",
+        "ms": 1897
+      }
+    ]
+  },
+  {
+    "question": "Has order ORD-0013 shipped?",
+    "expected": "ORDER_STATUS",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "ORDER_STATUS",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 2,
+    "evidence": 3,
+    "answer": "The evidence shows that order ORD-0013 (demo) has shipment SHP-0010 (demo). The shipping status of order ORD-0013 (demo) is unavailable in the provided evidence.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 3543
+      },
+      {
+        "name": "entities",
+        "ms": 334
+      },
+      {
+        "name": "graph",
+        "ms": 303
+      },
+      {
+        "name": "answer",
+        "ms": 1898
+      }
+    ]
+  },
+  {
+    "question": "Where is the shipment for order ORD-0014 now?",
+    "expected": "ORDER_STATUS",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "ORDER_STATUS",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 2,
+    "evidence": 4,
+    "answer": "The information regarding the location of shipment SHP-0011 (demo) for order ORD-0014 (demo) is unavailable.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2455
+      },
+      {
+        "name": "entities",
+        "ms": 1252
+      },
+      {
+        "name": "graph",
+        "ms": 291
+      },
+      {
+        "name": "answer",
+        "ms": 2692
+      }
+    ]
+  },
+  {
+    "question": "What dealers are in Zwolle?",
+    "expected": "GEO_LOCATION",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "GEO_LOCATION",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 1,
+    "answer": "IJsselvallei Equipment (demo) is a dealer located in Zwolle, NL. This information is based on the provided synthetic demo data.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2101
+      },
+      {
+        "name": "entities",
+        "ms": 374
+      },
+      {
+        "name": "graph",
+        "ms": 271
+      },
+      {
+        "name": "answer",
+        "ms": 3239
+      }
+    ]
+  },
+  {
+    "question": "What dealers are in Assen?",
+    "expected": "GEO_LOCATION",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "GEO_LOCATION",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 0,
+    "evidence": 0,
+    "answer": "No dealer is recorded in Assen.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2364
+      },
+      {
+        "name": "entities",
+        "ms": 318
+      },
+      {
+        "name": "graph",
+        "ms": 232
+      },
+      {
+        "name": "answer",
+        "ms": 0
+      }
+    ]
+  },
+  {
+    "question": "What is the provenance of NVM-1010-HY?",
+    "expected": "PART_PROVENANCE",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_PROVENANCE",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 5,
+    "evidence": 21,
+    "answer": "The part NVM-1010-HY is recorded in the noordveld-parts-catalog.xlsx source-derived file. It originates at a plant, which is a source-derived relationship.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2352
+      },
+      {
+        "name": "entities",
+        "ms": 316
+      },
+      {
+        "name": "graph",
+        "ms": 472
+      },
+      {
+        "name": "answer",
+        "ms": 1984
+      }
+    ]
+  },
+  {
+    "question": "Show me everything connected to the NV-4500.",
+    "expected": "MACHINE_GRAPH",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "MACHINE_GRAPH",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 5,
+    "answer": "The NV-4500 (demo) is a member of the NV series and is branded as Noordveld. It is manufactured at Assen (NL), fits 52 parts, and has 4 service plans (demo).",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1917
+      },
+      {
+        "name": "entities",
+        "ms": 327
+      },
+      {
+        "name": "graph",
+        "ms": 237
+      },
+      {
+        "name": "answer",
+        "ms": 849
+      }
+    ]
+  },
+  {
+    "question": "What parts are used across multiple machines?",
+    "expected": "SHARED_PARTS",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "SHARED_PARTS",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 93,
+    "evidence": 40,
+    "answer": "93 parts are recorded as fitting more than one machine.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1473
+      },
+      {
+        "name": "entities",
+        "ms": 0
+      },
+      {
+        "name": "graph",
+        "ms": 384
+      },
+      {
+        "name": "answer",
+        "ms": 1684
+      }
+    ]
+  },
+  {
+    "question": "Which parts are low on stock?",
+    "expected": "LOW_STOCK_PARTS",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "LOW_STOCK_PARTS",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 9,
+    "evidence": 9,
+    "answer": "9 parts are Limited or on Backorder in the catalogue (4 on Backorder).",
+    "worded_by": "template",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2651
+      },
+      {
+        "name": "entities",
+        "ms": 0
+      },
+      {
+        "name": "graph",
+        "ms": 402
+      },
+      {
+        "name": "answer",
+        "ms": 1394
+      }
+    ]
+  },
+  {
+    "question": "Which parts does Hanselmann Kuehlsysteme supply?",
+    "expected": "SUPPLIER_GRAPH",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "SUPPLIER_GRAPH",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 13,
+    "evidence": 12,
+    "answer": "Hanselmann Kuehlsysteme (demo) (Hannover, DE) is connected to 13 parts through SUPPLIED_BY. It is connected to the categories Filtration, Cooling.",
+    "worded_by": "template",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1610
+      },
+      {
+        "name": "entities",
+        "ms": 319
+      },
+      {
+        "name": "graph",
+        "ms": 611
+      },
+      {
+        "name": "answer",
+        "ms": 1529
+      }
+    ]
+  },
+  {
+    "question": "Which machines are manufactured in Lingen?",
+    "expected": "MACHINE_LIST",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "MACHINE_LIST",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 5,
+    "evidence": 5,
+    "answer": "The information regarding which machines are manufactured in Lingen is unavailable in the provided evidence.",
+    "worded_by": "gemini",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1465
+      },
+      {
+        "name": "entities",
+        "ms": 0
+      },
+      {
+        "name": "graph",
+        "ms": 393
+      },
+      {
+        "name": "answer",
+        "ms": 1601
+      }
+    ]
+  },
+  {
+    "question": "Which warehouses have this part?",
+    "expected": "NEEDS_CLARIFICATION",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_LOCATION",
+    "scope": "NEEDS_CLARIFICATION",
+    "understood_by": "llm",
+    "total": 0,
+    "evidence": 0,
+    "answer": "Which part number or name are you asking about?",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1319
+      }
+    ]
+  },
+  {
+    "question": "Has this order shipped?",
+    "expected": "NEEDS_CLARIFICATION",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "ORDER_STATUS",
+    "scope": "NEEDS_CLARIFICATION",
+    "understood_by": "llm",
+    "total": 0,
+    "evidence": 0,
+    "answer": "Could you please provide the order number?",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1903
+      }
+    ]
+  },
+  {
+    "question": "Is NVM-1010-HY interchangeable with NVM-1050-CL?",
+    "expected": "PART_TO_PART",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_PART",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 0,
+    "evidence": 0,
+    "answer": "No graph relationship links NVM-1010-HY and NVM-1050-CL, so the graph does not establish that they are interchangeable, alternatives or replacements.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 2343
+      },
+      {
+        "name": "entities",
+        "ms": 881
+      },
+      {
+        "name": "graph",
+        "ms": 247
+      },
+      {
+        "name": "answer",
+        "ms": 0
+      }
+    ]
+  },
+  {
+    "question": "Does Hanselmann Kuehlsysteme service the NV-4500?",
+    "expected": "*",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "ENTITY_PATH",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 2,
+    "answer": "The provided evidence does not state that Hanselmann Kuehlsysteme (demo) services the NV-4500. This information is unavailable.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1957
+      },
+      {
+        "name": "entities",
+        "ms": 555
+      },
+      {
+        "name": "graph",
+        "ms": 291
+      },
+      {
+        "name": "answer",
+        "ms": 1282
+      }
+    ]
+  },
+  {
+    "question": "Is NVM-1010-HY certified?",
+    "expected": "PART_TO_COMPLIANCE",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_COMPLIANCE",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 1,
+    "evidence": 1,
+    "answer": "NVM-1010-HY (demo) has the Hydraulic components (demo) compliance.",
+    "worded_by": "gemini",
+    "demo_notice": true,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1675
+      },
+      {
+        "name": "entities",
+        "ms": 322
+      },
+      {
+        "name": "graph",
+        "ms": 236
+      },
+      {
+        "name": "answer",
+        "ms": 1179
+      }
+    ]
+  },
+  {
+    "question": "Which orders contain NVM-4410-SK?",
+    "expected": "PART_TO_ORDERS",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "PART_TO_ORDERS",
+    "scope": "IN_SCOPE",
+    "understood_by": "llm",
+    "total": 0,
+    "evidence": 0,
+    "answer": "No order containing NVM-4410-SK is recorded in the graph.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1935
+      },
+      {
+        "name": "entities",
+        "ms": 319
+      },
+      {
+        "name": "graph",
+        "ms": 249
+      },
+      {
+        "name": "answer",
+        "ms": 0
+      }
+    ]
+  },
+  {
+    "question": "What is the capital of France?",
+    "expected": "OUT_OF_SCOPE",
+    "verdict": "PASS",
+    "why": "",
+    "intent": "UNSUPPORTED",
+    "scope": "OUT_OF_SCOPE",
+    "understood_by": "llm",
+    "total": 0,
+    "evidence": 0,
+    "answer": "I can help with Noordveld Parts Intelligence questions about parts, machines, fitment, suppliers, assemblies, availability, compliance, relationships and provenance. Please ask a question related to those areas.",
+    "worded_by": "template",
+    "demo_notice": false,
+    "stages": [
+      {
+        "name": "understanding",
+        "ms": 1389
+      }
+    ]
+  }
+]

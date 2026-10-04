@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 # Where a value comes from. NOT_CONNECTED means the graph has no such data at all (unknown, never zero).
 DataClass = Literal["REAL", "SOURCE_DERIVED", "DERIVED", "SYNTHETIC_DEMO", "USER_PROVIDED", "TEST_DATA", "INTERNAL_REFERENCE_ONLY", "UNKNOWN", "NOT_CONNECTED"]
-EntityKind = Literal["PART", "MACHINE", "SUPPLIER", "DEALER", "ASSEMBLY", "CATEGORY"]
+EntityKind = Literal["PART", "MACHINE", "SUPPLIER", "DEALER", "ASSEMBLY", "CATEGORY", "ORDER", "WAREHOUSE"]
 
 
 class Fact(BaseModel):
@@ -21,7 +21,7 @@ class FactGroup(BaseModel):
 
 
 class Action(BaseModel):
-    kind: Literal["view_part", "parts_store", "investigate", "identify", "ask"]
+    kind: Literal["view_part", "parts_store", "investigate", "identify", "request_identification", "ask"]
     label: str
     href: str | None = None
     question: str | None = None
@@ -30,7 +30,7 @@ class Action(BaseModel):
 class ResultItem(BaseModel):
     """One thing in an answer, shaped for display: a primary key, a title, and separate labelled facts (never one long line)."""
 
-    kind: Literal["part", "machine", "supplier", "dealer", "assembly", "category", "relationship", "compliance", "stock", "metric", "path"]
+    kind: Literal["part", "machine", "supplier", "dealer", "assembly", "category", "relationship", "compliance", "warehouse", "order", "shipment", "service_plan", "metric", "path"]
     key: str
     title: str
     subtitle: str | None = None
@@ -64,6 +64,18 @@ class EntityRef(BaseModel):
     data_class: DataClass = "UNKNOWN"
 
 
+class Subject(BaseModel):
+    """The entity an answer is about, identified in a few facts (for a part: name, category, catalogue status, data class), so a list of
+    machines or suppliers never appears without saying which part it belongs to."""
+
+    kind: EntityKind
+    key: str
+    label: str
+    name: str | None = None
+    facts: list[Fact] = []
+    data_class: DataClass = "UNKNOWN"
+
+
 class Candidate(BaseModel):
     kind: EntityKind
     key: str
@@ -73,6 +85,7 @@ class Candidate(BaseModel):
 
 class Clarification(BaseModel):
     question: str
+    code: str | None = None  # PART_NOT_FOUND, MACHINE_NOT_FOUND, ... when a named entity is not in the graph; AMBIGUOUS when several match
     candidates: list[Candidate] = []
     suggestions: list[str] = []
 
@@ -80,7 +93,8 @@ class Clarification(BaseModel):
 class Answer(BaseModel):
     summary: str
     grounded: bool  # true when every statement comes from graph evidence returned with this response
-    source: Literal["template", "gemini"]
+    source: Literal["template", "llm"]
+    demo: bool = False  # true when any result or evidence is synthetic demo data; the UI shows a "Demo data" notice
 
 
 class SelectedEntity(BaseModel):
@@ -94,12 +108,20 @@ class QueryRequest(BaseModel):
     limit: int = Field(default=12, ge=1, le=40)
 
 
+class Stage(BaseModel):
+    """One measured step of answering a question (real elapsed time, in order)."""
+
+    name: Literal["understanding", "entities", "graph", "answer"]
+    ms: int
+
+
 class QueryResponse(BaseModel):
     question: str
     intent: str
     intent_label: str
-    understood_by: Literal["rules", "llm", "selection"]
+    understood_by: Literal["llm", "selection"]
     entities: list[EntityRef]
+    subject: Subject | None = None
     answer: Answer
     results: list[ResultItem]
     total: int
@@ -109,19 +131,26 @@ class QueryResponse(BaseModel):
     warnings: list[str]
     actions: list[Action]
     clarification: Clarification | None = None
+    # the scope guardrail's verdict: OUT_OF_SCOPE questions never reach Neo4j; NEEDS_CLARIFICATION asks before answering
+    scope: Literal["IN_SCOPE", "OUT_OF_SCOPE", "NEEDS_CLARIFICATION"] = "IN_SCOPE"
+    stages: list[Stage] = []
     elapsed_ms: int
 
 
 # ── part workspace ────────────────────────────────────────────────────────────────────────────────
 class PartStatus(BaseModel):
-    code: Literal["VERIFIED", "IDENTIFICATION_REQUIRED", "UNVERIFIED", "OTHER"]
+    """The catalogue status of a part (PartCatalogProfile.part_status). Only VERIFIED parts can be ordered."""
+
+    code: Literal["VERIFIED", "IDENTIFICATION_REQUIRED", "AMBIGUOUS", "UNVERIFIED"]
     label: str
+    reason: str | None = None
+    data_class: DataClass = "UNKNOWN"  # where the status itself comes from
 
 
 class IdentificationNeed(BaseModel):
     model_code: str | None = None
-    reason: str | None = None
-    needed: str | None = None
+    reason: str | None = None  # human label, e.g. "Ambiguous"
+    needed: str | None = None  # human label, e.g. "Machine variant or serial range"
 
 
 class PartOverview(BaseModel):
@@ -131,6 +160,7 @@ class PartOverview(BaseModel):
     description: str | None = None
     category: str | None = None
     subcategory: str | None = None
+    families: list[str] = []
     manufacturer: str | None = None
     origin_plant: str | None = None
     status: PartStatus
@@ -215,6 +245,9 @@ class WarehouseItem(BaseModel):
 
 class InventoryView(BaseModel):
     state: Literal["CONNECTED", "NOT_CONNECTED"]
+    # The Parts Store's availability (PartCatalogProfile.availability_state): one source for the label everywhere
+    availability_state: str | None = None
+    availability_label: str | None = None
     total_available: int | None = None  # None means unknown, never zero
     warehouses: list[WarehouseItem]
     dealers: list[DealerItem]
@@ -292,3 +325,21 @@ class Kpis(BaseModel):
     nodes: int
     synthetic_nodes: int
     provenance_coverage_pct: float  # nodes + relationships carrying data_status / all, computed deterministically
+
+
+class Link(BaseModel):
+    label: str
+    href: str | None = None
+    question: str | None = None  # a follow-up question to ask Parts Intelligence
+
+
+class EntityDetail(BaseModel):
+    """What the graph inspector shows for a node that is not a part."""
+
+    kind: Literal["MACHINE", "SUPPLIER", "DEALER", "WAREHOUSE", "ASSEMBLY", "COMPLIANCE", "CATEGORY"]
+    id: str
+    title: str
+    subtitle: str | None = None
+    data_class: DataClass
+    facts: list[Fact]
+    links: list[Link] = []

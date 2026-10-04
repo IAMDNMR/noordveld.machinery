@@ -10,6 +10,10 @@ from fastapi.testclient import TestClient
 from app.api.dependencies import get_llm
 from app.core.config import get_settings
 from app.main import app
+from tests.support.live import live
+from tests.support.keyword_model import KeywordModel
+
+MODEL = KeywordModel()
 
 pytestmark = pytest.mark.skipif(not get_settings().graph_configured, reason="Neo4j is not configured")
 V1 = "/api/v1/intelligence"
@@ -17,7 +21,7 @@ V1 = "/api/v1/intelligence"
 
 @pytest.fixture(scope="module")
 def client():
-    app.dependency_overrides[get_llm] = lambda: None  # deterministic and fast; the live-Gemini test uses `live_client`
+    app.dependency_overrides[get_llm] = lambda: MODEL  # a stand-in for Gemini (the application has no keyword router); the live-Gemini tests are in test_gemini_first.py
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -148,9 +152,46 @@ def test_kpis_are_consistent_with_the_catalogue(client):
     assert 0 < k["provenance_coverage_pct"] <= 100 and k["relationships"] > k["fitments"] > 0
 
 
-@pytest.mark.skipif(not get_settings().llm_configured, reason="GEMINI_API_KEY is not configured")
-def test_live_gemini_understands_a_free_form_question(live_client, part):
+@live
+def test_live_model_understands_a_free_form_question(live_client, part):
     r = query(live_client, f"I need to know which suppliers provide {part}, could you tell me")
     if r["understood_by"] == "llm" or r["intent"] == "PART_TO_SUPPLIER":
         assert r["intent"] == "PART_TO_SUPPLIER"
-    assert r["answer"]["source"] in ("template", "gemini")
+    assert r["answer"]["source"] in ("template", "llm")
+
+
+# ── part status states (QA fix 2) ─────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("part_number,code,label,action_kind,action_label", [
+    ("NVM-1050-CL", "VERIFIED", "Verified", "parts_store", "View in Parts Store"),
+    ("NVM-1140-DT", "IDENTIFICATION_REQUIRED", "Identification required", "identify", "Identify Part"),
+    ("NVM-4410-SK", "AMBIGUOUS", "Ambiguous", "identify", "Identify machine / variant / serial"),
+    ("NVM-1060-DT", "UNVERIFIED", "Unverified", "request_identification", "Request identification"),
+])
+def test_each_status_has_its_own_state_and_action(client, part_number, code, label, action_kind, action_label):
+    o = client.get(f"{V1}/parts/{part_number}").json()
+    assert o["status"]["code"] == code and o["status"]["label"] == label and o["status"]["data_class"] == "SYNTHETIC_DEMO"
+    assert [(a["kind"], a["label"]) for a in o["actions"]] == [(action_kind, action_label)]
+    assert o["families"]  # the header shows the machine family
+    for need in o["identification"]:  # never a raw code
+        assert need["reason"] in ("Identification required", "Ambiguous") and "_" not in (need["needed"] or "")
+
+
+# ── entity context (audit): a part-anchored answer names the part, and returns exactly its machines ─────────────
+def test_which_machines_use_a_part_identifies_the_part_and_returns_only_its_machines(client, part):
+    overview = client.get(f"{V1}/parts/{part}").json()
+    fitment = client.get(f"{V1}/parts/{part}/fitment").json()
+    r = query(client, f"Which machines use {overview['part_number']}?")
+    assert r["intent"] == "PART_TO_MACHINE"
+    subject = r["subject"]
+    assert (subject["kind"], subject["label"], subject["name"]) == ("PART", overview["part_number"], overview["name"])
+    facts = {f["label"]: f["value"] for f in subject["facts"]}
+    assert facts["Category"].startswith(overview["category"]) and subject["data_class"] == overview["data_class"]
+    assert overview["name"] in r["answer"]["summary"] or r["answer"]["source"] == "llm"
+    assert [i["title"] for i in r["results"]] == [f["model_code"] for f in fitment]  # the machines, no more and no less
+    assert {i["kind"] for i in r["results"]} <= {"machine"} and r["total"] == len(fitment)
+    assert {i["subtitle"] for i in r["results"]} == {f["name"] for f in fitment}  # each machine with its name
+
+
+def test_answers_about_a_whole_list_carry_no_subject(client):
+    r = query(client, "Which parts are low on stock?")
+    assert r.get("subject") is None

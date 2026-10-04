@@ -1,13 +1,14 @@
-import { X } from 'lucide-react'
-import { useEffect, useRef, type KeyboardEvent } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { useEffect, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { getPartOverview, type PartOverview, type PartTab } from '../../api'
 import { useApi } from '../../hooks/useApi'
+import { useIdentification } from '../../store/identification'
 import { PartImage } from '../store/PartImage'
 import { GraphTab } from './GraphTab'
 import { ErrorNotice } from './Notices'
 import { ProvenanceBadge } from './provenance'
-import { InsightsTab, ProvenanceTab, StoreTab } from './tabs/InsightTabs'
+import { ActionTab, InsightsTab, ProvenanceTab } from './tabs/InsightTabs'
 import { AssemblyTab, FitmentTab, OverviewTab, RelatedTab } from './tabs/OverviewTabs'
 import { ComplianceTab, DealersTab, InventoryTab, SuppliersTab } from './tabs/SupplyTabs'
 
@@ -29,34 +30,23 @@ export const TABS: readonly { id: PartTab; label: string }[] = [
 interface Props {
   partKey: string
   tab: PartTab
+  /** what the way back reads: the investigation it came from, or Parts Intelligence */
+  backLabel: string
   onTab: (tab: PartTab) => void
   onOpenPart: (partNumber: string) => void
   onClose: () => void
 }
 
-export function PartWorkspace({ partKey, tab, onTab, onOpenPart, onClose }: Props) {
+/** One part under investigation, as a document: identity first and dominant, a section index, then the open section. */
+export function PartWorkspace({ partKey, tab, backLabel, onTab, onOpenPart, onClose }: Props) {
   const overview = useApi((s) => getPartOverview(partKey, s), `overview:${partKey}`)
-  const panel = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null
-    panel.current?.focus()
-    const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-      opener?.focus?.()
-    }
-  }, [onClose])
-
-  useEffect(() => {
-    document.getElementById(`pw-tab-${tab}`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
-  }, [tab])
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [partKey])
 
   const moveTab = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
     if (!step) return
     e.preventDefault()
     const next = TABS[(index + step + TABS.length) % TABS.length]
@@ -66,97 +56,114 @@ export function PartWorkspace({ partKey, tab, onTab, onOpenPart, onClose }: Prop
 
   const data = overview.data
   return (
-    <div className="pw">
-      <button type="button" className="pw__scrim" onClick={onClose} tabIndex={-1} aria-label="Close part workspace" />
-      <div className="pw__panel" role="dialog" aria-modal="true" aria-labelledby="pw-title" tabIndex={-1} ref={panel}>
-        <button type="button" className="pw__close" onClick={onClose} aria-label="Close part workspace">
-          <X size={22} strokeWidth={1.8} aria-hidden="true" />
-        </button>
+    <article className="wf-container pw" aria-labelledby="pw-title">
+      <button type="button" className="back-link" onClick={onClose}>
+        <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" /> {backLabel}
+      </button>
 
-        {overview.error ? (
-          <div className="pw__body">
-            <ErrorNotice error={overview.error} onRetry={overview.reload} title={overview.error.notFound ? 'Part not found' : 'This part could not be loaded'} />
-          </div>
-        ) : !data ? (
-          <div className="pw__body">
-            <p className="pw-loading" role="status">
-              Loading part…
-            </p>
-          </div>
-        ) : (
-          <>
-            <header className="pw__head">
-              <div className="pw__image">
-                <PartImage partNumber={data.part_number} category={data.category} name={data.name} />
-              </div>
-              <div className="pw__id">
-                <p className="pw__eyebrow">Part Intelligence</p>
-                <h2 id="pw-title" className="pw__no mono">
-                  {data.part_number}
-                </h2>
-                <p className="pw__name">{data.name}</p>
-                <dl className="pw__meta">
-                  <div>
-                    <dt>Category</dt>
-                    <dd>{data.category ?? 'Not available'}</dd>
-                  </div>
-                  <div>
-                    <dt>Status</dt>
-                    <dd className={`pw__status pw__status--${data.status.code.toLowerCase()}`}>{data.status.label}</dd>
-                  </div>
-                  <div>
-                    <dt>Data</dt>
-                    <dd>
-                      <ProvenanceBadge value={data.data_class} />
-                    </dd>
-                  </div>
-                </dl>
-                <PartActions overview={data} onIdentify={() => onTab('fitment')} />
-              </div>
-            </header>
+      {overview.error ? (
+        <ErrorNotice error={overview.error} onRetry={overview.reload} title={overview.error.notFound ? 'Part not found' : 'This part could not be loaded'} />
+      ) : !data ? (
+        <p className="pw-loading" role="status">
+          Loading part…
+        </p>
+      ) : (
+        <>
+          <nav className="breadcrumbs" aria-label="Breadcrumb">
+            <Link to="/">Home</Link>
+            <span className="crumb-sep">/</span>
+            <button type="button" className="crumb-btn" onClick={onClose}>
+              Parts Intelligence
+            </button>
+            <span className="crumb-sep">/</span>
+            <span className="crumb-current" aria-current="page">
+              {data.part_number}
+            </span>
+          </nav>
 
-            <div className="pw__tabs" role="tablist" aria-label="Part intelligence sections">
-              {TABS.map((t, i) => (
-                <button
-                  key={t.id}
-                  id={`pw-tab-${t.id}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === t.id}
-                  aria-controls="pw-panel"
-                  tabIndex={tab === t.id ? 0 : -1}
-                  onClick={() => onTab(t.id)}
-                  onKeyDown={(e) => moveTab(e, i)}
-                >
-                  {t.label}
-                </button>
-              ))}
+          <header className="pi-header card card-pad">
+            <div className="pi-head-img">
+              <PartImage partNumber={data.part_number} category={data.category} name={data.name} />
             </div>
-
-            <div className="pw__body" id="pw-panel" role="tabpanel" aria-labelledby={`pw-tab-${tab}`}>
-              <TabContent tab={tab} partKey={data.part_number} overview={data} onTab={onTab} onOpenPart={onOpenPart} />
+            <div className="pi-head-main">
+              {data.category ? <p className="small muted">{data.category}</p> : null}
+              <h1 id="pw-title" className="pi-pn">
+                {data.part_number}
+              </h1>
+              <p className="pi-name">{data.name}</p>
+              <p className="small muted">{[data.families.join(', '), data.subcategory].filter(Boolean).join(' · ')}</p>
+              <div className="pi-head-badges">
+                <span className="small muted">Status</span>
+                <StatusBadge overview={data} />
+                <span className="small muted">Data</span>
+                <ProvenanceBadge value={data.data_class} />
+              </div>
+              {data.status.data_class === 'SYNTHETIC_DEMO' ? <p className="pw__demo-note">Status and orderability come from demo data, not a live catalogue.</p> : null}
             </div>
-          </>
-        )}
-      </div>
-    </div>
+            <div className="pi-head-action">
+              <PartActions overview={data} onIdentify={() => onTab('store')} />
+            </div>
+          </header>
+
+          <div className="pi-tabs" role="tablist" aria-label="Part intelligence sections">
+            {TABS.map((t, i) => (
+              <button
+                key={t.id}
+                id={`pw-tab-${t.id}`}
+                type="button"
+                role="tab"
+                className={`pi-tab ${tab === t.id ? 'is-active' : ''}`}
+                aria-selected={tab === t.id}
+                aria-controls="pw-panel"
+                tabIndex={tab === t.id ? 0 : -1}
+                onClick={() => onTab(t.id)}
+                onKeyDown={(e) => moveTab(e, i)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="pw__body" id="pw-panel" role="tabpanel" aria-labelledby={`pw-tab-${tab}`}>
+            <TabContent tab={tab} partKey={data.part_number} overview={data} onTab={onTab} onOpenPart={onOpenPart} />
+          </div>
+        </>
+      )}
+    </article>
   )
 }
 
-function PartActions({ overview, onIdentify }: { overview: PartOverview; onIdentify: () => void }) {
-  const store = overview.actions.find((a) => a.kind === 'parts_store')
-  const identify = overview.actions.some((a) => a.kind === 'identify')
-  if (!store && !identify) return null
+/** The status as the catalogue states it, plus what this user has already done about it (never a change of status). */
+export function StatusBadge({ overview }: { overview: PartOverview }) {
+  const { record } = useIdentification(overview.part_number)
+  const { code, label } = overview.status
+  const requested = code === 'UNVERIFIED' && record?.requestedAt
+  return (
+    <span className={`pw__status pw__status--${code.toLowerCase()}`}>
+      {requested ? 'Identification requested' : label}
+      {!requested && code !== 'VERIFIED' && record?.submittedAt ? <span className="pw__status-sub"> · details submitted</span> : null}
+    </span>
+  )
+}
+
+/** One primary action per status, as the API defines it. */
+export function PartActions({ overview, onIdentify }: { overview: PartOverview; onIdentify: () => void }) {
+  const { record, request } = useIdentification(overview.part_number)
+  const action = overview.actions[0]
+  if (!action) return null
   return (
     <div className="pw__actions">
-      {store?.href ? (
-        <Link className="button button--primary" to={store.href}>
-          {store.label}
+      {action.kind === 'parts_store' && action.href ? (
+        <Link className="btn btn-primary" to={action.href}>
+          {action.label}
         </Link>
-      ) : null}
-      {identify ? (
-        <button type="button" className="button button--secondary" onClick={onIdentify}>
-          Identify Part
+      ) : action.kind === 'identify' ? (
+        <button type="button" className="btn btn-primary" onClick={onIdentify}>
+          {action.label}
+        </button>
+      ) : action.kind === 'request_identification' ? (
+        <button type="button" className="btn btn-primary" onClick={request} disabled={Boolean(record?.requestedAt)}>
+          {record?.requestedAt ? 'Identification requested' : action.label}
         </button>
       ) : null}
     </div>
@@ -166,7 +173,7 @@ function PartActions({ overview, onIdentify }: { overview: PartOverview; onIdent
 function TabContent({ tab, partKey, overview, onTab, onOpenPart }: { tab: PartTab; partKey: string; overview: PartOverview; onTab: (t: PartTab) => void; onOpenPart: (pn: string) => void }) {
   switch (tab) {
     case 'overview':
-      return <OverviewTab overview={overview} />
+      return <OverviewTab overview={overview} onTab={onTab} />
     case 'fitment':
       return <FitmentTab partKey={partKey} overview={overview} />
     case 'related':
@@ -188,6 +195,6 @@ function TabContent({ tab, partKey, overview, onTab, onOpenPart }: { tab: PartTa
     case 'insights':
       return <InsightsTab partKey={partKey} />
     case 'store':
-      return <StoreTab overview={overview} onIdentify={() => onTab('fitment')} />
+      return <ActionTab overview={overview} onOpenFitment={() => onTab('fitment')} />
   }
 }

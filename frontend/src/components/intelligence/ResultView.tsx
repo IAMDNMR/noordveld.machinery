@@ -1,8 +1,9 @@
 import { CircleAlert } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { IntelligenceAction, QueryResponse, Suggestion } from '../../api'
+import type { Subject } from '../../api/intelligenceTypes'
 import { EvidencePanel } from './EvidencePanel'
-import { ProvenanceLine } from './provenance'
+import { ProvenanceBadge, ProvenanceLine } from './provenance'
 import { ResultCard } from './ResultCard'
 
 interface ResultViewProps {
@@ -14,13 +15,15 @@ interface ResultViewProps {
   onAsk: (question: string) => void
   onSelect: (candidate: { kind: string; key: string }) => void
   onMore: () => void
+  /** starts over: clears the question */
+  onClear?: () => void
 }
 
 function ActionButton({ action, onInvestigate, onAsk }: { action: IntelligenceAction; onInvestigate: (pn: string) => void; onAsk: (q: string) => void }) {
   if (action.kind === 'ask' && action.question) {
     const question = action.question
     return (
-      <button type="button" className="button button--secondary" onClick={() => onAsk(question)}>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={() => onAsk(question)}>
         {action.label}
       </button>
     )
@@ -28,14 +31,14 @@ function ActionButton({ action, onInvestigate, onAsk }: { action: IntelligenceAc
   if (action.kind === 'investigate' && action.href) {
     const part = new URL(action.href, 'http://x').searchParams.get('part')
     return (
-      <button type="button" className="button button--secondary" onClick={() => part && onInvestigate(part)}>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={() => part && onInvestigate(part)}>
         {action.label}
       </button>
     )
   }
   if (action.href) {
     return (
-      <Link className="button button--secondary" to={action.href}>
+      <Link className="btn btn-secondary btn-sm" to={action.href}>
         {action.label}
       </Link>
     )
@@ -43,30 +46,69 @@ function ActionButton({ action, onInvestigate, onAsk }: { action: IntelligenceAc
   return null
 }
 
-export function ResultView({ response, suggestions, limit, maxLimit, onInvestigate, onAsk, onSelect, onMore }: ResultViewProps) {
+/** Which part, machine, supplier... the answer is about: its identity in a few facts, before the results that belong to it */
+function SubjectLine({ subject, onInvestigate }: { subject: Subject; onInvestigate: (pn: string) => void }) {
+  const kind = subject.kind.charAt(0) + subject.kind.slice(1).toLowerCase()
+  return (
+    <div className="pr__subject" aria-label={`About ${kind.toLowerCase()} ${subject.label}`}>
+      <p className="pr__subject-id">
+        <span className="pr__subject-kind">{kind}</span>
+        {subject.kind === 'PART' ? (
+          <button type="button" className="pr__subject-label" onClick={() => onInvestigate(subject.label)}>
+            {subject.label}
+          </button>
+        ) : (
+          <strong className="pr__subject-label">{subject.label}</strong>
+        )}
+        {subject.name ? <span className="pr__subject-name">{subject.name}</span> : null}
+        <ProvenanceBadge value={subject.data_class} />
+      </p>
+      {subject.facts.length > 0 ? (
+        <dl className="pr__subject-facts">
+          {subject.facts.map((f) => (
+            <div key={f.label}>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </div>
+  )
+}
+
+export function ResultView({ response, suggestions, limit, maxLimit, onInvestigate, onAsk, onSelect, onMore, onClear }: ResultViewProps) {
   const { clarification } = response
   const canShowMore = response.results.length < response.total && limit < maxLimit
   const unsupported = response.intent === 'UNSUPPORTED'
 
   return (
-    <section className="pr" aria-labelledby="pr-question" aria-live="polite">
-      <p className="pr__label">Question</p>
-      <h2 id="pr-question" className="pr__question">
-        {response.question}
-      </h2>
-      <p className="pr__understood">
-        <span>{response.intent_label}</span>
+    <section className="pr" aria-label={`Answer to: ${response.question}`} aria-live="polite">
+      <div className="pr__understood">
+        <span className="pr__understood-k">Understood as</span>
+        <span className="pr__chip">{response.intent_label}</span>
         {response.entities.map((e) => (
-          <span key={`${e.kind}-${e.key}`}>
-            {e.kind.charAt(0) + e.kind.slice(1).toLowerCase()}: <strong>{e.label}</strong>
+          <span key={`${e.kind}-${e.key}`} className="pr__chip">
+            <span>{e.kind.charAt(0) + e.kind.slice(1).toLowerCase()}</span> <strong>{e.label}</strong>
           </span>
         ))}
-      </p>
+        {onClear ? (
+          <button type="button" className="pr__clear" onClick={onClear}>
+            Clear
+          </button>
+        ) : null}
+      </div>
 
       <div className="pr__answer">
-        <p className="pr__label">Answer</p>
+        <h2 className="pr__title">{unsupported ? 'Outside Parts Intelligence' : response.intent_label}</h2>
+        {response.subject && !clarification ? <SubjectLine subject={response.subject} onInvestigate={onInvestigate} /> : null}
         <p className="pr__summary">{response.answer.summary}</p>
-        {response.answer.source === 'gemini' ? <p className="pr__source">Worded by the language model from the evidence below.</p> : null}
+        {response.answer.demo ? (
+          <p className="pr__demo" role="note">
+            <strong>Demo data.</strong> This answer includes synthetic demonstration data, not live enterprise data.
+          </p>
+        ) : null}
+        {response.answer.source === 'llm' ? <p className="pr__source">Worded by the language model from the evidence below.</p> : null}
       </div>
 
       {response.warnings.map((w) => (
@@ -108,7 +150,7 @@ export function ResultView({ response, suggestions, limit, maxLimit, onInvestiga
         <>
           <div className="pr__count">
             <h3>
-              {response.total === 1 ? '1 result' : `${response.total} results`}
+              {response.total} {response.total === 1 ? 'result' : 'results'}
               {response.results.length < response.total ? <span> · showing {response.results.length}</span> : null}
             </h3>
             <ProvenanceLine items={response.provenance} />
@@ -121,7 +163,7 @@ export function ResultView({ response, suggestions, limit, maxLimit, onInvestiga
             ))}
           </ul>
           {canShowMore ? (
-            <button type="button" className="button button--secondary pr__more" onClick={onMore}>
+            <button type="button" className="btn btn-secondary pr__more" onClick={onMore}>
               Show more
             </button>
           ) : null}

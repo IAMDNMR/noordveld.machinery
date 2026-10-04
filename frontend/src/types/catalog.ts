@@ -1,53 +1,60 @@
-export type PlantId = 'assen' | 'lingen' | 'coevorden'
+/** Shapes the website components render. Every value is built from the backend's /site/overview response (src/data/site.ts). */
 
-/** Editorial grouping of the catalogued machine types. The catalog itself only provides the machine type. */
-export type MachineFamily = 'Loading' | 'Material handling' | 'Conveying'
+/** Lower-case plant city, also the key of the plant photo in src/assets/plants */
+export type PlantId = string
 
 export interface Part {
   partNo: string
   name: string
   category: string
-  plantId: PlantId
-  plantOfOrigin: string
-  compatibleModels: readonly string[]
   specNote: string
 }
 
 export interface Machine {
-  /** Exactly as written in the catalog, e.g. "NV-2100" */
+  /** Model code exactly as stored in the graph */
   model: string
-  /** URL-safe model, e.g. "nv-2100" */
+  /** URL-safe model code (also the key of the machine images) */
   slug: string
-  /** Machine type exactly as written in the catalog */
+  /** Machine type as stored in the graph */
   name: string
-  family: MachineFamily
-  /** Brand / origin without the acquisition note, e.g. "Kessler" */
+  /** Machine family from the graph (MEMBER_OF_FAMILY) */
+  family: string
   brand: string
-  /** Brand / origin exactly as written in the catalog */
-  origin: string
-  /** Year the brand was acquired, where the catalog states it */
   acquired?: number
   plantId: PlantId
-  /** Plant exactly as written in the catalog, e.g. "Assen (NL)" */
+  /** Plant name as stored in the graph, e.g. "Assen (NL)" */
   plant: string
-  /** Short factual description built only from catalog fields */
+  /** Short sentence built only from graph fields */
   description: string
-  /** Only fields the catalog provides. No invented technical data. */
+  /** Only fields the graph provides. No invented technical data. */
   specifications: Record<string, string>
-  /** Catalog parts that list this model as compatible */
+  /** Parts recorded as fitting this machine (FITS) */
   relatedParts: readonly Part[]
-  /** Names of catalogued attachments compatible with this model */
+  /** Names of fitting parts in the Attachments category */
   attachments: readonly string[]
+  /** Synthetic demo profile from the graph; shown with a demo label */
+  application: { text: string; context: string | null; introduced: number | null } | null
 }
 
 export interface Plant {
   id: PlantId
   city: string
-  country: 'Netherlands' | 'Germany'
-  countryCode: 'NL' | 'DE'
+  country: string
+  countryCode: string
   brand: string
   acquired?: number
-  /** Approximate coordinates, used only to place the schematic map */
-  lat: number
-  lon: number
+  machineCount: number
+  /** City-centre coordinates from the backend's map reference, only to place the schematic map */
+  lat: number | null
+  lon: number | null
+}
+
+export interface SiteData {
+  machines: readonly Machine[]
+  plants: readonly Plant[]
+  families: readonly string[]
+  /** The machine with the most recorded parts: featured on the home page */
+  featured: Machine | null
+  partCount: number
+  partCategories: readonly { name: string; count: number }[]
 }

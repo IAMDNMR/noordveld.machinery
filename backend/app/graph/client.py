@@ -6,7 +6,7 @@ import time
 from typing import Any
 
 import certifi
-from neo4j import READ_ACCESS, GraphDatabase, TrustCustomCAs, unit_of_work
+from neo4j import READ_ACCESS, WRITE_ACCESS, GraphDatabase, TrustCustomCAs, unit_of_work
 from neo4j.exceptions import AuthError, ClientError, DriverError, Neo4jError, ServiceUnavailable
 
 from app.core.config import Settings
@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class GraphClient:
-    """Thin wrapper around the Neo4j driver. The API only reads the graph, so every session is READ_ACCESS."""
+    """Thin wrapper around the Neo4j driver. Catalogue, intelligence and shopping only read (READ_ACCESS). `write` exists for one purpose:
+    the operational records of the order workflow (purchase requests, status events, a user's cart), always through the fixed,
+    parameterised queries in app/graph/queries/orders.py. No catalogue, fitment, price, inventory or supplier fact is written."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -55,6 +57,18 @@ class GraphClient:
             raise GraphUnavailableError(type(exc).__name__) from exc
         log.debug("graph query returned %d rows in %.0f ms", len(rows), (time.perf_counter() - started) * 1000)
         return rows
+
+    def write(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        """Run one write transaction (order workflow records only) and return its rows."""
+        timeout = self._settings.neo4j_query_timeout
+        try:
+            with self.driver.session(database=self._settings.neo4j_database, default_access_mode=WRITE_ACCESS) as session:
+                return session.execute_write(unit_of_work(timeout=timeout)(lambda tx: tx.run(query, params).data()))
+        except GraphUnavailableError:
+            raise
+        except (ServiceUnavailable, AuthError, ClientError, DriverError, Neo4jError, OSError) as exc:
+            log.error("graph write failed: %s", type(exc).__name__)
+            raise GraphUnavailableError(type(exc).__name__) from exc
 
     def close(self) -> None:
         if self._driver is not None:

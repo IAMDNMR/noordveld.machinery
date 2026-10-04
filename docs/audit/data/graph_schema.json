@@ -1,0 +1,5680 @@
+{
+  "labels": {
+    "SearchAlias": 493,
+    "PartSpecification": 279,
+    "Category": 101,
+    "Part": 100,
+    "LegacyReference": 100,
+    "PartCatalogProfile": 100,
+    "Price": 100,
+    "DeliveryEstimate": 100,
+    "MachineSpecification": 83,
+    "ServicePlan": 60,
+    "Address": 44,
+    "OrderStatusEvent": 32,
+    "MachineVariant": 30,
+    "TrackingEvent": 27,
+    "MachineType": 15,
+    "Machine": 15,
+    "Assembly": 15,
+    "Dealer": 15,
+    "Region": 14,
+    "OrderLine": 14,
+    "Supplier": 12,
+    "Customer": 10,
+    "Shipment": 9,
+    "ShippingRate": 8,
+    "Order": 8,
+    "ComplianceRequirement": 8,
+    "OrderStatus": 6,
+    "IdentificationRequirement": 6,
+    "CartLine": 6,
+    "Location": 5,
+    "SupplierBackorder": 4,
+    "Warehouse": 4,
+    "DataSource": 4,
+    "BusinessUnit": 3,
+    "MachineFamily": 3,
+    "Plant": 3,
+    "Cart": 3,
+    "Carrier": 1
+  },
+  "node_props": {
+    "BusinessUnit": {
+      "keys": [
+        "acquired_year",
+        "authoritative_flag",
+        "business_unit_id",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "relationship_to_noordveld",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 3
+    },
+    "MachineType": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "machine_type_id",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 15
+    },
+    "MachineFamily": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "derivation_rule",
+        "family_id",
+        "last_updated",
+        "model_prefix",
+        "name",
+        "provenance_type",
+        "review_flags",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 3
+    },
+    "OrderStatus": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "label",
+        "last_updated",
+        "order_status_code",
+        "provenance_type",
+        "sequence",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 6
+    },
+    "ShippingRate": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "distance_band",
+        "from_km",
+        "last_updated",
+        "method",
+        "price_ex_vat",
+        "provenance_type",
+        "rate_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "to_km",
+        "transit_days"
+      ],
+      "n": 8
+    },
+    "Machine": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "country",
+        "data_status",
+        "last_updated",
+        "machine_id",
+        "machine_type",
+        "model_code",
+        "name",
+        "origin_plant",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 15
+    },
+    "MachineSpecification": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "machine_spec_id",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "unit",
+        "value"
+      ],
+      "n": 83
+    },
+    "MachineVariant": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "serial_from",
+        "serial_to",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "variant_id",
+        "variant_name",
+        "variant_status"
+      ],
+      "n": 30
+    },
+    "Part": {
+      "keys": [
+        "authoritative_flag",
+        "brand",
+        "category",
+        "compatible_models_source",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "name",
+        "origin_plant",
+        "part_id",
+        "part_nature",
+        "part_number",
+        "provenance_type",
+        "review_flags",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet",
+        "spec_note_source",
+        "subcategory"
+      ],
+      "n": 100
+    },
+    "PartSpecification": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "derived_from",
+        "group",
+        "last_updated",
+        "name",
+        "normalized_unit",
+        "normalized_value",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_label",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet",
+        "source_text",
+        "specification_id",
+        "unit",
+        "value"
+      ],
+      "n": 279
+    },
+    "LegacyReference": {
+      "keys": [
+        "authoritative_flag",
+        "business_basis",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "legacy_business",
+        "legacy_code_prefix",
+        "legacy_part_number",
+        "legacy_plant",
+        "legacy_reference_id",
+        "legacy_source_note",
+        "mapping_confidence",
+        "mapping_type",
+        "provenance_type",
+        "review_flags",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 100
+    },
+    "PartCatalogProfile": {
+      "keys": [
+        "authoritative_flag",
+        "availability_state",
+        "confidence",
+        "data_status",
+        "image_path",
+        "last_updated",
+        "orderable",
+        "part_status",
+        "profile_id",
+        "provenance_type",
+        "return_window_days",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "status_reason",
+        "warranty_months",
+        "weight_kg"
+      ],
+      "n": 100
+    },
+    "SearchAlias": {
+      "keys": [
+        "alias",
+        "alias_id",
+        "alias_type",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "entity_type",
+        "last_updated",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 493
+    },
+    "Category": {
+      "keys": [
+        "authoritative_flag",
+        "basis",
+        "category_id",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "level",
+        "name",
+        "provenance_type",
+        "review_flags",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 101
+    },
+    "Plant": {
+      "keys": [
+        "authoritative_flag",
+        "city",
+        "confidence",
+        "country_code",
+        "data_status",
+        "is_fictional_demo",
+        "last_updated",
+        "name",
+        "plant_id",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 3
+    },
+    "Location": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "country_code",
+        "data_status",
+        "last_updated",
+        "location_id",
+        "location_type",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ],
+      "n": 5
+    },
+    "Region": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "country",
+        "country_code",
+        "currency",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "region_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "vat_rate_demo"
+      ],
+      "n": 14
+    },
+    "Address": {
+      "keys": [
+        "address_id",
+        "address_note",
+        "authoritative_flag",
+        "city",
+        "confidence",
+        "country_code",
+        "data_status",
+        "house_number",
+        "last_updated",
+        "owner_type",
+        "postal_code",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "state_region",
+        "street"
+      ],
+      "n": 44
+    },
+    "IdentificationRequirement": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "fits_variant_ids",
+        "identification_needed",
+        "last_updated",
+        "provenance_type",
+        "reason",
+        "requirement_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 6
+    },
+    "Assembly": {
+      "keys": [
+        "assembly_id",
+        "authoritative_flag",
+        "bom_status",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 15
+    },
+    "Supplier": {
+      "keys": [
+        "authoritative_flag",
+        "categories_supplied",
+        "city",
+        "confidence",
+        "country_code",
+        "data_status",
+        "last_updated",
+        "name",
+        "payment_terms_days",
+        "provenance_type",
+        "quality_rating_demo",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "supplier_id",
+        "supplier_status",
+        "supplier_type"
+      ],
+      "n": 12
+    },
+    "SupplierBackorder": {
+      "keys": [
+        "authoritative_flag",
+        "backorder_id",
+        "backorder_status",
+        "confidence",
+        "data_status",
+        "expected_restock_days",
+        "last_updated",
+        "provenance_type",
+        "quantity_on_order",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 4
+    },
+    "Dealer": {
+      "keys": [
+        "authoritative_flag",
+        "city",
+        "confidence",
+        "country_code",
+        "data_status",
+        "dealer_id",
+        "dealer_status",
+        "dealer_type",
+        "last_updated",
+        "name",
+        "pickup_allowed",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 15
+    },
+    "Warehouse": {
+      "keys": [
+        "authoritative_flag",
+        "city",
+        "confidence",
+        "country_code",
+        "data_status",
+        "last_updated",
+        "name",
+        "pickup_allowed",
+        "provenance_type",
+        "ships_to",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "warehouse_id"
+      ],
+      "n": 4
+    },
+    "Price": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "currency",
+        "data_status",
+        "last_updated",
+        "list_price_ex_vat",
+        "price_basis",
+        "price_id",
+        "price_status",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "valid_from",
+        "valid_to"
+      ],
+      "n": 100
+    },
+    "Customer": {
+      "keys": [
+        "authoritative_flag",
+        "city",
+        "confidence",
+        "country_code",
+        "customer_id",
+        "customer_status",
+        "customer_type",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 10
+    },
+    "Cart": {
+      "keys": [
+        "authoritative_flag",
+        "cart_id",
+        "cart_status",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 3
+    },
+    "CartLine": {
+      "keys": [
+        "authoritative_flag",
+        "cart_line_id",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "quantity",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "unit_price_eur"
+      ],
+      "n": 6
+    },
+    "Order": {
+      "keys": [
+        "authoritative_flag",
+        "channel",
+        "confidence",
+        "currency",
+        "data_status",
+        "last_updated",
+        "order_date",
+        "order_id",
+        "order_status",
+        "order_total_incl_vat",
+        "provenance_type",
+        "shipping_ex_vat",
+        "shipping_method",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "subtotal_ex_vat",
+        "vat_amount",
+        "vat_rate"
+      ],
+      "n": 8
+    },
+    "OrderStatusEvent": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "order_status",
+        "provenance_type",
+        "sequence",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "status_event_id"
+      ],
+      "n": 32
+    },
+    "OrderLine": {
+      "keys": [
+        "allocation_status",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "line_no",
+        "line_total_eur",
+        "order_line_id",
+        "provenance_type",
+        "quantity",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "unit_price_eur"
+      ],
+      "n": 14
+    },
+    "DeliveryEstimate": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "delivery_estimate_id",
+        "est_road_km",
+        "express_days",
+        "express_price_ex_vat",
+        "last_updated",
+        "note",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "standard_days",
+        "standard_price_ex_vat"
+      ],
+      "n": 100
+    },
+    "Shipment": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "est_road_km",
+        "last_updated",
+        "provenance_type",
+        "shipment_id",
+        "shipment_status",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "straight_line_km",
+        "tracking_ref"
+      ],
+      "n": 9
+    },
+    "Carrier": {
+      "keys": [
+        "authoritative_flag",
+        "carrier_id",
+        "confidence",
+        "data_status",
+        "key_basis",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 1
+    },
+    "TrackingEvent": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "event_date",
+        "event_location",
+        "event_seq",
+        "event_status",
+        "last_updated",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "tracking_event_id"
+      ],
+      "n": 27
+    },
+    "ServicePlan": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "interval_hours",
+        "interval_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "service_plan_id",
+        "service_template",
+        "source_file",
+        "source_id",
+        "source_id_value",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ],
+      "n": 60
+    },
+    "ComplianceRequirement": {
+      "keys": [
+        "authoritative_flag",
+        "categories_covered",
+        "certificate_status",
+        "certification",
+        "compliance_id",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "requirement",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "standard",
+        "valid_until"
+      ],
+      "n": 8
+    },
+    "DataSource": {
+      "keys": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "layer",
+        "limitations",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "verification"
+      ],
+      "n": 4
+    }
+  },
+  "node_status": [
+    {
+      "label": "Address",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 44
+    },
+    {
+      "label": "Assembly",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 15
+    },
+    {
+      "label": "BusinessUnit",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 3
+    },
+    {
+      "label": "Carrier",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 1
+    },
+    {
+      "label": "Cart",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 3
+    },
+    {
+      "label": "CartLine",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 6
+    },
+    {
+      "label": "Category",
+      "data_status": "DERIVED",
+      "provenance_type": "DERIVED",
+      "authoritative": false,
+      "n": 91
+    },
+    {
+      "label": "Category",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 10
+    },
+    {
+      "label": "ComplianceRequirement",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 8
+    },
+    {
+      "label": "Customer",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 10
+    },
+    {
+      "label": "DataSource",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 3
+    },
+    {
+      "label": "DataSource",
+      "data_status": "USER_PROVIDED",
+      "provenance_type": "USER_PROVIDED",
+      "authoritative": false,
+      "n": 1
+    },
+    {
+      "label": "Dealer",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 15
+    },
+    {
+      "label": "DeliveryEstimate",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 100
+    },
+    {
+      "label": "IdentificationRequirement",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 6
+    },
+    {
+      "label": "LegacyReference",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 100
+    },
+    {
+      "label": "Location",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 5
+    },
+    {
+      "label": "Machine",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 15
+    },
+    {
+      "label": "MachineFamily",
+      "data_status": "DERIVED",
+      "provenance_type": "DERIVED",
+      "authoritative": false,
+      "n": 3
+    },
+    {
+      "label": "MachineSpecification",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 83
+    },
+    {
+      "label": "MachineType",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 15
+    },
+    {
+      "label": "MachineVariant",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 30
+    },
+    {
+      "label": "Order",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 8
+    },
+    {
+      "label": "OrderLine",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 14
+    },
+    {
+      "label": "OrderStatus",
+      "data_status": "USER_PROVIDED",
+      "provenance_type": "USER_PROVIDED",
+      "authoritative": false,
+      "n": 6
+    },
+    {
+      "label": "OrderStatusEvent",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 32
+    },
+    {
+      "label": "Part",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 100
+    },
+    {
+      "label": "PartCatalogProfile",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 100
+    },
+    {
+      "label": "PartSpecification",
+      "data_status": "DERIVED",
+      "provenance_type": "DERIVED",
+      "authoritative": false,
+      "n": 71
+    },
+    {
+      "label": "PartSpecification",
+      "data_status": "SOURCE_DERIVED",
+      "provenance_type": "SOURCE_DERIVED",
+      "authoritative": false,
+      "n": 208
+    },
+    {
+      "label": "Plant",
+      "data_status": "USER_PROVIDED",
+      "provenance_type": "USER_PROVIDED",
+      "authoritative": false,
+      "n": 3
+    },
+    {
+      "label": "Price",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 100
+    },
+    {
+      "label": "Region",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 14
+    },
+    {
+      "label": "SearchAlias",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 493
+    },
+    {
+      "label": "ServicePlan",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 60
+    },
+    {
+      "label": "Shipment",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 9
+    },
+    {
+      "label": "ShippingRate",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 8
+    },
+    {
+      "label": "Supplier",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 12
+    },
+    {
+      "label": "SupplierBackorder",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 4
+    },
+    {
+      "label": "TrackingEvent",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 27
+    },
+    {
+      "label": "Warehouse",
+      "data_status": "SYNTHETIC_DEMO",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "authoritative": false,
+      "n": 4
+    }
+  ],
+  "rels": [
+    {
+      "from": "IdentificationRequirement",
+      "type": "ADMITS_VARIANT",
+      "to": "MachineVariant",
+      "n": 10,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "OrderLine",
+      "type": "ALLOCATED_FROM",
+      "to": "Warehouse",
+      "n": 10,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "allocation_status",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "AVAILABLE_AT",
+      "to": "Warehouse",
+      "n": 400,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "available",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "on_hand",
+        "provenance_type",
+        "rel_id",
+        "reorder_point",
+        "reserved",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "stock_status"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "BRANDED_AS",
+      "to": "BusinessUnit",
+      "n": 15,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "CARRIED_BY",
+      "to": "Carrier",
+      "n": 9,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Cart",
+      "type": "CONTAINS_LINE",
+      "to": "CartLine",
+      "n": 6,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "CONTAINS_LINE",
+      "to": "OrderLine",
+      "n": 14,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "ComplianceRequirement",
+      "type": "COVERS_CATEGORY",
+      "to": "Category",
+      "n": 10,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "CO_ORDERED_WITH",
+      "to": "Part",
+      "n": 75,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "evidence",
+        "interchangeability_status",
+        "last_updated",
+        "merged_source_record_ids",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_interchangeability",
+        "source_name",
+        "source_record_id",
+        "source_relationship_type",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "DELIVERS_TO_ADDRESS",
+      "to": "Address",
+      "n": 8,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "DELIVERS_TO_CUSTOMER",
+      "to": "Customer",
+      "n": 9,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "DISPATCHED_FROM",
+      "to": "Warehouse",
+      "n": 9,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "FITS",
+      "to": "Machine",
+      "n": 219,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "condition_note",
+        "confidence",
+        "data_status",
+        "fitment_evidence",
+        "fitment_status",
+        "fitment_type",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "review_flags",
+        "source_confidence",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "IdentificationRequirement",
+      "type": "FOR_MACHINE",
+      "to": "Machine",
+      "n": 6,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "ServicePlan",
+      "type": "FOR_MACHINE",
+      "to": "Machine",
+      "n": 60,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "IdentificationRequirement",
+      "type": "FOR_PART",
+      "to": "Part",
+      "n": 6,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "SupplierBackorder",
+      "type": "FOR_PART",
+      "to": "Part",
+      "n": 4,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "DeliveryEstimate",
+      "type": "FROM_WAREHOUSE",
+      "to": "Warehouse",
+      "n": 100,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "HAS_ALIAS",
+      "to": "SearchAlias",
+      "n": 45,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_ALIAS",
+      "to": "SearchAlias",
+      "n": 448,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_COMPLIANCE",
+      "to": "ComplianceRequirement",
+      "n": 100,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_LEGACY_REFERENCE",
+      "to": "LegacyReference",
+      "n": 100,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "HAS_MACHINE_SPECIFICATION",
+      "to": "MachineSpecification",
+      "n": 83,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "HAS_SHIPMENT",
+      "to": "Shipment",
+      "n": 9,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "HAS_SPECIFICATION",
+      "to": "PartSpecification",
+      "n": 279,
+      "edge_status": [
+        "DERIVED",
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "HAS_STATUS_EVENT",
+      "to": "OrderStatusEvent",
+      "n": 32,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "HAS_TRACKING_EVENT",
+      "to": "TrackingEvent",
+      "n": 27,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "BusinessUnit",
+      "type": "HOME_PLANT",
+      "to": "Plant",
+      "n": 3,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Assembly",
+      "type": "IDENTIFIED_BY_PART",
+      "to": "Part",
+      "n": 15,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "IN_CATEGORY",
+      "to": "Category",
+      "n": 100,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Location",
+      "type": "IN_COUNTRY",
+      "to": "Location",
+      "n": 3,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Address",
+      "type": "IN_REGION",
+      "to": "Region",
+      "n": 44,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "IN_SUBCATEGORY",
+      "to": "Category",
+      "n": 100,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "LegacyReference",
+      "type": "ISSUED_BY_BUSINESS_UNIT",
+      "to": "BusinessUnit",
+      "n": 100,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Customer",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "n": 10,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Dealer",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "n": 15,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Plant",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "n": 3,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Supplier",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "n": 12,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Warehouse",
+      "type": "LOCATED_AT_ADDRESS",
+      "to": "Address",
+      "n": 4,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Warehouse",
+      "type": "LOCATED_AT_PLANT",
+      "to": "Plant",
+      "n": 3,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Plant",
+      "type": "LOCATED_IN",
+      "to": "Location",
+      "n": 3,
+      "edge_status": [
+        "USER_PROVIDED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "MANUFACTURED_AT",
+      "to": "Plant",
+      "n": 15,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "MEMBER_OF_FAMILY",
+      "to": "MachineFamily",
+      "n": 15,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Machine",
+      "type": "OF_TYPE",
+      "to": "MachineType",
+      "n": 15,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Cart",
+      "type": "OPENED_BY",
+      "to": "Customer",
+      "n": 3,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Order",
+      "type": "ORDERED_BY",
+      "to": "Customer",
+      "n": 8,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "ORIGINATES_AT",
+      "to": "Plant",
+      "n": 100,
+      "edge_status": [
+        "SOURCE_DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Plant",
+      "type": "OWNED_BY",
+      "to": "BusinessUnit",
+      "n": 3,
+      "edge_status": [
+        "USER_PROVIDED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "PART_OF",
+      "to": "Assembly",
+      "n": 35,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "basis",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "quantity",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "SupplierBackorder",
+      "type": "PLACED_WITH",
+      "to": "Supplier",
+      "n": 4,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "OrderLine",
+      "type": "PLANNED_FULFILMENT_FROM",
+      "to": "Warehouse",
+      "n": 4,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "allocation_status",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Price",
+      "type": "PRICES_PART",
+      "to": "Part",
+      "n": 100,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "MachineFamily",
+      "type": "PRODUCT_FAMILY_OF",
+      "to": "BusinessUnit",
+      "n": 3,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "PartCatalogProfile",
+      "type": "PROFILES_PART",
+      "to": "Part",
+      "n": 100,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "OrderStatusEvent",
+      "type": "RECORDS_STATUS",
+      "to": "OrderStatus",
+      "n": 32,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "CartLine",
+      "type": "REFERENCES_PART",
+      "to": "Part",
+      "n": 6,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "OrderLine",
+      "type": "REFERENCES_PART",
+      "to": "Part",
+      "n": 14,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "RELATED_COMPONENT",
+      "to": "Part",
+      "n": 2,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "evidence",
+        "interchangeability_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_interchangeability",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "ServicePlan",
+      "type": "REQUIRES_PART",
+      "to": "Part",
+      "n": 71,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "basis",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "quantity",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "SAME_NAME_GROUP_AS",
+      "to": "Part",
+      "n": 9,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "evidence",
+        "interchangeability_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_interchangeability",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Dealer",
+      "type": "SERVES_FAMILY",
+      "to": "MachineFamily",
+      "n": 30,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Shipment",
+      "type": "SHIPS_LINE",
+      "to": "OrderLine",
+      "n": 9,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Warehouse",
+      "type": "SHIPS_TO_COUNTRY",
+      "to": "Location",
+      "n": 8,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "STOCKED_BY",
+      "to": "Dealer",
+      "n": 315,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "available",
+        "confidence",
+        "data_status",
+        "inventory_id",
+        "last_updated",
+        "on_hand",
+        "provenance_type",
+        "rel_id",
+        "reorder_point",
+        "reserved",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "stock_status",
+        "stocking_status"
+      ]
+    },
+    {
+      "from": "Category",
+      "type": "SUBCATEGORY_OF",
+      "to": "Category",
+      "n": 91,
+      "edge_status": [
+        "DERIVED"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_ref",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "Part",
+      "type": "SUPPLIED_BY",
+      "to": "Supplier",
+      "n": 157,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "is_primary",
+        "last_updated",
+        "lead_time_days",
+        "min_order_qty",
+        "provenance_type",
+        "rel_id",
+        "relationship_status",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "supplier_part_number",
+        "unit_cost_eur"
+      ]
+    },
+    {
+      "from": "Supplier",
+      "type": "SUPPLIES_CATEGORY",
+      "to": "Category",
+      "n": 25,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "DeliveryEstimate",
+      "type": "TO_CUSTOMER",
+      "to": "Customer",
+      "n": 40,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "DeliveryEstimate",
+      "type": "TO_DEALER",
+      "to": "Dealer",
+      "n": 60,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    },
+    {
+      "from": "MachineVariant",
+      "type": "VARIANT_OF",
+      "to": "Machine",
+      "n": 30,
+      "edge_status": [
+        "SYNTHETIC_DEMO"
+      ],
+      "props": [
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "rel_id",
+        "source_file",
+        "source_id",
+        "source_name",
+        "source_record_id",
+        "source_sheet"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "name": "address_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Address"
+      ],
+      "properties": [
+        "address_id"
+      ]
+    },
+    {
+      "name": "assembly_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Assembly"
+      ],
+      "properties": [
+        "assembly_id"
+      ]
+    },
+    {
+      "name": "business_unit_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "BusinessUnit"
+      ],
+      "properties": [
+        "business_unit_id"
+      ]
+    },
+    {
+      "name": "carrier_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Carrier"
+      ],
+      "properties": [
+        "carrier_id"
+      ]
+    },
+    {
+      "name": "cart_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Cart"
+      ],
+      "properties": [
+        "cart_id"
+      ]
+    },
+    {
+      "name": "cart_line_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "CartLine"
+      ],
+      "properties": [
+        "cart_line_id"
+      ]
+    },
+    {
+      "name": "category_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Category"
+      ],
+      "properties": [
+        "category_id"
+      ]
+    },
+    {
+      "name": "compliance_requirement_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ComplianceRequirement"
+      ],
+      "properties": [
+        "compliance_id"
+      ]
+    },
+    {
+      "name": "customer_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Customer"
+      ],
+      "properties": [
+        "customer_id"
+      ]
+    },
+    {
+      "name": "data_source_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "DataSource"
+      ],
+      "properties": [
+        "source_id"
+      ]
+    },
+    {
+      "name": "dealer_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Dealer"
+      ],
+      "properties": [
+        "dealer_id"
+      ]
+    },
+    {
+      "name": "delivery_estimate_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "DeliveryEstimate"
+      ],
+      "properties": [
+        "delivery_estimate_id"
+      ]
+    },
+    {
+      "name": "identification_requirement_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "IdentificationRequirement"
+      ],
+      "properties": [
+        "requirement_id"
+      ]
+    },
+    {
+      "name": "legacy_reference_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "LegacyReference"
+      ],
+      "properties": [
+        "legacy_reference_id"
+      ]
+    },
+    {
+      "name": "location_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Location"
+      ],
+      "properties": [
+        "location_id"
+      ]
+    },
+    {
+      "name": "machine_family_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineFamily"
+      ],
+      "properties": [
+        "family_id"
+      ]
+    },
+    {
+      "name": "machine_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Machine"
+      ],
+      "properties": [
+        "machine_id"
+      ]
+    },
+    {
+      "name": "machine_specification_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineSpecification"
+      ],
+      "properties": [
+        "machine_spec_id"
+      ]
+    },
+    {
+      "name": "machine_type_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineType"
+      ],
+      "properties": [
+        "machine_type_id"
+      ]
+    },
+    {
+      "name": "machine_variant_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineVariant"
+      ],
+      "properties": [
+        "variant_id"
+      ]
+    },
+    {
+      "name": "order_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Order"
+      ],
+      "properties": [
+        "order_id"
+      ]
+    },
+    {
+      "name": "order_line_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "OrderLine"
+      ],
+      "properties": [
+        "order_line_id"
+      ]
+    },
+    {
+      "name": "order_status_event_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "OrderStatusEvent"
+      ],
+      "properties": [
+        "status_event_id"
+      ]
+    },
+    {
+      "name": "order_status_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "OrderStatus"
+      ],
+      "properties": [
+        "order_status_code"
+      ]
+    },
+    {
+      "name": "part_catalog_profile_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "PartCatalogProfile"
+      ],
+      "properties": [
+        "profile_id"
+      ]
+    },
+    {
+      "name": "part_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Part"
+      ],
+      "properties": [
+        "part_id"
+      ]
+    },
+    {
+      "name": "part_specification_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "PartSpecification"
+      ],
+      "properties": [
+        "specification_id"
+      ]
+    },
+    {
+      "name": "plant_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Plant"
+      ],
+      "properties": [
+        "plant_id"
+      ]
+    },
+    {
+      "name": "price_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Price"
+      ],
+      "properties": [
+        "price_id"
+      ]
+    },
+    {
+      "name": "region_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Region"
+      ],
+      "properties": [
+        "region_id"
+      ]
+    },
+    {
+      "name": "rel_admits_variant_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ADMITS_VARIANT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_allocated_from_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ALLOCATED_FROM"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_available_at_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "AVAILABLE_AT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_branded_as_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "BRANDED_AS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_carried_by_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "CARRIED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_co_ordered_with_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "CO_ORDERED_WITH"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_contains_line_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "CONTAINS_LINE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_covers_category_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "COVERS_CATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_delivers_to_address_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "DELIVERS_TO_ADDRESS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_delivers_to_customer_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "DELIVERS_TO_CUSTOMER"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_dispatched_from_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "DISPATCHED_FROM"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_fits_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FITS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_for_machine_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FOR_MACHINE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_for_part_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FOR_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_from_warehouse_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FROM_WAREHOUSE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_alias_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_ALIAS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_compliance_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_COMPLIANCE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_legacy_reference_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_LEGACY_REFERENCE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_machine_specification_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_MACHINE_SPECIFICATION"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_shipment_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_SHIPMENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_specification_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_SPECIFICATION"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_status_event_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_STATUS_EVENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_tracking_event_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_TRACKING_EVENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_home_plant_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HOME_PLANT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_identified_by_part_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IDENTIFIED_BY_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_category_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_CATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_country_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_COUNTRY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_region_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_REGION"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_subcategory_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_SUBCATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_issued_by_business_unit_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ISSUED_BY_BUSINESS_UNIT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_located_at_address_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "LOCATED_AT_ADDRESS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_located_at_plant_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "LOCATED_AT_PLANT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_located_in_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "LOCATED_IN"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_manufactured_at_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "MANUFACTURED_AT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_member_of_family_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "MEMBER_OF_FAMILY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_of_type_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "OF_TYPE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_opened_by_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "OPENED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_ordered_by_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ORDERED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_originates_at_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ORIGINATES_AT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_owned_by_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "OWNED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_part_of_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PART_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_placed_with_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PLACED_WITH"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_planned_fulfilment_from_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PLANNED_FULFILMENT_FROM"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_prices_part_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PRICES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_product_family_of_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PRODUCT_FAMILY_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_profiles_part_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PROFILES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_records_status_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "RECORDS_STATUS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_references_part_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "REFERENCES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_related_component_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "RELATED_COMPONENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_requires_part_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "REQUIRES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_same_name_group_as_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SAME_NAME_GROUP_AS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_serves_family_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SERVES_FAMILY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_ships_line_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SHIPS_LINE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_ships_to_country_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SHIPS_TO_COUNTRY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_stocked_by_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "STOCKED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_subcategory_of_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SUBCATEGORY_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_supplied_by_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SUPPLIED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_supplies_category_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SUPPLIES_CATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_to_customer_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "TO_CUSTOMER"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_to_dealer_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "TO_DEALER"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_variant_of_id_unique",
+      "type": "RELATIONSHIP_PROPERTY_UNIQUENESS",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "VARIANT_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "search_alias_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "SearchAlias"
+      ],
+      "properties": [
+        "alias_id"
+      ]
+    },
+    {
+      "name": "service_plan_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ServicePlan"
+      ],
+      "properties": [
+        "service_plan_id"
+      ]
+    },
+    {
+      "name": "shipment_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Shipment"
+      ],
+      "properties": [
+        "shipment_id"
+      ]
+    },
+    {
+      "name": "shipping_rate_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ShippingRate"
+      ],
+      "properties": [
+        "rate_id"
+      ]
+    },
+    {
+      "name": "supplier_backorder_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "SupplierBackorder"
+      ],
+      "properties": [
+        "backorder_id"
+      ]
+    },
+    {
+      "name": "supplier_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Supplier"
+      ],
+      "properties": [
+        "supplier_id"
+      ]
+    },
+    {
+      "name": "tracking_event_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "TrackingEvent"
+      ],
+      "properties": [
+        "tracking_event_id"
+      ]
+    },
+    {
+      "name": "warehouse_id_unique",
+      "type": "NODE_PROPERTY_UNIQUENESS",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Warehouse"
+      ],
+      "properties": [
+        "warehouse_id"
+      ]
+    }
+  ],
+  "indexes": [
+    {
+      "name": "address_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Address"
+      ],
+      "properties": [
+        "address_id"
+      ]
+    },
+    {
+      "name": "assembly_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Assembly"
+      ],
+      "properties": [
+        "assembly_id"
+      ]
+    },
+    {
+      "name": "business_unit_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "BusinessUnit"
+      ],
+      "properties": [
+        "business_unit_id"
+      ]
+    },
+    {
+      "name": "carrier_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Carrier"
+      ],
+      "properties": [
+        "carrier_id"
+      ]
+    },
+    {
+      "name": "cart_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Cart"
+      ],
+      "properties": [
+        "cart_id"
+      ]
+    },
+    {
+      "name": "cart_line_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "CartLine"
+      ],
+      "properties": [
+        "cart_line_id"
+      ]
+    },
+    {
+      "name": "category_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Category"
+      ],
+      "properties": [
+        "category_id"
+      ]
+    },
+    {
+      "name": "compliance_requirement_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ComplianceRequirement"
+      ],
+      "properties": [
+        "compliance_id"
+      ]
+    },
+    {
+      "name": "customer_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Customer"
+      ],
+      "properties": [
+        "customer_id"
+      ]
+    },
+    {
+      "name": "data_source_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "DataSource"
+      ],
+      "properties": [
+        "source_id"
+      ]
+    },
+    {
+      "name": "dealer_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Dealer"
+      ],
+      "properties": [
+        "dealer_id"
+      ]
+    },
+    {
+      "name": "delivery_estimate_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "DeliveryEstimate"
+      ],
+      "properties": [
+        "delivery_estimate_id"
+      ]
+    },
+    {
+      "name": "identification_requirement_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "IdentificationRequirement"
+      ],
+      "properties": [
+        "requirement_id"
+      ]
+    },
+    {
+      "name": "index_1b9dcc97",
+      "state": "ONLINE",
+      "type": "LOOKUP",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": null,
+      "properties": null
+    },
+    {
+      "name": "index_460996c0",
+      "state": "ONLINE",
+      "type": "LOOKUP",
+      "entityType": "NODE",
+      "labelsOrTypes": null,
+      "properties": null
+    },
+    {
+      "name": "legacy_reference_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "LegacyReference"
+      ],
+      "properties": [
+        "legacy_reference_id"
+      ]
+    },
+    {
+      "name": "location_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Location"
+      ],
+      "properties": [
+        "location_id"
+      ]
+    },
+    {
+      "name": "machine_family_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineFamily"
+      ],
+      "properties": [
+        "family_id"
+      ]
+    },
+    {
+      "name": "machine_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Machine"
+      ],
+      "properties": [
+        "machine_id"
+      ]
+    },
+    {
+      "name": "machine_specification_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineSpecification"
+      ],
+      "properties": [
+        "machine_spec_id"
+      ]
+    },
+    {
+      "name": "machine_type_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineType"
+      ],
+      "properties": [
+        "machine_type_id"
+      ]
+    },
+    {
+      "name": "machine_variant_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "MachineVariant"
+      ],
+      "properties": [
+        "variant_id"
+      ]
+    },
+    {
+      "name": "order_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Order"
+      ],
+      "properties": [
+        "order_id"
+      ]
+    },
+    {
+      "name": "order_line_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "OrderLine"
+      ],
+      "properties": [
+        "order_line_id"
+      ]
+    },
+    {
+      "name": "order_status_event_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "OrderStatusEvent"
+      ],
+      "properties": [
+        "status_event_id"
+      ]
+    },
+    {
+      "name": "order_status_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "OrderStatus"
+      ],
+      "properties": [
+        "order_status_code"
+      ]
+    },
+    {
+      "name": "part_catalog_profile_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "PartCatalogProfile"
+      ],
+      "properties": [
+        "profile_id"
+      ]
+    },
+    {
+      "name": "part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Part"
+      ],
+      "properties": [
+        "part_id"
+      ]
+    },
+    {
+      "name": "part_specification_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "PartSpecification"
+      ],
+      "properties": [
+        "specification_id"
+      ]
+    },
+    {
+      "name": "plant_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Plant"
+      ],
+      "properties": [
+        "plant_id"
+      ]
+    },
+    {
+      "name": "price_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Price"
+      ],
+      "properties": [
+        "price_id"
+      ]
+    },
+    {
+      "name": "region_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Region"
+      ],
+      "properties": [
+        "region_id"
+      ]
+    },
+    {
+      "name": "rel_admits_variant_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ADMITS_VARIANT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_allocated_from_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ALLOCATED_FROM"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_available_at_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "AVAILABLE_AT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_branded_as_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "BRANDED_AS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_carried_by_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "CARRIED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_co_ordered_with_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "CO_ORDERED_WITH"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_contains_line_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "CONTAINS_LINE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_covers_category_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "COVERS_CATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_delivers_to_address_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "DELIVERS_TO_ADDRESS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_delivers_to_customer_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "DELIVERS_TO_CUSTOMER"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_dispatched_from_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "DISPATCHED_FROM"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_fits_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FITS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_for_machine_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FOR_MACHINE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_for_part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FOR_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_from_warehouse_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "FROM_WAREHOUSE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_alias_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_ALIAS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_compliance_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_COMPLIANCE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_legacy_reference_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_LEGACY_REFERENCE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_machine_specification_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_MACHINE_SPECIFICATION"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_shipment_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_SHIPMENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_specification_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_SPECIFICATION"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_status_event_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_STATUS_EVENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_has_tracking_event_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HAS_TRACKING_EVENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_home_plant_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "HOME_PLANT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_identified_by_part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IDENTIFIED_BY_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_category_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_CATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_country_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_COUNTRY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_region_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_REGION"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_in_subcategory_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "IN_SUBCATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_issued_by_business_unit_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ISSUED_BY_BUSINESS_UNIT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_located_at_address_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "LOCATED_AT_ADDRESS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_located_at_plant_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "LOCATED_AT_PLANT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_located_in_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "LOCATED_IN"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_manufactured_at_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "MANUFACTURED_AT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_member_of_family_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "MEMBER_OF_FAMILY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_of_type_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "OF_TYPE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_opened_by_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "OPENED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_ordered_by_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ORDERED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_originates_at_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "ORIGINATES_AT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_owned_by_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "OWNED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_part_of_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PART_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_placed_with_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PLACED_WITH"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_planned_fulfilment_from_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PLANNED_FULFILMENT_FROM"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_prices_part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PRICES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_product_family_of_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PRODUCT_FAMILY_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_profiles_part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "PROFILES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_records_status_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "RECORDS_STATUS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_references_part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "REFERENCES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_related_component_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "RELATED_COMPONENT"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_requires_part_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "REQUIRES_PART"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_same_name_group_as_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SAME_NAME_GROUP_AS"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_serves_family_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SERVES_FAMILY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_ships_line_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SHIPS_LINE"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_ships_to_country_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SHIPS_TO_COUNTRY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_stocked_by_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "STOCKED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_subcategory_of_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SUBCATEGORY_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_supplied_by_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SUPPLIED_BY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_supplies_category_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "SUPPLIES_CATEGORY"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_to_customer_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "TO_CUSTOMER"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_to_dealer_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "TO_DEALER"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "rel_variant_of_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "VARIANT_OF"
+      ],
+      "properties": [
+        "rel_id"
+      ]
+    },
+    {
+      "name": "search_alias_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "SearchAlias"
+      ],
+      "properties": [
+        "alias_id"
+      ]
+    },
+    {
+      "name": "service_plan_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ServicePlan"
+      ],
+      "properties": [
+        "service_plan_id"
+      ]
+    },
+    {
+      "name": "shipment_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Shipment"
+      ],
+      "properties": [
+        "shipment_id"
+      ]
+    },
+    {
+      "name": "shipping_rate_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ShippingRate"
+      ],
+      "properties": [
+        "rate_id"
+      ]
+    },
+    {
+      "name": "supplier_backorder_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "SupplierBackorder"
+      ],
+      "properties": [
+        "backorder_id"
+      ]
+    },
+    {
+      "name": "supplier_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Supplier"
+      ],
+      "properties": [
+        "supplier_id"
+      ]
+    },
+    {
+      "name": "tracking_event_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "TrackingEvent"
+      ],
+      "properties": [
+        "tracking_event_id"
+      ]
+    },
+    {
+      "name": "warehouse_id_unique",
+      "state": "ONLINE",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Warehouse"
+      ],
+      "properties": [
+        "warehouse_id"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "id": "LOC-ASSEN",
+      "name": "Assen",
+      "type": "CITY",
+      "cc": "NL",
+      "ds": "SOURCE_DERIVED"
+    },
+    {
+      "id": "LOC-COEVORDEN",
+      "name": "Coevorden",
+      "type": "CITY",
+      "cc": "NL",
+      "ds": "SOURCE_DERIVED"
+    },
+    {
+      "id": "LOC-DE",
+      "name": "Germany",
+      "type": "COUNTRY",
+      "cc": "DE",
+      "ds": "SOURCE_DERIVED"
+    },
+    {
+      "id": "LOC-LINGEN",
+      "name": "Lingen",
+      "type": "CITY",
+      "cc": "DE",
+      "ds": "SOURCE_DERIVED"
+    },
+    {
+      "id": "LOC-NL",
+      "name": "Netherlands",
+      "type": "COUNTRY",
+      "cc": "NL",
+      "ds": "SOURCE_DERIVED"
+    }
+  ],
+  "regions": [
+    {
+      "name": "Antwerpen",
+      "k": [
+        "source_id",
+        "region_id",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "country",
+        "country_code",
+        "currency",
+        "vat_rate_demo"
+      ]
+    },
+    {
+      "name": "Oost-Vlaanderen",
+      "k": [
+        "source_id",
+        "region_id",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "country",
+        "country_code",
+        "currency",
+        "vat_rate_demo"
+      ]
+    },
+    {
+      "name": "Bremen",
+      "k": [
+        "source_id",
+        "region_id",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "name",
+        "provenance_type",
+        "source_file",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "country",
+        "country_code",
+        "currency",
+        "vat_rate_demo"
+      ]
+    }
+  ],
+  "dealer_cities": [
+    {
+      "cc": "BE",
+      "city": "Antwerpen",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Bremen",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Dortmund",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Hannover",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Koeln",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Muenster",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Osnabrueck",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Eindhoven",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Emmen",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Enschede",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Groningen",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Rotterdam",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Utrecht",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Venlo",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Zwolle",
+      "n": 1
+    }
+  ],
+  "supplier_cities": [
+    {
+      "cc": "BE",
+      "city": "Antwerpen",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Bremen",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Hannover",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Meppen",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Muenster",
+      "n": 1
+    },
+    {
+      "cc": "DE",
+      "city": "Oldenburg",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Almelo",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Eindhoven",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Enschede",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Groningen",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Heerenveen",
+      "n": 1
+    },
+    {
+      "cc": "NL",
+      "city": "Rotterdam",
+      "n": 1
+    }
+  ],
+  "warehouse_cities": [
+    {
+      "cc": "NL",
+      "city": "Assen",
+      "name": "Noordveld Central Warehouse Assen (demo)"
+    },
+    {
+      "cc": "DE",
+      "city": "Lingen",
+      "name": "Kessler Parts Depot Lingen (demo)"
+    },
+    {
+      "cc": "NL",
+      "city": "Coevorden",
+      "name": "Bakker Parts Depot Coevorden (demo)"
+    },
+    {
+      "cc": "NL",
+      "city": "Zwolle",
+      "name": "Regional Distribution Centre Zwolle (demo)"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-0001",
+      "status": "SHIPPED",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0002",
+      "status": "DELIVERED",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0003",
+      "status": "ALLOCATED",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0004",
+      "status": "PROCESSING",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0005",
+      "status": "CONFIRMED",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0006",
+      "status": "NEW",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0007",
+      "status": "DELIVERED",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "ORD-0008",
+      "status": "SHIPPED",
+      "ds": "SYNTHETIC_DEMO"
+    }
+  ],
+  "shipments": [
+    {
+      "id": "SHP-0001",
+      "status": "SHIPPED",
+      "ref": "DEMO-0001-1",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0002",
+      "status": "SHIPPED",
+      "ref": "DEMO-0001-2",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0003",
+      "status": "SHIPPED",
+      "ref": "DEMO-0001-3",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0004",
+      "status": "DELIVERED",
+      "ref": "DEMO-0002-1",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0005",
+      "status": "DELIVERED",
+      "ref": "DEMO-0002-2",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0006",
+      "status": "DELIVERED",
+      "ref": "DEMO-0002-3",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0007",
+      "status": "DELIVERED",
+      "ref": "DEMO-0007-1",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0008",
+      "status": "DELIVERED",
+      "ref": "DEMO-0007-2",
+      "ds": "SYNTHETIC_DEMO"
+    },
+    {
+      "id": "SHP-0009",
+      "status": "SHIPPED",
+      "ref": "DEMO-0008-1",
+      "ds": "SYNTHETIC_DEMO"
+    }
+  ],
+  "inventory_freshness": [
+    {
+      "n": 400,
+      "with_last_updated": 400,
+      "with_qty": 400,
+      "keys": [
+        "source_id",
+        "rel_id",
+        "authoritative_flag",
+        "confidence",
+        "data_status",
+        "last_updated",
+        "provenance_type",
+        "source_file",
+        "source_name",
+        "source_record_id",
+        "source_sheet",
+        "available",
+        "on_hand",
+        "reorder_point",
+        "reserved",
+        "stock_status"
+      ]
+    }
+  ],
+  "entity_properties_of_interest": {
+    "Order": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "ORD-0001",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "channel": "DEMO_WEB_STORE",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "shipping_ex_vat": 19.0,
+      "order_date": "2026-09-03",
+      "order_status": "SHIPPED",
+      "vat_amount": 678.7,
+      "shipping_method": "STANDARD",
+      "source_sheet": "SYN_orders",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "currency": "EUR",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "subtotal_ex_vat": 3212.89,
+      "order_id": "ORD-0001",
+      "source_name": "gen_synthetic.py (seed 42)",
+      "order_total_incl_vat": 3910.59,
+      "vat_rate": 0.21
+    },
+    "Shipment": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "SHP-0001",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "est_road_km": 165.0,
+      "shipment_id": "SHP-0001",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "tracking_ref": "DEMO-0001-1",
+      "source_sheet": "SYN_shipments",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "straight_line_km": 126.9,
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)",
+      "shipment_status": "SHIPPED"
+    },
+    "TrackingEvent": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "EVT-0001",
+      "event_location": "Coevorden",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "tracking_event_id": "EVT-0001",
+      "source_id_value": "EVT-0001",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "source_sheet": "SYN_shipment_events",
+      "event_date": "2026-09-04",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)",
+      "event_seq": 1,
+      "event_status": "PICKED"
+    },
+    "Customer": {
+      "customer_type": "BUSINESS",
+      "last_updated": "2026-10-01",
+      "source_record_id": "CUS-001",
+      "city": "Zwolle",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "country_code": "NL",
+      "source_sheet": "SYN_customers",
+      "customer_status": "DEMO",
+      "name": "Harmsen Logistics BV (demo)",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "customer_id": "CUS-001",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)"
+    },
+    "ServicePlan": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "SVC-1000-001",
+      "service_template": "SVC-1000",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "source_id_value": "SVC-1000-001",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "interval_hours": 1000,
+      "interval_status": "DEMO_INTERVAL",
+      "source_sheet": "SYN_services",
+      "service_plan_id": "SVC-1000-001",
+      "name": "Major service (demo)",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)"
+    },
+    "OrderStatusEvent": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "OSH-0001",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "source_id_value": "OSH-0001",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "sequence": 1,
+      "order_status": "NEW",
+      "source_sheet": "SYN_order_status_history",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "status_event_id": "OSH-0001",
+      "source_name": "gen_synthetic.py (seed 42)"
+    },
+    "Carrier": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "CAR-demo-freight-fictional",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "key_basis": "DERIVED_FROM_NAME",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "carrier_id": "CAR-demo-freight-fictional",
+      "source_sheet": "SYN_shipments",
+      "name": "Demo Freight (fictional)",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)"
+    },
+    "OrderLine": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "OI-0001",
+      "quantity": 1,
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "line_no": 1,
+      "line_total_eur": 363.6,
+      "unit_price_eur": 363.6,
+      "source_id_value": "OI-0001",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "source_sheet": "SYN_order_items",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "allocation_status": "SHIPPED",
+      "order_line_id": "OI-0001",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)"
+    },
+    "Address": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "ADR-0001",
+      "address_note": "Synthetic address; street, number and postal code are invented",
+      "city": "Assen",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "address_id": "ADR-0001",
+      "house_number": 140,
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "country_code": "NL",
+      "state_region": "Drenthe",
+      "street": "Kanaalweg",
+      "source_sheet": "SYN_addresses",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "postal_code": "3830 SC",
+      "source_name": "gen_synthetic.py (seed 42)",
+      "owner_type": "PLANT"
+    },
+    "Region": {
+      "country": "Belgium",
+      "last_updated": "2026-10-01",
+      "source_record_id": "REG-BE-ANTW",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "region_id": "REG-BE-ANTW",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "country_code": "BE",
+      "vat_rate_demo": 0.21,
+      "source_sheet": "SYN_countries_regions",
+      "name": "Antwerpen",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "currency": "EUR",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)"
+    },
+    "SupplierBackorder": {
+      "last_updated": "2026-10-01",
+      "source_record_id": "BO-001",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "quantity_on_order": 40,
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "backorder_id": "BO-001",
+      "expected_restock_days": 14,
+      "source_sheet": "SYN_supplier_backorders",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)",
+      "backorder_status": "ON_ORDER_DEMO"
+    },
+    "DeliveryEstimate": {
+      "note": "transit days from SYN_shipping_rates + 1 handling day",
+      "last_updated": "2026-10-01",
+      "source_record_id": "DLT-0001",
+      "authoritative_flag": false,
+      "confidence": "NOT_STATED",
+      "est_road_km": 80.6,
+      "express_days": 2,
+      "standard_days": 2,
+      "source_id_value": "DLT-0001",
+      "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+      "delivery_estimate_id": "DLT-0001",
+      "source_sheet": "SYN_delivery_options",
+      "provenance_type": "SYNTHETIC_DEMO",
+      "express_price_ex_vat": 21.6,
+      "standard_price_ex_vat": 12.0,
+      "source_id": "SRC-003",
+      "data_status": "SYNTHETIC_DEMO",
+      "source_name": "gen_synthetic.py (seed 42)"
+    }
+  },
+  "has_labels": {
+    "Part": true,
+    "Machine": true,
+    "MachineType": true,
+    "MachineFamily": true,
+    "Category": true,
+    "Assembly": true,
+    "Supplier": true,
+    "Dealer": true,
+    "DealerBranch": false,
+    "Depot": false,
+    "Warehouse": true,
+    "City": false,
+    "Country": false,
+    "Location": true,
+    "Region": true,
+    "Address": true,
+    "Inventory": false,
+    "Customer": true,
+    "PartsInquiry": false,
+    "RequestedPart": false,
+    "FulfilmentRequest": false,
+    "FulfilmentOption": false,
+    "Allocation": false,
+    "Order": true,
+    "Shipment": true,
+    "ShipmentEvent": false,
+    "TrackingEvent": true,
+    "ServiceJob": false,
+    "ServicePlan": true,
+    "ComplianceRequirement": true,
+    "Certification": false,
+    "Alternative": false,
+    "Supersession": false
+  }
+}

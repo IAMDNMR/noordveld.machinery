@@ -18,14 +18,24 @@ class Intent(StrEnum):
     PART_TO_SUPPLIER = "PART_TO_SUPPLIER"
     PART_TO_DEALER = "PART_TO_DEALER"
     PART_TO_LOCATION = "PART_TO_LOCATION"
+    PART_TO_WAREHOUSE = "PART_TO_WAREHOUSE"
+    WAREHOUSE_STOCK = "WAREHOUSE_STOCK"
     PART_TO_INVENTORY = "PART_TO_INVENTORY"
     PART_TO_COMPLIANCE = "PART_TO_COMPLIANCE"
     PART_PROVENANCE = "PART_PROVENANCE"
     PART_GRAPH = "PART_GRAPH"
     MACHINE_GRAPH = "MACHINE_GRAPH"
+    MACHINE_LIST = "MACHINE_LIST"
+    SHARED_PARTS = "SHARED_PARTS"
+    PART_TO_SERVICE_PLAN = "PART_TO_SERVICE_PLAN"
+    PART_TO_ORDERS = "PART_TO_ORDERS"
+    LOW_STOCK_PARTS = "LOW_STOCK_PARTS"
     SUPPLIER_GRAPH = "SUPPLIER_GRAPH"
     DEALER_GRAPH = "DEALER_GRAPH"
     DATA_QUALITY = "DATA_QUALITY"
+    ENTITY_PATH = "ENTITY_PATH"
+    ORDER_STATUS = "ORDER_STATUS"
+    GEO_LOCATION = "GEO_LOCATION"
     UNSUPPORTED = "UNSUPPORTED"
 
 
@@ -36,17 +46,22 @@ class Kind(StrEnum):
     DEALER = "DEALER"
     ASSEMBLY = "ASSEMBLY"
     CATEGORY = "CATEGORY"
+    ORDER = "ORDER"
+    WAREHOUSE = "WAREHOUSE"
 
 
 @dataclass(frozen=True)
 class ParsedQuestion:
-    """What the question is about, before any entity is looked up. Produced by rules first, by an LLM only if rules cannot tell."""
+    """What the question is about, before any entity is looked up. Always produced by the language model."""
 
     intent: Intent | None
     mentions: tuple[str, ...] = ()
     text: str = ""  # free-text residue, used by PART_SEARCH
-    source: str = "rules"  # rules | llm
+    source: str = "llm"
     clarification: str | None = None
+    single: bool = False  # "tell me about X": one entity expected, several matches are offered as a choice
+    needs_clarification: bool = False  # the model asked for more detail instead of choosing an intent
+    filters: dict = field(default_factory=dict)  # place, place_kind, proximity, location, target_kind, as returned by the model
 
 
 @dataclass(frozen=True)

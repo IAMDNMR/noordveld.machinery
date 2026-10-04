@@ -196,3 +196,9 @@
 @media (prefers-reduced-motion: reduce) {
   .lf-bar, .lf-big { transition: none; }
 }
+
+/* while the film's records load from the graph: the same frame, so nothing jumps */
+.lf-gate { width: min(100% - 2 * var(--gutter), 92rem); margin-inline: auto; aspect-ratio: 16 / 9; display: grid; place-content: center; justify-items: center; gap: 1rem; border-radius: 24px;
+  background: var(--paper); border: 1px solid var(--line); color: var(--graphite-2, #4a4f53); text-align: center; padding: 2rem; }
+.lf-gate button { padding: 0.6rem 1.1rem; border: 1px solid var(--line); border-radius: 999px; background: #fff; font: inherit; cursor: pointer; }
+@media (max-width: 760px) { .lf-gate { width: 100%; border-radius: 0; aspect-ratio: 4 / 5; } }

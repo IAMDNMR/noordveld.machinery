@@ -75,14 +75,14 @@ function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: str
 
   return (
     <div className={`ssearch ssearch--${variant}`} ref={root}>
-      <form role="search" onSubmit={submit}>
-        <Search className="ssearch__icon" size={variant === 'hero' ? 22 : 18} strokeWidth={1.8} aria-hidden="true" />
+      <form role="search" onSubmit={submit} className={variant === 'hero' ? 'search-box' : undefined}>
+        {variant === 'bar' ? <Search className="ssearch__icon" size={18} strokeWidth={1.8} aria-hidden="true" /> : null}
         <input
           ref={input}
           type="search"
           aria-label="Search parts, machines or part numbers"
           aria-controls={listId}
-          placeholder="Search parts, machines or part numbers..."
+          placeholder={variant === 'hero' ? 'Search by part number, description or machine' : 'Search parts, machines or part numbers...'}
           value={text}
           autoComplete="off"
           onChange={(e) => {
@@ -107,7 +107,7 @@ function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: str
           </button>
         ) : null}
         {variant === 'hero' ? (
-          <button type="submit" className="ssearch__go">
+          <button type="submit" className="btn btn-primary">
             Search
           </button>
         ) : null}

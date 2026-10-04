@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.dependencies import Overviews, Questions, Workspaces
+from app.api.dependencies import EntityDetails, Overviews, Questions, Workspaces
 from app.schemas.intelligence import (
-    AssemblyItem, ComplianceItem, DealerItem, FitmentItem, GraphView, Insight, InventoryView, Kpis, PartOverview, ProvenanceReport, QueryRequest, QueryResponse,
+    AssemblyItem, ComplianceItem, DealerItem, EntityDetail, FitmentItem, GraphView, Insight, InventoryView, Kpis, PartOverview, ProvenanceReport, QueryRequest, QueryResponse,
     RelatedItem, SupplierItem,
 )
 
@@ -81,3 +81,9 @@ def insights(key: str, ws: Workspaces) -> list[Insight]:
 @router.get("/parts/{key}/graph", response_model=GraphView)
 def graph(key: str, ws: Workspaces) -> GraphView:
     return ws.graph(key)
+
+
+@router.get("/entities/{kind}/{entity_id}", response_model=EntityDetail)
+def entity(kind: str, entity_id: str, service: EntityDetails) -> EntityDetail:
+    """Detail of a graph node that is not a part (machine, supplier, dealer, warehouse, assembly, compliance, category)."""
+    return service.detail(kind.upper(), entity_id)

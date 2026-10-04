@@ -82,3 +82,26 @@ def test_cart_quote(client):
     else:
         assert quote["subtotal"] is None
     assert client.post("/api/v1/cart/quote", json={"items": [{"part_id": "x", "quantity": 0}]}).status_code == 422
+
+
+# ── order gate (QA fix 1): non-verified parts are never priced ─────────────────────────────────────
+NON_VERIFIED = {"NVM-1140-DT": "IDENTIFICATION_REQUIRED", "NVM-4410-SK": "AMBIGUOUS", "NVM-1060-DT": "UNVERIFIED"}
+
+
+@pytest.mark.parametrize("part_number,status", NON_VERIFIED.items())
+def test_quote_rejects_non_verified_parts(client, part_number, status):
+    part_id = client.get(f"/api/v1/parts/{part_number}").json()["part"]["part_id"]
+    quote = client.post("/api/v1/cart/quote", json={"items": [{"part_id": part_id, "quantity": 2}]}).json()
+    assert quote["lines"] == [] and quote["subtotal"] is None
+    rejected = quote["rejected"][0]
+    assert rejected["part"]["part_number"] == part_number and rejected["status"] == status
+    assert rejected["part"]["price"] is None and rejected["status_label"] and rejected["reason"]
+
+
+def test_quote_prices_verified_and_excludes_rejected_from_subtotal(client):
+    ok = client.get("/api/v1/parts/NVM-1050-CL").json()
+    bad = client.get("/api/v1/parts/NVM-1140-DT").json()
+    quote = client.post("/api/v1/cart/quote", json={"items": [{"part_id": ok["part"]["part_id"], "quantity": 1}, {"part_id": bad["part"]["part_id"], "quantity": 1}]}).json()
+    assert [l["part"]["part_number"] for l in quote["lines"]] == ["NVM-1050-CL"]
+    assert quote["subtotal"]["amount"] == ok["price"]["amount"]
+    assert [r["part"]["part_number"] for r in quote["rejected"]] == ["NVM-1140-DT"]

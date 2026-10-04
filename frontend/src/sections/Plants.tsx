@@ -2,30 +2,39 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PlantImage } from '../components/media/MachineImage'
 import { Reveal } from '../components/Reveal'
-import { machinesAt, plants } from '../data/machines'
+import { capitalise, countWord, inText, machinesAt, useSite } from '../data/site'
 import type { PlantId } from '../types/catalog'
 import { PlantMap } from './PlantMap'
 
 export function Plants() {
-  const [active, setActive] = useState<PlantId>('assen')
+  const { data } = useSite()
+  const plants = data?.plants ?? []
+  const [chosen, setActive] = useState<PlantId | null>(null)
+  const active = chosen ?? plants[0]?.id ?? ''
+  const countries = [...new Set(plants.map((p) => p.country))]
+  const title = data ? `${capitalise(countWord(plants.length))} plants. ${capitalise(countWord(countries.length))} ${countries.length === 1 ? 'country' : 'countries'}.` : 'Our plants.'
 
   return (
     <section id="plants" className="section on-mist plants" aria-labelledby="plants-title">
       <div className="container">
         <Reveal className="plants__head">
           <h2 id="plants-title" className="h1">
-            Three plants. Two countries.
+            {title}
           </h2>
-          <p className="lead">Every Noordveld machine comes from one of three plants in the north of the Netherlands and Germany.</p>
+          {data ? (
+            <p className="lead">
+              Every Noordveld machine comes from one of {countWord(plants.length)} plants in {countries.map(inText).join(' and ')}.
+            </p>
+          ) : null}
         </Reveal>
 
         <div className="plants__layout">
           <div className="plants__map">
-            <PlantMap active={active} onSelect={setActive} />
+            <PlantMap plants={plants} active={active} onSelect={setActive} />
           </div>
           <ul className="plants__list">
             {plants.map((plant) => {
-              const list = machinesAt(plant.id)
+              const list = data ? machinesAt(data, plant.id) : []
               return (
                 <li key={plant.id} className={`plant ${active === plant.id ? 'is-active' : ''}`} onPointerEnter={() => setActive(plant.id)} onFocusCapture={() => setActive(plant.id)}>
                   <PlantImage plant={plant} ratio="16 / 8" />

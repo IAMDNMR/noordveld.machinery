@@ -4,7 +4,7 @@ import { FilmSlot } from '../components/media/FilmSlot'
 import { EditorialImage } from '../components/media/MachineImage'
 import { Reveal } from '../components/Reveal'
 import { company, films } from '../data/content'
-import { parts, partCategories } from '../data/machines'
+import { useSite } from '../data/site'
 
 const concepts: readonly { name: string; text: string; icon: LucideIcon }[] = [
   { name: 'Service', text: 'People who know the machine.', icon: Wrench },
@@ -58,6 +58,8 @@ export function Service() {
 }
 
 export function PartsSection() {
+  const { data } = useSite()
+  const partCategories = data?.partCategories ?? []
   return (
     <section id="parts" className="section on-mist parts" aria-labelledby="parts-title">
       <div className="container parts__layout">
@@ -77,7 +79,13 @@ export function PartsSection() {
         </div>
         <Reveal className="parts__catalogue" delay={160}>
           <p className="parts__count">
-            <strong>{parts.length}</strong> parts catalogued across {partCategories.length} categories
+            {data ? (
+              <>
+                <strong>{data.partCount}</strong> parts catalogued across {partCategories.length} categories
+              </>
+            ) : (
+              'Loading the catalogue…'
+            )}
           </p>
           <ul className="parts__list">
             {partCategories.map((c) => (

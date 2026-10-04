@@ -1,4 +1,3 @@
-import { Cog } from 'lucide-react'
 import type { CatalogueFilters, PartQuery } from '../../api'
 import { humanize } from '../../lib/format'
 import { activeFilterCount } from '../../lib/storeQuery'
@@ -36,7 +35,6 @@ export function FilterPanel({ query, options, onChange, onClear }: FilterPanelPr
             {options.categories.map((c) => (
               <label key={c.category_id} className={`${query.category === c.name ? 'is-on' : ''} ${c.part_count === 0 ? 'is-empty' : ''}`}>
                 <input type="radio" name="category" checked={query.category === c.name} onChange={() => onChange({ category: c.name })} onClick={() => query.category === c.name && onChange({ category: '' })} />
-                <Cog size={17} strokeWidth={1.5} aria-hidden="true" />
                 <span className="filters__label">{c.name}</span>
                 <span className="filters__n">{c.part_count}</span>
               </label>

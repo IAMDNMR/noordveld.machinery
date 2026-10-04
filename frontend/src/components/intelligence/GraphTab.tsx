@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { getPartGraph, type GraphNode, type GraphView } from '../../api'
+import { Link, useNavigate } from 'react-router-dom'
+import { getEntity, getPartGraph, type GraphNode, type GraphView } from '../../api'
 import { useApi } from '../../hooks/useApi'
 import { humanize } from '../../lib/format'
 import { ProvenanceBadge } from './provenance'
@@ -105,10 +106,11 @@ function Graph({ view, onOpen }: { view: GraphView; onOpen: (pn: string) => void
             <p className="pw-lead">The part you are investigating.</p>
           )}
           {selected.part_number && selected.id !== root.id ? (
-            <button type="button" className="button button--secondary" onClick={() => onOpen(selected.part_number!)}>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => onOpen(selected.part_number!)}>
               Investigate {selected.part_number}
             </button>
           ) : null}
+          {selected.kind !== 'PART' ? <NodeDetail key={selected.id} nodeId={selected.id} /> : null}
         </aside>
       </div>
 
@@ -138,6 +140,53 @@ function Graph({ view, onOpen }: { view: GraphView; onOpen: (pn: string) => void
           </section>
         ))}
       </div>
+    </div>
+  )
+}
+
+/** The stored detail of a node that is not a part, loaded when the node is selected. */
+function NodeDetail({ nodeId }: { nodeId: string }) {
+  const [kind, id] = [nodeId.slice(0, nodeId.indexOf(':')), nodeId.slice(nodeId.indexOf(':') + 1)]
+  const detail = useApi((s) => getEntity(kind, id, s), `entity:${nodeId}`)
+  const navigate = useNavigate()
+  return (
+    <div className="pg__detail">
+      <TabFrame state={detail} label="Detail">
+        {(d) => (
+          <>
+            {d.subtitle ? <p className="pw-rows__sub">{d.subtitle}</p> : null}
+            <dl className="pw-facts">
+              {d.facts.map((f) => (
+                <div key={f.label}>
+                  <dt>{f.label}</dt>
+                  <dd className={f.value ? undefined : 'is-missing'}>{f.value ?? 'Not available'}</dd>
+                </div>
+              ))}
+              <div>
+                <dt>Data</dt>
+                <dd>
+                  <ProvenanceBadge value={d.data_class} />
+                </dd>
+              </div>
+            </dl>
+            {d.links.length > 0 ? (
+              <div className="pg__links">
+                {d.links.map((l) =>
+                  l.href ? (
+                    <Link key={l.label} className="rcard__action" to={l.href}>
+                      {l.label}
+                    </Link>
+                  ) : l.question ? (
+                    <button key={l.label} type="button" className="rcard__action" onClick={() => navigate(`/parts-intelligence?q=${encodeURIComponent(l.question!)}`)}>
+                      {l.label}
+                    </button>
+                  ) : null,
+                )}
+              </div>
+            ) : null}
+          </>
+        )}
+      </TabFrame>
     </div>
   )
 }

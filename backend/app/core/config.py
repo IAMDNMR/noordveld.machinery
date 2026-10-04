@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from functools import lru_cache
+import secrets
 from pathlib import Path
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
@@ -35,16 +36,22 @@ class Settings:
     #: origins allowed to call the API (the Vite dev server by default)
     cors_origins: tuple[str, ...] = ("http://localhost:5180",)
     log_level: str = "INFO"
-    #: Gemini language layer (understanding and grounded wording only). Empty key = language model disabled.
-    gemini_api_key: str = field(default="", repr=False)
-    gemini_model: str = "gemini-2.5-flash"
-    #: free tier allows 15 requests/minute; stay under it
-    gemini_requests_per_minute: int = 12
-    gemini_timeout: float = 20.0
+    #: language layer (understanding and grounded wording only). The provider is chosen here and nowhere else.
+    llm_provider: str = "groq"  # groq | gemini
+    groq_api_key: str = field(default="", repr=False)
+    groq_model: str = "qwen/qwen3.8-27b"
+    gemini_api_key: str = field(default="", repr=False)  # optional provider
+    gemini_model: str = "gemini-3.5-flash"
+    llm_requests_per_minute: int = 25
+    llm_timeout: float = 20.0
+    #: signs the demo session cookie; when SESSION_SECRET is not set a random one is made per process (sign in again after a restart)
+    session_secret: str = field(default="", repr=False)
+    session_cookie_secure: bool = False
 
     @property
     def llm_configured(self) -> bool:
-        return bool(self.gemini_api_key)
+        """True when the selected provider has its key. An empty key disables the language model (its routes return 503)."""
+        return bool({"groq": self.groq_api_key, "gemini": self.gemini_api_key}.get(self.llm_provider))
 
     @property
     def graph_configured(self) -> bool:
@@ -62,8 +69,13 @@ def get_settings() -> Settings:
         neo4j_query_timeout=float(os.environ.get("NEO4J_QUERY_TIMEOUT", "15")),
         cors_origins=tuple(o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5180").split(",") if o.strip()),
         log_level=os.environ.get("LOG_LEVEL", "INFO").upper(),
+        llm_provider=(os.environ.get("LLM_PROVIDER", "") or "groq").strip().lower(),
+        groq_api_key=os.environ.get("GROQ_API_KEY", ""),
+        groq_model=os.environ.get("GROQ_MODEL", "") or "qwen/qwen3.8-27b",
         gemini_api_key=os.environ.get("GEMINI_API_KEY", ""),
-        gemini_model=os.environ.get("GEMINI_MODEL", "") or "gemini-2.5-flash",
-        gemini_requests_per_minute=int(os.environ.get("GEMINI_REQUESTS_PER_MINUTE", "12")),
-        gemini_timeout=float(os.environ.get("GEMINI_TIMEOUT", "20")),
+        gemini_model=os.environ.get("GEMINI_MODEL", "") or "gemini-3.5-flash",
+        llm_requests_per_minute=int(os.environ.get("LLM_REQUESTS_PER_MINUTE", "25")),
+        llm_timeout=float(os.environ.get("LLM_TIMEOUT", "20")),
+        session_secret=os.environ.get("SESSION_SECRET", "") or secrets.token_urlsafe(32),
+        session_cookie_secure=os.environ.get("SESSION_COOKIE_SECURE", "").lower() == "true",
     )

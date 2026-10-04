@@ -5,11 +5,12 @@ import { MachineCard } from '../components/MachineCard'
 import { MachineImage } from '../components/media/MachineImage'
 import { Reveal } from '../components/Reveal'
 import { TextLink } from '../components/ButtonLink'
-import { machineBySlug, machines } from '../data/machines'
-
-const featured = machineBySlug('nv-4500')
+import { useSite } from '../data/site'
 
 export function Portfolio() {
+  const { data } = useSite()
+  const machines = data?.machines ?? []
+  const featured = data?.featured ?? null
   const railRef = useRef<HTMLUListElement>(null)
   const [progress, setProgress] = useState(0)
 
@@ -22,9 +23,10 @@ export function Portfolio() {
 
   useEffect(() => {
     update()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-measure once the machines have loaded
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
-  }, [update])
+  }, [update, machines.length])
 
   const scrollBy = (dir: 1 | -1) => {
     const rail = railRef.current
@@ -42,8 +44,8 @@ export function Portfolio() {
             </h2>
           </Reveal>
           <Reveal delay={120} className="portfolio__intro">
-            <p className="lead">Explore the Noordveld range across material handling, loading, conveying and industrial applications.</p>
-            <TextLink to="/machines">View all 15 machines</TextLink>
+            <p className="lead">Explore the Noordveld range{data?.families.length ? ` across the ${data.families.join(', ')}` : ''}.</p>
+            <TextLink to="/machines">{data ? `View all ${machines.length} machines` : 'View all machines'}</TextLink>
           </Reveal>
         </div>
 

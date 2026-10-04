@@ -5,6 +5,7 @@ import { STORE_ROUTE } from '../../lib/storeQuery'
 import { CartProvider, useCart } from '../../store/CartContext'
 import { CartDrawer } from './CartDrawer'
 import { StoreSearch } from './StoreSearch'
+import '../../styles/wf.css'
 import './store.css'
 
 function StoreBar() {
@@ -26,7 +27,7 @@ function StoreBar() {
 
   return (
     <div className={`sbar ${over ? 'sbar--over' : ''}`}>
-      <div className="container sbar__inner">
+      <div className="wf-container sbar__inner">
         <Link to={STORE_ROUTE} className="sbar__title">
           Parts Store
         </Link>
@@ -47,7 +48,7 @@ function StoreBar() {
 export function StoreLayout() {
   return (
     <CartProvider>
-      <div className="store">
+      <div className="store wf">
         <StoreBar />
         <Outlet />
         <CartDrawer />

@@ -2,6 +2,7 @@ import { apiGet, apiPost } from './client'
 import type {
   AssemblyItem,
   ComplianceItem,
+  EntityDetail,
   DealerItem,
   FitmentItem,
   GraphView,
@@ -33,3 +34,7 @@ export const getPartCompliance = (key: string, signal?: AbortSignal): Promise<Co
 export const getPartProvenance = (key: string, signal?: AbortSignal): Promise<ProvenanceReport> => apiGet<ProvenanceReport>(part(key, '/provenance'), {}, signal)
 export const getPartInsights = (key: string, signal?: AbortSignal): Promise<Insight[]> => apiGet<Insight[]>(part(key, '/insights'), {}, signal)
 export const getPartGraph = (key: string, signal?: AbortSignal): Promise<GraphView> => apiGet<GraphView>(part(key, '/graph'), {}, signal)
+
+/** Detail of a graph node that is not a part. */
+export const getEntity = (kind: string, id: string, signal?: AbortSignal): Promise<EntityDetail> =>
+  apiGet<EntityDetail>(`/intelligence/entities/${encodeURIComponent(kind)}/${encodeURIComponent(id)}`, {}, signal)

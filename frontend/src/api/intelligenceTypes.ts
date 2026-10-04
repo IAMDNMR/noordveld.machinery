@@ -10,7 +10,7 @@ export type DataClass =
   | 'UNKNOWN'
   | 'NOT_CONNECTED'
 
-export type EntityKind = 'PART' | 'MACHINE' | 'SUPPLIER' | 'DEALER' | 'ASSEMBLY' | 'CATEGORY'
+export type EntityKind = 'PART' | 'MACHINE' | 'SUPPLIER' | 'DEALER' | 'ASSEMBLY' | 'CATEGORY' | 'ORDER' | 'WAREHOUSE'
 
 export interface Fact {
   label: string
@@ -23,14 +23,14 @@ export interface FactGroup {
 }
 
 export interface IntelligenceAction {
-  kind: 'view_part' | 'parts_store' | 'investigate' | 'identify' | 'ask'
+  kind: 'view_part' | 'parts_store' | 'investigate' | 'identify' | 'request_identification' | 'ask'
   label: string
   href: string | null
   question: string | null
 }
 
 export interface ResultItem {
-  kind: 'part' | 'machine' | 'supplier' | 'dealer' | 'assembly' | 'category' | 'relationship' | 'compliance' | 'stock' | 'metric' | 'path'
+  kind: 'part' | 'machine' | 'supplier' | 'dealer' | 'assembly' | 'category' | 'relationship' | 'compliance' | 'warehouse' | 'order' | 'shipment' | 'service_plan' | 'metric' | 'path'
   key: string
   title: string
   subtitle: string | null
@@ -64,6 +64,16 @@ export interface EntityRef {
   data_class: DataClass
 }
 
+/** The entity an answer is anchored on, identified in a few facts */
+export interface Subject {
+  kind: EntityKind
+  key: string
+  label: string
+  name: string | null
+  facts: Fact[]
+  data_class: DataClass
+}
+
 export interface Candidate {
   kind: EntityKind
   key: string
@@ -81,9 +91,12 @@ export interface QueryResponse {
   question: string
   intent: string
   intent_label: string
-  understood_by: 'rules' | 'llm' | 'selection'
+  /** Every question is understood by the language model; 'selection' when the user picked between candidates */
+  understood_by: 'llm' | 'selection'
   entities: EntityRef[]
-  answer: { summary: string; grounded: boolean; source: 'template' | 'gemini' }
+  /** What the answer is about (absent for searches and whole-catalogue answers) */
+  subject?: Subject | null
+  answer: { summary: string; grounded: boolean; source: 'template' | 'llm'; demo: boolean }
   results: ResultItem[]
   total: number
   evidence: Evidence[]
@@ -92,6 +105,10 @@ export interface QueryResponse {
   warnings: string[]
   actions: IntelligenceAction[]
   clarification: Clarification | null
+  /** The scope guardrail's verdict. Out-of-scope questions are never sent to the graph. */
+  scope: 'IN_SCOPE' | 'OUT_OF_SCOPE' | 'NEEDS_CLARIFICATION'
+  /** Measured steps, in order */
+  stages: { name: 'understanding' | 'entities' | 'graph' | 'answer'; ms: number }[]
   elapsed_ms: number
 }
 
@@ -107,9 +124,10 @@ export interface PartOverview {
   description: string | null
   category: string | null
   subcategory: string | null
+  families: string[]
   manufacturer: string | null
   origin_plant: string | null
-  status: { code: 'VERIFIED' | 'IDENTIFICATION_REQUIRED' | 'UNVERIFIED' | 'OTHER'; label: string }
+  status: { code: 'VERIFIED' | 'IDENTIFICATION_REQUIRED' | 'AMBIGUOUS' | 'UNVERIFIED'; label: string; reason: string | null; data_class: DataClass }
   identification: { model_code: string | null; reason: string | null; needed: string | null }[]
   data_class: DataClass
   source: string | null
@@ -185,6 +203,9 @@ export interface WarehouseItem {
 
 export interface InventoryView {
   state: 'CONNECTED' | 'NOT_CONNECTED'
+  /** Same field and label as the Parts Store */
+  availability_state: string | null
+  availability_label: string | null
   total_available: number | null
   warehouses: WarehouseItem[]
   dealers: DealerItem[]
@@ -245,3 +266,13 @@ export interface GraphView {
 }
 
 export type PartTab = 'overview' | 'fitment' | 'related' | 'assembly' | 'suppliers' | 'dealers' | 'inventory' | 'compliance' | 'graph' | 'provenance' | 'insights' | 'store'
+
+export interface EntityDetail {
+  kind: 'MACHINE' | 'SUPPLIER' | 'DEALER' | 'WAREHOUSE' | 'ASSEMBLY' | 'COMPLIANCE' | 'CATEGORY'
+  id: string
+  title: string
+  subtitle: string | null
+  data_class: DataClass
+  facts: Fact[]
+  links: { label: string; href: string | null; question: string | null }[]
+}

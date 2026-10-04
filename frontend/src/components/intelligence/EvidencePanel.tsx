@@ -1,7 +1,8 @@
 import type { QueryResponse } from '../../api'
 import { DATA_CLASS_LABEL } from './provenance'
 
-const BY: Record<QueryResponse['understood_by'], string> = { rules: 'Recognised directly', llm: 'Interpreted by the language model', selection: 'Your selection' }
+const BY: Record<QueryResponse['understood_by'], string> = { llm: 'understood by the language model', selection: 'your selection' }
+const STAGE: Record<QueryResponse['stages'][number]['name'], string> = { understanding: 'Understanding', entities: 'Entities', graph: 'Knowledge graph', answer: 'Answer' }
 
 /** The question's route through the system, and the graph edges behind the answer. Collapsed by default; never shows Cypher. */
 export function EvidencePanel({ response }: { response: QueryResponse }) {
@@ -13,10 +14,14 @@ export function EvidencePanel({ response }: { response: QueryResponse }) {
     ['Graph path', response.graph_path.length ? response.graph_path.join(' → ') : 'Not applicable'],
     ['Evidence', `${response.evidence.length} relationship${response.evidence.length === 1 ? '' : 's'} read`],
     ['Result', `${response.total} found · answered in ${response.elapsed_ms} ms`],
+    ...(response.stages.length ? [['Steps', response.stages.map((s) => `${STAGE[s.name]} ${s.ms} ms`).join(' · ')] as [string, string]] : []),
   ]
   return (
-    <details className="evid">
-      <summary>How this was answered</summary>
+    <details className="evid" open>
+      <summary>
+        <span className="evid__title">Why this result</span>
+        <span className="evid__sub">How this was answered, and the graph relationships behind it</span>
+      </summary>
       <ol className="evid__steps">
         {steps.map(([label, value]) => (
           <li key={label}>

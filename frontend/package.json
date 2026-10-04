@@ -10,7 +10,6 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "lint": "oxlint src agentic-commerce/src agentic-commerce/remotion",
-    "data": "python scripts/build-data.py",
     "film:preview": "remotion studio agentic-commerce/remotion/index.ts",
     "film:render": "remotion render agentic-commerce/remotion/index.ts EvolutionFilm --crf=18 agentic-commerce/film-masters/16x9.mp4",
     "film:render:square": "remotion render agentic-commerce/remotion/index.ts EvolutionFilmSquare --crf=18 agentic-commerce/film-masters/1x1.mp4",

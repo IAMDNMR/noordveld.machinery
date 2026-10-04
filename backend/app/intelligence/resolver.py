@@ -37,12 +37,13 @@ class EntityResolver:
         self._repo = repo
 
     def _lookup(self, mention: str) -> list[Resolved]:
-        words = mention.split()
-        while words:  # "NV 4500 loader" -> try the whole phrase, then without trailing words
-            rows = self._repo.resolve(" ".join(words))
+        words = mention.split()[:6]
+        # "NV 4500 loader" -> the whole phrase, then without trailing words; "supplies water pump" -> then without leading words
+        tries = [words[:n] for n in range(len(words), 0, -1)] + [words[n:] for n in range(1, len(words))]
+        for attempt in tries:
+            rows = self._repo.resolve(" ".join(attempt))
             if rows:
                 return [_to_resolved(r) for r in rows]
-            words = words[:-1] if len(words) > 1 else []
         return []
 
     def resolve(self, mentions: tuple[str, ...], selected: list[SelectedEntity] | None = None) -> Resolution:

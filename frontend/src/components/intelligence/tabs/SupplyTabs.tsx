@@ -79,13 +79,13 @@ export function InventoryTab({ partKey }: { partKey: string }) {
       {(inv) =>
         inv.state === 'NOT_CONNECTED' ? (
           <div className="pw-note">
-            <h3>Not connected</h3>
+            <h3>{inv.availability_label ?? 'No inventory record'}</h3>
             <p>{inv.note}</p>
             <ProvenanceBadge value="NOT_CONNECTED" />
           </div>
         ) : (
           <>
-            <Facts rows={[['Warehouse units recorded', inv.total_available?.toString()], ['Warehouses', inv.warehouses.length.toString()], ['Dealers with a record', inv.dealers.length.toString()], ['Data class', <ProvenanceBadge value={inv.data_class} key="d" />]]} />
+            <Facts rows={[['Availability', inv.availability_label], ['Warehouse units recorded', inv.total_available?.toString()], ['Warehouses', inv.warehouses.length.toString()], ['Dealers with a record', inv.dealers.length.toString()], ['Data class', <ProvenanceBadge value={inv.data_class} key="d" />]]} />
             {inv.note ? <p className="pw-note-inline">{inv.note}</p> : null}
             {inv.warehouses.length > 0 ? (
               <>

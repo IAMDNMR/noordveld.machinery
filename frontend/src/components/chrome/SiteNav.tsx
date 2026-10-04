@@ -1,5 +1,5 @@
 import { Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { nav, type NavItem } from '../../data/content'
 import { Logo } from '../Logo'
 import './chrome-tokens.css'
@@ -12,11 +12,22 @@ interface SiteNavProps {
   /** True where the page opens on a dark film: the bar starts transparent and turns solid on scroll */
   heroTone: boolean
   Link: ChromeLink
+  /** the links to show; the public site navigation when omitted */
+  items?: readonly NavItem[]
+  /** the account area at the end of the bar (role label, sign in / out) */
+  account?: ReactNode
 }
 
-const isCurrent = (item: NavItem, pathname: string): boolean => (item.to === '/parts-store' || item.to === '/parts-intelligence' || item.to === '/machines') && pathname.startsWith(item.to)
+/** Agentic Shopping is the hands-on step of Agentic E-Commerce, so it lights up that item. */
+const isCurrent = (item: NavItem, pathname: string): boolean => {
+  const [path] = pathname.split('?')
+  if (item.to === '/agentic-commerce/') return path.startsWith('/agentic-commerce') || path.startsWith('/agentic-shopping')
+  if (item.to.includes('?')) return pathname === item.to // a queue of the order list
+  if (item.to === '/orders') return path.startsWith('/orders') && !pathname.includes('queue=')
+  return ['/parts-store', '/parts-intelligence', '/machines', '/agentic-shopping'].includes(item.to) && path.startsWith(item.to)
+}
 
-export function SiteNav({ pathname, heroTone, Link }: SiteNavProps) {
+export function SiteNav({ pathname, heroTone, Link, items = nav, account }: SiteNavProps) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const overHero = heroTone && !scrolled && !open
@@ -48,13 +59,14 @@ export function SiteNav({ pathname, heroTone, Link }: SiteNavProps) {
           <Logo tone={overHero ? 'light' : 'dark'} height={34} />
         </Link>
         <nav className="nav__links" aria-label="Primary">
-          {nav.map((item) => (
+          {items.map((item) => (
             <Link key={item.label} to={item.to} external={item.external} className="nav__link" current={isCurrent(item, pathname)}>
               {item.label}
               {item.tag ? <span className="nav__tag">{item.tag}</span> : null}
             </Link>
           ))}
         </nav>
+        {account ? <div className="nav__account">{account}</div> : null}
         <button className="nav__toggle" type="button" aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpen((v) => !v)}>
           <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
           {open ? <X size={26} aria-hidden="true" /> : <Menu size={26} aria-hidden="true" />}
@@ -62,13 +74,14 @@ export function SiteNav({ pathname, heroTone, Link }: SiteNavProps) {
       </div>
       <div id="mobile-menu" className="nav__sheet" hidden={!open}>
         <nav aria-label="Mobile">
-          {nav.map((item) => (
+          {items.map((item) => (
             <Link key={item.label} to={item.to} external={item.external} onClick={close} current={isCurrent(item, pathname)}>
               {item.label}
               {item.tag ? <span className="nav__tag">{item.tag}</span> : null}
             </Link>
           ))}
         </nav>
+        {account ? <div className="nav__account nav__account--sheet">{account}</div> : null}
       </div>
     </header>
   )

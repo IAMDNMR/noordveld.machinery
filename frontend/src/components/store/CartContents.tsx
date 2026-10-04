@@ -44,6 +44,23 @@ export function CartContents({ onNavigate }: { onNavigate?: () => void }) {
             <p className="cline__total">{line_total ? formatMoney(line_total) : '—'}</p>
           </li>
         ))}
+        {data.rejected.map(({ part, status_label, reason }) => (
+          <li key={part.part_id} className="cline cline--blocked">
+            <PartImage partNumber={part.part_number} name={part.name} variant="mini" />
+            <div>
+              <Link to={partPath(part.part_number)} className="cline__name" onClick={onNavigate}>
+                {part.name}
+              </Link>
+              <p className="cline__no mono">{part.part_number}</p>
+              <p className="cline__note" role="note">
+                <strong>Cannot be ordered: {status_label}.</strong> {reason}
+              </p>
+            </div>
+            <button type="button" className="cline__remove" onClick={() => remove(part.part_id)} aria-label={`Remove ${part.name}`}>
+              <Trash2 size={17} strokeWidth={1.7} aria-hidden="true" />
+            </button>
+          </li>
+        ))}
         {data.unknown_part_ids.map((id) => (
           <li key={id} className="cline cline--unknown">
             <p className="cline__note">A part in your cart ({id}) is no longer in the catalogue.</p>
@@ -58,6 +75,11 @@ export function CartContents({ onNavigate }: { onNavigate?: () => void }) {
           <dt>Subtotal</dt>
           <dd>{data.subtotal ? formatMoney(data.subtotal) : 'Not available'}</dd>
         </div>
+        {data.rejected.length > 0 ? (
+          <div>
+            <dt>{data.rejected.length === 1 ? '1 part cannot be ordered and is not included.' : `${data.rejected.length} parts cannot be ordered and are not included.`}</dt>
+          </div>
+        ) : null}
         {data.subtotal === null && data.unpriced_part_ids.length > 0 ? <div><dt>Some parts have no price, so no subtotal is shown.</dt></div> : null}
       </dl>
       <p className="cart__fine">{data.note}</p>

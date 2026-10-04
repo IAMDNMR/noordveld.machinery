@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from app.graph.repositories.parts import PartRepository
-from app.schemas.cart import Quote, QuoteLine, QuoteRequest
+from app.schemas.cart import Quote, QuoteLine, QuoteRequest, RejectedLine
 from app.schemas.catalogue import Money
+from app.services.part_status import is_orderable, rejection_reason, status_label
 from app.services.parts import to_summary
 
 NOTE = (
@@ -23,9 +24,16 @@ class CartService:
         found = {r["part_id"]: to_summary(r) for r in self._repo.summaries(list(quantities))}
 
         lines: list[QuoteLine] = []
+        rejected: list[RejectedLine] = []
         for part_id, qty in quantities.items():
             part = found.get(part_id)
             if part is None:
+                continue
+            status = part.availability.part_status if part.availability else None
+            orderable = part.availability.orderable if part.availability else None
+            if not is_orderable(status, orderable):  # the order gate: never priced, never in the subtotal
+                rejected.append(RejectedLine(part=part.model_copy(update={"price": None}), quantity=qty, status=status,
+                                             status_label=status_label(status), reason=rejection_reason(status, orderable)))
                 continue
             total = None
             if part.price is not None:
@@ -43,6 +51,7 @@ class CartService:
             )
         return Quote(
             lines=lines,
+            rejected=rejected,
             unknown_part_ids=[i for i in quantities if i not in found],
             subtotal=subtotal,
             unpriced_part_ids=unpriced,

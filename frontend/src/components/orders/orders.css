@@ -1,0 +1,50 @@
+/* Sign-in, orders and order detail, on the wireframe's layouts (src/styles/wf.css). */
+.ord-page { padding-top: calc(var(--nav-height) + 40px); padding-bottom: 72px; }
+.ord-page h1 { margin-bottom: 4px; }
+.ord-loading, .ord-page .pi-empty { margin-top: 24px; }
+.ord-restricted { max-width: 560px; margin-top: 28px; display: grid; gap: 10px; justify-items: start; }
+.ord-restricted h2 { font-size: 18px; }
+
+/* sign-in */
+.ord-accounts { margin-top: 26px; }
+.ord-account { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.ord-account h2 { font-size: 17px; }
+.ord-account .btn { margin-top: auto; }
+.ord-signin__note { margin-top: 22px; }
+
+/* list */
+.ord-queues { margin: 22px 0 16px; }
+.ord-table { margin-top: 22px; }
+.ord-queues + .ord-table { margin-top: 0; }
+.ord-table .data-table th, .ord-table .data-table td { white-space: nowrap; }
+.ord-table .data-table td[data-label="Parts"] { white-space: normal; min-width: 10rem; }
+
+/* detail */
+.ord-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.ord-status { font-size: 13px; padding: 6px 12px; }
+.ord-actions { margin-bottom: 20px; border-color: var(--accent); }
+.ord-actions h2 { font-size: 15px; margin-bottom: 8px; }
+.ord-blocked { color: var(--warn); margin-top: 4px; }
+.ord-error { margin-top: 12px; }
+.ord-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.ord-grid h2 { font-size: 15px; margin-bottom: 12px; }
+.ord-totals { margin-top: 12px; }
+.ord-line + .ord-line { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--grey-100); }
+.ord-line .chip-row { margin: 6px 0 8px; }
+.ord-line .kv-row dd small { display: block; }
+.ord-timeline { display: grid; gap: 10px; margin-top: 10px; padding-left: 16px; border-left: 2px solid var(--grey-200); }
+.ord-timeline li { position: relative; display: grid; gap: 1px; font-size: 14px; }
+.ord-timeline li::before { content: ""; position: absolute; left: -22px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+
+@media (max-width: 900px) {
+  .ord-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .ord-head { flex-direction: column; }
+  .ord-actions .spread { flex-direction: column; align-items: flex-start; }
+  .ord-table .data-table thead { display: none; }
+  .ord-table .data-table, .ord-table .data-table tbody, .ord-table .data-table tr, .ord-table .data-table th, .ord-table .data-table td { display: block; width: 100%; white-space: normal; }
+  .ord-table .data-table tr { padding: 12px 14px; border-bottom: 1px solid var(--grey-100); }
+  .ord-table .data-table th, .ord-table .data-table td { padding: 2px 0 !important; border: 0 !important; }
+  .ord-table .data-table td[data-label]::before { content: attr(data-label); display: inline-block; min-width: 6rem; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-500); }
+}

@@ -20,10 +20,32 @@ export interface NavItem {
 export const AGENTIC_ROUTE = '/agentic-commerce/'
 
 export const nav: readonly NavItem[] = [
-  { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true },
-  { label: 'Parts Store', to: '/parts-store', tag: 'Agentic' },
+  { label: 'Machines', to: '/machines' },
+  { label: 'Parts Store', to: '/parts-store' },
   { label: 'Parts Intelligence', to: '/parts-intelligence' },
+  { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true }, // its "See it work" step opens Agentic Shopping
+  { label: 'Contact', to: `mailto:${company.email}`, external: true },
 ]
+
+/** What each signed-in role works with. Hiding a link is presentation only: the backend checks every request. */
+export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly NavItem[] =>
+  role === 'END_USER'
+    ? [
+        { label: 'Machines', to: '/machines' },
+        { label: 'Parts Store', to: '/parts-store' },
+        { label: 'Parts Intelligence', to: '/parts-intelligence' },
+        { label: 'Agentic Shopping', to: '/agentic-shopping' },
+        { label: 'My Orders', to: '/orders' },
+      ]
+    : role === 'ORDER_PROCESSOR'
+      ? [
+          { label: 'Orders', to: '/orders' },
+          { label: 'Parts Intelligence', to: '/parts-intelligence' },
+          { label: 'Parts Store', to: '/parts-store' },
+          { label: 'Fulfilment', to: '/orders?queue=needs_fulfilment' },
+          { label: 'Shipments', to: '/orders?queue=shipped' },
+        ]
+      : nav
 
 export interface Industry {
   name: string

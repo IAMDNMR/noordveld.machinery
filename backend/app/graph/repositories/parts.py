@@ -7,9 +7,18 @@ from app.graph.client import GraphClient
 from app.graph.queries import parts as q
 
 
+def _singular(word: str) -> str:
+    """'hoses' -> 'hos', 'filters' -> 'filter': a plain plural still finds the singular name, because tokens are matched as substrings."""
+    if word.isalpha() and len(word) > 4 and word.endswith("es"):
+        return word[:-2]
+    if word.isalpha() and len(word) > 3 and word.endswith("s") and not word.endswith("ss"):
+        return word[:-1]
+    return word
+
+
 def search_tokens(text: str) -> list[str]:
     """Lower-cased words of a search text. Every word has to be found somewhere in the part's searchable text."""
-    return [t.lower() for t in text.split()][:8]
+    return [_singular(t.lower()) for t in text.split()][:8]
 
 
 class PartRepository:

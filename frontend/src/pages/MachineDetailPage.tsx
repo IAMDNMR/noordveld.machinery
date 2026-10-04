@@ -5,8 +5,8 @@ import { ButtonLink } from '../components/ButtonLink'
 import { FilmSlot } from '../components/media/FilmSlot'
 import { MachineImage } from '../components/media/MachineImage'
 import { Reveal } from '../components/Reveal'
-import { company, films, industries } from '../data/content'
-import { machineBySlug, machines } from '../data/machines'
+import { company, films } from '../data/content'
+import { useSite } from '../data/site'
 import { useParallax } from '../hooks/useParallax'
 import { usePageMeta } from '../hooks/usePageMeta'
 import type { Machine } from '../types/catalog'
@@ -15,20 +15,26 @@ import './pages.css'
 
 const PREVIEW = 8
 
-/** Broad application areas per family, taken from the site's own industry categories. */
-const familyIndustries: Record<Machine['family'], readonly string[]> = {
-  Loading: ['Construction and site operations', 'Agricultural and general equipment'],
-  'Material handling': ['Material handling', 'Logistics'],
-  Conveying: ['Industrial operations', 'Logistics'],
-}
-
 export default function MachineDetailPage() {
   const { model = '' } = useParams()
-  const machine = machineBySlug(model.toLowerCase())
-  return machine ? <MachineDetail machine={machine} /> : <NotFoundPage />
+  const { data, error } = useSite()
+  if (error) return <NotFoundPage />
+  if (!data) {
+    return (
+      <section className="mhero" aria-busy="true">
+        <div className="container mhero__inner">
+          <p className="lead" role="status">
+            Loading {model.toUpperCase()}…
+          </p>
+        </div>
+      </section>
+    )
+  }
+  const machine = data.machines.find((m) => m.slug === model.toLowerCase())
+  return machine ? <MachineDetail machine={machine} machines={data.machines} /> : <NotFoundPage />
 }
 
-function MachineDetail({ machine }: { machine: Machine }) {
+function MachineDetail({ machine, machines }: { machine: Machine; machines: readonly Machine[] }) {
   const imageRef = useRef<HTMLDivElement>(null)
   useParallax(imageRef, 40)
   const [showAll, setShowAll] = useState(false)
@@ -49,7 +55,6 @@ function MachineDetail({ machine }: { machine: Machine }) {
     return Array.from(map, ([category, items]) => ({ category, items }))
   }, [machine])
   const visible = showAll ? machine.relatedParts : machine.relatedParts.slice(0, PREVIEW)
-  const areas = industries.filter((i) => familyIndustries[machine.family].includes(i.name))
   const film = { ...films.machine, title: `${machine.model} at work` }
 
   return (
@@ -91,11 +96,11 @@ function MachineDetail({ machine }: { machine: Machine }) {
           </Reveal>
           <Reveal delay={100} className="detail__body">
             <p className="lead">
-              {machine.model} is part of the {machine.brand === 'Noordveld' ? 'Noordveld' : `${machine.brand} (a Noordveld brand)`} range of {machine.family.toLowerCase()} machinery, built at the {machine.plant} plant.
+              {machine.model} is part of the {machine.brand === 'Noordveld' ? 'Noordveld' : `${machine.brand} (a Noordveld brand)`} range, in the {machine.family}, built at the {machine.plant} plant.
             </p>
             <ul className="facts-inline">
               <li>
-                <span>Category</span>
+                <span>Family</span>
                 {machine.family}
               </li>
               <li>
@@ -141,7 +146,17 @@ function MachineDetail({ machine }: { machine: Machine }) {
             </h2>
           </Reveal>
           <Reveal delay={100} className="detail__body">
-            <p className="lead">Machines like the {machine.model} serve {areas.map((a) => a.name.toLowerCase()).join(' and ')}.</p>
+            {machine.application ? (
+              <>
+                <p className="lead">
+                  {machine.application.text}
+                  {machine.application.context ? `, typically in ${machine.application.context.charAt(0).toLowerCase()}${machine.application.context.slice(1)}` : ''}.
+                </p>
+                <p className="note">Application profile: synthetic demo data in the Noordveld graph{machine.application.introduced ? `, introduced ${machine.application.introduced} (demo)` : ''}.</p>
+              </>
+            ) : (
+              <p className="lead">No application profile is recorded for the {machine.model}.</p>
+            )}
             {machine.attachments.length > 0 ? (
               <>
                 <h3 className="detail__sub">Attachments in the catalogue</h3>

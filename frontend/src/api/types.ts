@@ -223,8 +223,18 @@ export interface QuoteLine {
   line_total: Money | null
 }
 
+/** A non-orderable cart line. The server never prices it. */
+export interface RejectedLine {
+  part: PartSummary
+  quantity: number
+  status: string | null
+  status_label: string
+  reason: string
+}
+
 export interface Quote {
   lines: QuoteLine[]
+  rejected: RejectedLine[]
   unknown_part_ids: string[]
   subtotal: Money | null
   unpriced_part_ids: string[]

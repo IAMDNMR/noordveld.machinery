@@ -1,15 +1,20 @@
 import { MachineCard } from '../components/MachineCard'
 import { Reveal } from '../components/Reveal'
-import { families, machines } from '../data/machines'
+import { countWord, inText, useSite } from '../data/site'
 import { usePageMeta } from '../hooks/usePageMeta'
 import './pages.css'
 
 const slug = (family: string): string => family.toLowerCase().replace(/\s+/g, '-')
 
 export default function MachinesPage() {
+  const { data } = useSite()
+  const machines = data?.machines ?? []
+  const families = data?.families ?? []
+  const plants = data?.plants ?? []
+  const countries = [...new Set(plants.map((p) => p.country))]
   usePageMeta({
     title: 'Machines',
-    description: `The Noordveld range: ${machines.length} machines across loading, material handling and conveying, built at Assen, Lingen and Coevorden.`,
+    description: data ? `The Noordveld range: ${machines.length} machines across the ${families.join(', ')}, built at ${plants.map((p) => p.city).join(', ')}.` : 'The Noordveld range of machines.',
     path: '/machines',
   })
   return (
@@ -23,7 +28,13 @@ export default function MachinesPage() {
             </h1>
           </Reveal>
           <Reveal delay={120} className="page-head__side">
-            <p className="lead">{machines.length} machines across loading, material handling and conveying, built at three plants in the Netherlands and Germany.</p>
+            {data ? (
+              <p className="lead">
+                {machines.length} machines across the {families.join(', ')}, built at {countWord(plants.length)} plants in {countries.map(inText).join(' and ')}.
+              </p>
+            ) : (
+              <p className="lead">Loading the range…</p>
+            )}
             <nav aria-label="Machine families" className="jumps">
               {families.map((f) => (
                 <a key={f} href={`#${slug(f)}`}>

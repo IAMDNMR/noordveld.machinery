@@ -18,3 +18,4 @@
 @media (max-width: 719px) {
   .comparison__list { grid-template-columns: 1fr; }
 }
+.closing__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }

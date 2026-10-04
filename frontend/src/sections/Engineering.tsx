@@ -1,9 +1,12 @@
 import { FilmSlot } from '../components/media/FilmSlot'
 import { Reveal } from '../components/Reveal'
 import { films } from '../data/content'
-import { machines, plants } from '../data/machines'
+import { useSite } from '../data/site'
 
 export function Engineering() {
+  const { data } = useSite()
+  const plants = data?.plants ?? []
+  const countries = new Set(plants.map((p) => p.countryCode)).size
   return (
     <section id="company" className="section engineering" aria-labelledby="engineering-title">
       <div className="container">
@@ -34,15 +37,15 @@ export function Engineering() {
         <dl className="facts">
           <div>
             <dt>Manufacturing plants</dt>
-            <dd>3</dd>
+            <dd>{data ? plants.length : '–'}</dd>
           </div>
           <div>
             <dt>Countries</dt>
-            <dd>2</dd>
+            <dd>{data ? countries : '–'}</dd>
           </div>
           <div>
             <dt>Machines in the range</dt>
-            <dd>{machines.length}</dd>
+            <dd>{data ? data.machines.length : '–'}</dd>
           </div>
         </dl>
 

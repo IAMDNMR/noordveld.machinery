@@ -1,5 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { CartLine } from '../api'
+import { getMyCart, putMyCart } from '../api/orders'
+import { useSession } from './session'
 
 interface CartValue {
   /** Part ids and quantities only. Names and prices are never stored: the API supplies them when the cart is shown. */
@@ -33,13 +35,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [justAdded, setJustAdded] = useState<string | null>(null)
 
+  // Signed in as an End User, the cart belongs to the user on the server: it is loaded once (lines added while signed out are
+  // carried over) and every change is saved. Signed out, it lives in this browser as before.
+  const { user } = useSession()
+  const owner = user?.role === 'END_USER' ? user.id : null
+  const synced = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!owner) {
+      synced.current = null
+      return
+    }
+    let live = true
+    getMyCart().then(
+      (server) => {
+        if (!live) return
+        setLines((local) => {
+          const merged = new Map(server.map((l) => [l.partId, l.qty] as [string, number]))
+          for (const l of local) if (!merged.has(l.partId)) merged.set(l.partId, l.qty)
+          return [...merged].map(([partId, qty]) => ({ partId, qty: Math.min(MAX_QTY, qty) }))
+        })
+        synced.current = owner
+      },
+      () => undefined,
+    )
+    return () => {
+      live = false
+    }
+  }, [owner])
+
   useEffect(() => {
     try {
       localStorage.setItem(KEY, JSON.stringify(lines))
     } catch {
       /* storage unavailable: the cart simply lives for this visit */
     }
-  }, [lines])
+    if (owner && synced.current === owner) {
+      const t = window.setTimeout(() => putMyCart(lines.map((l) => ({ part_id: l.partId, quantity: l.qty }))).catch(() => undefined), 250)
+      return () => window.clearTimeout(t)
+    }
+  }, [lines, owner])
 
   useEffect(() => {
     if (!justAdded) return

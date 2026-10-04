@@ -45,6 +45,15 @@ CALL {
   WHERE tier IS NOT NULL
   RETURN 'ASSEMBLY' AS kind, a.assembly_id AS id, a.name AS label, null AS detail, a.data_status AS data_status, tier
   UNION
+  MATCH (w:Warehouse)
+  WITH w, CASE WHEN replace(replace(toLower(w.warehouse_id), '-', ''), ' ', '') = $norm OR toLower(w.name) = $text THEN 0
+               WHEN size($text) >= 4 AND toLower(w.name) CONTAINS $text THEN 2 END AS tier
+  WHERE tier IS NOT NULL
+  RETURN 'WAREHOUSE' AS kind, w.warehouse_id AS id, w.name AS label, w.city AS detail, w.data_status AS data_status, tier
+  UNION
+  MATCH (o:Order) WHERE replace(replace(toLower(o.order_id), '-', ''), ' ', '') = $norm
+  RETURN 'ORDER' AS kind, o.order_id AS id, o.order_id AS label, o.order_status AS detail, o.data_status AS data_status, 0 AS tier
+  UNION
   MATCH (c:Category) WHERE c.level = 1
   WITH c, CASE WHEN toLower(c.name) = $text THEN 0 WHEN size($text) >= 4 AND toLower(c.name) CONTAINS $text THEN 2 END AS tier
   WHERE tier IS NOT NULL
@@ -61,6 +70,7 @@ MATCH (p:Part) WHERE p.part_number = $key OR p.part_id = $key
 RETURN p{.part_id, .part_number, .name, .category, .subcategory, .brand, .origin_plant, .spec_note_source, .data_status, .provenance_type,
          .authoritative_flag, .source_name, .source_file, .source_sheet, .source_record_id, .confidence, .last_updated} AS part,
   head([(c:PartCatalogProfile)-[:PROFILES_PART]->(p) | c{.part_status, .orderable, .availability_state, .status_reason, .data_status}]) AS profile,
+  [(p)-[:FITS]->(:Machine)-[:MEMBER_OF_FAMILY]->(f:MachineFamily) | f.name] AS families,
   [(ir:IdentificationRequirement)-[:FOR_PART]->(p) | {model_code: head([(ir)-[:FOR_MACHINE]->(m:Machine) | m.model_code]), reason: ir.reason, needed: ir.identification_needed, data_status: ir.data_status}] AS identification
 LIMIT 1
 """
@@ -109,6 +119,19 @@ MATCH (p:Part {part_id: $part_id})-[s:AVAILABLE_AT]->(w:Warehouse)
 RETURN w.warehouse_id AS warehouse_id, w.name AS name, w.city AS city, w.country_code AS country_code,
   s.available AS available, s.stock_status AS stock_status, s.data_status AS data_status
 ORDER BY w.name LIMIT 20
+"""
+
+# Starts at the warehouse and follows only its own AVAILABLE_AT records. "In stock" is a recorded quantity above zero; a recorded zero is
+# reported as out of stock and a record with no quantity as not stated (unknown is never zero).
+WAREHOUSE_STOCK = """
+MATCH (w:Warehouse {warehouse_id: $id})
+OPTIONAL MATCH (p:Part)-[r:AVAILABLE_AT]->(w)
+WITH w, p, r ORDER BY coalesce(r.available, 0) DESC, p.part_number
+WITH w, collect(CASE WHEN p IS NULL THEN null ELSE {part_id: p.part_id, part_number: p.part_number, name: p.name, category: p.category,
+  available: r.available, stock_status: r.stock_status, data_status: r.data_status} END) AS found
+WITH [x IN found WHERE x IS NOT NULL] AS recs
+RETURN size(recs) AS recorded, size([x IN recs WHERE x.available > 0]) AS in_stock, size([x IN recs WHERE x.available = 0]) AS out_of_stock,
+  size([x IN recs WHERE x.available IS NULL]) AS not_stated, [x IN recs WHERE x.available > 0][0..$limit] AS rows
 """
 
 PART_COMPLIANCE = """
@@ -160,7 +183,59 @@ RETURN m{.machine_id, .model_code, .name, .machine_type, .origin_plant, .country
   size([(m)<-[:FITS]-(:Part) | 1]) AS part_count,
   size([(m)<-[:FOR_MACHINE]-(:ServicePlan) | 1]) AS service_plans,
   size([(m)-[:HAS_MACHINE_SPECIFICATION]->(:MachineSpecification) | 1]) AS specifications,
-  [(m)-[:MEMBER_OF_FAMILY]->(:MachineFamily)<-[:SERVES_FAMILY]-(d:Dealer) | d.name][..20] AS dealers_serving_family
+  [(m)-[:MEMBER_OF_FAMILY]->(:MachineFamily)<-[:SERVES_FAMILY]-(d:Dealer) | d.name][..20] AS dealers_serving_family,
+  head([(m)<-[:PROFILES_MACHINE]-(mp:MachineProfile) | mp{.application, .operating_context, .lifecycle_status, .introduction_year, .data_status}]) AS profile
+"""
+
+MACHINE_LIST = """
+MATCH (m:Machine)
+OPTIONAL MATCH (m)-[:MANUFACTURED_AT]->(pl:Plant)
+WITH m, pl WHERE $place IS NULL OR toLower(pl.city) = $place OR toLower(pl.name) CONTAINS $place OR toLower(pl.country_code) = $place
+OPTIONAL MATCH (m)-[:BRANDED_AS]->(bu:BusinessUnit)
+WITH m, pl, bu WHERE $brand IS NULL OR toLower(bu.name) = $brand
+RETURN m{.machine_id, .model_code, .name, .machine_type, .country, .data_status} AS machine,
+  head([(m)-[:MEMBER_OF_FAMILY]->(f:MachineFamily) | f.name]) AS family,
+  head([(m)-[:MANUFACTURED_AT]->(pl:Plant) | pl.name]) AS plant,
+  bu.name AS brand,
+  size([(m)<-[:FITS]-(:Part) | 1]) AS part_count
+ORDER BY m.model_code
+LIMIT 200
+"""
+
+SHARED_PARTS = """
+MATCH (p:Part)-[:FITS]->(m:Machine)
+WITH p, collect(m.model_code) AS machines
+WHERE size(machines) >= 2 AND ($machine IS NULL OR $machine IN machines)
+WITH p, machines ORDER BY size(machines) DESC, p.part_number
+WITH collect({part_id: p.part_id, part_number: p.part_number, name: p.name, category: p.category, data_status: p.data_status, machines: machines}) AS found
+RETURN size(found) AS total, found[0..$limit] AS rows
+"""
+
+PART_SERVICE_PLANS = """
+MATCH (sp:ServicePlan)-[r:REQUIRES_PART]->(:Part {part_id: $id})
+OPTIONAL MATCH (sp)-[:FOR_MACHINE]->(m:Machine)
+RETURN sp{.service_plan_id, .name, .interval_hours, .interval_status, .data_status} AS plan, m.model_code AS machine, r.quantity AS quantity, r.data_status AS link_status
+ORDER BY machine, plan.service_plan_id
+LIMIT 60
+"""
+
+PART_ORDERS = """
+MATCH (o:Order)-[:CONTAINS_LINE]->(l:OrderLine)-[r:REFERENCES_PART]->(:Part {part_id: $id})
+RETURN o{.order_id, .order_status, .order_date, .data_status} AS order, l.quantity AS quantity, l.allocation_status AS allocation, r.data_status AS link_status,
+  [(o)-[:HAS_SHIPMENT]->(s:Shipment) | s.shipment_status] AS shipments
+ORDER BY order.order_id
+LIMIT 60
+"""
+
+LOW_STOCK_PARTS = """
+MATCH (c:PartCatalogProfile)-[:PROFILES_PART]->(p:Part)
+WHERE c.availability_state IN ['LIMITED', 'BACKORDER']
+WITH p, c, reduce(s = 0, x IN [(p)-[a:AVAILABLE_AT]->(:Warehouse) | coalesce(a.available, 0)] | s + x) AS units,
+     size([(p)-[:AVAILABLE_AT]->(:Warehouse) | 1]) AS warehouses
+WITH p, c, units, warehouses ORDER BY CASE c.availability_state WHEN 'BACKORDER' THEN 0 ELSE 1 END, units, p.part_number
+WITH collect({part_id: p.part_id, part_number: p.part_number, name: p.name, category: p.category, data_status: c.data_status, state: c.availability_state,
+              units: units, warehouses: warehouses}) AS found
+RETURN size(found) AS total, found[0..$limit] AS rows
 """
 
 MACHINE_PARTS = """
@@ -278,3 +353,107 @@ CALL { MATCH (d:Dealer)<-[r:STOCKED_BY]-(:Part) RETURN d.name AS dealer, count(r
 CALL { MATCH (a:Assembly)<-[r:PART_OF]-(:Part) RETURN a.name AS assembly, count(r) AS ca ORDER BY ca DESC, assembly LIMIT 1 }
 RETURN part, machine, supplier, dealer, assembly
 """
+
+
+# ── paths between two entities (shortest, over business relationships only, at most 4 steps) ──────
+_path_rels = "FITS|PART_OF|SUPPLIED_BY|STOCKED_BY|AVAILABLE_AT|HAS_COMPLIANCE|CO_ORDERED_WITH|RELATED_COMPONENT|SAME_NAME_GROUP_AS|IN_CATEGORY|MEMBER_OF_FAMILY|SERVES_FAMILY"
+_key = "coalesce({n}.part_number, {n}.model_code, {n}.name, {n}.requirement, {n}.order_id)"
+_path_return = (
+    "RETURN [n IN nodes(p) | {label: labels(n)[0], key: " + _key.format(n="n") + "}] AS nodes, "
+    "[r IN relationships(p) | {type: type(r), source: " + _key.format(n="startNode(r)") + ", target: " + _key.format(n="endNode(r)") + ", ds: r.data_status}] AS rels"
+)
+PATH_BETWEEN = (
+    "MATCH (a) WHERE $a_label IN labels(a) AND a[$a_prop] = $a_id "
+    "MATCH (b) WHERE $b_label IN labels(b) AND b[$b_prop] = $b_id AND a <> b "
+    "MATCH p = shortestPath((a)-[:" + _path_rels + "*..4]-(b)) " + _path_return + " LIMIT 1"
+)
+# to the nearest entities of a kind ("what links this part and a supplier")
+PATH_TO_KIND = (
+    "MATCH (a) WHERE $a_label IN labels(a) AND a[$a_prop] = $a_id "
+    "MATCH (b) WHERE $b_label IN labels(b) AND a <> b "
+    "MATCH p = shortestPath((a)-[:" + _path_rels + "*..4]-(b)) WITH p ORDER BY length(p) LIMIT 5 " + _path_return
+)
+
+# ── orders (read-only status; customer and address are deliberately not returned) ─────────────────
+ORDER_STATUS = """
+MATCH (o:Order {order_id: $id})
+RETURN o{.order_id, .order_status, .order_date, .channel, .shipping_method, .data_status} AS order,
+  [(o)-[:CONTAINS_LINE]->(l:OrderLine)-[:REFERENCES_PART]->(p:Part) | {line_no: l.line_no, part_number: p.part_number, name: p.name, quantity: l.quantity,
+      allocation_status: l.allocation_status, data_status: l.data_status}] AS lines,
+  [(o)-[:HAS_SHIPMENT]->(s:Shipment) | {shipment_id: s.shipment_id, status: s.shipment_status, tracking_ref: s.tracking_ref, data_status: s.data_status,
+      carrier: head([(s)-[:CARRIED_BY]->(c:Carrier) | c.name]),
+      events: [(s)-[:HAS_TRACKING_EVENT]->(e:TrackingEvent) | e{.event_seq, .event_status, .event_date, .event_location}]}] AS shipments
+LIMIT 1
+"""
+
+# ── locations: stated city and country of dealers, suppliers and warehouses (no coordinates exist in the graph) ──
+PLACES = """
+CALL {
+  MATCH (d:Dealer) RETURN d.city AS city, d.country_code AS cc
+  UNION MATCH (s:Supplier) RETURN s.city AS city, s.country_code AS cc
+  UNION MATCH (w:Warehouse) RETURN w.city AS city, w.country_code AS cc
+}
+WITH collect(DISTINCT {city: city, cc: cc}) AS cities
+CALL { MATCH (r:Region) RETURN collect(DISTINCT {name: r.country, cc: r.country_code}) AS countries }
+RETURN cities[0..200] AS cities, countries[0..50] AS countries
+LIMIT 1
+"""
+
+_located = """
+WHERE ($city IS NULL OR toLower(n.city) = $city) AND ($cc IS NULL OR n.country_code = $cc)
+RETURN n.{id} AS id, n.name AS name, n.city AS city, n.country_code AS cc, n.data_status AS ds
+ORDER BY cc, city, name LIMIT 60
+"""
+DEALERS_IN = "MATCH (n:Dealer) " + _located.replace("{id}", "dealer_id")
+SUPPLIERS_IN = "MATCH (n:Supplier) " + _located.replace("{id}", "supplier_id")
+WAREHOUSES_IN = "MATCH (n:Warehouse) " + _located.replace("{id}", "warehouse_id")
+
+
+# ── one entity's detail, for a graph node (fixed query per kind; never a label taken from user input) ─────────
+WAREHOUSE_CORE = """
+MATCH (w:Warehouse {warehouse_id: $id})
+RETURN w{.warehouse_id, .name, .city, .country_code, .pickup_allowed, .ships_to, .data_status} AS warehouse,
+  size([(w)<-[:AVAILABLE_AT]-(:Part) | 1]) AS part_count
+LIMIT 1
+"""
+
+COMPLIANCE_CORE = """
+MATCH (c:ComplianceRequirement {compliance_id: $id})
+RETURN c{.compliance_id, .requirement, .standard, .certification, .certificate_status, .valid_until, .data_status} AS compliance,
+  [(c)-[:COVERS_CATEGORY]->(cat:Category) | cat.name] AS covers, size([(c)<-[:HAS_COMPLIANCE]-(:Part) | 1]) AS part_count
+LIMIT 1
+"""
+
+CATEGORY_CORE = """
+MATCH (c:Category {category_id: $id})
+RETURN c{.category_id, .name, .level, .data_status} AS category, size([(c)<-[:IN_CATEGORY|IN_SUBCATEGORY]-(:Part) | 1]) AS part_count
+LIMIT 1
+"""
+
+# ── answer subject: the identity of the entity a question is anchored on (one small row; no lists) ──────────────
+SUBJECT = {
+    "PART": """
+MATCH (p:Part {part_id: $id})
+RETURN p.part_number AS label, p.name AS name, p.data_status AS data_status, p.source_name AS source,
+  head([(p)-[:IN_CATEGORY]->(c:Category) | c.name]) AS category,
+  head([(p)-[:IN_SUBCATEGORY]->(c:Category) | c.name]) AS subcategory,
+  head([(c:PartCatalogProfile)-[:PROFILES_PART]->(p) | c.part_status]) AS part_status
+LIMIT 1
+""",
+    "MACHINE": """
+MATCH (m:Machine {machine_id: $id})
+RETURN m.model_code AS label, m.name AS name, m.data_status AS data_status, m.machine_type AS machine_type,
+  head([(m)-[:MEMBER_OF_FAMILY]->(f:MachineFamily) | f.name]) AS family
+LIMIT 1
+""",
+    "SUPPLIER": "MATCH (s:Supplier {supplier_id: $id}) RETURN s.name AS label, s.name AS name, s.data_status AS data_status, s.city AS city, s.country_code AS country LIMIT 1",
+    "DEALER": "MATCH (d:Dealer {dealer_id: $id}) RETURN d.name AS label, d.name AS name, d.data_status AS data_status, d.city AS city, d.country_code AS country LIMIT 1",
+    "ASSEMBLY": """
+MATCH (a:Assembly {assembly_id: $id})
+RETURN a.name AS label, a.name AS name, a.data_status AS data_status, a.bom_status AS bom_status,
+  head([(a)-[:IDENTIFIED_BY_PART]->(ip:Part) | ip.part_number]) AS identified_by
+LIMIT 1
+""",
+    "WAREHOUSE": "MATCH (w:Warehouse {warehouse_id: $id}) RETURN w.name AS label, w.name AS name, w.data_status AS data_status, w.city AS city, w.country_code AS country, w.warehouse_type AS warehouse_type, w.operating_status AS operating_status LIMIT 1",
+    "ORDER": "MATCH (o:Order {order_id: $id}) RETURN o.order_id AS label, null AS name, o.data_status AS data_status, o.order_status AS order_status LIMIT 1",
+}

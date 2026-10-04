@@ -147,8 +147,8 @@ const STEP = 48
 const PLACES: Place[] = (() => {
   const raw: (Member & { city: string; lat: number; lon: number; at: number })[] = [
     { id: D.supplier.id, kind: 'supplier', name: D.supplier.name, city: D.supplier.city, lat: D.supplier.lat, lon: D.supplier.lon, at: 18.7 },
-    ...D.stock.filter((s) => s.kind === 'warehouse').map((s, i) => ({ id: s.id, kind: 'warehouse' as const, name: s.name, city: s.city, lat: s.lat, lon: s.lon, at: 19.2 + i * 0.14, available: s.available })),
-    ...D.stock.filter((s) => s.kind === 'dealer').map((s, i) => ({ id: s.id, kind: 'dealer' as const, name: s.name, city: s.city, lat: s.lat, lon: s.lon, at: 19.85 + i * 0.14, available: s.available })),
+    ...D.stock.filter((s) => s.kind === 'warehouse' && s.lat !== null && s.lon !== null).map((s, i) => ({ id: s.id, kind: 'warehouse' as const, name: s.name, city: s.city, lat: s.lat as number, lon: s.lon as number, at: 19.2 + i * 0.14, available: s.available })),
+    ...D.stock.filter((s) => s.kind === 'dealer' && s.lat !== null && s.lon !== null).map((s, i) => ({ id: s.id, kind: 'dealer' as const, name: s.name, city: s.city, lat: s.lat as number, lon: s.lon as number, at: 19.85 + i * 0.14, available: s.available })),
     { id: D.customer.id, kind: 'customer', name: D.customer.name, city: D.customer.city, lat: D.customer.lat, lon: D.customer.lon, at: 20.5 },
   ]
   const lats = raw.map((r) => r.lat)

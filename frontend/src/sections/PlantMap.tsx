@@ -1,5 +1,4 @@
-import { plants } from '../data/machines'
-import type { PlantId } from '../types/catalog'
+import type { Plant, PlantId } from '../types/catalog'
 
 const W = 600
 const H = 560
@@ -22,16 +21,20 @@ const gridLon = [6.5, 6.75, 7.0, 7.25, 7.5]
 const gridLat = [52.5, 52.75, 53.0]
 
 interface PlantMapProps {
+  plants: readonly Plant[]
   active: PlantId
   onSelect: (id: PlantId) => void
 }
 
 /** Schematic regional map: no map API, positions placed from approximate coordinates. */
-export function PlantMap({ active, onSelect }: PlantMapProps) {
+export function PlantMap({ plants: all, active, onSelect }: PlantMapProps) {
+  const plants = all.filter((p): p is Plant & { lat: number; lon: number } => p.lat !== null && p.lon !== null)
+  const westmost = plants.reduce<string | null>((w, p) => (w === null || p.lon < (plants.find((x) => x.id === w)?.lon ?? Infinity) ? p.id : w), null)
+  const route = [...plants].sort((a, b) => b.lat - a.lat)
   const borderPath = border.map(([lon, lat], i) => `${i === 0 ? 'M' : 'L'}${project(lon, lat).join(' ')}`).join(' ')
   return (
     <figure className="pmap">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Schematic map showing the plants at Assen, Coevorden and Lingen">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Schematic map showing the plants at ${plants.map((p) => p.city).join(', ')}`}>
         {gridLon.map((lon) => (
           <line key={lon} x1={project(lon, 0)[0]} x2={project(lon, 0)[0]} y1={0} y2={H} className="pmap__grid" />
         ))}
@@ -46,12 +49,12 @@ export function PlantMap({ active, onSelect }: PlantMapProps) {
           Germany
         </text>
 
-        <path d={`M${project(plants[0].lon, plants[0].lat).join(' ')} L${project(plants[2].lon, plants[2].lat).join(' ')} L${project(plants[1].lon, plants[1].lat).join(' ')}`} className="pmap__link" />
+        {route.length > 1 ? <path d={route.map((p, i) => `${i ? 'L' : 'M'}${project(p.lon, p.lat).join(' ')}`).join(' ')} className="pmap__link" /> : null}
 
         {plants.map((plant) => {
           const [x, y] = project(plant.lon, plant.lat)
           const on = plant.id === active
-          const labelRight = plant.id !== 'assen'
+          const labelRight = plant.id !== westmost
           return (
             <g key={plant.id} className={`pmap__plant ${on ? 'is-active' : ''}`} onPointerEnter={() => onSelect(plant.id)} onClick={() => onSelect(plant.id)}>
               <circle cx={x} cy={y} r={on ? 26 : 18} className="pmap__halo" />

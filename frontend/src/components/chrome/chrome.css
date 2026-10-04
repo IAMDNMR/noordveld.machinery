@@ -6,7 +6,7 @@
 
 /* ───────── Nav ───────── */
 .nav { position: fixed; inset: 0 0 auto 0; z-index: 100; transition: background var(--dur-base) var(--ease-weight), border-color var(--dur-base), color var(--dur-base); border-bottom: 1px solid transparent; }
-.nav--solid { background: rgb(247 245 240 / 0.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); color: var(--graphite); }
+.nav--solid { background: rgb(244 243 239 / 0.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); color: var(--graphite); }
 .nav--hero { background: linear-gradient(180deg, rgb(20 24 26 / 0.55), transparent); color: var(--on-dark); }
 .nav__bar { height: var(--nav-height); display: flex; align-items: center; gap: var(--space-6); }
 .nav__logo { display: inline-flex; margin-right: auto; border-radius: var(--radius-s); }
@@ -61,3 +61,14 @@
 @media (max-width: 559px) {
   .footer__grid { grid-template-columns: 1fr; }
 }
+
+/* account area: a subtle role label and sign in / out */
+.nav__account { display: flex; align-items: center; gap: var(--space-3); margin-left: var(--space-2); padding-left: var(--space-5); border-left: 1px solid var(--line); }
+.nav--hero .nav__account { border-left-color: var(--line-dark); }
+.nav__role { padding: 0.2rem 0.6rem; border: 1px solid currentColor; border-radius: 999px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.75; white-space: nowrap; }
+.nav__signout, .nav__signin { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 0.95rem; font-weight: 500; opacity: 0.85; cursor: pointer; white-space: nowrap; }
+.nav__signout:hover, .nav__signin:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+.nav__account--sheet { margin: var(--space-6) 0 0; padding: var(--space-4) 0 0; border-left: 0; border-top: 1px solid var(--line); }
+.nav__account--sheet .nav__signout, .nav__account--sheet .nav__signin { font-size: 1.25rem; }
+@media (max-width: 899px) { .nav__bar > .nav__account { display: none; } }
+@media (min-width: 900px) { .nav__account--sheet { display: none; } }

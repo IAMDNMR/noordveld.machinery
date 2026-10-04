@@ -1,7 +1,8 @@
+import { useId, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { getPartInsights, getPartProvenance, type PartOverview } from '../../../api'
 import { useApi } from '../../../hooks/useApi'
-import { humanize } from '../../../lib/format'
+import { formatDate, useIdentification } from '../../../store/identification'
 import { DATA_CLASS_MEANING, ProvenanceBadge } from '../provenance'
 import { Facts, TabFrame } from './shared'
 
@@ -85,39 +86,111 @@ export function InsightsTab({ partKey }: { partKey: string }) {
   )
 }
 
-/** The hand-off to the transactional store: offered only when the part is verified and orderable. */
-export function StoreTab({ overview, onIdentify }: { overview: PartOverview; onIdentify: () => void }) {
+/**
+ * The next step for this part, by catalogue status. Identification entered here is stored and shown back; it never
+ * verifies the part. Only verified catalogue data can change the status.
+ */
+export function ActionTab({ overview, onOpenFitment }: { overview: PartOverview; onOpenFitment: () => void }) {
+  const { record, request, submit } = useIdentification(overview.part_number)
   const store = overview.actions.find((a) => a.kind === 'parts_store')
+  const { code, label, reason } = overview.status
+
   if (store?.href) {
     return (
       <div className="pw-handoff">
         <h3>Ready to order</h3>
         <p>This part is verified and orderable. Pricing, availability and the cart are in the Parts Store.</p>
-        <Link className="button button--primary" to={store.href}>
+        <Link className="btn btn-primary" to={store.href}>
           {store.label}
         </Link>
       </div>
     )
   }
-  if (overview.status.code === 'IDENTIFICATION_REQUIRED') {
+
+  if (code === 'IDENTIFICATION_REQUIRED' || code === 'AMBIGUOUS') {
     return (
       <div className="pw-handoff">
-        <h3>Identification required first</h3>
-        <p>The machine or serial range has to be confirmed before this part can be ordered. Check the machine and fitment details.</p>
-        <button type="button" className="button button--primary" onClick={onIdentify}>
-          Identify part
+        <h3>{code === 'AMBIGUOUS' ? 'Identify machine / variant / serial' : 'Identify Part'}</h3>
+        <p>
+          Status: <strong>{label}</strong>. {reason ?? ''} This part cannot be ordered until the identification is verified.
+        </p>
+        {overview.identification.length > 0 ? (
+          <ul className="pw-bullets">
+            {overview.identification.map((i, n) => (
+              <li key={n}>{[i.model_code, i.needed].filter(Boolean).join(': ')}</li>
+            ))}
+          </ul>
+        ) : null}
+        <IdentifyForm
+          key={record?.submittedAt ?? 'new'}
+          suggestions={overview.identification.map((i) => i.model_code).filter((m): m is string => Boolean(m))}
+          initialMachine={record?.machine ?? ''}
+          initialSerial={record?.serialOrVariant ?? ''}
+          onSubmit={submit}
+        />
+        {record?.submittedAt ? (
+          <div className="pw-saved" role="status">
+            <p>
+              <strong>Saved {formatDate(record.submittedAt)}:</strong> machine {record.machine || 'not given'}, serial or variant {record.serialOrVariant || 'not given'}.
+            </p>
+            <p>The status stays {label.toLowerCase()} until this identification is verified against the catalogue.</p>
+          </div>
+        ) : null}
+        <button type="button" className="rcard__action" onClick={onOpenFitment}>
+          See machine and fitment details
         </button>
       </div>
     )
   }
+
+  // Unverified
   return (
     <div className="pw-handoff">
-      <h3>Not available to order</h3>
+      <h3>{record?.requestedAt ? 'Identification requested' : 'Request identification'}</h3>
       <p>
-        This part is {overview.status.label.toLowerCase()}
-        {overview.orderable === false ? ' and cannot be ordered online' : overview.orderable === null ? ' and online ordering is not configured' : ''}. Review its provenance to see what would verify it.
+        Status: <strong>{label}</strong>. {reason ?? ''} This part cannot be ordered until it has been identified.
       </p>
-      <p className="pw-note-inline">Status: {humanize(overview.status.code)}</p>
+      {record?.requestedAt ? (
+        <p className="pw-saved" role="status">
+          Requested on {formatDate(record.requestedAt)}. The status stays unverified until the part is identified.
+        </p>
+      ) : (
+        <button type="button" className="btn btn-primary" onClick={request}>
+          Request identification
+        </button>
+      )}
     </div>
+  )
+}
+
+function IdentifyForm({ suggestions, initialMachine, initialSerial, onSubmit }: { suggestions: string[]; initialMachine: string; initialSerial: string; onSubmit: (machine: string, serial: string) => void }) {
+  const [machine, setMachine] = useState(initialMachine)
+  const [serial, setSerial] = useState(initialSerial)
+  const listId = useId()
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    if (machine.trim() && serial.trim()) onSubmit(machine, serial)
+  }
+  return (
+    <form className="pw-form" onSubmit={submit} aria-label="Identify the part">
+      <label>
+        <span>Machine model</span>
+        <input value={machine} onChange={(e) => setMachine(e.target.value)} list={listId} required maxLength={40} autoComplete="off" />
+      </label>
+      <datalist id={listId}>
+        {suggestions.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </datalist>
+      <label>
+        <span>Serial number or variant</span>
+        <input value={serial} onChange={(e) => setSerial(e.target.value)} required maxLength={60} autoComplete="off" />
+      </label>
+      <button type="submit" className="btn btn-secondary btn-sm" disabled={!machine.trim() || !serial.trim()}>
+        Save identification
+      </button>
+    </form>
   )
 }

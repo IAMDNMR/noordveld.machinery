@@ -2,7 +2,7 @@ import { CircleCheck, Euro, MapPin, PackageCheck, Puzzle, ScanSearch, Target, Tr
 import { lerp, seg } from '../../lib/math'
 import { DrawPath, Glyph, Label, SCENE_H, SCENE_W, accent, accentInk, ink, ink2, ink3, line } from './primitives'
 
-const REQUIREMENT = ['My machine is down.', 'I need it operational', 'within two days.', 'My budget is €80,000.'] as const
+const REQUIREMENT = ['My machine is down.', 'Budget · Urgency', 'Availability · Location'] as const
 const CENTER = { x: 600, y: 250 }
 const FACTORS = [
   { name: 'Context', icon: ScanSearch },
@@ -13,9 +13,9 @@ const FACTORS = [
   { name: 'Delivery', icon: Truck },
 ] as const
 const OPTIONS = [
-  { name: 'A', price: '€72,000', meta: 'Tomorrow · 120 km' },
-  { name: 'B', price: '€78,000', meta: 'Two days · 60 km' },
-  { name: 'C', price: '€65,000', meta: 'Five days · 300 km' },
+  { name: 'A', meta: 'Best availability' },
+  { name: 'B', meta: 'Fastest fulfilment' },
+  { name: 'C', meta: 'Lowest cost' },
 ] as const
 
 const text = { fontFamily: 'var(--font-sans)', fill: ink } as const
@@ -67,7 +67,7 @@ export function AgenticScene({ p }: { p: number }) {
             <g key={o.name} transform={`translate(440 ${y})`} opacity={o2}>
               <line x1={0} x2={320} y1={-34} y2={-34} stroke={line} strokeWidth={1} />
               <text x={0} y={0} style={{ ...text, fontSize: 25, fontWeight: 600, letterSpacing: '-0.02em', fill: isBest && best > 0.5 ? accentInk : ink }}>
-                Option {o.name} · {o.price}
+                Option {o.name}
               </text>
               <text x={0} y={30} style={{ ...text, fontSize: 'var(--scene-meta, 19px)', fill: ink3 }}>
                 {o.meta}

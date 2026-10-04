@@ -21,8 +21,19 @@ class QuoteLine(BaseModel):
     line_total: Money | None = None  # null when the part has no price in the graph
 
 
+class RejectedLine(BaseModel):
+    """A cart line that cannot be ordered. It is never priced: `part.price` is always null here."""
+
+    part: PartSummary
+    quantity: int
+    status: str | None = None
+    status_label: str
+    reason: str
+
+
 class Quote(BaseModel):
     lines: list[QuoteLine]
+    rejected: list[RejectedLine] = []  # non-orderable parts: excluded from lines and subtotal
     unknown_part_ids: list[str]
     subtotal: Money | None = None  # only when every line is priced
     unpriced_part_ids: list[str]

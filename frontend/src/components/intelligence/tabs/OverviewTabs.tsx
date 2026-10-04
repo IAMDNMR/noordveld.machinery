@@ -1,11 +1,15 @@
-import { getPartAssemblies, getPartFitment, getPartRelated, type PartOverview } from '../../../api'
+import { getPartAssemblies, getPartFitment, getPartRelated, type PartOverview, type PartTab } from '../../../api'
 import { useApi } from '../../../hooks/useApi'
+import { Investigation } from '../Investigation'
 import { ProvenanceBadge } from '../provenance'
 import { Empty, Facts, TabFrame } from './shared'
 
-export function OverviewTab({ overview }: { overview: PartOverview }) {
+export function OverviewTab({ overview, onTab }: { overview: PartOverview; onTab: (tab: PartTab) => void }) {
   return (
     <>
+      <Investigation overview={overview} onTab={onTab} />
+      <section className="card card-pad pw-record">
+      <h3 className="pw-sub">Part record</h3>
       <Facts
         rows={[
           ['Part number', <span className="mono" key="pn">{overview.part_number}</span>],
@@ -21,6 +25,7 @@ export function OverviewTab({ overview }: { overview: PartOverview }) {
           ['Last updated', overview.last_updated],
         ]}
       />
+      </section>
       {overview.identification.length > 0 ? (
         <div className="pw-note">
           <h3>Identification required</h3>

@@ -8,9 +8,11 @@ from app.core.exceptions import NotFoundError
 from app.graph.repositories.intelligence import IntelligenceRepository
 from app.intelligence.handlers import INTELLIGENCE_ROUTE, humanize
 from app.intelligence.provenance import LABELS, data_class
+from app.services.part_status import STATUS_LABELS, is_orderable, status_label
 from app.schemas.intelligence import (
     Action, AssemblyItem, Component, ComplianceItem, DealerItem, FitmentItem, GraphEdge, GraphNode, GraphView, IdentificationNeed, Insight, InventoryView,
     Kpis, PartOverview, PartStatus, ProvenanceReport, RelatedItem, RelationshipSource, SupplierItem, WarehouseItem,
+    EntityDetail, Fact, Link,
 )
 
 STORE_ROUTE = "/parts-store"
@@ -18,14 +20,20 @@ RELATION_LABEL = {"CO_ORDERED_WITH": "Often ordered together", "RELATED_COMPONEN
 CAPS = {"machines": 15, "assemblies": 10, "suppliers": 10, "dealers": 10, "warehouses": 6, "compliance": 6, "related": 10}
 
 
-def part_status(profile: dict | None, identification: list[dict]) -> PartStatus:
-    if any(i.get("needed") or i.get("reason") for i in identification):
-        return PartStatus(code="IDENTIFICATION_REQUIRED", label="Identification required")
-    if profile is None:
-        return PartStatus(code="UNVERIFIED", label="Unverified")
-    if profile.get("part_status") == "VERIFIED":
-        return PartStatus(code="VERIFIED", label="Verified")
-    return PartStatus(code="OTHER", label=humanize(profile.get("part_status")) or "Unverified")
+def part_status(profile: dict | None) -> PartStatus:
+    """The catalogue's own status. A part without a profile, or with a status the catalogue does not define, is unverified."""
+    code = (profile or {}).get("part_status")
+    code = code if code in STATUS_LABELS else "UNVERIFIED"
+    return PartStatus(code=code, label=status_label(code), reason=(profile or {}).get("status_reason"), data_class=data_class((profile or {}).get("data_status")) if profile else "NOT_CONNECTED")
+
+
+def identification_need(row: dict) -> IdentificationNeed:
+    reason = row.get("reason")
+    return IdentificationNeed(model_code=row.get("model_code"), reason=STATUS_LABELS.get(reason or "", humanize(reason)), needed=humanize(row.get("needed")))
+
+
+# The one primary action for each status. Identification is captured on the Action tab; it never verifies a part by itself.
+_ACTION_LABEL = {"IDENTIFICATION_REQUIRED": "Identify Part", "AMBIGUOUS": "Identify machine / variant / serial", "UNVERIFIED": "Request identification"}
 
 
 class PartWorkspace:
@@ -41,18 +49,20 @@ class PartWorkspace:
     def overview(self, key: str) -> PartOverview:
         core = self._core(key)
         p, profile, ident = core["part"], core["profile"], core["identification"]
-        status = part_status(profile, ident)
+        status = part_status(profile)
         pn = p["part_number"]
         actions: list[Action] = []
         orderable = profile.get("orderable") if profile else None
-        if status.code == "VERIFIED" and orderable is True:
+        if is_orderable(status.code, orderable):
             actions.append(Action(kind="parts_store", label="View in Parts Store", href=f"{STORE_ROUTE}/{quote(pn)}"))
-        if status.code == "IDENTIFICATION_REQUIRED":
-            actions.append(Action(kind="identify", label="Identify part", href=f"{INTELLIGENCE_ROUTE}?part={quote(pn)}&tab=fitment"))
+        elif status.code in ("IDENTIFICATION_REQUIRED", "AMBIGUOUS"):
+            actions.append(Action(kind="identify", label=_ACTION_LABEL[status.code], href=f"{INTELLIGENCE_ROUTE}?part={quote(pn)}&tab=store"))
+        elif status.code == "UNVERIFIED":
+            actions.append(Action(kind="request_identification", label=_ACTION_LABEL["UNVERIFIED"]))
         return PartOverview(
             part_id=p["part_id"], part_number=pn, name=p["name"], description=p.get("spec_note_source"), category=p.get("category"), subcategory=p.get("subcategory"),
-            manufacturer=p.get("brand"), origin_plant=p.get("origin_plant"), status=status, data_class=data_class(p.get("data_status")),
-            identification=[IdentificationNeed(model_code=i.get("model_code"), reason=i.get("reason"), needed=i.get("needed")) for i in ident if i.get("needed") or i.get("reason")],
+            families=sorted(set(core.get("families") or [])), manufacturer=p.get("brand"), origin_plant=p.get("origin_plant"), status=status, data_class=data_class(p.get("data_status")),
+            identification=[identification_need(i) for i in ident if i.get("needed") or i.get("reason")],
             source=p.get("source_name"), last_updated=p.get("last_updated"), orderable=orderable, actions=actions,
         )
 
@@ -85,15 +95,19 @@ class PartWorkspace:
         return [self._dealer(r) for r in self._repo.dealers(self._id(key))]
 
     def inventory(self, key: str) -> InventoryView:
-        pid = self._id(key)
+        core = self._core(key)
+        pid = core["part"]["part_id"]
+        state = (core.get("profile") or {}).get("availability_state")
+        label = humanize(state)
         wh, dl = self._repo.warehouses(pid), self._repo.dealers(pid)
         if not wh and not dl:
-            return InventoryView(state="NOT_CONNECTED", total_available=None, warehouses=[], dealers=[], data_class="NOT_CONNECTED", note="No stock is connected for this part. Availability is unknown, which is not the same as zero.")
+            return InventoryView(state="NOT_CONNECTED", availability_state=state, availability_label=label or "No inventory record", total_available=None, warehouses=[], dealers=[],
+                                 data_class="NOT_CONNECTED", note="No stock is connected for this part. Availability is unknown, which is not the same as zero.")
         known = [r["available"] for r in wh if r["available"] is not None]
         classes = {data_class(r["data_status"]) for r in [*wh, *dl]}
         demo = "SYNTHETIC_DEMO" in classes
         return InventoryView(
-            state="CONNECTED", total_available=sum(known) if known else None,
+            state="CONNECTED", availability_state=state, availability_label=label or "No inventory record", total_available=sum(known) if known else None,
             warehouses=[WarehouseItem(warehouse_id=r["warehouse_id"], name=r["name"], city=r["city"], country_code=r["country_code"], available=r["available"], stock_status=humanize(r["stock_status"]),
                                       data_class=data_class(r["data_status"])) for r in wh],
             dealers=[self._dealer(r) for r in dl], data_class="SYNTHETIC_DEMO" if demo else (next(iter(classes)) if len(classes) == 1 else "UNKNOWN"),
@@ -109,7 +123,7 @@ class PartWorkspace:
         p, profile = core["part"], core["profile"]
         rels = self._repo.relationships(p["part_id"])
         sources = [RelationshipSource(relationship=r["relationship"], connected_label=r["other_label"], count=r["n"], data_class=data_class(r["data_status"])) for r in rels]
-        status = part_status(profile, core["identification"])
+        status = part_status(profile)
         limits: list[str] = []
         if any(s.data_class == "SYNTHETIC_DEMO" for s in sources):
             limits.append("Stock, price, supplier, dealer, assembly and compliance links are demonstration data, not enterprise truth.")
@@ -213,4 +227,71 @@ class Overview:
             {"category": "Network", "question": f"Show the relationships for {part}."},
             {"category": "Provenance", "question": f"What is the provenance of {part}?"},
             {"category": "Provenance", "question": "Where is the catalogue data incomplete?"},
+            {"category": "Machine & Fitment", "question": "What machines are available?"},
+            {"category": "Machine & Fitment", "question": "What parts are used across multiple machines?"},
+            {"category": "Inventory", "question": "Which parts are low on stock?"},
+            {"category": "Service", "question": f"Which service plans require {part}?"},
+            {"category": "Orders", "question": f"Which orders contain {part}?"},
         ]
+
+
+ENTITY_KINDS = ("MACHINE", "SUPPLIER", "DEALER", "WAREHOUSE", "ASSEMBLY", "COMPLIANCE", "CATEGORY")
+
+
+def _yes_no(value: bool | None) -> str | None:
+    return None if value is None else ("Yes" if value else "No")
+
+
+def _where(city: str | None, cc: str | None) -> str | None:
+    return ", ".join(x for x in (city, cc) if x) or None
+
+
+class Entities:
+    """Detail for a graph node: the stored properties of that one node, read-only."""
+
+    def __init__(self, repo: IntelligenceRepository) -> None:
+        self._repo = repo
+
+    def detail(self, kind: str, entity_id: str) -> EntityDetail:
+        if kind not in ENTITY_KINDS:
+            raise NotFoundError("Entity kind", kind)
+        row = self._repo.entity(kind, entity_id)
+        if row is None:
+            raise NotFoundError(kind.title(), entity_id)
+        n = row.get("part_count")
+        if kind == "MACHINE":
+            m = row["machine"]
+            return EntityDetail(kind=kind, id=entity_id, title=m["model_code"], subtitle=m["name"], data_class=data_class(m["data_status"]), facts=[
+                Fact(label="Machine type", value=m["machine_type"]), Fact(label="Family", value=row["family"]), Fact(label="Plant", value=row["plant"]),
+                Fact(label="Parts that fit", value=str(n))],
+                links=[Link(label="Open machine page", href=f"/machines/{m['model_code'].lower()}"), Link(label=f"Parts that fit {m['model_code']}", question=f"Which parts fit {m['model_code']}?")])
+        if kind == "SUPPLIER":
+            s = row["supplier"]
+            return EntityDetail(kind=kind, id=entity_id, title=s["name"], subtitle=_where(s["city"], s["country_code"]), data_class=data_class(s["data_status"]), facts=[
+                Fact(label="Type", value=humanize(s.get("supplier_type"))), Fact(label="Status", value=humanize(s.get("supplier_status"))), Fact(label="Region", value=row.get("region")),
+                Fact(label="Supplies categories", value=", ".join(row["categories"]) or None), Fact(label="Parts connected (SUPPLIED_BY)", value=str(n))],
+                links=[Link(label="Parts from this supplier", question=f"Which parts does {s['name']} supply?")])
+        if kind == "DEALER":
+            d = row["dealer"]
+            return EntityDetail(kind=kind, id=entity_id, title=d["name"], subtitle=_where(d["city"], d["country_code"]), data_class=data_class(d["data_status"]), facts=[
+                Fact(label="Type", value=humanize(d.get("dealer_type"))), Fact(label="Status", value=humanize(d.get("dealer_status"))), Fact(label="Collection", value=_yes_no(d.get("pickup_allowed"))),
+                Fact(label="Serves machine families", value=", ".join(row["families"]) or None), Fact(label="Parts with a stocking record", value=str(n))],
+                links=[Link(label="Parts this dealer stocks", question=f"What does {d['name']} stock?")])
+        if kind == "WAREHOUSE":
+            w = row["warehouse"]
+            return EntityDetail(kind=kind, id=entity_id, title=w["name"], subtitle=_where(w["city"], w["country_code"]), data_class=data_class(w["data_status"]), facts=[
+                Fact(label="Ships to", value=w.get("ships_to")), Fact(label="Collection", value=_yes_no(w.get("pickup_allowed"))), Fact(label="Parts with stock records", value=str(n))])
+        if kind == "ASSEMBLY":
+            a = row["assembly"]
+            return EntityDetail(kind=kind, id=entity_id, title=a["name"], subtitle="Assembly", data_class=data_class(a["data_status"]), facts=[
+                Fact(label="BOM status", value=humanize(a.get("bom_status"))), Fact(label="Identified by part", value=row.get("identified_by")), Fact(label="Components", value=str(n))],
+                links=[Link(label="Parts in this assembly", question=f"Which parts are in {a['name']}?")])
+        if kind == "COMPLIANCE":
+            c = row["compliance"]
+            return EntityDetail(kind=kind, id=entity_id, title=c["requirement"], subtitle=c.get("standard"), data_class=data_class(c["data_status"]), facts=[
+                Fact(label="Certification", value=c.get("certification")), Fact(label="Certificate status", value=humanize(c.get("certificate_status"))),
+                Fact(label="Valid until", value=c.get("valid_until")), Fact(label="Covers categories", value=", ".join(row["covers"]) or None), Fact(label="Parts connected", value=str(n))])
+        c = row["category"]
+        return EntityDetail(kind=kind, id=entity_id, title=c["name"], subtitle="Category", data_class=data_class(c["data_status"]), facts=[
+            Fact(label="Level", value=str(c.get("level")) if c.get("level") is not None else None), Fact(label="Parts", value=str(n))],
+            links=[Link(label="Browse in the Parts Store", href=f"/parts-store?category={quote(c['name'])}")])

@@ -51,4 +51,7 @@ export const apiGet = <T>(path: string, query: Query = {}, signal?: AbortSignal)
 export const apiPost = <T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> =>
   request<T>(path, { method: 'POST', signal, headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
 
+export const apiPut = <T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> =>
+  request<T>(path, { method: 'PUT', signal, headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+
 export const isAbort = (error: unknown): boolean => error instanceof DOMException && error.name === 'AbortError'
