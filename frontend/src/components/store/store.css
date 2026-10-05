@@ -169,10 +169,10 @@
 .cart__loading { padding: 24px 22px; color: var(--ink-500); }
 .cline--blocked .cline__note { color: var(--warn); }
 /* the cart's buttons use the site button classes; give them the wireframe shape */
-.cart .button, .pco .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 0; padding: 11px 18px; border-radius: 9px; font-size: 14px; font-weight: 600; }
-.cart .button--primary, .pco .button--primary { background: var(--ink-900); color: #fff; }
-.cart .button--primary:hover, .pco .button--primary:hover { background: #000; }
-.cart .button--secondary, .pco .button--secondary { background: #fff; border: 1px solid var(--grey-300); color: var(--ink-900); }
+.cart .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 0; padding: 11px 18px; border-radius: 9px; font-size: 14px; font-weight: 600; }
+.cart .button--primary { background: var(--ink-900); color: #fff; }
+.cart .button--primary:hover { background: #000; }
+.cart .button--secondary { background: #fff; border: 1px solid var(--grey-300); color: var(--ink-900); }
 
 /* part page */
 .pd-missing { padding-block: 60px 80px; display: grid; gap: 14px; justify-items: start; }
@@ -202,12 +202,6 @@
 .pd-section .chip strong { color: var(--accent); }
 
 /* checkout */
-.pco { padding-block: 40px 72px; max-width: 46rem; }
-.pco h1 { font-size: 28px; }
-.pco__notice { margin-block: 18px; padding: 10px 14px; border-radius: 9px; background: var(--warn-bg); color: var(--warn); font-size: 13.5px; }
-.pco__panel { display: grid; gap: 14px; }
-.pco__panel .cart__lines { list-style: none; padding: 0; }
-.pco__panel .cart__totals { padding: 0; }
 
 /* responsive */
 @media (min-width: 901px) {
@@ -231,3 +225,8 @@
   .sbar__cart.is-bump, .part-skeleton { animation: none; }
   .sheet__panel, .cart__panel, .sheet__scrim, .cart__scrim { transition: none; }
 }
+
+/* the machine a part was chosen for */
+.cline__machine { margin-top: 2px; font-size: 12px; color: var(--ink-500); }
+.pd-machine { display: grid; gap: 4px; margin-right: 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-500); }
+.pd-machine select { padding: 9px 10px; border: 1px solid var(--grey-300); border-radius: 9px; background: #fff; font-size: 14px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink-900); }

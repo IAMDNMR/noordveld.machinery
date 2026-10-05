@@ -7,18 +7,19 @@ from typing import Any
 
 import certifi
 from neo4j import READ_ACCESS, WRITE_ACCESS, GraphDatabase, TrustCustomCAs, unit_of_work
-from neo4j.exceptions import AuthError, ClientError, DriverError, Neo4jError, ServiceUnavailable
+from neo4j.exceptions import AuthError, ClientError, ConstraintError, DriverError, Neo4jError, ServiceUnavailable
 
 from app.core.config import Settings
-from app.core.exceptions import GraphUnavailableError
+from app.core.exceptions import GraphConflictError, GraphUnavailableError
 
 log = logging.getLogger(__name__)
 
 
 class GraphClient:
     """Thin wrapper around the Neo4j driver. Catalogue, intelligence and shopping only read (READ_ACCESS). `write` exists for one purpose:
-    the operational records of the order workflow (purchase requests, status events, a user's cart), always through the fixed,
-    parameterised queries in app/graph/queries/orders.py. No catalogue, fitment, price, inventory or supplier fact is written."""
+    the operational records of the order workflow (orders, status events, shipments, a user's cart) and the depot inventory row an order reserves,
+    always through the fixed, parameterised queries in app/graph/queries/orders.py and checkout.py. No catalogue, fitment, price, supplier or
+    transport fact is written."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -68,6 +69,21 @@ class GraphClient:
             raise
         except (ServiceUnavailable, AuthError, ClientError, DriverError, Neo4jError, OSError) as exc:
             log.error("graph write failed: %s", type(exc).__name__)
+            raise GraphUnavailableError(type(exc).__name__) from exc
+
+    def transaction(self, work):
+        """Run `work(tx)` as ONE write transaction: every statement commits together or none does (an exception raised inside rolls it all back).
+        Used by the order lifecycle, where a status change, a stock reservation and an audit event must be atomic."""
+        timeout = self._settings.neo4j_query_timeout
+        try:
+            with self.driver.session(database=self._settings.neo4j_database, default_access_mode=WRITE_ACCESS) as session:
+                return session.execute_write(unit_of_work(timeout=timeout)(work))
+        except GraphUnavailableError:
+            raise
+        except ConstraintError as exc:
+            raise GraphConflictError(str(exc)) from exc
+        except (ServiceUnavailable, AuthError, ClientError, DriverError, Neo4jError, OSError) as exc:
+            log.error("graph transaction failed: %s", type(exc).__name__)
             raise GraphUnavailableError(type(exc).__name__) from exc
 
     def close(self) -> None:

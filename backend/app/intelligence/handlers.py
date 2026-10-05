@@ -11,6 +11,7 @@ from urllib.parse import quote
 
 from app.graph.repositories.intelligence import IntelligenceRepository
 from app.graph.repositories.parts import PartRepository
+from app.intelligence.casual import singular
 from app.intelligence.models import Intent, Kind, Outcome, Resolved
 from app.intelligence.provenance import LABELS, data_class
 from app.schemas.intelligence import Action, Evidence, Fact, FactGroup, ResultItem
@@ -111,7 +112,16 @@ def machine_to_part(c: Context) -> Outcome:
     ]
     evidence = [ev(r["part_number"], "PART", "FITS", machine.label, "MACHINE", r["data_status"]) for r in rows]
     scope = f" in {category.label}" if category else ""
-    summary = f"{machine.label} is associated with {_count(total, 'part')}{scope} in the current graph." if total else f"No parts are recorded as fitting {machine.label}{scope} in the graph."
+    if total:
+        summary = f"{machine.label} is associated with {_count(total, 'part')}{scope} in the current graph."
+    elif category:
+        summary = f"Sorry, no {category.label} part is available in this store for {machine.label}."
+        others = c.repo.machines_with_category(machine.id, category.label)
+        if others:
+            summary += " Other models in the same family do have one: " + ", ".join(f"{o['model_code']} ({_count(o['parts'], 'part')})" for o in others) + "."
+        summary += " For this machine, please contact Noordveld parts support or your dealer."
+    else:
+        summary = f"No parts are recorded as fitting {machine.label} in the graph. Please contact Noordveld parts support or your dealer."
     return Outcome(summary, results, evidence, ["Part", "FITS", "Machine"], total)
 
 
@@ -580,8 +590,19 @@ def part_search(c: Context) -> Outcome:
     text = c.text.strip()
     if category and text.lower() in category.label.lower():
         text = ""
-    total, ids = c.parts.search(text=text, category=category.label if category else None, machine=machine.label if machine else None, availability=None, orderable=None, sort="relevance", offset=0, limit=c.limit)
+    wide = 100 if machine else c.limit  # with a machine, only confirmed fits are kept, so look at more candidates first
+    total, ids = c.parts.search(text=text, category=category.label if category else None, machine=machine.label if machine else None, availability=None, orderable=None, sort="relevance", offset=0, limit=wide)
+    if not total and text:  # "brake pads" -> "brake pad": a plural or phrasing should not hide a part
+        plain = " ".join(singular(w) for w in text.split())
+        if plain != text:
+            text = plain
+            total, ids = c.parts.search(text=text, category=category.label if category else None, machine=machine.label if machine else None, availability=None, orderable=None, sort="relevance", offset=0, limit=wide)
     rows = [to_summary(r) for r in c.parts.summaries(ids)]
+    conditional = 0
+    if machine:  # machine constraint: only parts with a CONFIRMED FITS relationship to that machine are answers; conditional fits are counted, not listed
+        confirmed = [p for p in rows if any(f.model_code == machine.label and (f.fitment_status or "").upper() == "CONFIRMED" for f in p.fitment)]
+        conditional = len(rows) - len(confirmed)
+        rows, total = confirmed[: c.limit], len(confirmed)
     key = text.lower().replace("-", "").replace(" ", "")
 
     def reason(p) -> str:
@@ -601,11 +622,25 @@ def part_search(c: Context) -> Outcome:
     evidence = [ev(p.part_number, "PART", "IN_CATEGORY", p.category or "no category", "CATEGORY", "SOURCE_DERIVED") for p in rows]
     evidence += [ev(p.part_number, "PART", "FITS", f.model_code, "MACHINE", "SOURCE_DERIVED") for p in rows for f in p.fitment if machine and f.model_code == machine.label]
     scope = " ".join(x for x in [f"for {machine.label}" if machine else "", f"in {category.label}" if category else ""] if x)
+    for_machine = f" for {machine.label}" if machine else ""
     if total == 1 and rows:
         summary = f"{rows[0].part_number} is the {rows[0].name.lower()} in the {rows[0].category or 'uncategorised'} category."
+    elif total:
+        summary = f"{_count(total, 'part')} match{'es' if total == 1 else ''}{(' ' + scope) if scope else ''}."
+    elif category:
+        summary = f"Sorry, no {category.label} part is available in this store{for_machine}."
+    elif text:
+        summary = f"Sorry, no part matching \u201c{text}\u201d is available in this store{for_machine}."
     else:
-        summary = f"{_count(total, 'part')} match{'es' if total == 1 else ''}{(' ' + scope) if scope else ''}." if total else "No parts match this search."
-    return Outcome(summary, results, evidence, ["Part"], total, actions=[investigate_action(rows[0].part_number)] if total == 1 and rows else [])
+        summary = "No parts match this search."
+    warnings = [f"{conditional} more {'part matches' if conditional == 1 else 'parts match'} but {'its' if conditional == 1 else 'their'} fitment to {machine.label} is conditional or unverified, so not listed."] if machine and conditional else []
+    if not total and machine and category:
+        others = c.repo.machines_with_category(machine.id, category.label)
+        if others:
+            summary += " Other models in the same family do have one: " + ", ".join(f"{o['model_code']} ({_count(o['parts'], 'part')})" for o in others) + "."
+    if not total and (category or text):
+        summary += " Please contact Noordveld parts support or your dealer."
+    return Outcome(summary, results, evidence, ["Part", "FITS", "Machine"] if machine else ["Part"], total, warnings=warnings, actions=[investigate_action(rows[0].part_number)] if total == 1 and rows else [])
 
 
 # ── paths, orders, places ──────────────────────────────────────────────────────────────────────────

@@ -141,7 +141,7 @@ export default function PartsStorePage() {
               <ul className="grid grid-3" aria-busy={parts.loading}>
                 {parts.data.items.map((p) => (
                   <li key={p.part_id} className="store-cell">
-                    <PartCard part={p} />
+                    <PartCard part={p} machine={query.machine || null} />
                   </li>
                 ))}
               </ul>

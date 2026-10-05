@@ -93,6 +93,7 @@ EntityDetails = Annotated[Entities, Depends(get_entities)]
 from fastapi import Cookie, HTTPException  # noqa: E402
 
 from app.core.session import COOKIE, verify  # noqa: E402
+from app.services.checkout import CheckoutService  # noqa: E402
 from app.services.orders import GraphOrdersRepository, OrdersRepository, OrdersService, User  # noqa: E402
 
 
@@ -105,6 +106,13 @@ def get_orders(repo: Annotated[OrdersRepository, Depends(get_orders_repository)]
 
 
 OrdersSvc = Annotated[OrdersService, Depends(get_orders)]
+
+
+def get_checkout(repo: Annotated[OrdersRepository, Depends(get_orders_repository)], orders: OrdersSvc) -> CheckoutService:
+    return CheckoutService(repo, orders)
+
+
+CheckoutSvc = Annotated[CheckoutService, Depends(get_checkout)]
 
 
 def current_user(orders: OrdersSvc, nv_session: Annotated[str | None, Cookie(alias=COOKIE)] = None) -> User:

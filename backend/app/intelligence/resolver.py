@@ -1,6 +1,7 @@
 """Entity resolution against Neo4j. Several equally good matches are returned as candidates, never silently chosen between."""
 from __future__ import annotations
 
+import difflib
 from dataclasses import dataclass, field
 
 from app.graph.repositories.intelligence import IntelligenceRepository
@@ -44,7 +45,21 @@ class EntityResolver:
             rows = self._repo.resolve(" ".join(attempt))
             if rows:
                 return [_to_resolved(r) for r in rows]
-        return []
+        return self._misspelled_category(words)
+
+    def _misspelled_category(self, words: list[str]) -> list[Resolved]:
+        """Nothing matched as typed: a single misspelled word that is clearly one category ("hydralic" -> Hydraulics) still counts, never a guess between two."""
+        names = {r["label"].lower(): r for r in self._repo.category_names()}
+        hits = {}
+        for word in words:
+            if len(word) < 5:
+                continue
+            for close in difflib.get_close_matches(word.lower(), list(names), n=2, cutoff=0.8):
+                hits[close] = names[close]
+        if len(hits) != 1:
+            return []
+        r = next(iter(hits.values()))
+        return [Resolved(Kind.CATEGORY, r["id"], r["label"], None, r.get("data_status"), 2)]
 
     def resolve(self, mentions: tuple[str, ...], selected: list[SelectedEntity] | None = None) -> Resolution:
         picked: dict[Kind, list[Resolved]] = {}

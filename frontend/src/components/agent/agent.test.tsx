@@ -133,7 +133,7 @@ describe('agentic shopping', () => {
     expect(screen.getByRole('link', { name: /View evidence in Parts Intelligence/ }).getAttribute('href')).toBe('/parts-intelligence?part=AB-1')
     expect(screen.getByRole('link', { name: 'AB-9' }).getAttribute('href')).toBe('/parts-intelligence?part=AB-9')
     fireEvent.click(screen.getAllByRole('button', { name: /add to cart/i })[0])
-    await waitFor(() => expect(JSON.parse(localStorage.getItem('noordveld-parts-cart-v2') ?? '[]')).toEqual([{ partId: 'P1', qty: 1 }]))
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('noordveld-parts-cart-v2') ?? '[]')).toEqual([{ partId: 'P1', qty: 1, machine: null }]))
     expect(screen.getByRole('link', { name: /Review order/ }).getAttribute('href')).toBe('/parts-store/checkout')
     expect(document.body.textContent).not.toMatch(/payment successful|order confirmed|visa|paypal/i)
   })

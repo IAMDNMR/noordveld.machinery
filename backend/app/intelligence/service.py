@@ -16,6 +16,7 @@ import time
 
 from app.graph.repositories.intelligence import IntelligenceRepository
 from app.graph.repositories.parts import PartRepository
+from app.intelligence.casual import content_text
 from app.intelligence.contract import enforce_result_kinds
 from app.intelligence.grounding import contradicts, demo_names, drop_false_demo_qualifier, grounding_records, is_grounded, keep_demo_qualifier
 from app.intelligence.handlers import HANDLERS, Context, humanize
@@ -24,7 +25,7 @@ from app.intelligence.models import Intent, Kind, Outcome, ParsedQuestion, Resol
 from app.intelligence.provenance import data_class, summarise
 from app.intelligence.registry import HINTS, REGISTRY, answerable_intents, spec_for
 from app.intelligence.resolver import EntityResolver, Resolution
-from app.llm import LLMClient, LLMError, LLMParse, LLMUnavailable
+from app.llm import LLMClient, LLMError, LLMInvalidResponse, LLMParse, LLMUnavailable
 from app.schemas.intelligence import Answer, Candidate, Clarification, EntityRef, Fact, QueryRequest, QueryResponse, Stage, Subject
 from app.services.part_status import status_label
 
@@ -64,16 +65,59 @@ class IntelligenceService:
         cache[key] = parse
         return parse
 
+    def _plain_request(self, question: str) -> LLMParse | None:
+        """Only when the model returned no usable structure at all for a short request: read it as a search for the part it names, rather than fail.
+        The model's own reading is never overridden (it decides intent and constraints); a question with an identifier is left to the model."""
+        text = content_text(question)
+        if not text or identifiers(question):
+            return None
+        return LLMParse(Intent.PART_SEARCH.value, (text,), need=text, entities={"part": text})
+
+    def _annotate_machines(self, blocker: dict, found: Resolution, text: str) -> None:
+        """Machine choices say how many parts of the asked kind each has, and list the ones that have some first."""
+        cands: list[Resolved] = blocker.get("candidates") or []
+        if not cands or cands[0].kind is not Kind.MACHINE:
+            return
+        category = found.one(Kind.CATEGORY)
+        if category is None and not text:
+            return
+        what = category.label if category else text
+        counted = []
+        for c in cands:
+            if category:
+                n = self._repo.machine_parts(c.id, category.label, 1)[0]
+            else:
+                n = self._parts.search(text=text, category=None, machine=c.label, availability=None, orderable=None, sort="relevance", offset=0, limit=1)[0]
+            note = f"{n} {what} {'part' if n == 1 else 'parts'}" if n else f"no {what} part"
+            counted.append((n, Resolved(c.kind, c.id, c.label, " · ".join(x for x in (c.detail, note) if x), c.data_status, c.tier)))
+        blocker["candidates"] = [r for _, r in sorted(counted, key=lambda x: -x[0])]
+
     def _understand(self, question: str, req: QueryRequest, llm: LLMParse) -> tuple[ParsedQuestion, Resolution, str]:
         # only an intent in the approved registry can ever run; anything else is rejected without a query
         intent = Intent(llm.intent) if llm.intent in Intent._value2member_map_ else Intent.UNSUPPORTED
         typed = tuple(v for v in llm.entities.values() if v.strip()) or llm.mentions
-        mentions = tuple(dict.fromkeys(m for m in (*typed, *identifiers(question)) if m.strip()))  # exact identifiers assist; they never choose the intent
+        # The model extracts the need (what kind of part) and the machine independently. The backend then picks the approved query from those validated
+        # constraints: a need with or without a machine is a part search (a machine is only a filter on it), a machine alone lists its parts.
+        machine_named = llm.entities.get("machine", "").strip()
+        need = (llm.need or "").strip()
+        if not need and machine_named and llm.entities.get("part") and not identifiers(llm.entities["part"]):
+            need = llm.entities["part"].strip()  # an older reading that put the need in `part`
+        if need and llm.in_scope and intent in (Intent.MACHINE_TO_PART, Intent.MACHINE_GRAPH, Intent.UNSUPPORTED):
+            intent = Intent.PART_SEARCH
+        mentions = tuple(dict.fromkeys(m for m in (*typed, need, *identifiers(question)) if m and m.strip()))  # exact identifiers assist; they never choose the intent
+        if intent is Intent.PART_SEARCH and not mentions:
+            mentions = tuple(x for x in (content_text(question),) if x)  # the model named nothing: search for what was said, not the whole catalogue
         found = self._resolver.resolve(mentions, req.selected)
+        if intent is Intent.PART_SEARCH and not machine_named:  # a word that only occurs in a machine's description ("belt" in "Belt Conveyor Module") is not a machine the user named
+            machines = found.by_kind.get(Kind.MACHINE, [])
+            if machines and all(r.tier >= 2 and _squash(r.label) not in _squash(question) for r in machines):
+                found.by_kind.pop(Kind.MACHINE)
         _narrow_by_question(found, question)
-        text = llm.entities.get("part", "")
+        # a need that names a category ("hydraulic", even misspelled) IS that category: it filters, it is not a text to search for
+        need_is_category = bool(need) and self._resolver.resolve((need,)).one(Kind.CATEGORY) is not None
+        text = ("" if need_is_category else need) if need else llm.entities.get("part", "")
         parsed = ParsedQuestion(None if intent is Intent.UNSUPPORTED else intent, mentions, text, "llm", llm.clarification_question, bool(llm.filters.get("single")),
-                                llm.requires_clarification, dict(llm.filters))
+                                llm.requires_clarification and not need, dict(llm.filters), need=need, machine_named=machine_named)
         return parsed, found, "selection" if req.selected else "llm"
 
     # ── query ────────────────────────────────────────────────────────────────────────────────────
@@ -81,7 +125,12 @@ class IntelligenceService:
         started = time.perf_counter()
         question = " ".join(req.question.split())
         t0 = time.perf_counter()
-        llm = self._interpret(question)
+        try:
+            llm = self._interpret(question)
+        except LLMInvalidResponse:  # no usable structure came back for a short request: read it plainly rather than fail
+            llm = self._plain_request(question)
+            if llm is None:
+                raise
         stages = [Stage(name="understanding", ms=_ms(t0))]
 
         # scope guardrail: decided by the model, enforced here, before any graph access
@@ -116,6 +165,16 @@ class IntelligenceService:
             if isinstance(ends, dict):
                 return self._clarify(question, intent, ends, found, started, by, stages)
             extra["path"] = ends
+        elif intent is Intent.PART_SEARCH and parsed.machine_named and found.one(Kind.MACHINE) is None:
+            # the question names a machine: the search is for parts that fit THAT machine. It must resolve to exactly one, or nothing is searched (never dropped, never guessed).
+            many = found.many(Kind.MACHINE)
+            if many:
+                blocker = {"question": f"“{parsed.machine_named}” matches more than one machine. Which machine do you mean?", "candidates": many, "code": "AMBIGUOUS"}
+                self._annotate_machines(blocker, found, parsed.need)
+            else:
+                blocker = {"question": f"I could not identify a machine called “{parsed.machine_named}” in the Noordveld catalogue, so I have not searched. Which machine do you mean?",
+                           "candidates": [], "code": NOT_FOUND_CODES[Kind.MACHINE]}
+            return self._clarify(question, intent, blocker, found, started, by, stages)
         elif intent is Intent.PART_SEARCH and parsed.single and found.one(Kind.PART) is None and found.many(Kind.PART):
             blocker = {"question": "Several parts match. Which part do you mean?", "candidates": found.many(Kind.PART), "code": "AMBIGUOUS"}
             return self._clarify(question, intent, blocker, found, started, by, stages)
@@ -126,17 +185,18 @@ class IntelligenceService:
         elif spec.required is not None:
             blocker = self._missing(spec.required, found, parsed)
             if blocker:
+                self._annotate_machines(blocker, found, parsed.text)
                 return self._clarify(question, intent, blocker, found, started, by, stages)
         stages.insert(1, Stage(name="entities", ms=_ms(t0)))
 
         entities = {r.kind: r for r in found.all_unique()}
-        if intent is not Intent.PART_SEARCH:
-            entities = {k: v for k, v in entities.items() if k in (spec.required, *spec.optional)}
+        # only the kinds the approved query takes are "understood": a word that merely occurs in a supplier's or assembly's name is not a constraint
+        entities = {k: v for k, v in entities.items() if k in ((Kind.PART, *spec.optional) if intent is Intent.PART_SEARCH else (spec.required, *spec.optional))}
         part = entities.get(Kind.PART)
         if intent is Intent.PART_SEARCH and part is not None and (part.tier < 2 or parsed.single):
             text = part.label  # a named part is the answer; the other words of the question are not a search
         else:
-            text = parsed.text or (parsed.mentions[0] if parsed.mentions and not {Kind.MACHINE, Kind.CATEGORY} & entities.keys() else "")
+            text = parsed.text if parsed.need else (parsed.text or (parsed.mentions[0] if parsed.mentions and not {Kind.MACHINE, Kind.CATEGORY} & entities.keys() else ""))
         ctx = Context(question, text, req.limit, self._repo, self._parts, entities, extra)
         t1 = time.perf_counter()
         outcome = HANDLERS[intent](ctx)

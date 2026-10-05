@@ -1,0 +1,38 @@
+/* Parts Store checkout: a stepped single page. Reuses the store's tokens (store.css) and the wireframe's cards, buttons and tags. */
+.co { padding-block: 40px 72px; max-width: 62rem; }
+.co h1 { font-size: 28px; margin-bottom: 18px; }
+.co__steps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0 0 20px; }
+.co__steps li { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--grey-200); background: #fff; font-size: 13px; color: var(--ink-500); }
+.co__steps li span { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--grey-100); font-size: 12px; font-weight: 700; }
+.co__steps li.is-current { border-color: var(--accent); color: var(--ink-900); font-weight: 600; }
+.co__steps li.is-current span { background: var(--accent); color: #fff; }
+.co__steps li.is-done span { background: var(--accent-50); color: var(--accent); }
+.co__panel { display: grid; gap: 16px; }
+.co__panel h2 { font-size: 20px; }
+.co__panel h3 { font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-500); margin-bottom: 6px; }
+.co__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.co label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.co input:not([type="radio"]):not([type="checkbox"]), .co select { width: 100%; padding: 10px 12px; border: 1px solid var(--grey-300); border-radius: 9px; background: #fff; font-size: 14px; font-weight: 400; }
+.co__fieldset { border: 1px solid var(--grey-200); border-radius: 12px; padding: 14px 16px; display: grid; gap: 12px; }
+.co__fieldset legend { padding: 0 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-500); }
+.co__check { display: flex !important; align-items: center; gap: 10px !important; font-weight: 400 !important; }
+.co__confirm { margin-top: 4px; font-weight: 600 !important; }
+.co__choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.co__choices label, .co__depot { display: grid; grid-template-columns: auto 1fr auto; column-gap: 12px; align-items: start; padding: 12px 14px; border: 1px solid var(--grey-300); border-radius: 10px; cursor: pointer; }
+.co__choices label.is-on, .co__depot.is-on { border-color: var(--accent); background: var(--accent-50); }
+.co__depot.is-off { opacity: 0.62; cursor: not-allowed; background: var(--grey-50); }
+.co__choices label span, .co__depot span { display: grid; gap: 3px; }
+.co__choices small, .co__depot small, .co__summary small { font-size: 12.5px; color: var(--ink-500); font-weight: 400; display: block; }
+.co__depots { display: grid; gap: 10px; }
+.co__depot > span > em { justify-self: start; font-style: normal; }
+.co__stock { display: inline-block; margin-right: 12px; }
+.co__stock--unknown { color: var(--warn); font-weight: 600; }
+.co__stock--out_of_stock, .co__stock--on_order { color: var(--bad); }
+.co__bad { color: var(--bad); }
+.co__nav { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+.co__summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+.co__summary .kv-row dd small { display: block; }
+.co__prov { grid-column: 1 / -1; }
+@media (max-width: 800px) {
+  .co__grid, .co__summary { grid-template-columns: minmax(0, 1fr); }
+}

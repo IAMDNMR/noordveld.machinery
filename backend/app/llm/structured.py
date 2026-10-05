@@ -41,6 +41,7 @@ def question_schema(intents: list[str]) -> dict[str, Any]:
         "in_scope": {"type": "boolean"},
         "intent": {"type": "string", "enum": intents},
         "entities": _obj({k: _STR for k in ENTITY_KEYS}),
+        "need": _STR,
         "filters": _obj({
             "place": _STR, "place_kind": {"type": ["string", "null"], "enum": ["DEALER", "SUPPLIER", "WAREHOUSE", None]},
             "proximity": {"type": ["string", "null"], "enum": ["in", "near", None]}, "location": _STR, "brand": _STR, "target_kind": _STR,
@@ -109,6 +110,7 @@ def to_llm_parse(text: str, allowed: list[str]) -> LLMParse:
             filters={k: v for k, v in filters.items() if v not in (None, "")},
             entities=entities,
             in_scope=data["in_scope"] and data.get("domain", "parts_intelligence") == "parts_intelligence",
+            need=_text(data.get("need")),
             confidence=float(confidence) if isinstance(confidence, (int, float)) and not isinstance(confidence, bool) else None,
         )
     except (KeyError, TypeError, AttributeError) as exc:

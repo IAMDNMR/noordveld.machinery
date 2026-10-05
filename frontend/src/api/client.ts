@@ -4,12 +4,15 @@ const BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(
 export class ApiError extends Error {
   readonly status: number
   readonly code: string
+  /** structured, safe-to-show facts about a refused business rule (a field name, the reasons a depot cannot supply) */
+  readonly details: unknown
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: string, message: string, details?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.details = details
   }
 
   get notFound(): boolean {
@@ -39,8 +42,8 @@ async function request<T>(path: string, init: RequestInit): Promise<T> {
     throw new ApiError(0, 'network', 'The parts service could not be reached.')
   }
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null
-    throw new ApiError(response.status, body?.error?.code ?? 'error', body?.error?.message ?? 'The parts service returned an error.')
+    const body = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string; details?: unknown } } | null
+    throw new ApiError(response.status, body?.error?.code ?? 'error', body?.error?.message ?? 'The parts service returned an error.', body?.error?.details)
   }
   return (await response.json()) as T
 }

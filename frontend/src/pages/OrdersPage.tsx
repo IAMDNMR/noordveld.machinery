@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom'
-import { getOrders, type OrderRow, type Queue } from '../api/orders'
+import { DIRECT_ORDER, getOrders, type OrderRow, type Queue } from '../api/orders'
 import { Restricted } from '../components/orders/Restricted'
 import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -14,19 +14,21 @@ const QUEUES: { id: Queue | 'all'; label: string }[] = [
   { id: 'ready_to_ship', label: 'Ready to ship' },
   { id: 'shipped', label: 'Shipped' },
   { id: 'completed', label: 'Completed' },
+  { id: 'exceptions', label: 'Exceptions' },
 ]
 
+const WARN = new Set(['CANCELLED', 'REJECTED', 'ALLOCATION_FAILED', 'ALLOCATION_RELEASED', 'SHIPMENT_EXCEPTION', 'DELIVERY_FAILED', 'SERVICE_CANCELLED'])
 export const statusTone = (status: string): string =>
-  status === 'DELIVERED' ? 'tag-good' : status === 'SHIPPED' || status === 'ALLOCATED' ? 'tag-info' : status === 'NEW' ? 'tag-warn' : 'tag-plain'
+  status === 'DELIVERED' || status === 'COMPLETED' ? 'tag-good' : status === 'SHIPPED' || status === 'ALLOCATED' || status === 'READY_TO_SHIP' ? 'tag-info' : status === 'NEW' || WARN.has(status) ? 'tag-warn' : 'tag-plain'
 
-const money = (amount: number | null, currency: string) =>
-  amount == null ? 'Not recorded' : new Intl.NumberFormat('en-NL', { style: 'currency', currency }).format(amount)
+const money = (amount: number | null, currency: string, direct = false) =>
+  amount == null ? (direct ? 'Not available' : 'Not recorded') : new Intl.NumberFormat('en-NL', { style: 'currency', currency }).format(amount)
 
 /** End User: my requests and orders. Order Processor: the work queue. Which one is shown follows the role the server returns. */
 export default function OrdersPage() {
   const { user, ready } = useSession()
   const processor = user?.role === 'ORDER_PROCESSOR'
-  usePageMeta({ title: processor ? 'Order processing' : 'My orders', description: 'Purchase requests and orders.', path: '/orders' })
+  usePageMeta({ title: processor ? 'Order processing' : 'My orders', description: 'Orders and their status.', path: '/orders' })
   const orders = useApi((s) => (user ? getOrders(s) : Promise.resolve(null)), `orders:${user?.id ?? 'none'}`)
   const [params, setParams] = useSearchParams()
   const queue = (params.get('queue') as Queue | null) ?? 'all'
@@ -36,11 +38,11 @@ export default function OrdersPage() {
     <div className="wf ord-page">
       <div className="wf-container">
         <p className="eyebrow">{processor ? 'Order Processor' : 'End User'}</p>
-        <h1>{processor ? 'Order processing' : 'My requests & orders'}</h1>
+        <h1>{processor ? 'Order processing' : 'My orders'}</h1>
         <p className="lede">
           {processor
-            ? 'Customer requests and orders to review, fulfil and follow. Every check reads the Noordveld graph; nothing here edits catalogue facts.'
-            : 'Your purchase requests and orders, their status and how they are being fulfilled.'}
+            ? 'Customer orders to allocate, fulfil, ship and follow. Every step is recorded in the Noordveld graph; nothing here edits catalogue facts.'
+            : 'Your orders, their status and how they are being fulfilled.'}
         </p>
 
         {!user ? (
@@ -72,7 +74,7 @@ export default function OrdersPage() {
 }
 
 function OrderTable({ rows, processor }: { rows: OrderRow[]; processor: boolean }) {
-  if (rows.length === 0) return <p className="pi-empty">{processor ? 'No orders in this queue.' : 'You have no requests or orders yet. Add verified parts to your cart and submit a purchase request from the order review.'}</p>
+  if (rows.length === 0) return <p className="pi-empty">{processor ? 'No orders in this queue.' : 'You have no orders yet. Add verified parts to your cart and place an order at checkout.'}</p>
   return (
     <div className="card ord-table">
       <div className="table-scroll">
@@ -106,7 +108,7 @@ function OrderTable({ rows, processor }: { rows: OrderRow[]; processor: boolean 
                   <span className={`tag ${statusTone(o.status)}`}>{o.status_label}</span>
                 </td>
                 <td data-label="Fulfilment">{o.fulfilment}</td>
-                <td data-label="Total">{money(o.total, o.currency)}</td>
+                <td data-label="Total">{money(o.total, o.currency, o.channel === DIRECT_ORDER)}</td>
               </tr>
             ))}
           </tbody>

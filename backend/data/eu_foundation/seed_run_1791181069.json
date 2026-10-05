@@ -1,0 +1,19 @@
+{
+ "after_prune_counts": {
+  "DISTANCE_TO": 1868,
+  "FreightRate": 498,
+  "HAS_TRANSPORT_OPTION": 125,
+  "TransportLeg": 1277,
+  "TransportRoute": 4798
+ },
+ "constraints": 68,
+ "missing_endpoints": [],
+ "node_batches": 41,
+ "nodes_created": 0,
+ "rel_batches": 153,
+ "rels_created": 0,
+ "seconds": 87,
+ "source_checksum_after": "ec894df173040ff0a3d2ef313fac9708065f9b71e3c966c4dc6a6976e9767d16",
+ "source_checksum_before": "ec894df173040ff0a3d2ef313fac9708065f9b71e3c966c4dc6a6976e9767d16",
+ "source_data_unchanged": true
+}

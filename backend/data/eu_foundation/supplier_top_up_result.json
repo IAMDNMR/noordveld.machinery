@@ -1,0 +1,91 @@
+{
+ "batch": "SUPPLY-2026-10-05",
+ "created": {
+  "deleted": 0,
+  "nodes": 0,
+  "props": 144,
+  "rels": 8
+ },
+ "planned": [
+  {
+   "added": "SUP-013",
+   "category": "Drivetrain",
+   "existing": [
+    "SUP-009"
+   ],
+   "lead_time_days": 11,
+   "part_id": "PRT-024",
+   "part_number": "NVM-1080-DT"
+  },
+  {
+   "added": "SUP-005",
+   "category": "Filtration",
+   "existing": [
+    "SUP-007"
+   ],
+   "lead_time_days": 8,
+   "part_id": "PRT-060",
+   "part_number": "NVM-1030-FL"
+  },
+  {
+   "added": "SUP-005",
+   "category": "Filtration",
+   "existing": [
+    "SUP-007"
+   ],
+   "lead_time_days": 8,
+   "part_id": "PRT-065",
+   "part_number": "NVM-1080-FL"
+  },
+  {
+   "added": "SUP-032",
+   "category": "Cooling",
+   "existing": [
+    "SUP-011"
+   ],
+   "lead_time_days": 5,
+   "part_id": "PRT-077",
+   "part_number": "NVM-1040-CL"
+  },
+  {
+   "added": "SUP-032",
+   "category": "Cooling",
+   "existing": [
+    "SUP-007"
+   ],
+   "lead_time_days": 5,
+   "part_id": "PRT-078",
+   "part_number": "NVM-1050-CL"
+  },
+  {
+   "added": "SUP-023",
+   "category": "Cab & Controls",
+   "existing": [
+    "SUP-003"
+   ],
+   "lead_time_days": 20,
+   "part_id": "PRT-084",
+   "part_number": "NVM-1050-CB"
+  },
+  {
+   "added": "SUP-031",
+   "category": "Attachments",
+   "existing": [
+    "SUP-004"
+   ],
+   "lead_time_days": 11,
+   "part_id": "PRT-092",
+   "part_number": "NVM-1050-AT"
+  },
+  {
+   "added": "SUP-039",
+   "category": "Lubrication",
+   "existing": [
+    "SUP-005"
+   ],
+   "lead_time_days": 7,
+   "part_id": "PRT-099",
+   "part_number": "NVM-1040-LU"
+  }
+ ]
+}

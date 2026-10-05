@@ -1,0 +1,12 @@
+{
+ "constraints": 68,
+ "missing_endpoints": [],
+ "node_batches": 43,
+ "nodes_created": 3434,
+ "rel_batches": 169,
+ "rels_created": 18689,
+ "seconds": 106,
+ "source_checksum_after": "ec894df173040ff0a3d2ef313fac9708065f9b71e3c966c4dc6a6976e9767d16",
+ "source_checksum_before": "ec894df173040ff0a3d2ef313fac9708065f9b71e3c966c4dc6a6976e9767d16",
+ "source_data_unchanged": true
+}

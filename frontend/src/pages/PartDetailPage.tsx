@@ -87,7 +87,9 @@ function PartView({ d }: { d: PartDetail }) {
   const { add, lines, setOpen } = useCart()
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
-  const inCart = lines.find((l) => l.partId === part.part_id)
+  // the machine this part is bought for: it travels with the cart line and the order. Chosen by the user; preselected only when the catalogue records a single fit.
+  const [machine, setMachine] = useState<string>(() => (d.fitment.length === 1 ? d.fitment[0].model_code : ''))
+  const inCart = lines.filter((l) => l.partId === part.part_id).reduce((n, l) => n + l.qty, 0)
   const orderable = canOrder(profile?.part_status, profile?.orderable) ? true : profile?.orderable === true ? false : profile?.orderable
   const totalStock = d.warehouses.length > 0 ? d.warehouses.reduce((n, w) => n + (w.available ?? 0), 0) : null
   const attention = d.identification.filter((i) => i.identification_needed)
@@ -95,7 +97,7 @@ function PartView({ d }: { d: PartDetail }) {
   const primary = d.suppliers.find((s) => s.is_primary) ?? d.suppliers[0]
 
   const addToCart = () => {
-    add(part.part_id, qty)
+    add(part.part_id, qty, machine || null)
     setAdded(true)
     window.setTimeout(() => setAdded(false), 1800)
   }
@@ -174,6 +176,19 @@ function PartView({ d }: { d: PartDetail }) {
           <div className="pd-actions">
             {orderable === true ? (
               <>
+                {d.fitment.length > 0 ? (
+                  <label className="pd-machine">
+                    <span>For machine</span>
+                    <select value={machine} onChange={(e) => setMachine(e.target.value)} aria-label="Machine this part is for">
+                      <option value="">Not specified</option>
+                      {d.fitment.map((f) => (
+                        <option key={f.machine_id} value={f.model_code}>
+                          {f.name?.startsWith(f.model_code) ? f.name : `${f.model_code} ${f.name ?? ''}`.trim()} · {f.fitment_status === 'CONFIRMED' ? 'confirmed fit' : 'conditional fit'}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <QtyStepper value={qty} onChange={setQty} label="Quantity" />
                 <button type="button" className={`btn btn-primary ${added ? 'is-added' : ''}`} onClick={addToCart}>
                   {added ? <Check size={16} strokeWidth={2.2} aria-hidden="true" /> : <ShoppingCart size={16} strokeWidth={1.8} aria-hidden="true" />}
@@ -187,9 +202,9 @@ function PartView({ d }: { d: PartDetail }) {
               Investigate in Parts Intelligence
             </Link>
           </div>
-          {inCart ? (
+          {inCart > 0 ? (
             <button type="button" className="link-more pd-incart" onClick={() => setOpen(true)}>
-              {inCart.qty} in your cart · View cart
+              {inCart} in your cart · View cart
             </button>
           ) : null}
         </div>

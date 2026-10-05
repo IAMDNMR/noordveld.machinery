@@ -17,7 +17,7 @@ class Role(str, Enum):
 PERMISSIONS: dict[Role, frozenset[str]] = {
     Role.END_USER: frozenset({
         "catalogue.read", "parts.read", "intelligence.query", "agentic_shopping.use",
-        "cart.read", "cart.write", "orders.read_own", "requests.create",
+        "cart.read", "cart.write", "orders.read_own", "orders.place", "orders.cancel_own",
     }),
     Role.ORDER_PROCESSOR: frozenset({
         "catalogue.read", "parts.read", "intelligence.query",

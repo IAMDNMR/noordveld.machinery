@@ -391,9 +391,10 @@ def test_graph_q14_primary_supplier_wording_that_denies_it_is_never_returned():
 @needs_graph
 def test_graph_q27_quantity_wording_that_denies_it_is_never_returned():
     r = graph_ask(parse("PART_TO_INVENTORY", part="NVM-1020-FL"), "How many units of NVM-1020-FL are in stock?", reply="The evidence does not contain specific unit counts for NVM-1020-FL.")
-    assert r["answer"]["source"] == "template" and "81 units recorded across 4 warehouses" in r["answer"]["summary"]
+    assert r["answer"]["source"] == "template" and "172 units recorded across 8 warehouses" in r["answer"]["summary"]
     seen = {x["name"]: x["facts"].get("Units recorded") for x in r["_model_saw"] if x.get("kind") == "warehouse"}
-    assert sorted(seen.values()) == ["20", "48", "5", "8"] and len(seen) == 4
+    assert len(seen) == 8 and sum(int(v) for v in seen.values()) == 172  # every warehouse quantity (the original 4 depots plus the European foundation depots) reached the wording step
+    assert {"20", "48", "5", "8"} <= set(seen.values())
 
 
 @needs_graph

@@ -8,7 +8,7 @@ import { AvailabilityBadge, canOrder, StatusFlag } from './Badges'
 import { PartImage } from './PartImage'
 
 /** One catalogue part, as the wireframe's part card: picture, number, name, meta, price with availability, actions. */
-export function PartCard({ part }: { part: PartSummary }) {
+export function PartCard({ part, machine = null }: { part: PartSummary; machine?: string | null }) {
   const { add, justAdded } = useCart()
   const added = justAdded === part.part_id
   const fits = part.fitment.slice(0, 3)
@@ -35,7 +35,7 @@ export function PartCard({ part }: { part: PartSummary }) {
           View details
         </Link>
         {canOrder(part.availability?.part_status, part.availability?.orderable) ? (
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => add(part.part_id)} aria-label={`Add ${part.name} to cart`}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => add(part.part_id, 1, machine)} aria-label={`Add ${part.name} to cart`}>
             {added ? <Check size={15} strokeWidth={2.2} aria-hidden="true" /> : <ShoppingCart size={15} strokeWidth={1.8} aria-hidden="true" />}
             {added ? 'Added' : 'Add'}
           </button>

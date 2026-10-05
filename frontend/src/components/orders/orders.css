@@ -36,6 +36,23 @@
 .ord-timeline li { position: relative; display: grid; gap: 1px; font-size: 14px; }
 .ord-timeline li::before { content: ""; position: absolute; left: -22px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
 
+/* direct order lifecycle */
+.ord-placed { margin-bottom: 20px; border-color: var(--accent); background: var(--accent-50); }
+.ord-placed h2 { font-size: 16px; margin-bottom: 6px; }
+.ord-stages-card { margin-bottom: 20px; overflow-x: auto; }
+.ord-stages { display: grid; grid-template-columns: repeat(7, minmax(6.5rem, 1fr)); gap: 6px; list-style: none; padding: 0; margin: 0; }
+.ord-stages li { display: grid; gap: 2px; justify-items: start; padding-top: 4px; position: relative; font-size: 13px; }
+.ord-stages__dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--grey-300); background: #fff; }
+.ord-stages small { font-size: 12px; color: var(--ink-500); }
+.ord-stages li.is-done .ord-stages__dot { background: var(--accent); border-color: var(--accent); }
+.ord-stages li.is-current .ord-stages__dot { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-50); }
+.ord-stages li.is-current strong { color: var(--accent); }
+.ord-stages li.is-exception .ord-stages__dot { background: var(--bad); border-color: var(--bad); }
+.ord-stages li.is-exception small, .ord-stages li.is-exception strong { color: var(--bad); }
+.ord-stages li.is-skipped { opacity: 0.55; }
+.ord-actionrow { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.ord-blocked { margin-top: 10px; padding-left: 18px; }
+
 @media (max-width: 900px) {
   .ord-grid { grid-template-columns: minmax(0, 1fr); }
 }

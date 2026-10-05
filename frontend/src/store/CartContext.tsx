@@ -1,19 +1,20 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { CartLine } from '../api'
+import { lineKey, type CartLine } from '../api/cart'
 import { getMyCart, putMyCart } from '../api/orders'
 import { useSession } from './session'
 
 interface CartValue {
-  /** Part ids and quantities only. Names and prices are never stored: the API supplies them when the cart is shown. */
+  /** Part id, quantity and the machine the part was chosen for. Names and prices are never stored: the API supplies them when the cart is shown. */
   lines: readonly CartLine[]
   count: number
   open: boolean
   /** Part last added, shown briefly as feedback */
   justAdded: string | null
   setOpen: (open: boolean) => void
-  add: (partId: string, qty?: number) => void
-  setQty: (partId: string, qty: number) => void
-  remove: (partId: string) => void
+  add: (partId: string, qty?: number, machine?: string | null) => void
+  /** lines are addressed by lineKey (part + machine) */
+  setQty: (key: string, qty: number) => void
+  remove: (key: string) => void
   clear: () => void
 }
 
@@ -21,10 +22,12 @@ const KEY = 'noordveld-parts-cart-v2'
 const MAX_QTY = 99
 const Cart = createContext<CartValue | null>(null)
 
+const clean = (partId: string, qty: number, machine: unknown): CartLine => ({ partId, qty: Math.min(MAX_QTY, qty), machine: typeof machine === 'string' && machine ? machine : null })
+
 const read = (): CartLine[] => {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? '[]') as Partial<CartLine>[]
-    return raw.filter((l): l is CartLine => typeof l.partId === 'string' && Number.isInteger(l.qty) && (l.qty ?? 0) > 0).map((l) => ({ partId: l.partId, qty: Math.min(MAX_QTY, l.qty) }))
+    return raw.filter((l): l is CartLine => typeof l.partId === 'string' && Number.isInteger(l.qty) && (l.qty ?? 0) > 0).map((l) => clean(l.partId, l.qty, l.machine))
   } catch {
     return []
   }
@@ -51,9 +54,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       (server) => {
         if (!live) return
         setLines((local) => {
-          const merged = new Map(server.map((l) => [l.partId, l.qty] as [string, number]))
-          for (const l of local) if (!merged.has(l.partId)) merged.set(l.partId, l.qty)
-          return [...merged].map(([partId, qty]) => ({ partId, qty: Math.min(MAX_QTY, qty) }))
+          const merged = new Map(server.map((l) => [lineKey(l), clean(l.partId, l.qty, l.machine)] as [string, CartLine]))
+          for (const l of local) if (!merged.has(lineKey(l))) merged.set(lineKey(l), l)
+          return [...merged.values()]
         })
         synced.current = owner
       },
@@ -71,7 +74,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       /* storage unavailable: the cart simply lives for this visit */
     }
     if (owner && synced.current === owner) {
-      const t = window.setTimeout(() => putMyCart(lines.map((l) => ({ part_id: l.partId, quantity: l.qty }))).catch(() => undefined), 250)
+      const t = window.setTimeout(() => putMyCart(lines.map((l) => ({ part_id: l.partId, quantity: l.qty, machine: l.machine ?? null }))).catch(() => undefined), 250)
       return () => window.clearTimeout(t)
     }
   }, [lines, owner])
@@ -82,14 +85,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t)
   }, [justAdded])
 
-  const add = useCallback((partId: string, qty = 1) => {
-    setLines((cur) =>
-      cur.some((l) => l.partId === partId) ? cur.map((l) => (l.partId === partId ? { ...l, qty: Math.min(MAX_QTY, l.qty + qty) } : l)) : [...cur, { partId, qty: Math.min(MAX_QTY, qty) }],
-    )
+  const add = useCallback((partId: string, qty = 1, machine: string | null = null) => {
+    const key = lineKey({ partId, machine })
+    setLines((cur) => (cur.some((l) => lineKey(l) === key) ? cur.map((l) => (lineKey(l) === key ? { ...l, qty: Math.min(MAX_QTY, l.qty + qty) } : l)) : [...cur, clean(partId, qty, machine)]))
     setJustAdded(partId)
   }, [])
-  const setQty = useCallback((partId: string, qty: number) => setLines((cur) => (qty <= 0 ? cur.filter((l) => l.partId !== partId) : cur.map((l) => (l.partId === partId ? { ...l, qty: Math.min(MAX_QTY, qty) } : l)))), [])
-  const remove = useCallback((partId: string) => setLines((cur) => cur.filter((l) => l.partId !== partId)), [])
+  const setQty = useCallback((key: string, qty: number) => setLines((cur) => (qty <= 0 ? cur.filter((l) => lineKey(l) !== key) : cur.map((l) => (lineKey(l) === key ? { ...l, qty: Math.min(MAX_QTY, qty) } : l)))), [])
+  const remove = useCallback((key: string) => setLines((cur) => cur.filter((l) => lineKey(l) !== key)), [])
   const clear = useCallback(() => setLines([]), [])
 
   const value = useMemo<CartValue>(

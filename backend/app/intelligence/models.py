@@ -62,6 +62,8 @@ class ParsedQuestion:
     single: bool = False  # "tell me about X": one entity expected, several matches are offered as a choice
     needs_clarification: bool = False  # the model asked for more detail instead of choosing an intent
     filters: dict = field(default_factory=dict)  # place, place_kind, proximity, location, target_kind, as returned by the model
+    need: str = ""  # the requested kind of part, extracted by the model apart from the machine
+    machine_named: str = ""  # a machine the question names, as written; it must resolve or the question is not answered
 
 
 @dataclass(frozen=True)

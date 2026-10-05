@@ -8,8 +8,8 @@ from app.services.part_status import is_orderable, rejection_reason, status_labe
 from app.services.parts import to_summary
 
 NOTE = (
-    "Prepared quote only. Prices are demo figures from the Noordveld demo dataset, excluding VAT and delivery. "
-    "Order placement is not connected, so nothing here is an order."
+    "Prices are synthetic demo list prices from the Noordveld demo dataset, excluding VAT and delivery. They are not an order cost: "
+    "part cost and transportation cost are not available until a pricing source is connected."
 )
 
 

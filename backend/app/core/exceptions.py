@@ -10,5 +10,9 @@ class NotFoundError(Exception):
         self.key = key
 
 
+class GraphConflictError(Exception):
+    """A write violated a uniqueness constraint (for example the same place-order key arriving twice at once)."""
+
+
 class GraphUnavailableError(Exception):
     """The graph database could not be reached or refused the query. Details are logged, never returned to clients."""

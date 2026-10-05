@@ -1,5 +1,5 @@
-"""Orders, purchase requests and the user's cart. Authorization is enforced here (permission per route) and again in the service
-(ownership): an End User sees only their customer's orders; only an Order Processor can change a status."""
+"""Orders and the user's cart. Authorization is enforced here (permission per route) and again in the service (ownership): an End User sees only
+their own orders and may cancel one early; only an Order Processor advances an order. Placing an order is in checkout.py."""
 from __future__ import annotations
 
 from typing import Annotated
@@ -16,15 +16,16 @@ router = APIRouter(tags=["orders"])
 class Item(BaseModel):
     part_id: str = Field(min_length=1, max_length=64)
     quantity: int = Field(ge=1, le=99)
-
-
-class RequestBody(BaseModel):
-    items: list[Item] = Field(min_length=1, max_length=50)
-    idempotency_key: str = Field(min_length=8, max_length=80)
+    machine: str | None = Field(default=None, max_length=40)
 
 
 class StatusBody(BaseModel):
     status: str = Field(min_length=2, max_length=24)
+    expected_status: str | None = None
+
+
+class ActionBody(BaseModel):
+    action: str = Field(min_length=2, max_length=40)
     expected_status: str | None = None
 
 
@@ -40,7 +41,11 @@ def _call(fn, *args):
     except Missing as exc:
         raise HTTPException(status_code=404, detail={"code": "not_found", "message": f"No order {exc}."}) from exc
     except TransitionError as exc:
-        raise HTTPException(status_code=409, detail={"code": exc.code, "message": str(exc)}) from exc
+        status = 422 if exc.code in ("invalid_details", "machine_mismatch", "empty_order", "unknown_part", "confirmation_required") else 409
+        detail = {"code": exc.code, "message": str(exc)}
+        if exc.details is not None:
+            detail["details"] = exc.details
+        raise HTTPException(status_code=status, detail=detail) from exc
 
 
 AnyReader = Annotated[User, Depends(require("catalogue.read"))]  # any signed-in role; the service narrows the scope
@@ -58,12 +63,14 @@ def order_detail(order_id: str, user: AnyReader, orders: OrdersSvc) -> dict:
 
 @router.post("/orders/{order_id}/status")
 def update_status(order_id: str, body: StatusBody, user: Annotated[User, Depends(require("orders.update_status"))], orders: OrdersSvc) -> dict:
+    """Earlier-channel orders only; a direct order moves through /actions."""
     return _call(orders.update_status, user, order_id, body.status, body.expected_status)
 
 
-@router.post("/requests", status_code=201)
-def create_request(body: RequestBody, user: Annotated[User, Depends(require("requests.create"))], orders: OrdersSvc) -> dict:
-    return _call(orders.create_request, user, [(i.part_id, i.quantity) for i in body.items], body.idempotency_key)
+@router.post("/orders/{order_id}/actions")
+def order_action(order_id: str, body: ActionBody, user: AnyReader, orders: OrdersSvc) -> dict:
+    """One lifecycle action on a direct order (allocate, start_fulfilment, create_shipment, dispatch, cancel …). The service decides if it is valid now."""
+    return _call(orders.act, user, order_id, body.action, body.expected_status)
 
 
 @router.get("/me/cart")
@@ -73,4 +80,5 @@ def my_cart(user: Annotated[User, Depends(require("cart.read"))], orders: Orders
 
 @router.put("/me/cart")
 def put_cart(body: CartBody, user: Annotated[User, Depends(require("cart.write"))], orders: OrdersSvc) -> list[dict]:
-    return _call(orders.put_cart, user, [(i.part_id, i.quantity) for i in body.lines])
+    return _call(orders.put_cart, user, [(i.part_id, i.quantity, i.machine) for i in body.lines])
+

@@ -34,6 +34,7 @@ class LLMParse:
     filters: dict[str, Any] = field(default_factory=dict)
     entities: dict[str, str] = field(default_factory=dict)
     in_scope: bool = True  # the scope guardrail: is this a Parts Intelligence question at all?
+    need: str | None = None  # the kind of part or need the user wants ('hydraulic', 'filter'), apart from any machine; None when none was named
     confidence: float | None = None
 
 

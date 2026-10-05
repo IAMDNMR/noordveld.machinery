@@ -8,8 +8,8 @@ import '../styles/wf.css'
 import '../components/orders/orders.css'
 
 const PURPOSE: Record<DemoUser['role'], string> = {
-  END_USER: 'Needs a part: browse, investigate, get a recommendation, submit a purchase request and follow its status.',
-  ORDER_PROCESSOR: 'Processes customer requests: checks fitment, stock, supply and shipment, and moves orders through their steps.',
+  END_USER: 'Needs a part: browse, investigate, get a recommendation, place an order and follow it through allocation, shipment and delivery.',
+  ORDER_PROCESSOR: 'Processes customer orders: checks fitment, stock, supply and shipment, and moves orders through their steps.',
 }
 
 /** Demo sign-in: choose one of the seeded demo accounts. No password and no identity provider; the backend keeps a signed session. */

@@ -141,7 +141,7 @@ def test_gemini_returns_typed_entities_and_filters_and_nothing_executable():
     assert parse.intent == "MACHINE_LIST" and parse.entities == {} and parse.filters["location"] == "Assen"
     assert "MATCH" not in repr(parse.entities) and not hasattr(parse, "cypher")  # only the declared fields survive; no query text is ever carried
     schema = body["generationConfig"]["responseSchema"]
-    assert set(schema["properties"]) == {"in_scope", "intent", "entities", "filters", "requires_clarification", "clarification_question"}  # no query (domain and confidence were dropped to save tokens; a reply that still carries them is read)
+    assert set(schema["properties"]) == {"in_scope", "intent", "entities", "need", "filters", "requires_clarification", "clarification_question"}  # no query (domain and confidence were dropped to save tokens; a reply that still carries them is read)
     assert "cypher" not in json.dumps(schema).lower() and "Do not generate" not in json.dumps(schema)
     assert "do not answer the question" in body["systemInstruction"]["parts"][0]["text"].lower() and "cypher" in body["systemInstruction"]["parts"][0]["text"].lower()
 
@@ -512,3 +512,47 @@ def test_does_a_part_fit_one_machine_answers_for_that_pair_only():
     assert [i.title for i in r.results] == ["ZZ-2"] and r.answer.summary.startswith("Yes: AB-1000-XY is recorded as fitting ZZ-2 (fitment: confirmed)")
     r = ask(service(repo, FakeLLM(parse=LLMParse("PART_TO_MACHINE", ("AB-1000-XY", "ZZ-9")))), "Does AB-1000-XY fit the ZZ-9?")
     assert r.results == [] and "not established that it fits" in r.answer.summary and "ZZ-1, ZZ-2" in r.answer.summary  # unknown, never "does not fit"
+
+
+# ── a misspelled category is still understood; an empty machine+category result says so and points to the same-family models ──
+CATS = [{"id": "CAT-HY", "label": "Hydraulics", "data_status": "SOURCE_DERIVED"}, {"id": "CAT-BR", "label": "Brakes", "data_status": "SOURCE_DERIVED"}]
+
+
+def test_misspelled_category_resolves_to_the_one_clear_category():
+    from app.intelligence.models import Kind
+    from app.intelligence.resolver import EntityResolver
+    found = EntityResolver(FakeRepo(category_names=CATS)).resolve(("hydralic",))
+    assert [r.label for r in found.by_kind[Kind.CATEGORY]] == ["Hydraulics"]
+    assert EntityResolver(FakeRepo(category_names=CATS)).resolve(("zzzzzz",)).by_kind == {}  # no clear match: nothing is guessed
+
+
+def test_machine_with_no_part_in_the_category_says_so_and_names_same_family_models():
+    repo = FakeRepo({"bts-500": [row("MACHINE", "MCH-13", "BTS-500")], "hydralic": []}, category_names=CATS, machine_parts=(0, []),
+                    machines_with_category=[{"model_code": "BTS-250", "parts": 2}])
+    r = ask(service(repo, FakeLLM(parse=LLMParse("MACHINE_TO_PART", ("BTS-500", "hydralic")))), "hydralic for BTS-500")
+    s = r.answer.summary
+    assert r.results == [] and "no Hydraulics part is available in this store for BTS-500" in s and "BTS-250 (2 parts)" in s and "contact" in s
+
+
+# ── casual requests ───────────────────────────────────────────────────────────────────────────────────────────
+def test_casual_phrasing_is_reduced_to_the_part_named():
+    from app.intelligence.casual import content_text
+    assert content_text("show me that belt") == "belt"
+    assert content_text("do you have a hose") == "hose"
+    assert content_text("show me the hydraulics you have available") == "hydraulic"
+    assert content_text("brake pads") == "brake pad"
+    assert content_text("parts for my machine") == ""  # nothing named: still asks which machine
+
+
+def test_the_plain_reading_is_only_a_fallback_for_an_unusable_model_reply():
+    svc = IntelligenceService(FakeRepo(), None, FakeLLM(parse=LLMParse("UNSUPPORTED")))
+    plain = svc._plain_request("show me that belt")  # used only when the model returned no usable structure
+    assert plain is not None and plain.intent == "PART_SEARCH" and plain.need == "belt"
+    assert svc._plain_request("show me NVM-1010-AT") is None  # a named identifier is left to the model
+    assert svc._plain_request("parts for my machine") is None  # nothing named
+
+
+def test_a_model_that_only_asks_for_detail_is_not_overridden():
+    """The model's own reading decides: a clarification it asks for is asked, not answered by a word-stripping guess."""
+    r = ask(service(FakeRepo(), FakeLLM(parse=LLMParse("UNSUPPORTED", requires_clarification=True, clarification_question="Which belt do you mean?"))), "show me that belt")
+    assert r.scope == "NEEDS_CLARIFICATION" and r.clarification.question == "Which belt do you mean?" and r.results == []

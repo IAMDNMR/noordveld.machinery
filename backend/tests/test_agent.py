@@ -302,7 +302,7 @@ def test_case1_prefer_in_stock_is_complete_and_explained():
     for c in r["candidates"]:
         assert_complete(c)
     assert best["fitment_label"] == "Confirmed fit" and best["availability_label"] == "In stock"
-    assert best["inventory"].startswith("81 units") and best["fulfilment"].startswith("Available from") and best["delivery"] == "Estimate not recorded"
+    assert best["inventory"].startswith("172 units") and best["fulfilment"].startswith("Available from") and best["delivery"] == "Estimate not recorded"
     assert best["price_basis"] == "ex VAT" and best["order_action"] == "add_to_cart" and best["stock_locations"]
     assert "lead time" not in best["supplier_label"]  # a supplier lead time does not apply to stock already on the shelf
     assert alt["part"]["part_number"] == "NVM-1010-FL" and alt["availability_label"] == "Backorder" and alt["fulfilment"] == "Supplier lead time · 10 days"

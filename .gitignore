@@ -19,3 +19,8 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Regenerated on every run by backend/scripts/eu_foundation (validate.py, scenarios.py, build.py plan): output, not source
+backend/data/eu_foundation/validation.json
+backend/data/eu_foundation/scenarios.json
+backend/data/eu_foundation/plan_summary.json

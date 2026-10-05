@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.dependencies import Catalogue, get_graph
-from app.api.routes import accounts, agent, catalogue, intelligence, orders, parts, site
+from app.api.routes import accounts, agent, catalogue, checkout, intelligence, orders, parts, site
 from app.core.config import get_settings
 from app.core.exceptions import GraphUnavailableError, NotFoundError
 from app.core.logging import setup_logging
@@ -20,8 +20,11 @@ from app.llm import LLMError, LLMInvalidResponse, LLMUnavailable
 log = logging.getLogger(__name__)
 
 
-def _error(status: int, code: str, message: str) -> JSONResponse:
-    return JSONResponse(status_code=status, content={"error": {"code": code, "message": message}})
+def _error(status: int, code: str, message: str, details: object = None) -> JSONResponse:
+    body: dict = {"code": code, "message": message}
+    if details is not None:  # structured, safe-to-show facts about why a business rule refused (field name, depot reasons)
+        body["details"] = details
+    return JSONResponse(status_code=status, content={"error": body})
 
 
 def create_app() -> FastAPI:
@@ -54,7 +57,7 @@ def create_app() -> FastAPI:
     @app.exception_handler(HTTPException)
     async def http_error(_: Request, exc: HTTPException) -> JSONResponse:
         detail = exc.detail if isinstance(exc.detail, dict) else {"code": "error", "message": str(exc.detail)}
-        return _error(exc.status_code, detail.get("code", "error"), detail.get("message", ""))
+        return _error(exc.status_code, detail.get("code", "error"), detail.get("message", ""), detail.get("details"))
 
     @app.exception_handler(Exception)
     async def unexpected(_: Request, exc: Exception) -> JSONResponse:
@@ -80,6 +83,7 @@ def create_app() -> FastAPI:
     app.include_router(site.router, prefix="/api/v1")
     app.include_router(accounts.router, prefix="/api/v1")
     app.include_router(orders.router, prefix="/api/v1")
+    app.include_router(checkout.router, prefix="/api/v1")
     app.add_event_handler("shutdown", lambda: get_graph().close())
     return app
 

@@ -11,7 +11,7 @@ import { SessionProvider } from '../../store/session'
 const anna: Me = { id: 'U-ANNA', name: 'Anna (demo)', email: 'a@x.example', role: 'END_USER', customer: 'Customer One', permissions: ['orders.read_own'] }
 const jane: Me = { id: 'U-JANE', name: 'Jane (demo)', email: 'j@x.example', role: 'ORDER_PROCESSOR', customer: null, permissions: ['orders.read', 'orders.update_status'] }
 const row = (id: string, status: OrderRow['status'], queue?: OrderRow['queue'], customer?: string): OrderRow => ({
-  order_id: id, order_date: '2026-10-01', status, status_label: { NEW: 'Pending review', CONFIRMED: 'Confirmed', PROCESSING: 'Processing', ALLOCATED: 'Allocated', SHIPPED: 'Shipped', DELIVERED: 'Delivered' }[status],
+  order_id: id, order_date: '2026-10-01', status, status_label: ({ NEW: 'Pending review', CONFIRMED: 'Confirmed', PROCESSING: 'Processing', ALLOCATED: 'Allocated', SHIPPED: 'Shipped', DELIVERED: 'Delivered' } as Record<string, string>)[status] ?? status,
   parts: ['AB-1 × 1'], fits: ['M-1'], total: 50, currency: 'EUR', fulfilment: 'In stock', data_status: 'SYNTHETIC_DEMO', ...(queue ? { queue, customer } : {}),
 })
 const detail = (processor: boolean, status: OrderDetail['status'] = 'NEW'): OrderDetail => ({
@@ -76,7 +76,7 @@ describe('roles', () => {
 
   it('lists the End User’s own orders without customer or queue columns', async () => {
     mount('/orders', anna, { '/orders': () => new Response(JSON.stringify([row('O-1', 'NEW'), row('O-4', 'DELIVERED')])) })
-    expect(await screen.findByRole('heading', { name: 'My requests & orders' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'My orders' })).toBeTruthy()
     await screen.findByRole('link', { name: 'O-1' })
     const head = [...document.querySelectorAll('thead th')].map((t) => t.textContent)
     expect(head).not.toContain('Customer')

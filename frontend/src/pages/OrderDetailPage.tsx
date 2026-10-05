@@ -1,8 +1,9 @@
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api'
-import { getOrder, updateStatus, type OrderDetail } from '../api/orders'
+import { DIRECT_ORDER, getOrder, updateStatus, type OrderDetail } from '../api/orders'
+import { DirectDetail } from '../components/orders/DirectOrder'
 import { Restricted } from '../components/orders/Restricted'
 import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -16,11 +17,12 @@ const money = (amount: number | null | undefined, currency = 'EUR') =>
 const fitText = (s: string | null) => (s === 'CONFIRMED' ? 'Confirmed fit' : s === 'CONDITIONAL' ? 'Conditional fit · verification required' : 'Fitment not verified')
 const DATA: Record<string, string> = { SYNTHETIC_DEMO: 'Synthetic demo', SOURCE_DERIVED: 'Source-derived', USER_PROVIDED: 'Recorded in the app', DERIVED: 'Derived' }
 
-/** One order or request. Both roles see the same facts about their order; only the Order Processor gets the operational detail and actions. */
+/** One order. Both roles see the same facts about their order; only the Order Processor gets the operational detail and actions. */
 export default function OrderDetailPage() {
   const { orderId = '' } = useParams()
   const { user, ready } = useSession()
-  usePageMeta({ title: orderId, description: 'Order or purchase request.', path: `/orders/${orderId}` })
+  const [params] = useSearchParams()
+  usePageMeta({ title: orderId, description: 'Order status, fulfilment, shipment and tracking.', path: `/orders/${orderId}` })
   const state = useApi((s) => (user ? getOrder(orderId, s) : Promise.resolve(null)), `order:${orderId}:${user?.id ?? 'none'}`)
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const shown = order && order.order_id === orderId ? order : state.data
@@ -30,7 +32,7 @@ export default function OrderDetailPage() {
     <div className="wf ord-page">
       <div className="wf-container">
         <Link className="back-link" to="/orders">
-          <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" /> {user?.role === 'ORDER_PROCESSOR' ? 'Order processing' : 'My requests & orders'}
+          <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" /> {user?.role === 'ORDER_PROCESSOR' ? 'Order processing' : 'My orders'}
         </Link>
         {!user ? (
           <Restricted reason="signed_out" />
@@ -39,7 +41,11 @@ export default function OrderDetailPage() {
         ) : !shown ? (
           <p className="muted">Loading order…</p>
         ) : (
-          <Detail o={shown} processor={user.role === 'ORDER_PROCESSOR'} onChange={setOrder} />
+          shown.channel === DIRECT_ORDER ? (
+            <DirectDetail o={shown} processor={user.role === 'ORDER_PROCESSOR'} placed={params.get('placed') === '1'} onChange={setOrder} />
+          ) : (
+            <Detail o={shown} processor={user.role === 'ORDER_PROCESSOR'} onChange={setOrder} />
+          )
         )}
       </div>
     </div>
@@ -51,7 +57,7 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
     <>
       <header className="ord-head">
         <div>
-          <p className="eyebrow">{o.channel === 'DEMO_APP_REQUEST' ? 'Purchase request' : 'Order'}</p>
+          <p className="eyebrow">Order</p>
           <h1>{o.order_id}</h1>
           <p className="muted">
             {o.order_date ? `Created ${o.order_date}` : 'Creation date not recorded'}

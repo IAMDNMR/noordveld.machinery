@@ -247,6 +247,19 @@ WITH collect({part_id: p.part_id, part_number: p.part_number, name: p.name, cate
 RETURN size(rows) AS total, rows[0..$limit] AS rows
 """
 
+# Top-level categories, for typo-tolerant matching of a category word the user misspelled ("hydralic").
+CATEGORY_NAMES = """
+MATCH (c:Category) WHERE c.level = 1
+RETURN c.category_id AS id, c.name AS label, c.data_status AS data_status LIMIT 50
+"""
+
+# Other models of the same family that do have parts in a category (used when the chosen machine has none).
+MACHINES_WITH_CATEGORY = """
+MATCH (m:Machine {machine_id: $machine_id})-[:MEMBER_OF_FAMILY]->(:MachineFamily)<-[:MEMBER_OF_FAMILY]-(o:Machine)
+WHERE o <> m AND EXISTS { (:Part {category: $category})-[:FITS]->(o) }
+RETURN o.model_code AS model_code, size([(p:Part {category: $category})-[:FITS]->(o) | 1]) AS parts ORDER BY o.model_code LIMIT 20
+"""
+
 # ── supplier / dealer / assembly side ────────────────────────────────────────────────────────────
 SUPPLIER_CORE = """
 MATCH (s:Supplier {supplier_id: $id})

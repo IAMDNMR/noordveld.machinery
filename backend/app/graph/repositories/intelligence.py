@@ -101,6 +101,12 @@ class IntelligenceRepository:
     def machine_parts(self, machine_id: str, category: str | None, limit: int) -> tuple[int, list[dict[str, Any]]]:
         return self._listing(q.MACHINE_PARTS, limit, machine_id=machine_id, category=category)
 
+    def category_names(self) -> list[dict[str, Any]]:
+        return self._g.read(q.CATEGORY_NAMES)
+
+    def machines_with_category(self, machine_id: str, category: str) -> list[dict[str, Any]]:
+        return self._g.read(q.MACHINES_WITH_CATEGORY, machine_id=machine_id, category=category)
+
     def supplier_core(self, supplier_id: str) -> dict[str, Any] | None:
         rows = self._g.read(q.SUPPLIER_CORE, id=supplier_id)
         return rows[0] if rows else None

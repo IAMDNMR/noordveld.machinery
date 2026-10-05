@@ -1,0 +1,1419 @@
+{
+ "address_countries": {
+  "BE": 3,
+  "DE": 17,
+  "NL": 24
+ },
+ "batches_present": {
+  "ENRICH-2026-10-03": 182,
+  "OPS-2026-10-04": 229
+ },
+ "business_units": [
+  {
+   "ds": "SOURCE_DERIVED",
+   "name": "Bakker",
+   "plant": [
+    "Coevorden (NL)"
+   ]
+  },
+  {
+   "ds": "SOURCE_DERIVED",
+   "name": "Kessler",
+   "plant": [
+    "Lingen (DE)"
+   ]
+  },
+  {
+   "ds": "SOURCE_DERIVED",
+   "name": "Noordveld",
+   "plant": [
+    "Assen (NL)"
+   ]
+  }
+ ],
+ "carriers": [
+  {
+   "p": {
+    "authoritative_flag": false,
+    "carrier_id": "CAR-demo-freight-fictional",
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "enrichment_batch": "OPS-2026-10-04",
+    "key_basis": "DERIVED_FROM_NAME",
+    "last_updated": "2026-10-01",
+    "name": "Demo Freight (fictional)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "provider_code": "DFF",
+    "provider_note": "Fictional demo provider. Not a real carrier and not connected to any carrier system.",
+    "region": "NL|DE|BE",
+    "service_status": "ACTIVE_DEMO",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "CAR-demo-freight-fictional",
+    "source_sheet": "SYN_shipments",
+    "transport_modes": "ROAD"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "carrier_id": "CAR-DEMO-002",
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "demo_marker": "SYNTHETIC_DEMO_DATA",
+    "enrichment_batch": "OPS-2026-10-04",
+    "last_updated": "2026-10-04",
+    "name": "Delta Linehaul (demo)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "provider_code": "DLH",
+    "provider_note": "Fictional demo provider. Not a real carrier and not connected to any carrier system.",
+    "region": "NL|DE|BE",
+    "service_status": "ACTIVE_DEMO",
+    "source_file": "backend/scripts/operational_demo",
+    "source_id": "SRC-OPS-DEMO",
+    "source_name": "seed_operational_demo.py (deterministic)",
+    "source_record_id": "CAR-DEMO-002",
+    "transport_modes": "ROAD"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "carrier_id": "CAR-DEMO-003",
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "demo_marker": "SYNTHETIC_DEMO_DATA",
+    "enrichment_batch": "OPS-2026-10-04",
+    "last_updated": "2026-10-04",
+    "name": "ParcelWerk Europe (demo)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "provider_code": "PWE",
+    "provider_note": "Fictional demo provider. Not a real carrier and not connected to any carrier system.",
+    "region": "NL|DE|BE",
+    "service_status": "ACTIVE_DEMO",
+    "source_file": "backend/scripts/operational_demo",
+    "source_id": "SRC-OPS-DEMO",
+    "source_name": "seed_operational_demo.py (deterministic)",
+    "source_record_id": "CAR-DEMO-003",
+    "transport_modes": "ROAD|PARCEL"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "carrier_id": "CAR-DEMO-004",
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "demo_marker": "SYNTHETIC_DEMO_DATA",
+    "enrichment_batch": "OPS-2026-10-04",
+    "last_updated": "2026-10-04",
+    "name": "Rhein-Express Spedition (demo)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "provider_code": "RXS",
+    "provider_note": "Fictional demo provider. Not a real carrier and not connected to any carrier system.",
+    "region": "NL|DE",
+    "service_status": "ACTIVE_DEMO",
+    "source_file": "backend/scripts/operational_demo",
+    "source_id": "SRC-OPS-DEMO",
+    "source_name": "seed_operational_demo.py (deterministic)",
+    "source_record_id": "CAR-DEMO-004",
+    "transport_modes": "ROAD"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "carrier_id": "CAR-DEMO-005",
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "demo_marker": "SYNTHETIC_DEMO_DATA",
+    "enrichment_batch": "OPS-2026-10-04",
+    "last_updated": "2026-10-04",
+    "name": "Kustlijn Pallet Network (demo)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "provider_code": "KPN",
+    "provider_note": "Fictional demo provider. Not a real carrier and not connected to any carrier system.",
+    "region": "NL|DE|BE",
+    "service_status": "ACTIVE_DEMO",
+    "source_file": "backend/scripts/operational_demo",
+    "source_id": "SRC-OPS-DEMO",
+    "source_name": "seed_operational_demo.py (deterministic)",
+    "source_record_id": "CAR-DEMO-005",
+    "transport_modes": "ROAD|PALLET"
+   }
+  }
+ ],
+ "constraint_list": [
+  "address_id_unique",
+  "app_user_id",
+  "assembly_id_unique",
+  "business_unit_id_unique",
+  "carrier_id_unique",
+  "cart_id_unique",
+  "cart_line_id_unique",
+  "category_id_unique",
+  "compliance_requirement_id_unique",
+  "customer_contact_id_unique",
+  "customer_id_unique",
+  "customer_request_id_unique",
+  "data_source_id_unique",
+  "dealer_contact_id_unique",
+  "dealer_id_unique",
+  "delivery_estimate_id_unique",
+  "freight_rate_id_unique",
+  "identification_requirement_id_unique",
+  "legacy_reference_id_unique",
+  "location_id_unique",
+  "machine_family_id_unique",
+  "machine_id_unique",
+  "machine_profile_id_unique",
+  "machine_specification_id_unique",
+  "machine_type_id_unique",
+  "machine_variant_id_unique",
+  "order_id_unique",
+  "order_line_id_unique",
+  "order_status_event_id_unique",
+  "order_status_id_unique",
+  "part_catalog_profile_id_unique",
+  "part_id_unique",
+  "part_specification_id_unique",
+  "plant_id_unique",
+  "price_id_unique",
+  "region_id_unique",
+  "rel_admits_variant_id_unique",
+  "rel_allocated_from_id_unique",
+  "rel_applies_from_id_unique",
+  "rel_available_at_id_unique",
+  "rel_based_on_rate_card_id_unique",
+  "rel_branded_as_id_unique",
+  "rel_carried_by_id_unique",
+  "rel_co_ordered_with_id_unique",
+  "rel_contains_line_id_unique",
+  "rel_covers_category_id_unique",
+  "rel_delivers_to_address_id_unique",
+  "rel_delivers_to_customer_id_unique",
+  "rel_dispatched_from_id_unique",
+  "rel_distance_to_id_unique",
+  "rel_fits_id_unique",
+  "rel_for_machine_id_unique",
+  "rel_for_part_id_unique",
+  "rel_from_warehouse_id_unique",
+  "rel_has_alias_id_unique",
+  "rel_has_compliance_id_unique",
+  "rel_has_contact_id_unique",
+  "rel_has_legacy_reference_id_unique",
+  "rel_has_machine_specification_id_unique",
+  "rel_has_rate_id_unique",
+  "rel_has_ship_to_id_unique",
+  "rel_has_shipment_id_unique",
+  "rel_has_specification_id_unique",
+  "rel_has_status_event_id_unique",
+  "rel_has_tracking_event_id_unique",
+  "rel_has_transport_option_id_unique",
+  "rel_home_plant_id_unique",
+  "rel_identified_by_part_id_unique",
+  "rel_in_category_id_unique",
+  "rel_in_country_id_unique",
+  "rel_in_region_id_unique",
+  "rel_in_subcategory_id_unique",
+  "rel_issued_by_business_unit_id_unique",
+  "rel_located_at_address_id_unique",
+  "rel_located_at_plant_id_unique",
+  "rel_located_in_id_unique",
+  "rel_manufactured_at_id_unique",
+  "rel_member_of_family_id_unique",
+  "rel_of_type_id_unique",
+  "rel_offers_id_unique",
+  "rel_opened_by_id_unique",
+  "rel_ordered_by_id_unique",
+  "rel_originates_at_id_unique",
+  "rel_owned_by_id_unique",
+  "rel_part_of_id_unique",
+  "rel_placed_with_id_unique",
+  "rel_planned_fulfilment_from_id_unique",
+  "rel_prices_part_id_unique",
+  "rel_product_family_of_id_unique",
+  "rel_profiles_machine_id_unique",
+  "rel_profiles_part_id_unique",
+  "rel_records_status_id_unique",
+  "rel_references_part_id_unique",
+  "rel_related_component_id_unique",
+  "rel_requires_part_id_unique",
+  "rel_same_name_group_as_id_unique",
+  "rel_serves_family_id_unique",
+  "rel_ships_line_id_unique",
+  "rel_ships_to_country_id_unique",
+  "rel_stocked_by_id_unique",
+  "rel_subcategory_of_id_unique",
+  "rel_supplied_by_id_unique",
+  "rel_supplies_category_id_unique",
+  "rel_to_customer_id_unique",
+  "rel_to_dealer_id_unique",
+  "rel_variant_of_id_unique",
+  "search_alias_id_unique",
+  "service_plan_id_unique",
+  "shipment_id_unique",
+  "shipping_rate_id_unique",
+  "shipto_id_unique",
+  "supplier_backorder_id_unique",
+  "supplier_contact_id_unique",
+  "supplier_id_unique",
+  "tracking_event_id_unique",
+  "transport_option_id_unique",
+  "warehouse_id_unique"
+ ],
+ "constraints": 117,
+ "customers": 10,
+ "data_sources": [
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "last_updated": "2026-10-01",
+    "layer": "Blue tabs",
+    "limitations": "Treated as demo data. Not linked to a live ERP or catalogue.",
+    "name": "Catalog workbook (supplied)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-001",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SRC-001",
+    "source_sheet": "SYN_data_sources",
+    "verification": "Row-level references; values compared to the workbook by validate.py"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "last_updated": "2026-10-01",
+    "layer": "Blue tabs (derived_fields column)",
+    "limitations": "Families and subcategories await business confirmation (demo).",
+    "name": "Rule-derived fields",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-002",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SRC-002",
+    "source_sheet": "SYN_data_sources",
+    "verification": "Deterministic rules listed per row"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "last_updated": "2026-10-01",
+    "layer": "Orange SYN_ tabs",
+    "limitations": "All values invented. Not suitable for real decisions.",
+    "name": "Synthetic generator (seed 42)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SRC-003",
+    "source_sheet": "SYN_data_sources",
+    "verification": "22+ consistency checks in SYN_quality_checks"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "enrichment_batch": "ENRICH-2026-10-03",
+    "last_updated": "2026-10-03",
+    "layer": "Synthetic enrichment",
+    "limitations": "Synthetic demonstration data. Not real company, supplier, inventory, order or shipment data.",
+    "name": "Demo enrichment script (seed 20261003)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "source_file": "backend/scripts/enrich_graph_demo_data.py",
+    "source_id": "SRC-004",
+    "source_name": "enrich_graph_demo_data.py (seed 20261003)",
+    "source_record_id": "SRC-004",
+    "source_sheet": "data_sources",
+    "verification": "Validated by enrich_graph_demo_data.py validate; additive only"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "USER_PROVIDED",
+    "layer": "DEMO-class rows (plants, order-status vocabulary)",
+    "limitations": "Declares the plants and workflow vocabulary fictional/demonstration",
+    "name": "Project brief and OEM Agentic Commerce wireframe (cited by the workbook)",
+    "provenance_type": "USER_PROVIDED",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "01_Legend data_class DEMO",
+    "source_record_id": "DEMO",
+    "source_sheet": "01_Legend",
+    "verification": "As cited in the workbook's source / source_ref columns"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "demo_marker": "SYNTHETIC_DEMO_DATA",
+    "enrichment_batch": "OPS-2026-10-04",
+    "last_updated": "2026-10-04",
+    "layer": "Synthetic operational data",
+    "limitations": "Synthetic demonstration data. Not real company, dealer, customer, supplier, transport, rate or distance data. No carrier, ERP or TMS is connected.",
+    "name": "Operational demo seed (deterministic)",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "source_file": "backend/scripts/operational_demo",
+    "source_id": "SRC-OPS-DEMO",
+    "source_name": "seed_operational_demo.py (deterministic)",
+    "source_record_id": "SRC-OPS-DEMO",
+    "source_sheet": "operational_demo",
+    "verification": "Validated by scripts/operational_demo/verify.py; additive only"
+   }
+  }
+ ],
+ "dealers": [
+  {
+   "cc": "NL",
+   "city": "Groningen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-001",
+   "name": "Noordland Machines (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "NL",
+   "city": "Zwolle",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-002",
+   "name": "IJsselvallei Equipment (demo)",
+   "type": "SERVICE_PARTNER"
+  },
+  {
+   "cc": "NL",
+   "city": "Enschede",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-003",
+   "name": "Twente Werktuigen (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "NL",
+   "city": "Eindhoven",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-004",
+   "name": "Brabant Heavy Parts (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "NL",
+   "city": "Rotterdam",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-005",
+   "name": "Maasmond Machinery (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "NL",
+   "city": "Utrecht",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-006",
+   "name": "Centraal Lift & Load (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "NL",
+   "city": "Emmen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-007",
+   "name": "Drenthe Techniek (demo)",
+   "type": "SERVICE_PARTNER"
+  },
+  {
+   "cc": "NL",
+   "city": "Venlo",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-008",
+   "name": "Limburg Material Handling (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "DE",
+   "city": "Osnabrueck",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-009",
+   "name": "Nordwest Fahrzeugtechnik (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "DE",
+   "city": "Muenster",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-010",
+   "name": "Muensterland Maschinen (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "DE",
+   "city": "Bremen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-011",
+   "name": "Hansa Flurfoerdertechnik (demo)",
+   "type": "SERVICE_PARTNER"
+  },
+  {
+   "cc": "DE",
+   "city": "Hannover",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-012",
+   "name": "Leine Industrietechnik (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "DE",
+   "city": "Dortmund",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-013",
+   "name": "Ruhrgebiet Lagertechnik (demo)",
+   "type": "SERVICE_PARTNER"
+  },
+  {
+   "cc": "DE",
+   "city": "Koeln",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-014",
+   "name": "Rheinland Stapler (demo)",
+   "type": "AUTHORISED_DEALER"
+  },
+  {
+   "cc": "BE",
+   "city": "Antwerpen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "DLR-015",
+   "name": "Scheldt Handling Group (demo)",
+   "type": "AUTHORISED_DEALER"
+  }
+ ],
+ "delivery_estimate_links": [
+  {
+   "l": "Warehouse",
+   "n": 100,
+   "t": "FROM_WAREHOUSE"
+  },
+  {
+   "l": "Customer",
+   "n": 40,
+   "t": "TO_CUSTOMER"
+  },
+  {
+   "l": "Dealer",
+   "n": 60,
+   "t": "TO_DEALER"
+  }
+ ],
+ "delivery_estimate_sample": [
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "delivery_estimate_id": "DLT-0001",
+    "est_road_km": 80.6,
+    "express_days": 2,
+    "express_price_ex_vat": 21.6,
+    "last_updated": "2026-10-01",
+    "note": "transit days from SYN_shipping_rates + 1 handling day",
+    "provenance_type": "SYNTHETIC_DEMO",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_id_value": "DLT-0001",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "DLT-0001",
+    "source_sheet": "SYN_delivery_options",
+    "standard_days": 2,
+    "standard_price_ex_vat": 12.0
+   }
+  }
+ ],
+ "delivery_estimates": {
+  "keys": [
+   "source_id",
+   "delivery_estimate_id",
+   "authoritative_flag",
+   "confidence",
+   "data_status",
+   "last_updated",
+   "provenance_type",
+   "source_file",
+   "source_name",
+   "source_record_id",
+   "source_sheet",
+   "source_id_value",
+   "est_road_km",
+   "express_days",
+   "express_price_ex_vat",
+   "note",
+   "standard_days",
+   "standard_price_ex_vat"
+  ],
+  "n": 100
+ },
+ "fitments": 219,
+ "indexes": 119,
+ "inventory": [
+  {
+   "n": 305,
+   "null_qty": 0,
+   "s": "IN_STOCK"
+  },
+  {
+   "n": 95,
+   "null_qty": 0,
+   "s": "OUT_OF_STOCK"
+  }
+ ],
+ "labels": {
+  "Address": 44,
+  "AppUser": 3,
+  "Assembly": 30,
+  "BusinessUnit": 3,
+  "Carrier": 5,
+  "Cart": 5,
+  "CartLine": 8,
+  "Category": 101,
+  "ComplianceRequirement": 8,
+  "Customer": 10,
+  "CustomerContact": 10,
+  "CustomerRequest": 6,
+  "DataSource": 6,
+  "Dealer": 15,
+  "DealerContact": 18,
+  "DeliveryEstimate": 100,
+  "FreightRate": 155,
+  "IdentificationRequirement": 6,
+  "LegacyReference": 100,
+  "Location": 5,
+  "Machine": 15,
+  "MachineFamily": 3,
+  "MachineProfile": 15,
+  "MachineSpecification": 83,
+  "MachineType": 15,
+  "MachineVariant": 30,
+  "Order": 16,
+  "OrderLine": 27,
+  "OrderStatus": 6,
+  "OrderStatusEvent": 56,
+  "Part": 100,
+  "PartCatalogProfile": 100,
+  "PartSpecification": 279,
+  "Plant": 3,
+  "Price": 100,
+  "Region": 14,
+  "SearchAlias": 493,
+  "ServicePlan": 60,
+  "ShipTo": 20,
+  "Shipment": 11,
+  "ShippingRate": 8,
+  "Supplier": 12,
+  "SupplierBackorder": 4,
+  "SupplierContact": 12,
+  "TrackingEvent": 32,
+  "TransportOption": 8,
+  "Warehouse": 4
+ },
+ "locations": [
+  {
+   "cc": "NL",
+   "id": "LOC-ASSEN",
+   "name": "Assen",
+   "type": "CITY"
+  },
+  {
+   "cc": "NL",
+   "id": "LOC-COEVORDEN",
+   "name": "Coevorden",
+   "type": "CITY"
+  },
+  {
+   "cc": "DE",
+   "id": "LOC-DE",
+   "name": "Germany",
+   "type": "COUNTRY"
+  },
+  {
+   "cc": "DE",
+   "id": "LOC-LINGEN",
+   "name": "Lingen",
+   "type": "CITY"
+  },
+  {
+   "cc": "NL",
+   "id": "LOC-NL",
+   "name": "Netherlands",
+   "type": "COUNTRY"
+  }
+ ],
+ "machine_plants": [
+  {
+   "machines": [
+    "NV-2100",
+    "NV-3200",
+    "NV-4500",
+    "NV-6000",
+    "NV-7500"
+   ],
+   "plant": "Assen (NL)"
+  },
+  {
+   "machines": [
+    "BTS-100",
+    "BTS-250",
+    "BTS-500",
+    "BTS-750",
+    "BTS-900"
+   ],
+   "plant": "Coevorden (NL)"
+  },
+  {
+   "machines": [
+    "KFT-120",
+    "KFT-200",
+    "KFT-450",
+    "KFT-600",
+    "KFT-800"
+   ],
+   "plant": "Lingen (DE)"
+  }
+ ],
+ "machines": 15,
+ "node_status": {
+  "DERIVED": 165,
+  "SOURCE_DERIVED": 456,
+  "SYNTHETIC_DEMO": 1522,
+  "USER_PROVIDED": 21
+ },
+ "nodes": 2164,
+ "order_statuses": [
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "SOURCE_STATED",
+    "data_status": "USER_PROVIDED",
+    "label": "New",
+    "last_updated": "2026-10-01",
+    "order_status_code": "NEW",
+    "provenance_type": "USER_PROVIDED",
+    "sequence": 1,
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "OEM Agentic Commerce wireframe, master spec sections 29-33",
+    "source_record_id": "NEW",
+    "source_ref": "Workflow vocabulary; configuration, not transactions",
+    "source_sheet": "order_statuses"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "SOURCE_STATED",
+    "data_status": "USER_PROVIDED",
+    "label": "Confirmed",
+    "last_updated": "2026-10-01",
+    "order_status_code": "CONFIRMED",
+    "provenance_type": "USER_PROVIDED",
+    "sequence": 2,
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "OEM Agentic Commerce wireframe, master spec sections 29-33",
+    "source_record_id": "CONFIRMED",
+    "source_ref": "Workflow vocabulary; configuration, not transactions",
+    "source_sheet": "order_statuses"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "SOURCE_STATED",
+    "data_status": "USER_PROVIDED",
+    "label": "Processing",
+    "last_updated": "2026-10-01",
+    "order_status_code": "PROCESSING",
+    "provenance_type": "USER_PROVIDED",
+    "sequence": 3,
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "OEM Agentic Commerce wireframe, master spec sections 29-33",
+    "source_record_id": "PROCESSING",
+    "source_ref": "Workflow vocabulary; configuration, not transactions",
+    "source_sheet": "order_statuses"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "SOURCE_STATED",
+    "data_status": "USER_PROVIDED",
+    "label": "Allocated",
+    "last_updated": "2026-10-01",
+    "order_status_code": "ALLOCATED",
+    "provenance_type": "USER_PROVIDED",
+    "sequence": 4,
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "OEM Agentic Commerce wireframe, master spec sections 29-33",
+    "source_record_id": "ALLOCATED",
+    "source_ref": "Workflow vocabulary; configuration, not transactions",
+    "source_sheet": "order_statuses"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "SOURCE_STATED",
+    "data_status": "USER_PROVIDED",
+    "label": "Shipped",
+    "last_updated": "2026-10-01",
+    "order_status_code": "SHIPPED",
+    "provenance_type": "USER_PROVIDED",
+    "sequence": 5,
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "OEM Agentic Commerce wireframe, master spec sections 29-33",
+    "source_record_id": "SHIPPED",
+    "source_ref": "Workflow vocabulary; configuration, not transactions",
+    "source_sheet": "order_statuses"
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "SOURCE_STATED",
+    "data_status": "USER_PROVIDED",
+    "label": "Delivered",
+    "last_updated": "2026-10-01",
+    "order_status_code": "DELIVERED",
+    "provenance_type": "USER_PROVIDED",
+    "sequence": 6,
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-BRIEF",
+    "source_name": "OEM Agentic Commerce wireframe, master spec sections 29-33",
+    "source_record_id": "DELIVERED",
+    "source_ref": "Workflow vocabulary; configuration, not transactions",
+    "source_sheet": "order_statuses"
+   }
+  }
+ ],
+ "orders": [
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0001",
+   "status": "SHIPPED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0002",
+   "status": "DELIVERED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0003",
+   "status": "ALLOCATED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0004",
+   "status": "PROCESSING"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0005",
+   "status": "CONFIRMED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0006",
+   "status": "NEW"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0007",
+   "status": "DELIVERED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0008",
+   "status": "SHIPPED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0009",
+   "status": "NEW"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0010",
+   "status": "CONFIRMED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0011",
+   "status": "PROCESSING"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0012",
+   "status": "ALLOCATED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0013",
+   "status": "SHIPPED"
+  },
+  {
+   "ds": "SYNTHETIC_DEMO",
+   "id": "ORD-0014",
+   "status": "DELIVERED"
+  },
+  {
+   "ds": "USER_PROVIDED",
+   "id": "ORD-R140D9D7F",
+   "status": "CONFIRMED"
+  },
+  {
+   "ds": "USER_PROVIDED",
+   "id": "ORD-RF97CC452",
+   "status": "NEW"
+  }
+ ],
+ "parts": 100,
+ "plants": [
+  {
+   "city": [
+    "Assen"
+   ],
+   "ds": "USER_PROVIDED",
+   "id": "PLT-001",
+   "name": "Assen (NL)"
+  },
+  {
+   "city": [
+    "Lingen"
+   ],
+   "ds": "USER_PROVIDED",
+   "id": "PLT-002",
+   "name": "Lingen (DE)"
+  },
+  {
+   "city": [
+    "Coevorden"
+   ],
+   "ds": "USER_PROVIDED",
+   "id": "PLT-003",
+   "name": "Coevorden (NL)"
+  }
+ ],
+ "prices": {
+  "currencies": [
+   "EUR"
+  ],
+  "hi": 5020.08,
+  "lo": 18.79,
+  "n": 100,
+  "statuses": [
+   "DEMO_PRICE"
+  ]
+ },
+ "regions": [
+  {
+   "cc": "BE",
+   "id": "REG-BE-ANTW",
+   "name": "Antwerpen"
+  },
+  {
+   "cc": "BE",
+   "id": "REG-BE-OOST",
+   "name": "Oost-Vlaanderen"
+  },
+  {
+   "cc": "DE",
+   "id": "REG-DE-BREM",
+   "name": "Bremen"
+  },
+  {
+   "cc": "DE",
+   "id": "REG-DE-HAMB",
+   "name": "Hamburg"
+  },
+  {
+   "cc": "DE",
+   "id": "REG-DE-NIED",
+   "name": "Niedersachsen"
+  },
+  {
+   "cc": "DE",
+   "id": "REG-DE-NORD",
+   "name": "Nordrhein-Westfalen"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-DREN",
+   "name": "Drenthe"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-FRIE",
+   "name": "Friesland"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-GRON",
+   "name": "Groningen"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-LIMB",
+   "name": "Limburg"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-NOOR",
+   "name": "Noord-Brabant"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-OVER",
+   "name": "Overijssel"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-UTRE",
+   "name": "Utrecht"
+  },
+  {
+   "cc": "NL",
+   "id": "REG-NL-ZUID",
+   "name": "Zuid-Holland"
+  }
+ ],
+ "relationship_status": {
+  "DERIVED": 391,
+  "SOURCE_DERIVED": 778,
+  "SYNTHETIC_DEMO": 3467,
+  "USER_PROVIDED": 26
+ },
+ "relationship_types": {
+  "ACTS_FOR": 2,
+  "ADMITS_VARIANT": 10,
+  "ALLOCATED_FROM": 16,
+  "APPLIES_FROM": 155,
+  "AVAILABLE_AT": 400,
+  "BASED_ON_RATE_CARD": 155,
+  "BRANDED_AS": 15,
+  "CARRIED_BY": 11,
+  "CONTAINS_LINE": 35,
+  "COVERS_CATEGORY": 10,
+  "CO_ORDERED_WITH": 75,
+  "DELIVERS_TO_ADDRESS": 16,
+  "DELIVERS_TO_CUSTOMER": 11,
+  "DISPATCHED_FROM": 11,
+  "DISTANCE_TO": 80,
+  "FITS": 219,
+  "FOR_MACHINE": 72,
+  "FOR_PART": 10,
+  "FROM_WAREHOUSE": 100,
+  "HAS_ALIAS": 493,
+  "HAS_COMPLIANCE": 100,
+  "HAS_CONTACT": 40,
+  "HAS_LEGACY_REFERENCE": 100,
+  "HAS_MACHINE_SPECIFICATION": 83,
+  "HAS_RATE": 155,
+  "HAS_SHIPMENT": 11,
+  "HAS_SHIP_TO": 20,
+  "HAS_SPECIFICATION": 279,
+  "HAS_STATUS_EVENT": 56,
+  "HAS_TRACKING_EVENT": 32,
+  "HAS_TRANSPORT_OPTION": 25,
+  "HOME_PLANT": 3,
+  "IDENTIFIED_BY_PART": 15,
+  "IN_CATEGORY": 100,
+  "IN_COUNTRY": 3,
+  "IN_REGION": 44,
+  "IN_SUBCATEGORY": 100,
+  "ISSUED_BY_BUSINESS_UNIT": 100,
+  "LOCATED_AT_ADDRESS": 44,
+  "LOCATED_AT_PLANT": 3,
+  "LOCATED_IN": 3,
+  "MANUFACTURED_AT": 15,
+  "MEMBER_OF_FAMILY": 15,
+  "OFFERS": 8,
+  "OF_TYPE": 15,
+  "OPENED_BY": 11,
+  "ORDERED_BY": 16,
+  "ORIGINATES_AT": 100,
+  "OWNED_BY": 3,
+  "PART_OF": 90,
+  "PLACED_WITH": 4,
+  "PLANNED_FULFILMENT_FROM": 6,
+  "PRICES_PART": 100,
+  "PRODUCT_FAMILY_OF": 3,
+  "PROFILES_MACHINE": 15,
+  "PROFILES_PART": 100,
+  "RECORDS_STATUS": 56,
+  "REFERENCES_PART": 35,
+  "RELATED_COMPONENT": 2,
+  "REQUIRES_PART": 77,
+  "SAME_NAME_GROUP_AS": 9,
+  "SERVES_FAMILY": 30,
+  "SHIPS_LINE": 14,
+  "SHIPS_TO_COUNTRY": 8,
+  "STOCKED_BY": 315,
+  "SUBCATEGORY_OF": 91,
+  "SUPPLIED_BY": 157,
+  "SUPPLIES_CATEGORY": 25,
+  "TO_CUSTOMER": 40,
+  "TO_DEALER": 60,
+  "VARIANT_OF": 30
+ },
+ "relationships": 4662,
+ "service_plans": {
+  "n": 60,
+  "names": [
+   "Major service (demo)",
+   "Overhaul (demo)",
+   "Basic service (demo)",
+   "Intermediate service (demo)"
+  ]
+ },
+ "shipments": {
+  "n": 11,
+  "statuses": [
+   "SHIPPED",
+   "DELIVERED"
+  ]
+ },
+ "shipping_rates": [
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "LOCAL",
+    "from_km": 0,
+    "last_updated": "2026-10-01",
+    "method": "STANDARD",
+    "price_ex_vat": 12.0,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-01",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-01",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 100,
+    "transit_days": 1
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "LOCAL",
+    "from_km": 0,
+    "last_updated": "2026-10-01",
+    "method": "EXPRESS",
+    "price_ex_vat": 21.6,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-02",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-02",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 100,
+    "transit_days": 1
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "REGIONAL",
+    "from_km": 100,
+    "last_updated": "2026-10-01",
+    "method": "STANDARD",
+    "price_ex_vat": 19.0,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-03",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-03",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 250,
+    "transit_days": 2
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "REGIONAL",
+    "from_km": 100,
+    "last_updated": "2026-10-01",
+    "method": "EXPRESS",
+    "price_ex_vat": 34.2,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-04",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-04",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 250,
+    "transit_days": 1
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "NATIONAL",
+    "from_km": 250,
+    "last_updated": "2026-10-01",
+    "method": "STANDARD",
+    "price_ex_vat": 29.0,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-05",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-05",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 500,
+    "transit_days": 3
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "NATIONAL",
+    "from_km": 250,
+    "last_updated": "2026-10-01",
+    "method": "EXPRESS",
+    "price_ex_vat": 52.2,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-06",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-06",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 500,
+    "transit_days": 1
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "LONG_DISTANCE",
+    "from_km": 500,
+    "last_updated": "2026-10-01",
+    "method": "STANDARD",
+    "price_ex_vat": 45.0,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-07",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-07",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 5000,
+    "transit_days": 5
+   }
+  },
+  {
+   "p": {
+    "authoritative_flag": false,
+    "confidence": "NOT_STATED",
+    "data_status": "SYNTHETIC_DEMO",
+    "distance_band": "LONG_DISTANCE",
+    "from_km": 500,
+    "last_updated": "2026-10-01",
+    "method": "EXPRESS",
+    "price_ex_vat": 81.0,
+    "provenance_type": "SYNTHETIC_DEMO",
+    "rate_id": "SHR-08",
+    "source_file": "noordveld-complete-dataset-synthetic-demo.xlsx",
+    "source_id": "SRC-003",
+    "source_name": "gen_synthetic.py (seed 42)",
+    "source_record_id": "SHR-08",
+    "source_sheet": "SYN_shipping_rates",
+    "to_km": 5000,
+    "transit_days": 2
+   }
+  }
+ ],
+ "source_checksum": "f685de957e89985cd5b1d11d16d3895f23b25bdd995db0b6369eddc45cbeaaaa",
+ "source_checksum_basis": "SOURCE/DERIVED DATA INTEGRITY CHECKSUM: SOURCE_DERIVED + DERIVED + REAL records, plus USER_PROVIDED records NOT written by the running app (source_id <> 'APP-SESSION'): 631 nodes / 1175 relationships. Re-based 2026-10-05 after verifying that the SOURCE_DERIVED/DERIVED fingerprint (source_checksum_source_derived_only) is unchanged and that the 10 supplied USER_PROVIDED seed nodes are unchanged (source_checksum_incl_user_provided, the 2026-10-04 definition, reproduced exactly).",
+ "source_checksum_incl_user_provided": "ec894df173040ff0a3d2ef313fac9708065f9b71e3c966c4dc6a6976e9767d16",
+ "source_checksum_source_derived_only": "e1d7c74bc3964453e2286517ed9bb860ba47570eaf4da79657c0d968b2de0314",
+ "specifications": 279,
+ "stocked_by": [
+  {
+   "n": 315,
+   "s": "STOCKED_DEMO"
+  }
+ ],
+ "supplied_by_per_part": null,
+ "suppliers": [
+  {
+   "cc": "NL",
+   "city": "Groningen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-001",
+   "name": "Veldstra Hydraulics (demo)"
+  },
+  {
+   "cc": "NL",
+   "city": "Enschede",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-002",
+   "name": "Brinkhorst Drivetrain Components (demo)"
+  },
+  {
+   "cc": "NL",
+   "city": "Heerenveen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-003",
+   "name": "Oosterwolde Elektro (demo)"
+  },
+  {
+   "cc": "DE",
+   "city": "Bremen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-004",
+   "name": "Nordhaven Stahlbau (demo)"
+  },
+  {
+   "cc": "DE",
+   "city": "Muenster",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-005",
+   "name": "Klarwasser Filtertechnik (demo)"
+  },
+  {
+   "cc": "NL",
+   "city": "Eindhoven",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-006",
+   "name": "Dekkerman Brake Systems (demo)"
+  },
+  {
+   "cc": "DE",
+   "city": "Hannover",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-007",
+   "name": "Hanselmann Kuehlsysteme (demo)"
+  },
+  {
+   "cc": "NL",
+   "city": "Rotterdam",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-008",
+   "name": "Rijnmond Hydraulic Supply (demo)"
+  },
+  {
+   "cc": "DE",
+   "city": "Meppen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-009",
+   "name": "Emsland Antriebstechnik (demo)"
+  },
+  {
+   "cc": "NL",
+   "city": "Almelo",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-010",
+   "name": "Twentse Cab & Control (demo)"
+  },
+  {
+   "cc": "BE",
+   "city": "Antwerpen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-011",
+   "name": "Scheldt Industrial Seals (demo)"
+  },
+  {
+   "cc": "DE",
+   "city": "Oldenburg",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "SUP-012",
+   "name": "Weserland Universal Parts (demo)"
+  }
+ ],
+ "tracking_events": {
+  "n": 32,
+  "statuses": [
+   "PICKED",
+   "IN_TRANSIT",
+   "DELIVERED"
+  ]
+ },
+ "transport_labels_present": [
+  "FreightRate",
+  "TransportOption"
+ ],
+ "warehouses": [
+  {
+   "cc": "NL",
+   "city": "Assen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "WH-001",
+   "name": "Noordveld Central Warehouse Assen (demo)",
+   "plant": [
+    "Assen (NL)"
+   ]
+  },
+  {
+   "cc": "DE",
+   "city": "Lingen",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "WH-002",
+   "name": "Kessler Parts Depot Lingen (demo)",
+   "plant": [
+    "Lingen (DE)"
+   ]
+  },
+  {
+   "cc": "NL",
+   "city": "Coevorden",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "WH-003",
+   "name": "Bakker Parts Depot Coevorden (demo)",
+   "plant": [
+    "Coevorden (NL)"
+   ]
+  },
+  {
+   "cc": "NL",
+   "city": "Zwolle",
+   "ds": "SYNTHETIC_DEMO",
+   "id": "WH-004",
+   "name": "Regional Distribution Centre Zwolle (demo)",
+   "plant": []
+  }
+ ]
+}
