@@ -8,8 +8,9 @@
 .pvis--mini { flex: none; width: 4.25rem; height: 4.25rem; aspect-ratio: 1; }
 .pvis--mini .pvis__cat, .pvis--mini .pvis__no, .pvis--mini .pvis__mark, .pvis--mini .pvis__soon { display: none; }
 .pvis--mini .pvis__icon { width: 50%; height: 50%; }
-.pimg { aspect-ratio: 4 / 3; background: #fff; display: grid; place-items: center; overflow: hidden; }
-.pimg img { width: 100%; height: 100%; object-fit: contain; }
+.pimg { position: relative; aspect-ratio: 4 / 3; background: #fff; overflow: hidden; }
+/* absolutely sized so the picture always fits the box (a percentage height does not resolve inside a box whose height comes from aspect-ratio or a fixed height) */
+.pimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .pimg--large { aspect-ratio: 5 / 4; }
 .pimg--mini { flex: none; width: 4.25rem; height: 4.25rem; aspect-ratio: 1; }
 .pvis--large .pvis__soon { right: 1.4rem; bottom: 1.2rem; font-size: 0.72rem; }
