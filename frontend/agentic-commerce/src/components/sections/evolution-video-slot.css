@@ -1,0 +1,3 @@
+/* Same width as the rest of the page content (the .container edges). */
+.evo-slot { padding-block: calc(var(--nav-height) + var(--space-5)) var(--space-7); }
+.evo-slot__video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius-m, 1rem); background: #f4faf6; object-fit: contain; }
