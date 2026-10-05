@@ -5,6 +5,7 @@ Run (from backend/):  python -m uvicorn app.main:app --reload --port 8000
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,7 +32,12 @@ def create_app() -> FastAPI:
     settings = get_settings()
     setup_logging(settings.log_level)
 
-    app = FastAPI(title="Noordveld Parts Intelligence API", version="1.0.0")
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        yield
+        get_graph().close()
+
+    app = FastAPI(title="Noordveld Parts Intelligence API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "PUT"], allow_headers=["*"], allow_credentials=True
     )
@@ -84,7 +90,6 @@ def create_app() -> FastAPI:
     app.include_router(accounts.router, prefix="/api/v1")
     app.include_router(orders.router, prefix="/api/v1")
     app.include_router(checkout.router, prefix="/api/v1")
-    app.add_event_handler("shutdown", lambda: get_graph().close())
     return app
 
 
