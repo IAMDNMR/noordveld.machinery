@@ -193,7 +193,7 @@ function Run({ request, onRun }: { request: string; onRun: (q: string) => void }
 /** How the agent read the request. Only what was understood is shown; nothing is filled in. */
 function YourRequest({ i }: { i: AgentInterpretation }) {
   const priority = [i.preference === 'cheapest' ? 'Lowest price' : i.preference === 'fastest' ? 'Fastest' : null,
-    i.availability === 'require' ? 'Must be in stock' : i.availability === 'prefer' ? 'Prefer in stock' : null].filter(Boolean).join(' · ')
+    i.availability === 'require' ? 'Must be in stock' : i.availability === 'prefer' ? 'Prefer in stock' : i.availability === 'future' ? 'Accepts on-order stock' : null].filter(Boolean).join(' · ')
   const fields: [string, string | null][] = [
     ['Machine', i.machine],
     ['Need', i.part_type],
@@ -343,7 +343,7 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
       {best && r.state === 'recommendation' ? (
         <>
           {r.decision ? <DecisionPanel d={r.decision} /> : null}
-          <Recommended c={best} />
+          <Recommended c={best} machine={i.machine} qty={i.quantity} />
           <div className="grid grid-2 ag-explain">
             <Why r={r} best={best} />
             <HowWeKnow r={r} best={best} />
@@ -385,12 +385,12 @@ function Excluded({ r }: { r: AgentResponse }) {
   )
 }
 
-const tone = (label: string) => (label === 'In stock' ? 'tag-good' : label === 'Limited' ? 'tag-warn' : label === 'Backorder' ? 'tag-bad' : 'tag-plain')
+const tone = (label: string) => (label === 'In stock' ? 'tag-good' : label === 'Low stock' ? 'tag-warn' : label === 'On order' || label === 'Out of stock' ? 'tag-bad' : 'tag-plain')
 const fitTone = (c: AgentCandidate) => (c.fitment_label === 'Confirmed fit' ? 'tag-good' : 'tag-warn')
 const priceText = (c: AgentCandidate) => (c.part.price ? `${formatMoney(c.part.price)}${c.price_basis ? ` · ${c.price_basis}` : ''}` : 'Price not recorded')
 
 /** The commercial action, truthful about what the demo can do: add to the cart, then review the order. Nothing is paid or placed here. */
-function OrderAction({ c, compact = false }: { c: AgentCandidate; compact?: boolean }) {
+function OrderAction({ c, machine, qty, compact = false }: { c: AgentCandidate; machine: string | null; qty: number | null; compact?: boolean }) {
   const { add } = useCart()
   const [added, setAdded] = useState(false)
   const orderable = c.order_action === 'add_to_cart' && canOrder(c.part.availability?.part_status, c.part.availability?.orderable)
@@ -412,13 +412,13 @@ function OrderAction({ c, compact = false }: { c: AgentCandidate; compact?: bool
       type="button"
       className={`btn ${compact ? 'btn-secondary' : 'btn-primary'} btn-sm`}
       onClick={() => {
-        add(c.part.part_id)
+        add(c.part.part_id, qty ?? 1, machine) // the machine the agent resolved goes with the part into the existing cart
         setAdded(true)
       }}
       aria-label={c.recommended ? undefined : `Add ${c.part.part_number} to cart`}
     >
       <ShoppingCart size={15} strokeWidth={1.8} aria-hidden="true" />
-      {c.availability_label === 'Backorder' ? 'Add to cart · backorder' : 'Add to cart'}
+      {c.availability_label === 'On order' ? 'Add to cart · on order' : 'Add to cart'}
     </button>
   )
 }
@@ -458,7 +458,7 @@ function DecisionPanel({ d }: { d: NonNullable<AgentResponse['decision']> }) {
 }
 
 /** The recommended option, complete: every decision field has a value or a plain "not recorded" state. */
-function Recommended({ c }: { c: AgentCandidate }) {
+function Recommended({ c, machine, qty }: { c: AgentCandidate; machine: string | null; qty: number | null }) {
   const p = c.part
   const rows: [string, React.ReactNode][] = [
     ['Availability', <span key="a" className={`tag ${tone(c.availability_label)}`}><i className="tag-dot" aria-hidden="true" />{c.availability_label}</span>],
@@ -489,7 +489,7 @@ function Recommended({ c }: { c: AgentCandidate }) {
             {p.price ? formatMoney(p.price) : 'Price not recorded'} {c.price_basis ? <span className="small muted">{c.price_basis}</span> : null}
           </p>
           <div className="reco-actions">
-            <OrderAction c={c} />
+            <OrderAction c={c} machine={machine} qty={qty} />
             <Link className="btn btn-secondary btn-sm" to={partPath(p.part_number)}>
               View part
             </Link>
@@ -620,7 +620,7 @@ function Alternatives({ r }: { r: AgentResponse }) {
                       <Link className="link-more" to={partPath(c.part.part_number)}>
                         View →
                       </Link>
-                      <OrderAction c={c} compact />
+                      <OrderAction c={c} machine={r.interpretation.machine} qty={r.interpretation.quantity} compact />
                     </div>
                   </td>
                 </tr>

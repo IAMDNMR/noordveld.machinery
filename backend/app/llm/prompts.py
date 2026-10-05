@@ -49,10 +49,10 @@ SHOPPING_RULES = (
     "machine: the machine model code or name exactly as written (null if none). part_type: the part needed, in the user's own words made singular "
     "('brake pad' for 'brake pads'), with obvious misspellings corrected ('break pad' -> 'brake pad', 'hydralic hose' -> 'hydraulic hose'); never make it more specific "
     "than the user did ('filter' stays 'filter'), and null if not stated. preference: 'cheapest' when price matters most, 'fastest' when speed or urgency matters "
-    "('as soon as possible', 'tomorrow', 'machine is down'), otherwise 'none'. delivery_place: a city or site the user wants it delivered to (null if none). "
+    "('as soon as possible', 'tomorrow', 'machine is down'), otherwise 'none'. delivery_place: the city, site or country the user wants it delivered to, as written (null if none; never a machine, dealer or company). "
     "quantity: a number of units if stated. budget_max: the maximum price the user states ('under €800', 'my budget is 200', 'up to 500 euros', "
     "'I can spend 150'), as a number; null if no budget is stated, never guessed. budget_currency: the ISO code of the stated currency (EUR for €, euro, euros), "
-    "null if no currency is given. availability: 'require' when the part must be in stock or available now, 'prefer' for 'preferably in stock', otherwise 'none'. "
+    "null if no currency is given. availability: 'require' when the part must be in stock or available now, 'prefer' for 'preferably in stock', 'future' only when the user explicitly accepts waiting or ordering in stock ('I can wait', 'backorder is fine'), otherwise 'none'. "
     "clarification_question: null unless something essential is missing. "
     "If in scope but the machine or part is missing, still return in_scope true; the backend asks the user."
     + JSON_ONLY

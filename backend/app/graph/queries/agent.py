@@ -10,17 +10,31 @@ ORDER BY sub
 LIMIT 40
 """
 
-# The quickest recorded delivery to a city from a warehouse that holds stock of the part (demo delivery estimates).
-DELIVERY = """
-MATCH (p:Part {part_id: $part_id})-[a:AVAILABLE_AT]->(w:Warehouse)<-[:FROM_WAREHOUSE]-(d:DeliveryEstimate)-[:TO_CUSTOMER|TO_DEALER]->(t)
-WHERE coalesce(a.available, 0) > 0 AND toLower(t.city) = $city
-RETURN w.warehouse_id AS warehouse_id, w.name AS warehouse, w.city AS warehouse_city, t.city AS city,
-       d.standard_days AS standard_days, d.express_days AS express_days, d.data_status AS data_status
-ORDER BY d.express_days, d.standard_days, w.warehouse_id
-LIMIT 1
+# ── destinations, routes and service coverage (depot inventory -> route -> transport option -> ship-to) ──────────────
+# Recorded delivery destinations: a ship-to counts only when at least one transport route ends there.
+DESTINATIONS = """
+MATCH (s:ShipTo) WHERE s.city IS NOT NULL AND EXISTS { (:TransportRoute)-[:TO_SHIP_TO]->(s) }
+RETURN s.shipto_id AS shipto_id, s.city AS city, s.country_code AS country_code
+ORDER BY s.country_code, s.city, s.shipto_id LIMIT 400
 """
 
-CITIES = """
-MATCH (d:DeliveryEstimate)-[:TO_CUSTOMER|TO_DEALER]->(t)
-RETURN collect(DISTINCT t.city)[0..100] AS cities
+# Routes from the given depots to the given ship-tos, each with its transport option and freight record (a synthetic demo estimate).
+ROUTES_TO = """
+MATCH (w:Warehouse)<-[:FROM_DEPOT]-(r:TransportRoute)-[:TO_SHIP_TO]->(s:ShipTo)
+WHERE w.warehouse_id IN $depots AND s.shipto_id IN $shipto_ids AND coalesce(r.route_status, 'ACTIVE_DEMO') STARTS WITH 'ACTIVE'
+MATCH (r)-[:USES_OPTION]->(o:TransportOption)
+MATCH (r)-[:PRICED_BY]->(f:FreightRate)
+RETURN w.warehouse_id AS depot_id, s.shipto_id AS shipto_id, r.route_id AS route_id, o.transport_option_id AS option_id, o.name AS option_name,
+       r.option_code AS option_code, r.transport_mode AS mode, r.service_level AS service_level, r.total_distance_km AS distance_km,
+       r.total_estimated_days AS days, r.estimate_basis AS estimate_basis, r.legs_count AS legs, r.data_status AS data_status,
+       f.total_transport_cost AS freight_total, f.currency AS freight_currency, f.data_status AS rate_data_status
+ORDER BY w.warehouse_id, r.total_estimated_days, r.total_distance_km, r.route_id LIMIT 600
+"""
+
+# Dealers in a country that are recorded as installing the part (service evidence only: a dealer is never taken to be the destination).
+DEALERS_INSTALLING = """
+MATCH (d:Dealer)-[:INSTALLS_PART]->(p:Part {part_id: $part_id})
+WHERE coalesce(d.dealer_status, 'ACTIVE_DEMO') STARTS WITH 'ACTIVE' AND d.country_code = $country_code
+RETURN d.dealer_id AS dealer_id, d.name AS name, d.city AS city, d.data_status AS data_status
+ORDER BY d.city, d.name LIMIT 5
 """

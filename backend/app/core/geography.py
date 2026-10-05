@@ -20,3 +20,12 @@ CITY_COORDINATES: dict[str, tuple[float, float]] = {
 def coordinates(city: str | None) -> tuple[float | None, float | None]:
     point = CITY_COORDINATES.get((city or "").strip())
     return point if point else (None, None)
+
+
+# Country names as a user writes them -> ISO code. Reference data to read a place name; which country holds a plant, depot, dealer or destination comes from the graph.
+COUNTRY_NAMES: dict[str, str] = {
+    "austria": "AT", "belgium": "BE", "bulgaria": "BG", "croatia": "HR", "cyprus": "CY", "czechia": "CZ", "czech republic": "CZ", "denmark": "DK",
+    "estonia": "EE", "finland": "FI", "france": "FR", "germany": "DE", "greece": "GR", "hungary": "HU", "ireland": "IE", "italy": "IT", "latvia": "LV",
+    "lithuania": "LT", "luxembourg": "LU", "malta": "MT", "netherlands": "NL", "the netherlands": "NL", "holland": "NL", "poland": "PL", "portugal": "PT",
+    "romania": "RO", "slovakia": "SK", "slovenia": "SI", "spain": "ES", "sweden": "SE", "deutschland": "DE", "nederland": "NL", "belgie": "BE",
+}

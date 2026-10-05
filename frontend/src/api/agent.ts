@@ -13,7 +13,7 @@ export interface AgentStep {
 }
 
 export interface AgentEvidence {
-  key: 'fit' | 'verified' | 'budget' | 'availability' | 'inventory' | 'supplier' | 'delivery' | 'ranking'
+  key: 'fit' | 'verified' | 'budget' | 'availability' | 'inventory' | 'supplier' | 'delivery' | 'transport' | 'dealer' | 'ranking'
   ok: boolean
   label: string
   detail: string
@@ -51,7 +51,7 @@ export interface AgentInterpretation {
   quantity: number | null
   budget_max: number | null
   budget_currency: string | null
-  availability: 'require' | 'prefer' | 'none'
+  availability: 'require' | 'prefer' | 'future' | 'none'
 }
 
 export interface AgentResponse {
@@ -67,7 +67,20 @@ export interface AgentResponse {
   evidence: AgentEvidence[]
   comparison: string | null
   excluded: { part_number: string; name: string; status_label: string }[]
-  delivery: { city: string; warehouse: string; warehouse_city: string | null; standard_days: number | null; express_days: number | null } | null
+  delivery: {
+    city: string
+    warehouse: string
+    warehouse_city: string | null
+    standard_days: number | null
+    express_days: number | null
+    estimated_days: number | null
+    option: string | null
+    mode: string | null
+    service_level: string | null
+    distance_km: number | null
+    route_id: string | null
+    data_status: string | null
+  } | null
   /** what the choice was made on: hard requirements, ranking priorities in order, and the outcome in one line */
   decision: { requirements: string[]; priorities: string[]; summary: string } | null
   why: { title: string; detail: string }[]

@@ -57,7 +57,7 @@ SHOPPING_SCHEMA = _obj({
     "preference": {"type": "string", "enum": ["cheapest", "fastest", "none"]}, "delivery_place": _STR,
     "quantity": {"type": ["integer", "null"]}, "clarification_question": _STR,
     "budget_max": {"type": ["number", "null"]}, "budget_currency": _STR,
-    "availability": {"type": "string", "enum": ["require", "prefer", "none"]},
+    "availability": {"type": "string", "enum": ["require", "prefer", "future", "none"]},
 })
 
 
@@ -133,7 +133,7 @@ def to_shopping_parse(text: str) -> ShoppingParse:
             clarification_question=_text(data.get("clarification_question")),
             budget_max=float(budget) if number(budget) and budget > 0 else None,
             budget_currency=(_text(data.get("budget_currency")) or "").upper() or None,
-            availability=data.get("availability") if data.get("availability") in ("require", "prefer") else "none",
+            availability=data.get("availability") if data.get("availability") in ("require", "prefer", "future") else "none",
         )
     except (KeyError, TypeError) as exc:
         raise LLMInvalidResponse("not valid structured output") from exc

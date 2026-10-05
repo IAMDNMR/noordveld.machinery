@@ -51,7 +51,7 @@ class ShoppingParse:
     clarification_question: str | None = None
     budget_max: float | None = None  # "under €800", "budget is 200", "up to 500 euro"
     budget_currency: str | None = None  # ISO code as stated (EUR for €); None when not stated
-    availability: str = "none"  # require ("must be in stock", "available now") | prefer ("preferably in stock") | none
+    availability: str = "none"  # require ("must be in stock", "available now") | prefer ("preferably in stock") | future (accepts waiting for on-order stock) | none
 
 
 class LLMClient(Protocol):

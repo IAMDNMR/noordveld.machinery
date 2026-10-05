@@ -28,8 +28,8 @@ const recommendation: AgentResponse = {
       stock_locations: [{ warehouse: 'North depot', city: 'Northtown', available: 3 }, { warehouse: 'South depot', city: 'Southtown', available: 2 }],
       fulfilment: 'Available from connected stock (2 warehouses)', delivery: 'Estimate not recorded', supplier_label: 'Supplier One (demo)', suppliers: [{ name: 'Supplier One (demo)', lead_time_days: 7, primary: true }],
       supplier: 'Supplier One (demo)', supplier_lead_days: 7, fulfilment_days: null, within_budget: true, tradeoffs: [], can_add_to_cart: true },
-    { ...fields, part: part('P2', 'AB-2', 'VERIFIED', true, 20, 'BACKORDER'), recommended: false, availability_label: 'Backorder', fitment_status: 'CONFIRMED', inventory: '0 units in stock',
-      fulfilment: 'Supplier lead time · 10 days', delivery: 'Estimate not recorded', supplier_label: 'Supplier Two (demo) · lead time 10 days', order_note: 'Backorder: supplied after the supplier lead time (10 days)',
+    { ...fields, part: part('P2', 'AB-2', 'VERIFIED', true, 20, 'BACKORDER'), recommended: false, availability_label: 'On order', fitment_status: 'CONFIRMED', inventory: '0 units in stock',
+      fulfilment: 'Supplier lead time · 10 days', delivery: 'Estimate not recorded', supplier_label: 'Supplier Two (demo) · lead time 10 days', order_note: 'On order: supplied after the supplier lead time (10 days)',
       supplier: 'Supplier Two (demo)', supplier_lead_days: 10, fulfilment_days: 10, within_budget: true, tradeoffs: ['Higher price', 'Lower availability'], can_add_to_cart: true }],
   decision: { requirements: ['Confirmed fit for the M-1', 'Verified part', 'Within your €800 budget'], priorities: ['Lowest price', 'Availability'], summary: 'AB-1 ranked first because it is confirmed compatible and it is currently in stock.' },
   why: [{ title: 'Confirmed compatibility', detail: 'Fits the M-1 (catalogue fitment).' }, { title: 'Lower price', detail: '€10 compared with €20 (AB-2).' }, { title: 'Your priority', detail: 'You asked for the cheapest option, so the lowest valid price came first.' }],
@@ -115,7 +115,7 @@ describe('agentic shopping', () => {
     const table = await screen.findByRole('table')
     expect([...table.querySelectorAll('thead th')].map((th) => th.textContent)).toEqual(['Part', 'Price', 'Fitment', 'Availability', 'Fulfilment', 'Supplier', 'Reason', 'Action'])
     expect(table.textContent).not.toMatch(/AB-1/)
-    expect(table.textContent).toMatch(/AB-2.*€20\.00 · ex VAT.*Confirmed fit.*Backorder.*Supplier lead time · 10 days.*Supplier Two \(demo\) · lead time 10 days.*Higher price · Lower availability/)
+    expect(table.textContent).toMatch(/AB-2.*€20\.00 · ex VAT.*Confirmed fit.*On order.*Supplier lead time · 10 days.*Supplier Two \(demo\) · lead time 10 days.*Higher price · Lower availability/)
     cleanup()
     mount(() => ({ ...recommendation, candidates: [recommendation.candidates[0]] }))
     fireEvent.click(await screen.findByRole('button', { name: /view recommendation/i }))
@@ -133,7 +133,7 @@ describe('agentic shopping', () => {
     expect(screen.getByRole('link', { name: /View evidence in Parts Intelligence/ }).getAttribute('href')).toBe('/parts-intelligence?part=AB-1')
     expect(screen.getByRole('link', { name: 'AB-9' }).getAttribute('href')).toBe('/parts-intelligence?part=AB-9')
     fireEvent.click(screen.getAllByRole('button', { name: /add to cart/i })[0])
-    await waitFor(() => expect(JSON.parse(localStorage.getItem('noordveld-parts-cart-v2') ?? '[]')).toEqual([{ partId: 'P1', qty: 1, machine: null }]))
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('noordveld-parts-cart-v2') ?? '[]')).toEqual([{ partId: 'P1', qty: 1, machine: 'M-1' }]))
     expect(screen.getByRole('link', { name: /Review order/ }).getAttribute('href')).toBe('/parts-store/checkout')
     expect(document.body.textContent).not.toMatch(/payment successful|order confirmed|visa|paypal/i)
   })
@@ -166,6 +166,33 @@ describe('agentic shopping', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'M-2 Wheel Loader' }))
     await screen.findByText('msg recommend')
     expect(calls).toEqual(['I need a hose', 'I need a hose for my M-2'])
+  })
+
+  it('asks for the destination when the fastest option needs one, then re-runs with the chosen recorded place', async () => {
+    const calls = mount((request) => request.includes('delivered to Hamburg')
+      ? recommendation
+      : { ...base, state: 'need_detail', steps: steps(6), question: 'Fastest depends on where the part is going. Where should it be delivered?', options: [{ label: 'Hamburg', refine: 'delivered to Hamburg' }] })
+    expect(await screen.findByText(/Where should it be delivered/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Hamburg' }))
+    await screen.findByText('msg recommend')
+    expect(calls).toEqual(['I need a hose', 'I need a hose delivered to Hamburg'])
+  })
+
+  it('shows the recorded route, the transport option and dealer service as labelled evidence, and on-order stock as its own state', async () => {
+    const withRoute: AgentResponse = {
+      ...recommendation,
+      interpretation: { ...base.interpretation, delivery_place: 'Hamburg', availability: 'future' },
+      evidence: [
+        { key: 'transport', ok: true, label: 'Premium Road · road', detail: 'Route R-1, 400 km; freight context 120 EUR (synthetic demo estimate, not a price)', data_class: 'SYNTHETIC_DEMO' },
+        { key: 'dealer', ok: true, label: 'Dealers in DE that install this part', detail: 'Dealer One (Hamburg). Service evidence only.', data_class: 'SYNTHETIC_DEMO' },
+      ],
+    }
+    mount(() => withRoute)
+    fireEvent.click(await screen.findByRole('button', { name: /view recommendation/i }))
+    const ev = (await screen.findByText('Premium Road · road')).closest('ul')!
+    expect(ev.textContent).toMatch(/not a price/)
+    expect(ev.textContent).toMatch(/Dealers in DE that install this part/)
+    expect(document.querySelector('.ag-req')?.textContent).toMatch(/Accepts on-order stock/)
   })
 
   it('shows a compact service state without provider or transport details', async () => {

@@ -20,7 +20,7 @@ class Interpretation(BaseModel):
     quantity: int | None = None
     budget_max: float | None = None  # as the user stated it; compared with graph prices, never used to invent one
     budget_currency: str | None = None
-    availability: Literal["require", "prefer", "none"] = "none"
+    availability: Literal["require", "prefer", "future", "none"] = "none"  # future: the user accepts waiting for on-order stock
 
 
 class Step(BaseModel):
@@ -38,7 +38,7 @@ class Option(BaseModel):
 
 
 class EvidenceItem(BaseModel):
-    key: Literal["fit", "verified", "budget", "availability", "inventory", "supplier", "delivery", "ranking"]
+    key: Literal["fit", "verified", "budget", "availability", "inventory", "supplier", "delivery", "transport", "dealer", "ranking"]
     ok: bool
     label: str
     detail: str
@@ -89,11 +89,20 @@ class Excluded(BaseModel):
 
 
 class Delivery(BaseModel):
+    """The recorded route that makes the delivery claim: depot -> transport option -> destination. Every figure is a synthetic demo estimate."""
+
     city: str
     warehouse: str
     warehouse_city: str | None = None
-    standard_days: int | None = None
+    standard_days: int | None = None  # kept for older clients: the recorded estimate of the chosen route
     express_days: int | None = None
+    estimated_days: int | None = None
+    option: str | None = None
+    mode: str | None = None
+    service_level: str | None = None
+    distance_km: float | None = None
+    route_id: str | None = None
+    data_status: str | None = None
 
 
 class DecisionView(BaseModel):

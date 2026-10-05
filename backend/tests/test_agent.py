@@ -53,12 +53,12 @@ def test_recommends_a_verified_part_that_fits_with_graph_evidence_and_delivery()
     assert [s["status"] for s in r["steps"]] == ["done"] * 9 and r["reason"].startswith("Recommended because it fits the NV-4500")
 
 
-def test_fastest_ranks_by_availability_and_cheapest_by_price():
-    fast = agent(ShoppingParse(True, machine="NV-4500", part_type="brake pad", preference="fastest"))
+def test_fastest_ranks_by_recorded_route_and_cheapest_by_price():
+    fast = agent(ShoppingParse(True, machine="NV-4500", part_type="brake pad", preference="fastest", delivery_place="Hamburg"))
     cheap = agent(ShoppingParse(True, machine="NV-4500", part_type="brake pad", preference="cheapest"))
-    rank = {"In stock": 0, "Limited": 1, "Backorder": 2}
-    f = [rank[c["availability_label"]] for c in fast["candidates"]]
-    assert f == sorted(f)
+    assert fast["state"] == "recommendation" and all(c["availability_label"] in ("In stock", "Low stock") for c in fast["candidates"])
+    days = [c["fulfilment_days"] for c in fast["candidates"]]
+    assert days and None not in days and days == sorted(days)
     prices = [c["part"]["price"]["amount"] for c in cheap["candidates"]]
     assert prices == sorted(prices)
 
@@ -194,13 +194,13 @@ def test_budget_8_cheapest_within_budget_ranks_by_price():
 
 def test_budget_9_must_be_available_now_keeps_only_parts_with_stock():
     r = agent(ShoppingParse(True, machine="NV-4500", part_type="brake pad", availability="require"))
-    assert r["state"] == "recommendation" and all(c["availability_label"] in ("In stock", "Limited") for c in r["candidates"])
+    assert r["state"] == "recommendation" and all(c["availability_label"] in ("In stock", "Low stock") for c in r["candidates"])
 
 
-def test_budget_10_fastest_puts_stocked_parts_first():
-    r = agent(ShoppingParse(True, machine="NV-4500", part_type="brake pad", preference="fastest"))
-    stocked = [c["availability_label"] in ("In stock", "Limited") for c in r["candidates"]]
-    assert stocked == sorted(stocked, reverse=True)
+def test_budget_10_fastest_puts_parts_available_now_first():
+    r = agent(ShoppingParse(True, machine="NV-4500", part_type="brake pad", preference="fastest", delivery_place="Hamburg"))
+    stocked = [c["availability_label"] in ("In stock", "Low stock") for c in r["candidates"]]
+    assert r["state"] == "recommendation" and stocked and stocked == sorted(stocked, reverse=True)
 
 
 def test_budget_11_a_huge_budget_never_admits_an_unverified_part():
@@ -295,8 +295,10 @@ def assert_complete(candidate):
         assert isinstance(value, str) and value.strip() and value.strip() not in ("-", "—", "N/A", "null"), (field, value)
 
 
-def test_case1_prefer_in_stock_is_complete_and_explained():
-    r = air_filter(availability="prefer")
+def test_case1_default_is_complete_and_explained_and_on_order_is_opt_in():
+    default = air_filter(availability="prefer")
+    assert default["state"] == "recommendation" and default["recommended"] == "NVM-1020-FL" and len(default["candidates"]) == 1  # on-order stock is not offered unasked
+    r = air_filter(availability="future")  # the user explicitly accepts waiting
     assert r["state"] == "recommendation" and r["recommended"] == "NVM-1020-FL"
     best, alt = r["candidates"]
     for c in r["candidates"]:
@@ -305,11 +307,11 @@ def test_case1_prefer_in_stock_is_complete_and_explained():
     assert best["inventory"].startswith("172 units") and best["fulfilment"].startswith("Available from") and best["delivery"] == "Estimate not recorded"
     assert best["price_basis"] == "ex VAT" and best["order_action"] == "add_to_cart" and best["stock_locations"]
     assert "lead time" not in best["supplier_label"]  # a supplier lead time does not apply to stock already on the shelf
-    assert alt["part"]["part_number"] == "NVM-1010-FL" and alt["availability_label"] == "Backorder" and alt["fulfilment"] == "Supplier lead time · 10 days"
-    assert r["decision"]["priorities"][0] == "In-stock availability" and "NVM-1020-FL ranked first" in r["decision"]["summary"]
+    assert alt["part"]["part_number"] == "NVM-1010-FL" and alt["availability_label"] == "On order" and alt["fulfilment"] == "Supplier lead time · 10 days"
+    assert r["decision"]["priorities"][0] == "Available now" and "NVM-1020-FL ranked first" in r["decision"]["summary"]
     titles = [w["title"] for w in r["why"]]
-    assert titles[:2] == ["Confirmed compatibility", "In stock"] and "Better availability" in titles and "Lower price" in titles
-    assert "availability was prioritised before price" in r["why"][-1]["detail"]
+    assert titles[:2] == ["Confirmed compatibility", "Available now"] and "Better availability" in titles and "Lower price" in titles
+    assert "default applies" in r["why"][-1]["detail"]
     assert {h["label"] for h in r["how_we_know"]} >= {"Fitment", "Price", "Inventory", "Supplier", "Ranking"}
 
 
@@ -325,21 +327,21 @@ def test_case3_cheapest_is_the_lowest_verified_price_and_says_so():
     assert "cheapest" in r["why"][-1]["detail"]
 
 
-def test_case4_fastest_puts_stock_and_fulfilment_before_price():
-    r = air_filter(preference="fastest")
-    assert r["decision"]["priorities"][:2] == ["In-stock availability", "Fastest recorded fulfilment"]
-    assert r["candidates"][0]["availability_label"] == "In stock"
+def test_case4_fastest_puts_availability_and_the_recorded_route_before_price():
+    r = air_filter(preference="fastest", delivery_place="Zwolle")
+    assert r["decision"]["priorities"][:2] == ["Available now", "Fastest recorded route"]
+    assert r["candidates"][0]["availability_label"] == "In stock" and r["delivery"]["estimated_days"] is not None
 
 
 def test_case5_no_priority_uses_the_default_ranking_without_asking():
     r = air_filter()
-    assert r["state"] == "recommendation" and r["decision"]["priorities"] == ["Availability", "Price"]
+    assert r["state"] == "recommendation" and r["decision"]["priorities"] == ["Available now", "Availability", "Price"]
     assert "default" in r["why"][-1]["detail"]
 
 
-def test_case6_and_7_delivery_has_an_explicit_state():
+def test_case6_and_7_a_destination_is_resolved_or_asked_never_guessed():
     unknown = air_filter(delivery_place="Atlantis")
-    assert unknown["candidates"][0]["delivery"] == "No delivery estimate recorded to Atlantis"
+    assert unknown["state"] == "need_detail" and "Atlantis" in unknown["question"] and unknown["candidates"] == [] and unknown["options"]
     recorded = air_filter(delivery_place="Zwolle")
     best = recorded["candidates"][0]
     assert "to Zwolle" in best["delivery"] and best["fulfilment"].startswith("Ships from") and recorded["delivery"]["city"] == "Zwolle"

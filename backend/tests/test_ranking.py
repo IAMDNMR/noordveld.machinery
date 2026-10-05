@@ -22,18 +22,21 @@ def test_nothing_within_budget_is_reported_not_relaxed():
     assert d.ranked == [] and d.blocked_by == "budget"
 
 
-def test_require_stock_is_hard_and_prefer_only_ranks():
-    parts = [part("A", 50, availability="BACKORDER", units=0), part("B", 80)]
-    assert [f.part_number for f in decide(parts, Constraints(availability="require")).ranked] == ["B"]
-    assert decide([parts[0]], Constraints(availability="require")).blocked_by == "availability"
-    assert [f.part_number for f in decide(parts, Constraints(availability="prefer", preference="cheapest")).ranked] == ["B", "A"]
+def test_only_available_now_is_ranked_and_waiting_is_opt_in():
+    parts = [part("A", 50, availability="ON_ORDER", units=0), part("B", 80)]
+    d = decide(parts, Constraints())
+    assert [f.part_number for f in d.ranked] == ["B"] and [f.part_number for f in d.not_available] == ["A"]
+    assert decide([parts[0]], Constraints()).blocked_by == "availability"
+    assert [f.part_number for f in decide(parts, Constraints(availability="future")).ranked] == ["B", "A"]
+    assert [f.part_number for f in decide(parts, Constraints(availability="prefer")).ranked] == ["B"]
 
 
 def test_cheapest_fastest_and_default_rankings():
-    parts = [part("A", 50, availability="BACKORDER", units=0, supplier_lead_days=20), part("B", 90), part("C", 70, availability="LIMITED", units=2)]
-    assert [f.part_number for f in decide(parts, Constraints(preference="cheapest")).ranked] == ["A", "C", "B"]
-    assert [f.part_number for f in decide(parts, Constraints(preference="fastest")).ranked][-1] == "A"
-    assert [f.part_number for f in decide(parts, Constraints()).ranked] == ["B", "C", "A"]
+    parts = [part("A", 50, availability="ON_ORDER", units=0, supplier_lead_days=20), part("B", 90), part("C", 70, availability="LOW_STOCK", units=2)]
+    ask = lambda **k: [f.part_number for f in decide(parts, Constraints(availability="future", **k)).ranked]  # noqa: E731
+    assert ask(preference="cheapest") == ["C", "B", "A"]  # parts available now first, then by recorded price
+    assert ask(preference="fastest")[-1] == "A"
+    assert ask() == ["B", "C", "A"]
 
 
 def test_fastest_uses_recorded_delivery_days():
@@ -43,5 +46,5 @@ def test_fastest_uses_recorded_delivery_days():
 
 def test_tradeoffs_only_where_both_values_are_known():
     best = part("A", 100, delivery_days=1)
-    assert tradeoffs(part("B", 60, availability="BACKORDER", units=0, delivery_days=None, supplier_lead_days=9), best) == ["Lower price", "Lower availability", "Longer delivery"]
+    assert tradeoffs(part("B", 60, availability="ON_ORDER", units=0, delivery_days=None, supplier_lead_days=9), best) == ["Lower price", "Lower availability", "Longer delivery"]
     assert tradeoffs(part("C", 100, availability=None), best) == []
