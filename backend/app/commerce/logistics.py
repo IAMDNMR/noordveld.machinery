@@ -24,7 +24,12 @@ class LogisticsContext(c.CommerceContext):
     order: dict[str, Any] | None = None
     order_lines: list[dict[str, Any]] = field(default_factory=list)
     shipment: dict[str, Any] | None = None
-    part: dict[str, Any] | None = None
+    part: dict[str, Any] | None = None  # the part of a single-line shipment; None for several lines (use `parts`)
+    shipment_lines: list[dict[str, Any]] = field(default_factory=list)  # the order lines travelling on this shipment, each with its part
+    parts: list[dict[str, Any]] = field(default_factory=list)
+    shipment_kind: str | None = None  # SINGLE_LINE | MULTI_LINE | NO_LINE_RECORDED: several ordered items travelling together
+    order_shipments: list[str] = field(default_factory=list)
+    order_split: bool = False  # the order was split into several shipments: a different thing from MULTI_LINE
     origin: dict[str, Any] | None = None
     destination: dict[str, Any] | None = None
     current_status: str | None = None
@@ -107,18 +112,29 @@ class LogisticsContextBuilder:
         evidence = [c.evidence_item(f"shipment {s['shipment_id']} status {sc.current_status} as of its last tracking event", "TrackingEvent", sc.events[-1]["tracking_event_id"], sc.events[-1])] if sc.events else []
         if route:
             evidence.append(c.evidence_item(f"route {route['route_id']}: {route['transport_mode']}, {route['planned_transit_days']} days, {route['estimated_cost']} {route['currency']}", "Route", route["route_id"], route))
+        if sc.shipment_lines:
+            evidence.append(c.evidence_item(f"shipment {s['shipment_id']} carries {len(sc.shipment_lines)} order line(s): "
+                                            + ", ".join(f"{ln['order_line_id']} ({ln.get('part_number') or 'part not recorded'} x{ln.get('quantity')})" for ln in sc.shipment_lines),
+                                            "Shipment", s["shipment_id"], s))
+        if sc.order_split:
+            evidence.append(c.evidence_item(f"order {s.get('order_id')} is split over {len(sc.order_shipments)} shipments: {', '.join(sc.order_shipments)}", "Order", s.get("order_id"), order))
         evidence += [c.evidence_item(f"alternative route {a['route_id']}: {a['transport_mode']}, {a['planned_transit_days']} days, {a['estimated_cost']} {a['currency']}", "Route", a["route_id"], a)
                      for a in sc.alternative_routes]
         path: list[dict[str, Any]] = []
         if order:
             path.append(c.path_step(len(path) + 1, "Order", order["order_id"], "HAS_SHIPMENT", order))
         path.append(c.path_step(len(path) + 1, "Shipment", s["shipment_id"], "USES_ROUTE" if route else "HAS_TRACKING_EVENT", s))
+        by_id = {x["order_line_id"]: x for x in lines}  # the order line record carries the provenance
+        for ln in sc.shipment_lines:
+            path.append(c.path_step(len(path) + 1, "OrderLine", ln["order_line_id"], "SHIPS_LINE", by_id.get(ln["order_line_id"], ln)))
         if route:
             path.append(c.path_step(len(path) + 1, "Route", route["route_id"], "HAS_TRACKING_EVENT", route))
         if sc.events:
             path.append(c.path_step(len(path) + 1, "TrackingEvent", sc.events[-1]["tracking_event_id"], None, sc.events[-1]))
 
         facts: dict[str, Any] = {"shipment_status": s.get("status"), "current_status": sc.current_status, "route_resolution_status": sc.route_resolution_status, "delivered": delivered,
+                                 "shipment_kind": sc.shipment_kind, "shipment_line_count": len(sc.shipment_lines), "part_count": len(sc.parts), "order_split": sc.order_split,
+                                 "other_shipments_of_order": [x for x in sc.order_shipments if x != s["shipment_id"]],
                                  "completed_leg_count": len(done) if progress else None, "remaining_leg_count": len(todo) if progress else None, "position": progress["position"] if progress else None,
                                  "planned_eta": sc.planned_eta["planned_eta"], "eta_source": sc.planned_eta["source"], "days_to_eta": sc.planned_eta["days_to_eta"],
                                  "current_location_known": bool(sc.current_location and sc.current_location["known"]) if sc.current_location else None,
@@ -140,7 +156,8 @@ class LogisticsContextBuilder:
                 recommended_next_action="Explain status, remaining legs and ETA from the facts; mention alternatives only as recorded options with their recorded time and cost.")
         return LogisticsContext(
             **c.meta("LOGISTICS", inputs, self.as_of.isoformat(), self.generated_at, decision, records, evidence, path, fact_verified=route is not None and not coherence_problem),
-            order=order, order_lines=lines, shipment=s, part=sc.part, origin=sc.origin,
+            order=order, order_lines=lines, shipment=s, part=sc.part, shipment_lines=sc.shipment_lines, parts=sc.parts, shipment_kind=sc.shipment_kind, order_shipments=sc.order_shipments,
+            order_split=sc.order_split, origin=sc.origin,
             destination=sc.destination, current_status=sc.current_status, current_location=sc.current_location, route=route, route_legs=sc.route_legs, route_progress=progress, completed_legs=done,
             remaining_legs=todo, planned_eta=sc.planned_eta, alternative_routes=sc.alternative_routes, transport_comparison=sc.transport_comparison, tracking_events=sc.events,
             route_resolution_status=sc.route_resolution_status, requires_review=requires_review, provenance=c.dedupe_records(records))

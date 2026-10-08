@@ -25,10 +25,12 @@ BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 sys.path.insert(0, str(BACKEND / "scripts" / "eu_foundation"))
 
-from app.canonical.engine import Engine  # noqa: E402  (only its static helpers are used; no store is created)
-from app.canonical.export import FITMENT_MAP  # noqa: E402
-from app.canonical.io import CANON_DIR, load_rows  # noqa: E402
-from app.canonical.registry import BY_NAME, KINDS, SPECS, DatasetSpec  # noqa: E402
+from app.canonical.engine import (
+    Engine,
+)
+from app.canonical.export import FITMENT_MAP
+from app.canonical.io import CANON_DIR, load_rows
+from app.canonical.registry import BY_NAME, KINDS, SPECS, DatasetSpec
 
 APP = "APP-SESSION"
 SRC_CANON = "SRC-CANON"
@@ -151,6 +153,7 @@ class GraphSource(Protocol):
     def node_ids(self, label: str, key: str, dataset: str | None = None, exclude_app: bool = False, require_property: str | None = None) -> set[str]: ...
     def app_written(self, label: str) -> int: ...
     def rel_ids(self, type_: str, dataset: str | None = None) -> set[str]: ...
+    def rel_endpoints(self, type_: str, fl: tuple[str, str], tl: tuple[str, str]) -> set[tuple[str, str]]: ...
     def part_aliases(self) -> dict[str, list[str]]: ...
     def part_categories(self) -> dict[str, tuple[str | None, str | None]]: ...
     def fits(self) -> list[dict[str, Any]]: ...
@@ -213,6 +216,12 @@ class CypherSource:
         _safe(label)
         return self.g.read(f"MATCH (n:`{label}`) WHERE n.source_id = $app RETURN count(n) AS n", app=APP)[0]["n"]
 
+    def rel_endpoints(self, type_, fl, tl):
+        """(from id, to id) of every non-app relationship of a type between two labels: a relationship is identified by its ends, not by the id a loader gave it."""
+        _safe(type_, *fl, *tl)
+        rows = self.g.read(f"MATCH (a:`{fl[0]}`)-[r:`{type_}`]->(b:`{tl[0]}`) WHERE coalesce(r.source_id, '') <> $app RETURN a.`{fl[1]}` AS f, b.`{tl[1]}` AS t", app=APP)
+        return {(r["f"], r["t"]) for r in rows}
+
     def rel_ids(self, type_, dataset=None):
         _safe(type_)
         rows = self.g.read(f"MATCH ()-[r:`{type_}`]->() WHERE ($ds IS NULL OR r.canonical_dataset = $ds) AND coalesce(r.source_id, '') <> $app RETURN r.rel_id AS id", ds=dataset, app=APP)
@@ -238,7 +247,7 @@ class CypherSource:
     def snapshot(self):
         from audit_before import NODE_QUERY, REL_QUERY, fingerprint
 
-        one = lambda q, **p: self.g.read(q, **p)[0]["n"]  # noqa: E731
+        one = lambda q, **p: self.g.read(q, **p)[0]["n"]
         nodes = self.g.read(NODE_QUERY, app=APP)
         rels = self.g.read(REL_QUERY, app=APP)
         canon_nodes = self.g.read("MATCH (n) WHERE n.source_id = $s RETURN labels(n)[0] AS l, properties(n) AS p ORDER BY l, coalesce(n.source_record_id, ''), elementId(n)", s=SRC_CANON)
@@ -378,6 +387,9 @@ class MemorySource:
 
     def app_written(self, label):
         return self.app_nodes[label]
+
+    def rel_endpoints(self, type_, fl, tl):
+        return set(self.r.get((type_, fl[0], tl[0]), {}))
 
     def rel_ids(self, type_, dataset=None):
         out = {f["props"]["rel_id"] for f in self.fits_} if type_ == "FITS" and dataset is None else set()
@@ -779,6 +791,7 @@ class Entity:
     datasets: tuple[str, ...]
     labels: tuple[tuple[str, str], ...] = ()  # (graph label, key) pairs; ids are united
     rel_type: str | None = None
+    endpoints: tuple[str, tuple[str, str], tuple[str, str]] | None = None  # (type, from (label, key), to (label, key)): identified by the two ends
     id_fn: Any = None  # canonical record -> id as the graph stores it
     place_labels: tuple[str, ...] = ()  # labels whose nodes count only when they are used as places (they carry logistics_type)
     note: str = ""
@@ -815,6 +828,8 @@ ENTITIES: tuple[Entity, ...] = (
     Entity("InstallationEvent", ("installations",), (("InstallationEvent", "installation_id"),)), Entity("ReplacementEvent", ("replacements",), (("ReplacementEvent", "replacement_id"),)),
     Entity("WarrantyPolicy", ("warranty_policies",), (("WarrantyPolicy", "warranty_policy_id"),)), Entity("WarrantyClaim", ("warranty_claims",), (("WarrantyClaim", "claim_id"),)),
     Entity("Evidence", ("evidence",), (("Evidence", "evidence_id"),)), Entity("FeaturedScenario", ("scenarios_discovery", "scenarios_logistics", "scenarios_warranty"), (("FeaturedScenario", "scenario_id"),)),
+    Entity("ShipmentLine (SHIPS_LINE relationship)", ("shipment_lines", "network_shipment_lines"), endpoints=("SHIPS_LINE", ("Shipment", "shipment_id"), ("OrderLine", "order_line_id")),
+           note="which order lines travel on which shipment; a relationship identified by its two ends (loaders gave the seeded ones different rel_ids)"),
 )
 
 
@@ -829,7 +844,10 @@ def entity_counts(src: GraphSource, root: Path = CANON_DIR) -> list[dict[str, An
         for ds in e.datasets:
             cache.setdefault(ds, _records(BY_NAME[ds], root)[0])
             want |= {e.id_fn(r) if e.id_fn else r.id for r in cache[ds]}
-        if e.rel_type:
+        if e.endpoints:
+            have = {f"{f}>{t}" for f, t in src.rel_endpoints(*e.endpoints)}
+            app = 0
+        elif e.rel_type:
             have = src.rel_ids(e.rel_type)
             app = 0
         else:

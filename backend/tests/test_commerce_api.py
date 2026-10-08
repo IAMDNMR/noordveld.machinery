@@ -87,7 +87,7 @@ def test_logistics_endpoint_for_the_owner_the_dealer_and_the_oem(repo):
         body = r.json()
         assert r.status_code == 200 and body["decision"]["status"] == "SUCCESS" and body["decision"]["facts"]["shipment_status"] == "IN_TRANSIT"
         assert body["decision"]["facts"]["completed_leg_count"] == 1 and body["decision"]["facts"]["remaining_leg_count"] == 3 and body["decision"]["facts"]["alternatives"]
-        assert [s["entity"] for s in body["evidence_path"]] == ["Order", "Shipment", "Route", "TrackingEvent"]
+        assert [s["entity"] for s in body["evidence_path"]] == ["Order", "Shipment", "OrderLine", "Route", "TrackingEvent"]
 
 
 def test_logistics_endpoint_unresolved_shipment(repo):

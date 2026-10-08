@@ -53,9 +53,31 @@ def test_the_graphs_own_coordinate_wins_over_the_reference_city_centre():
     assert (out["latitude"], out["longitude"], out["geo_basis"]) == (1.5, 2.5, "APPROX_CITY_CENTRE")
 
 
-def test_a_city_the_graph_has_no_coordinates_for_still_takes_the_reference_city_centre_and_is_labelled_so():
-    out = export_locations([city("LOC-ASSEN", "Assen", data_status="SOURCE_DERIVED")])["LOC-ASSEN"]
+def test_an_unprotected_city_the_graph_has_no_coordinates_for_takes_the_reference_city_centre_and_is_labelled_so():
+    out = export_locations([city("LOC-X", "Assen")])["LOC-X"]
     assert out["geo_basis"] == "REFERENCE_CITY_CENTRE" and out["latitude"] == G.reference()["city_coordinates"]["Assen"][0]
+
+
+def test_a_protected_city_asserts_no_coordinates_the_graph_does_not_hold():
+    out = export_locations([city("LOC-ASSEN", "Assen", data_status="SOURCE_DERIVED", source_id="SRC-001")])["LOC-ASSEN"]
+    assert (out["latitude"], out["longitude"], out["geo_basis"]) == (None, None, None)
+    assert G.resolve_location_context("LOC-ASSEN", reader=FileReader(CANON_DIR))["resolved"]["latitude"] == G.reference()["city_coordinates"]["Assen"][0]  # still resolved, from the overlay
+
+
+def test_a_protected_plant_asserts_no_derived_geography_but_the_resolver_supplies_it():
+    class Stub(StubGraph):
+        def read(self, query: str, **params: Any) -> list[dict[str, Any]]:
+            return [{"p": {"plant_id": "PLT-9", "name": "P", "city": "Assen", "country_code": "NL", "data_status": "USER_PROVIDED", "source_id": "SRC-BRIEF"}}] if "MATCH (p:Plant)" in query else []
+
+    out = {r["location_id"]: r for r in Exporter(graph=Stub([])).locations()}["PLT-9"]
+    assert all(out.get(f) is None for f in ("country", "region", "timezone", "location_type"))
+    rows = FileReader(CANON_DIR)
+    for plant in ("PLT-001", "PLT-002", "PLT-003"):
+        rec = rows.location(plant)
+        assert all(rec.get(f) is None for f in ("country", "region", "timezone", "location_type"))  # the canonical record asserts nothing the graph lacks
+        res = G.resolve_location_context(plant, reader=rows)
+        assert res["resolved"]["logistics_type"] == "PLANT" and res["resolved"]["country"] and res["resolved"]["timezone"] and res["fields"]["country"]["value_source"] == "GEOGRAPHY_REFERENCE"
+        assert res["fields"]["country"]["record_value"] is None and res["fields"]["country"]["overlay_value"] == res["resolved"]["country"]
 
 
 def test_no_coordinate_is_invented_for_a_city_without_graph_or_reference_coordinates():
@@ -66,10 +88,8 @@ def test_no_coordinate_is_invented_for_a_city_without_graph_or_reference_coordin
 @live
 def test_every_graph_coordinate_that_should_be_exported_appears_in_the_canonical_files():
     report = R.run()
-    assert report["counts"].get("EXPORTER_OMISSION", 0) == 0 and report["counts"].get("GRAPH_ONLY", 0) == 0 and report["counts"].get("CONFLICT", 0) == 0
-    # what remains is canonical-only and protected: exactly the three supplied cities and the three plants, never anything else
-    assert {r["location_id"] for r in report["records"]} == {"LOC-ASSEN", "LOC-COEVORDEN", "LOC-LINGEN", "PLT-001", "PLT-002", "PLT-003"}
-    assert all(r["classification"] == "CANONICAL_ONLY" and r["protected"] for r in report["records"])
+    # after the exporter fix AND the protected-record cleanup nothing differs: no graph coordinate is missing from the files, no file asserts what a protected node lacks
+    assert report["records"] == [] and set(report["counts"]) == {"MATCH"}
 
 
 # ── reconciliation classification ────────────────────────────────────────────────────────────────

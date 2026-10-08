@@ -19,7 +19,11 @@ from typing import Any, Protocol
 from app.core.roles import Role, allowed
 from app.graph.client import GraphClient
 from app.graph.queries import orders as q
-from app.graph.repositories.fulfilment import GraphFulfilmentRepository, ReservationFailed, Stale
+from app.graph.repositories.fulfilment import (
+    GraphFulfilmentRepository,
+    ReservationFailed,
+    Stale,
+)
 from app.graph.repositories.parts import PartRepository
 from app.services import order_flow as flow
 from app.services.fulfilment import cost_block
@@ -27,7 +31,7 @@ from app.services.parts import to_summary
 
 FLOW = ["NEW", "CONFIRMED", "PROCESSING", "ALLOCATED", "SHIPPED", "DELIVERED"]  # the earlier channels
 TRANSITIONS: dict[str, str] = {a: b for a, b in zip(FLOW, FLOW[1:])}
-LABEL = {**{"NEW": "Pending review", "CONFIRMED": "Confirmed", "PROCESSING": "Processing", "ALLOCATED": "Allocated", "SHIPPED": "Shipped", "DELIVERED": "Delivered"}}
+LABEL = {"NEW": "Pending review", "CONFIRMED": "Confirmed", "PROCESSING": "Processing", "ALLOCATED": "Allocated", "SHIPPED": "Shipped", "DELIVERED": "Delivered"}
 DIRECT_LABEL = flow.LABEL
 QUEUE = {  # the processor's work queue sections, in workflow order: earlier-channel orders ...
     "pending_review": ["NEW"],

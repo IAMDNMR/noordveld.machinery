@@ -16,7 +16,13 @@ from collections import OrderedDict, deque
 from typing import Any
 
 from app.llm.base import LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
-from app.llm.prompts import GROUNDING_RULES, SHOPPING_RULES, UNDERSTAND_RULES, question_prompt, shopping_prompt
+from app.llm.prompts import (
+    GROUNDING_RULES,
+    SHOPPING_RULES,
+    UNDERSTAND_RULES,
+    question_prompt,
+    shopping_prompt,
+)
 
 log = logging.getLogger("app.llm")
 
@@ -63,7 +69,7 @@ SHOPPING_SCHEMA = _obj({
 
 # ── validation ───────────────────────────────────────────────────────────────────────────────────
 def _load(text: str) -> dict[str, Any]:
-    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()  # reasoning models may prepend their thinking
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()  # reasoning models may prepend their thinking
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
     try:
@@ -124,7 +130,7 @@ def to_shopping_parse(text: str) -> ShoppingParse:
         if not isinstance(data["in_scope"], bool):
             raise LLMInvalidResponse("scope verdict is not a boolean")
         qty, budget = data.get("quantity"), data.get("budget_max")
-        number = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)  # noqa: E731
+        number = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)
         return ShoppingParse(
             in_scope=data["in_scope"], machine=_text(data.get("machine")), part_type=_text(data.get("part_type")),
             preference=data.get("preference") if data.get("preference") in ("cheapest", "fastest") else "none",
@@ -228,4 +234,4 @@ class StructuredLLM:
         payload = json.dumps({"question": question, "intent": intent, "draft_answer": draft, "evidence": compact_evidence(evidence)},
                              ensure_ascii=False, separators=(",", ":"))
         text = self._guarded("grounded_answer", GROUNDING_RULES, payload, None)
-        return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
+        return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()

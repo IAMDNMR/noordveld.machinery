@@ -13,15 +13,20 @@ Phase 1-3 suites check files == graph for the readers).
 from __future__ import annotations
 
 import copy
+from collections.abc import Callable
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from app.canonical.io import CANON_DIR
 from app.commerce import contract as c
 from app.commerce.access import AccessPolicy, CommerceRole, Principal, apply_visibility
 from app.commerce.discovery import DiscoveryContext, DiscoveryContextBuilder
-from app.commerce.discovery_reader import DiscoveryReader, FileDiscoveryReader, GraphDiscoveryReader
+from app.commerce.discovery_reader import (
+    DiscoveryReader,
+    FileDiscoveryReader,
+    GraphDiscoveryReader,
+)
 from app.commerce.logistics import LogisticsContext, LogisticsContextBuilder
 from app.commerce.warranty import WarrantyContext, WarrantyContextAssembler
 from app.graph.client import GraphClient
@@ -129,9 +134,11 @@ class CommerceContextEngine:
     def _options(self, shipments: list[dict[str, Any]]) -> list[dict[str, Any]]:
         out = []
         for s in sorted(shipments, key=lambda x: x["shipment_id"]):
-            part = self.logistics.order_part(s["order_line_id"]) if s.get("order_line_id") else None
+            parts = [p for p in (self.logistics.order_part(i) for i in self.logistics.shipment_lines(s["shipment_id"])) if p]
+            only = parts[0] if len(parts) == 1 else None  # one line: its part; several lines: the options list every part, none is picked
             out.append({"shipment_id": s["shipment_id"], "order_id": s.get("order_id"), "status": s.get("status"), "transport_mode": s.get("transport_mode"),
-                        "part_number": (part or {}).get("part_number"), "part_name": (part or {}).get("name")})
+                        "part_number": (only or {}).get("part_number"), "part_name": (only or {}).get("name"), "line_count": len(parts),
+                        "parts": [{"part_number": p["part_number"], "part_name": p["name"], "quantity": p["quantity"]} for p in parts]})
         return out
 
     # ── warranty ─────────────────────────────────────────────────────────────────────────────────

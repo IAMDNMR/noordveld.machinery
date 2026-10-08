@@ -32,9 +32,7 @@ DEPRECATED_PART_STATUSES = frozenset({"DEPRECATED", "OBSOLETE", "SUPERSEDED", "D
 # The ranking policy. Echoed in every result so the agent can show it; it is a rule, not a fact about any part.
 WEIGHTS: dict[str, float] = {"fitment_score": 0.30, "semantic_match_score": 0.25, "approval_score": 0.20, "availability_score": 0.20, "regional_score": 0.05}
 MAX_CANDIDATES = 25
-STOPWORDS = frozenset("""i a an the need needs needed want wants looking look for my me our we to of on in with find get buy order please which what part parts spare spares replacement new fit fits fitting
-fitted compatible that this do does you have can is are it and or some any one original genuine oem machine would like show give recommend suitable right correct how much cost price available stock
-recorded as at from by be your am if im ive""".split())
+STOPWORDS = frozenset(["i", "a", "an", "the", "need", "needs", "needed", "want", "wants", "looking", "look", "for", "my", "me", "our", "we", "to", "of", "on", "in", "with", "find", "get", "buy", "order", "please", "which", "what", "part", "parts", "spare", "spares", "replacement", "new", "fit", "fits", "fitting", "fitted", "compatible", "that", "this", "do", "does", "you", "have", "can", "is", "are", "it", "and", "or", "some", "any", "one", "original", "genuine", "oem", "machine", "would", "like", "show", "give", "recommend", "suitable", "right", "correct", "how", "much", "cost", "price", "available", "stock", "recorded", "as", "at", "from", "by", "be", "your", "am", "if", "im", "ive"])
 
 
 def _words(text: str | None) -> list[str]:
@@ -167,9 +165,7 @@ def semantic_match(part: dict[str, Any], terms: list[str], by_identifier: bool, 
     conflicts = [t for t in alias_only if _hit(t, list(taxonomy))]
     if by_identifier:
         status = CANONICAL_MATCH
-    elif not canonical and not alias_only:
-        status = PARTIAL_MATCH
-    elif missing:
+    elif not canonical and not alias_only or missing:
         status = PARTIAL_MATCH
     elif not alias_only:
         status = CANONICAL_MATCH

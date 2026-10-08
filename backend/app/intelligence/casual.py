@@ -5,11 +5,7 @@ from __future__ import annotations
 import re
 
 FILLER = frozenset(
-    "a an the that this those these it its i im ive me my mine we our you your yours please pls can could would will should do does did have has got "
-    "need needs want wants looking look find finding get give show list display see tell is are was be there any some all what which where when how "
-    "for to of in on at with from by and or about into than then so just also available availability stock stocked store shop catalogue catalog "
-    "machine machines part parts item items thing things something anything one ones kind type "
-    "fit fits fitted fitting compatible compatibility work works suit suits suitable use used uses using model models spare spares".split()
+    ["a", "an", "the", "that", "this", "those", "these", "it", "its", "i", "im", "ive", "me", "my", "mine", "we", "our", "you", "your", "yours", "please", "pls", "can", "could", "would", "will", "should", "do", "does", "did", "have", "has", "got", "need", "needs", "want", "wants", "looking", "look", "find", "finding", "get", "give", "show", "list", "display", "see", "tell", "is", "are", "was", "be", "there", "any", "some", "all", "what", "which", "where", "when", "how", "for", "to", "of", "in", "on", "at", "with", "from", "by", "and", "or", "about", "into", "than", "then", "so", "just", "also", "available", "availability", "stock", "stocked", "store", "shop", "catalogue", "catalog", "machine", "machines", "part", "parts", "item", "items", "thing", "things", "something", "anything", "one", "ones", "kind", "type", "fit", "fits", "fitted", "fitting", "compatible", "compatibility", "work", "works", "suit", "suits", "suitable", "use", "used", "uses", "using", "model", "models", "spare", "spares"]
 )
 
 

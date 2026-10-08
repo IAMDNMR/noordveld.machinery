@@ -12,11 +12,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.dependencies import Catalogue, get_graph
-from app.api.routes import accounts, agent, catalogue, checkout, commerce, intelligence, orders, parts, site
+from app.api.routes import (
+    accounts,
+    agent,
+    catalogue,
+    checkout,
+    commerce,
+    intelligence,
+    orders,
+    parts,
+    site,
+)
 from app.core.config import get_settings
 from app.core.exceptions import GraphUnavailableError, NotFoundError
 from app.core.logging import setup_logging
-from app.llm import LLMError, LLMInvalidResponse, LLMUnavailable
+from app.llm import LLMError, LLMUnavailable
 
 log = logging.getLogger(__name__)
 

@@ -165,7 +165,12 @@ def test_the_film_constants_and_city_coordinates_became_canonical_records():
     cities = [r for r in rows("locations") if r["location_kind"] == "CITY" and r["latitude"]]
     # every city coordinate states its basis: the reference city centre (supplied cities the graph has no coordinates for) or the graph's own approximate city centre
     assert cities and all(r["geo_basis"] in ("REFERENCE_CITY_CENTRE", "APPROX_CITY_CENTRE") for r in cities)
-    assert {r["location_id"] for r in cities if r["geo_basis"] == "REFERENCE_CITY_CENTRE"} >= {"LOC-ASSEN", "LOC-COEVORDEN", "LOC-LINGEN"}
+    # the three supplied (protected) cities carry no coordinates of their own: they come from the geography reference through resolve_location_context()
+    from app.canonical.geography import resolve_location_context
+
+    for city in ("LOC-ASSEN", "LOC-COEVORDEN", "LOC-LINGEN"):
+        assert not [r for r in cities if r["location_id"] == city]
+        assert resolve_location_context(city)["coordinate_class"] == "REFERENCE"
 
 
 def test_route_modes_are_values_of_the_existing_network_never_a_rule():

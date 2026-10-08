@@ -14,7 +14,15 @@ from typing import Any
 from app.core.exceptions import GraphConflictError
 from app.services import order_flow as flow
 from app.services.fulfilment import cost_block, depot_plan, option_view
-from app.services.orders import SYSTEM, Forbidden, OrdersService, TransitionError, User, _now, _today
+from app.services.orders import (
+    SYSTEM,
+    Forbidden,
+    OrdersService,
+    TransitionError,
+    User,
+    _now,
+    _today,
+)
 from app.services.part_status import is_orderable, rejection_reason
 
 EMAIL = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")

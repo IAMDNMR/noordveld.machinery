@@ -95,17 +95,23 @@ def build(root: Path = CANON_DIR) -> dict[str, list[dict[str, Any]]]:
                           "requested_date": None, **_prov(defn, ln["order_line_id"])})
     out["network_orders"], out["network_order_lines"] = orders, lines
 
-    shipments, events = [], []
+    # the carrier's name comes from the canonical carrier records (the seeded shipments state it), never from free text here
+    carriers = {r["carrier_id"]: r["carrier"] for r in load_rows(BY_NAME["shipments"], root)[0] if r.get("carrier_id") and r.get("carrier")}
+    shipments, events, shipment_lines = [], [], []
     for s in defn["shipments"]:
+        if s["carrier_id"] not in carriers:
+            raise NetworkError(f"{s['shipment_id']}: carrier {s['carrier_id']!r} is not a carrier the canonical shipments name")
         route = by_route.get(s["route_id"])
         if route is None:
             raise NetworkError(f"{s['shipment_id']}: unknown route {s['route_id']}")
         eta = (date.fromisoformat(s["departure_date"]) + timedelta(days=route["planned_transit_days"])).isoformat()
         delivered = next((e["timestamp"] for e in s["events"] if e["event_type"] == "DELIVERED"), None)
-        shipments.append({"shipment_id": s["shipment_id"], "order_id": s["order_id"], "carrier": None, "route_id": s["route_id"], "origin_location_id": route["origin_location_id"],
+        shipments.append({"shipment_id": s["shipment_id"], "order_id": s["order_id"], "carrier": carriers[s["carrier_id"]], "route_id": s["route_id"], "origin_location_id": route["origin_location_id"],
                           "destination_location_id": route["destination_location_id"], "transport_mode": route["transport_mode"], "status": "DELIVERED" if delivered else "IN_TRANSIT",
                           "departure_date": s["departure_date"], "planned_eta": eta, "actual_eta": delivered[:10] if delivered else None, "tracking_ref": s["tracking_ref"], "remediation_flags": [], "route_resolution_status": "LINKED",
-                          "order_line_id": s["order_line_id"], "carrier_id": s["carrier_id"], **_prov(defn, s["shipment_id"])})
+                          "carrier_id": s["carrier_id"], **_prov(defn, s["shipment_id"])})
+        for line in s.get("order_line_ids") or [s["order_line_id"]]:  # one line, or several travelling together
+            shipment_lines.append({"shipment_line_id": f"{s['shipment_id']}>{line}", "shipment_id": s["shipment_id"], "order_line_id": line, **_prov(defn, f"{s['shipment_id']}>{line}")})
         batch = []
         for e in s["events"]:
             batch.append({"tracking_event_id": f"TRK-{s['shipment_id'][4:]}-{e['n']:02d}", "shipment_id": s["shipment_id"], "timestamp": e["timestamp"], "location_id": e["location_id"],
@@ -115,7 +121,7 @@ def build(root: Path = CANON_DIR) -> dict[str, list[dict[str, Any]]]:
         if problems:
             raise NetworkError(f"{s['shipment_id']}: {'; '.join(problems)}")
         events.extend(batch)
-    out["network_shipments"], out["network_tracking_events"] = shipments, events
+    out["network_shipments"], out["network_tracking_events"], out["network_shipment_lines"] = shipments, events, shipment_lines
     return out
 
 

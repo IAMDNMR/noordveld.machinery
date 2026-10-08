@@ -380,7 +380,7 @@ def test_logistics_golden_the_sea_shipment_where_is_my_pump(engine):
     assert ctx.current_location["known"] is False and any("no live position" in w for w in ctx.warnings)  # at sea: nothing invented
     assert ctx.origin["name"].startswith("Chubu") and ctx.destination["location_id"] == "DLR-004" and ctx.part["part_number"] == "NVM-1010-HY" and ctx.order["order_id"] == "ORD-NET-0001"
     assert [l["order_line_id"] for l in ctx.order_lines] == ["OL-NET-0001"] and ctx.order_lines[0]["quantity"] == 50
-    assert [s["entity"] for s in ctx.evidence_path] == ["Order", "Shipment", "Route", "TrackingEvent"]
+    assert [s["entity"] for s in ctx.evidence_path] == ["Order", "Shipment", "OrderLine", "Route", "TrackingEvent"]
     assert ctx.requires_review is False and ctx.route_resolution_status == "LINKED"
 
 

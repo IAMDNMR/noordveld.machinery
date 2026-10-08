@@ -15,7 +15,15 @@ import logging
 import math
 from collections import Counter
 
-from app.agent.ranking import AVAILABILITY_LABEL, AVAILABILITY_RANK, Constraints, Decision, Facts, decide, tradeoffs
+from app.agent.ranking import (
+    AVAILABILITY_LABEL,
+    AVAILABILITY_RANK,
+    Constraints,
+    Decision,
+    Facts,
+    decide,
+    tradeoffs,
+)
 from app.agent.supply import Destination, Supply, part_supply, resolve_destination
 from app.graph.client import GraphClient
 from app.graph.queries import agent as q
@@ -25,8 +33,22 @@ from app.graph.repositories.parts import PartRepository
 from app.intelligence.models import Kind
 from app.intelligence.resolver import EntityResolver
 from app.llm import LLMClient, LLMUnavailable
-from app.schemas.agent import (AgentResponse, AgentSuggestion, Candidate, Delivery, DecisionView, EvidenceItem, Excluded, Interpretation, Option, ProvenanceRow,
-                               Step, StockLocation, SupplierRef, WhyItem)
+from app.schemas.agent import (
+    AgentResponse,
+    AgentSuggestion,
+    Candidate,
+    DecisionView,
+    Delivery,
+    EvidenceItem,
+    Excluded,
+    Interpretation,
+    Option,
+    ProvenanceRow,
+    Step,
+    StockLocation,
+    SupplierRef,
+    WhyItem,
+)
 from app.schemas.catalogue import PartSummary
 from app.services.part_status import status_label
 from app.services.parts import to_summary

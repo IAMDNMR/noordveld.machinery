@@ -198,9 +198,13 @@ def test_new_scenario_shipments_are_fully_linked_to_their_route_order_and_places
     routes, locs = all_routes(), all_locations()
     orders = {o.order_id for o in recs("network_orders")}
     lines = {ln.order_line_id: ln for ln in recs("network_order_lines")}
+    shipped: dict[str, list[str]] = {}
+    for sl in recs("network_shipment_lines"):
+        shipped.setdefault(sl.shipment_id, []).append(sl.order_line_id)
     for s in shipments:
         route = routes[s.route_id]
-        assert s.route_resolution_status == "LINKED" and s.order_id in orders and lines[s.order_line_id].order_id == s.order_id
+        assert shipped[s.shipment_id] and all(lines[i].order_id == s.order_id for i in shipped[s.shipment_id])  # every shipment ships at least one line of its own order
+        assert s.route_resolution_status == "LINKED" and s.order_id in orders
         assert (s.origin_location_id, s.destination_location_id, s.transport_mode) == (route.origin_location_id, route.destination_location_id, route.transport_mode)
         assert s.origin_location_id in locs and s.destination_location_id in locs and not s.remediation_flags
         assert date.fromisoformat(s.planned_eta) == date.fromisoformat(s.departure_date) + timedelta(days=route.planned_transit_days)
@@ -212,7 +216,8 @@ def test_the_three_required_scenarios_exist():
     a, b, c = s["SHP-NET-0001"], s["SHP-NET-0002"], s["SHP-NET-0003"]
     assert a.status == "IN_TRANSIT" and a.transport_mode == "SEA" and a.origin_location_id == "SUP-041"  # A: Japan -> sea -> Rotterdam -> Netherlands DC -> dealer
     assert "TRM-SEA-NL-ROTTERDAM" in {leg.destination_location_id for leg in legs_of(a.route_id)} and "WH-005" in {leg.destination_location_id for leg in legs_of(a.route_id)}
-    assert (b.origin_location_id, b.destination_location_id, b.order_id, b.order_line_id) == (a.origin_location_id, a.destination_location_id, a.order_id, a.order_line_id)  # B: the air alternative
+    shipped = {sl.shipment_id: sl.order_line_id for sl in recs("network_shipment_lines")}
+    assert (b.origin_location_id, b.destination_location_id, b.order_id, shipped[b.shipment_id]) == (a.origin_location_id, a.destination_location_id, a.order_id, shipped[a.shipment_id])  # B: the air alternative
     assert b.transport_mode == "AIR" and b.route_id != a.route_id
     routes = all_routes()
     assert routes[b.route_id].planned_transit_days != routes[a.route_id].planned_transit_days and routes[b.route_id].estimated_cost != routes[a.route_id].estimated_cost

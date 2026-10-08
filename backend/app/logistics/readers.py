@@ -23,6 +23,7 @@ LOCATION_TYPE_BY_LABEL = {"Warehouse": "WAREHOUSE", "ShipTo": None, "Plant": "PL
 class LogisticsReader(Protocol):
     def shipment(self, shipment_id: str) -> dict[str, Any] | None: ...
     def events(self, shipment_id: str) -> list[dict[str, Any]]: ...
+    def shipment_lines(self, shipment_id: str) -> list[str]: ...
     def route(self, route_id: str) -> dict[str, Any] | None: ...
     def legs(self, route_id: str) -> list[dict[str, Any]]: ...
     def routes_between(self, origin: str, destination: str) -> list[dict[str, Any]]: ...
@@ -71,6 +72,15 @@ class FileReader:
                 grouped[r["shipment_id"]].append(r)
             self._cache[key] = grouped  # type: ignore[assignment]
         return sorted(self._cache[key].get(shipment_id, []), key=lambda e: (e["sequence"] if e["sequence"] is not None else 0, e["timestamp"]))  # type: ignore[union-attr]
+
+    def shipment_lines(self, shipment_id):
+        key = "shipment_lines"
+        if key not in self._cache:
+            grouped: dict[str, list[str]] = defaultdict(list)
+            for r in self._rows("shipment_lines", "network_shipment_lines"):
+                grouped[r["shipment_id"]].append(r["order_line_id"])
+            self._cache[key] = grouped  # type: ignore[assignment]
+        return sorted(self._cache[key].get(shipment_id, []))  # type: ignore[union-attr]
 
     def route(self, route_id):
         return self._index("route", "route_id", "routes", "network_routes").get(route_id)
@@ -135,11 +145,12 @@ class GraphReader:
             return None
         p = r["p"]
         route_id = p.get("route_id") or r["route_rel"]
-        # one shipment line is a fact; several lines cannot be held by the canonical shipment (one order_line_id), so none is chosen: dataset_comparison reports the gap
-        lines = r["order_line_ids"]
-        return graph_row("shipments", p, order_id=r["order_id"], order_line_id=lines[0] if len(lines) == 1 else None, carrier=r["carrier"], carrier_id=r["carrier_id"], route_id=route_id,
+        return graph_row("shipments", p, order_id=r["order_id"], carrier=r["carrier"], carrier_id=r["carrier_id"], route_id=route_id,
                          origin_location_id=r["origin"], destination_location_id=r["destination"],
                          route_resolution_status=p.get("route_resolution_status") or ("LINKED" if route_id else "ROUTE_NOT_DETERMINABLE"))
+
+    def shipment_lines(self, shipment_id):
+        return [r["id"] for r in self._g.read(q.SHIPMENT_LINES, id=shipment_id)]
 
     def events(self, shipment_id):
         return [graph_row("tracking_events", r["p"], shipment_id=shipment_id, location_id=r["location_id"], event_type=r["p"].get("event_type") or r["p"].get("event_status"))

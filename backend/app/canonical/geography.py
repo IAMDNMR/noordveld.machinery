@@ -94,7 +94,8 @@ def resolve_location_context(location_id: str, reader: Any = None, root: Path = 
             resolved[f], sources[f] = None, "NONE"
     if resolved["geo_basis"] is None and resolved["latitude"] is not None:
         resolved["geo_basis"], sources["geo_basis"] = "UNSTATED", "NONE"
-    return {"location_id": location_id, "found": True, "name": rec.get("name"), "graph_label": rec.get("graph_label"), "country_code": cc,
+    fields = {f: {"record_value": None if _blank(own[f]) else own[f], "overlay_value": profile.get(f), "value_source": sources[f]} for f in FIELDS}
+    return {"location_id": location_id, "found": True, "fields": fields, "name": rec.get("name"), "graph_label": rec.get("graph_label"), "country_code": cc,
             "protected": rec.get("data_status") in PROTECTED_STATUSES, "location": own, "geography_profile": profile, "resolved": resolved, "field_sources": sources,
             "coordinate_class": coordinate_class(rec.get("data_status"), resolved["geo_basis"]),
             "provenance": {"location": {k: rec.get(k) for k in ("data_status", "source_type", "source_record_id")}, "geography_profile": REFERENCE_PROVENANCE}}

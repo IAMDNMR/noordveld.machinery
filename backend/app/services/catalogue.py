@@ -2,7 +2,12 @@
 from __future__ import annotations
 
 from app.graph.repositories.catalogue import CatalogueRepository
-from app.schemas.catalogue import AvailabilityOption, CatalogueFilters, CategoryOption, MachineOption
+from app.schemas.catalogue import (
+    AvailabilityOption,
+    CatalogueFilters,
+    CategoryOption,
+    MachineOption,
+)
 
 
 class CatalogueService:

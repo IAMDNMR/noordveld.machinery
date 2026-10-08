@@ -10,8 +10,8 @@ from app.agent.service import AgentService
 from app.core.config import get_settings
 from app.graph.client import GraphClient
 from app.graph.repositories.catalogue import CatalogueRepository
-from app.graph.repositories.parts import PartRepository
 from app.graph.repositories.intelligence import IntelligenceRepository
+from app.graph.repositories.parts import PartRepository
 from app.intelligence.service import IntelligenceService
 from app.intelligence.workspace import Entities, Overview, PartWorkspace
 from app.llm import LLMClient, create_llm
@@ -90,11 +90,16 @@ EntityDetails = Annotated[Entities, Depends(get_entities)]
 
 
 # ── accounts and the order workflow ───────────────────────────────────────────────────────────────
-from fastapi import Cookie, HTTPException  # noqa: E402
+from fastapi import Cookie, HTTPException
 
-from app.core.session import COOKIE, verify  # noqa: E402
-from app.services.checkout import CheckoutService  # noqa: E402
-from app.services.orders import GraphOrdersRepository, OrdersRepository, OrdersService, User  # noqa: E402
+from app.core.session import COOKIE, verify
+from app.services.checkout import CheckoutService
+from app.services.orders import (
+    GraphOrdersRepository,
+    OrdersRepository,
+    OrdersService,
+    User,
+)
 
 
 def get_orders_repository(graph: Graph) -> OrdersRepository:
@@ -138,8 +143,8 @@ def require(permission: str):
 
 
 # ── the commerce context engine ───────────────────────────────────────────────────────────────────
-from app.commerce.engine import CommerceContextEngine  # noqa: E402
-from app.commerce.service import AgenticCommerceService  # noqa: E402
+from app.commerce.engine import CommerceContextEngine
+from app.commerce.service import AgenticCommerceService
 
 
 def get_commerce_engine(graph: Graph) -> CommerceContextEngine:

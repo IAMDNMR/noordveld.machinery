@@ -10,7 +10,7 @@ from app.schemas.intelligence import Subject
 
 # Anything with a digit is a number, part number, model code or id. All of them must already appear in the evidence or draft.
 _WITH_DIGIT = re.compile(r"[A-Za-z0-9][A-Za-z0-9\-]*\d[A-Za-z0-9\-]*")
-_CLAIM_WORDS = re.compile(r"interchangeab|replacement|alternative|equivalent|substitut|compatible with all|guarantee|certified|in stock|out of stock|zero|no stock", re.I)
+_CLAIM_WORDS = re.compile(r"interchangeab|replacement|alternative|equivalent|substitut|compatible with all|guarantee|certified|in stock|out of stock|zero|no stock", re.IGNORECASE)
 MAX_WORDS = 70
 MAX_IDENTIFIERS = 4  # the cards list the items; a sentence that recites them all is rejected
 
@@ -82,11 +82,11 @@ def grounding_records(outcome: Outcome, subject: Subject | None = None, limit: i
 
 
 # ── post-generation validation: wording must never deny what the deterministic result holds ───────────────────────
-_DENIAL = re.compile(r"\b(no|not|none|neither|cannot|unavailable|unknown|missing|without|lacks?|lacking)\b|n't", re.I)
+_DENIAL = re.compile(r"\b(no|not|none|neither|cannot|unavailable|unknown|missing|without|lacks?|lacking)\b|n't", re.IGNORECASE)
 _QUANTITY_LABELS = {"Units recorded", "Warehouse units recorded", "Quantity"}
 _CONCEPTS = (  # (fact labels that prove the value is in the result, the words a sentence uses to name it)
-    (_QUANTITY_LABELS, re.compile(r"\b(units?|quantit\w*|unit counts?|how many|stock levels?|on[- ]hand)\b", re.I)),
-    ({"Lead time"}, re.compile(r"\blead[- ]times?\b", re.I)),
+    (_QUANTITY_LABELS, re.compile(r"\b(units?|quantit\w*|unit counts?|how many|stock levels?|on[- ]hand)\b", re.IGNORECASE)),
+    ({"Lead time"}, re.compile(r"\blead[- ]times?\b", re.IGNORECASE)),
 )
 _NOUNS = {"supplier": r"suppliers?", "dealer": r"dealers?", "machine": r"machines?", "assembly": r"assembl(?:y|ies)", "order": r"orders?", "shipment": r"shipments?",
           "service_plan": r"service plans?", "warehouse": r"warehouses?", "compliance": r"compliance requirements?", "part": r"parts?"}
@@ -106,15 +106,15 @@ def contradicts(text: str, outcome: Outcome) -> str | None:
     for have, words in _CONCEPTS:
         if labels & have and _denies(text, words):
             return f"denies {sorted(labels & have)[0].lower()}"
-    if any(f.label == "Primary supplier" and f.value == "Yes" for i in outcome.results for f in i.facts) and _denies(text, re.compile(r"\bprimary\b", re.I)):
+    if any(f.label == "Primary supplier" and f.value == "Yes" for i in outcome.results for f in i.facts) and _denies(text, re.compile(r"\bprimary\b", re.IGNORECASE)):
         return "denies the primary supplier"
     for kind in {i.kind for i in outcome.results}:
         noun = _NOUNS.get(kind)
         # "No suppliers are connected": existence denied. "No supplier is marked as primary" is a statement about a flag, not about existence.
-        if noun and re.search(rf"\b(no|not any)\s+{noun}\b[^.;]{{0,30}}\b(recorded|connected|found|listed|available|exist\w*|linked|associated|stock\w*|hold\w*)\b", text, re.I):
+        if noun and re.search(rf"\b(no|not any)\s+{noun}\b[^.;]{{0,30}}\b(recorded|connected|found|listed|available|exist\w*|linked|associated|stock\w*|hold\w*)\b", text, re.IGNORECASE):
             return f"denies the listed {kind}s"
     compliance = [i for i in outcome.results if i.kind == "compliance"]
     if compliance and all(i.data_class == "SYNTHETIC_DEMO" for i in compliance):
-        if re.search(r"certif", text, re.I) and not re.search(r"demo|synthetic|not (?:established|real)|does not establish|no real", text, re.I):
+        if re.search(r"certif", text, re.IGNORECASE) and not re.search(r"demo|synthetic|not (?:established|real)|does not establish|no real", text, re.IGNORECASE):
             return "presents synthetic compliance data as established"
     return None

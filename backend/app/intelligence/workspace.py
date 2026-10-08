@@ -7,13 +7,33 @@ from urllib.parse import quote
 from app.core.exceptions import NotFoundError
 from app.graph.repositories.intelligence import IntelligenceRepository
 from app.intelligence.handlers import INTELLIGENCE_ROUTE, humanize
-from app.intelligence.provenance import LABELS, data_class
-from app.services.part_status import STATUS_LABELS, is_orderable, status_label
+from app.intelligence.provenance import data_class
 from app.schemas.intelligence import (
-    Action, AssemblyItem, Component, ComplianceItem, DealerItem, FitmentItem, GraphEdge, GraphNode, GraphView, IdentificationNeed, Insight, InventoryView,
-    Kpis, PartOverview, PartStatus, ProvenanceReport, RelatedItem, RelationshipSource, SupplierItem, WarehouseItem,
-    EntityDetail, Fact, Link,
+    Action,
+    AssemblyItem,
+    ComplianceItem,
+    Component,
+    DealerItem,
+    EntityDetail,
+    Fact,
+    FitmentItem,
+    GraphEdge,
+    GraphNode,
+    GraphView,
+    IdentificationNeed,
+    Insight,
+    InventoryView,
+    Kpis,
+    Link,
+    PartOverview,
+    PartStatus,
+    ProvenanceReport,
+    RelatedItem,
+    RelationshipSource,
+    SupplierItem,
+    WarehouseItem,
 )
+from app.services.part_status import STATUS_LABELS, is_orderable, status_label
 
 STORE_ROUTE = "/parts-store"
 RELATION_LABEL = {"CO_ORDERED_WITH": "Often ordered together", "RELATED_COMPONENT": "Related component", "SAME_NAME_GROUP_AS": "Shares a part name"}

@@ -185,7 +185,7 @@ def golden_checks(live: CommerceContextEngine) -> list[dict[str, Any]]:
     sea = live.build_logistics_context(shipment_id="SHP-NET-0001")
     f = sea.decision.facts
     row("logistics sea in transit 1/3", (f["shipment_status"], f["completed_leg_count"], f["remaining_leg_count"]) == ("IN_TRANSIT", 1, 3), f)
-    row("logistics evidence path", [s["entity"] for s in sea.evidence_path] == ["Order", "Shipment", "Route", "TrackingEvent"])
+    row("logistics evidence path", [s["entity"] for s in sea.evidence_path] == ["Order", "Shipment", "OrderLine", "Route", "TrackingEvent"])
     alt = next((a for a in f["alternatives"] if a["transport_mode"] == "AIR"), None)
     row("logistics air alternative from route records", alt is not None and (alt["planned_transit_days"], alt["estimated_cost"], alt["days_vs_current"], alt["cost_vs_current"]) == (6, 12675.0, -85, 9840.0), alt)
     unresolved = [live.build_logistics_context(shipment_id=f"SHP-{n:04d}") for n in range(1, 12)]
@@ -306,7 +306,7 @@ def api_endpoint_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 # ═══ structured sections: one row per scenario ═════════════════════════════════════════════════════
 DISCOVERY_CHAIN = ["Part", "Fitment", "ApprovedSource", "Inventory", "Price"]
-LOGISTICS_CHAIN = ["Order", "Shipment", "Route", "TrackingEvent"]
+LOGISTICS_CHAIN = ["Order", "Shipment", "OrderLine", "Route", "TrackingEvent"]  # the order lines a shipment carries sit between the shipment and its route
 WARRANTY_CHAIN = ["MachineInstance", "Installation", "WorkOrder", "Dealer", "WarrantyPolicy", "WarrantyClaim", "Evidence"]
 
 

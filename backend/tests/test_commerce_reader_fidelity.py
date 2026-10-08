@@ -101,20 +101,23 @@ class StubGraph:
         return [self.row]
 
 
-def ship_row(lines: list[str]) -> dict[str, Any]:
-    return {"p": {"shipment_id": "S1", "shipment_status": "SHIPPED", "data_status": "SYNTHETIC_DEMO"}, "order_id": "O1", "order_line_ids": lines, "route_rel": None, "origin": "W1",
+def ship_row() -> dict[str, Any]:
+    return {"p": {"shipment_id": "S1", "shipment_status": "SHIPPED", "data_status": "SYNTHETIC_DEMO"}, "order_id": "O1", "route_rel": None, "origin": "W1",
             "destination": None, "carrier": "Demo Freight (fictional)", "carrier_id": "CAR-1"}
 
 
 def test_the_shipment_carrier_id_is_read_from_the_carrier_relationship():
-    s = LogisticsGraphReader(StubGraph(ship_row(["OL-1"]))).shipment("S1")
-    assert s["carrier_id"] == "CAR-1" and s["carrier"] == "Demo Freight (fictional)" and s["order_line_id"] == "OL-1"
-    assert set(s) == set(BY_NAME["shipments"].model.model_fields) - {"ingestion_timestamp"}
+    s = LogisticsGraphReader(StubGraph(ship_row())).shipment("S1")
+    assert s["carrier_id"] == "CAR-1" and s["carrier"] == "Demo Freight (fictional)"
+    assert set(s) == set(BY_NAME["shipments"].model.model_fields) - {"ingestion_timestamp"} and "order_line_id" not in s
 
 
-def test_a_shipment_that_ships_several_lines_does_not_get_one_of_them_chosen_for_it():
-    assert LogisticsGraphReader(StubGraph(ship_row(["OL-1", "OL-2"]))).shipment("S1")["order_line_id"] is None
-    assert LogisticsGraphReader(StubGraph(ship_row([]))).shipment("S1")["order_line_id"] is None
+def test_the_lines_of_a_shipment_are_all_returned_none_is_chosen():
+    class Lines(StubGraph):
+        def read(self, query: str, **params: Any) -> list[dict[str, Any]]:
+            return [{"id": "OL-1"}, {"id": "OL-2"}, {"id": "OL-3"}]
+
+    assert LogisticsGraphReader(Lines({})).shipment_lines("S1") == ["OL-1", "OL-2", "OL-3"]
 
 
 # ── the mapping audit leaves nothing out ─────────────────────────────────────────────────────────

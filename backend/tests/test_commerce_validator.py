@@ -43,7 +43,8 @@ def offline_report() -> dict:
 # ── entity counts ────────────────────────────────────────────────────────────────────────────────
 REQUIRED_ENTITIES = ["Part", "Machine", "MachineInstance", "Category", "PartSpecification", "Fitment (FITS relationship)", "FitmentContext", "ApprovedSource (APPROVED_SOURCE relationship)", "Supplier", "Dealer",
                      "Plant", "Location", "Customer", "Order", "OrderLine", "Inventory (AVAILABLE_AT relationship)", "Pricing (Price)", "Route (TransportRoute)", "RouteLeg (TransportLeg)", "Shipment",
-                     "TrackingEvent", "Technician", "WorkOrder", "InstallationEvent", "ReplacementEvent", "WarrantyPolicy", "WarrantyClaim", "Evidence", "FeaturedScenario"]
+                     "TrackingEvent", "Technician", "WorkOrder", "InstallationEvent", "ReplacementEvent", "WarrantyPolicy", "WarrantyClaim", "Evidence", "FeaturedScenario",
+                     "ShipmentLine (SHIPS_LINE relationship)"]
 
 
 def test_entity_counts_cover_every_required_entity_with_canonical_graph_difference_and_status():

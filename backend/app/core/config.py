@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import os
+import secrets
 from dataclasses import dataclass, field
 from functools import lru_cache
-import secrets
 from pathlib import Path
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]

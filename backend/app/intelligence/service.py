@@ -18,15 +18,32 @@ from app.graph.repositories.intelligence import IntelligenceRepository
 from app.graph.repositories.parts import PartRepository
 from app.intelligence.casual import content_text
 from app.intelligence.contract import enforce_result_kinds
-from app.intelligence.grounding import contradicts, demo_names, drop_false_demo_qualifier, grounding_records, is_grounded, keep_demo_qualifier
+from app.intelligence.grounding import (
+    contradicts,
+    demo_names,
+    drop_false_demo_qualifier,
+    grounding_records,
+    is_grounded,
+    keep_demo_qualifier,
+)
 from app.intelligence.handlers import HANDLERS, Context, humanize
 from app.intelligence.identifiers import identifiers
 from app.intelligence.models import Intent, Kind, Outcome, ParsedQuestion, Resolved
 from app.intelligence.provenance import data_class, summarise
-from app.intelligence.registry import HINTS, REGISTRY, answerable_intents, spec_for
+from app.intelligence.registry import HINTS, answerable_intents, spec_for
 from app.intelligence.resolver import EntityResolver, Resolution
 from app.llm import LLMClient, LLMError, LLMInvalidResponse, LLMParse, LLMUnavailable
-from app.schemas.intelligence import Answer, Candidate, Clarification, EntityRef, Fact, QueryRequest, QueryResponse, Stage, Subject
+from app.schemas.intelligence import (
+    Answer,
+    Candidate,
+    Clarification,
+    EntityRef,
+    Fact,
+    QueryRequest,
+    QueryResponse,
+    Stage,
+    Subject,
+)
 from app.services.part_status import status_label
 
 log = logging.getLogger(__name__)

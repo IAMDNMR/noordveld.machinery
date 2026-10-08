@@ -371,7 +371,6 @@ class Shipment(Canon):
     tracking_ref: Opt = None
     remediation_flags: Pipe = []
     route_resolution_status: Annotated[RouteResolution | None, Blank] = None
-    order_line_id: Opt = None
     carrier_id: Opt = None
 
     @model_validator(mode="after")
@@ -380,6 +379,22 @@ class Shipment(Canon):
             raise ValueError("a LINKED shipment needs a route_id")
         if self.route_resolution_status == "ROUTE_NOT_DETERMINABLE" and self.route_id:
             raise ValueError("a shipment with a route_id is not ROUTE_NOT_DETERMINABLE")
+        return self
+
+
+class ShipmentLine(Canon):
+    """One order line travelling on one shipment (the SHIPS_LINE relationship). A shipment ships one or more lines; an order split over several shipments has several Shipment
+    records, each with its own lines. The record id is '<shipment_id>><order_line_id>'."""
+
+    ID = "shipment_line_id"
+    shipment_line_id: Id
+    shipment_id: Id
+    order_line_id: Id
+
+    @model_validator(mode="after")
+    def _id_names_its_ends(self):
+        if self.shipment_line_id != f"{self.shipment_id}>{self.order_line_id}":
+            raise ValueError("shipment_line_id must be '<shipment_id>><order_line_id>'")
         return self
 
 

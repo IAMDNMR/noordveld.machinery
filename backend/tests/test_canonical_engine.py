@@ -127,7 +127,7 @@ def test_the_data_status_vocabulary_extends_the_existing_one():
 
 def test_every_registry_dataset_has_a_model_a_file_path_and_resolvable_dependencies():
     names = {s.name for s in SPECS}
-    assert len(names) == len(SPECS) == 41
+    assert len(names) == len(SPECS) == 43
     for s in SPECS:
         assert s.depends and set(s.depends) <= names or not s.depends
         assert s.targets or s.rel
@@ -367,3 +367,18 @@ def test_the_graph_fingerprint_changes_when_an_ingested_value_is_tampered_with(t
     assert graph_fingerprint(store) != good
     store.nodes[("Technician", "TEC-1")]["certification"] = "L2"
     assert graph_fingerprint(store) == good
+
+
+def test_a_node_the_canonical_ingestion_created_follows_the_records_source_record_id_and_a_foreign_node_does_not(tmp_path):
+    engine, store, _ = world(tmp_path)
+    engine.run(NEW, dry_run=False)
+    key = ("Technician", "TEC-1")
+    assert store.nodes[key]["source_id"] == "SRC-CANON"
+    put(tmp_path, "technicians", [{**TECH, "source_record_id": "synthetic:TEC-1"}])
+    assert Engine(store, tmp_path, clock).run(["technicians"], dry_run=True)["totals"]["nodes_to_update"] == 1
+    Engine(store, tmp_path, clock).run(["technicians"], dry_run=False)
+    assert store.nodes[key]["source_record_id"] == "synthetic:TEC-1" and store.nodes[key]["name"] == TECH["name"]
+    assert Engine(store, tmp_path, clock).run(["technicians"], dry_run=True)["totals"]["nodes_to_update"] == 0  # idempotent
+    store.nodes[key]["source_id"], store.nodes[key]["source_record_id"] = "SRC-OTHER", "theirs"
+    Engine(store, tmp_path, clock).run(["technicians"], dry_run=False)
+    assert store.nodes[key]["source_record_id"] == "theirs"  # a record another source created keeps its own provenance

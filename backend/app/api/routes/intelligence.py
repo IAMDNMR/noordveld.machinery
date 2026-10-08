@@ -5,8 +5,21 @@ from fastapi import APIRouter
 
 from app.api.dependencies import EntityDetails, Overviews, Questions, Workspaces
 from app.schemas.intelligence import (
-    AssemblyItem, ComplianceItem, DealerItem, EntityDetail, FitmentItem, GraphView, Insight, InventoryView, Kpis, PartOverview, ProvenanceReport, QueryRequest, QueryResponse,
-    RelatedItem, SupplierItem,
+    AssemblyItem,
+    ComplianceItem,
+    DealerItem,
+    EntityDetail,
+    FitmentItem,
+    GraphView,
+    Insight,
+    InventoryView,
+    Kpis,
+    PartOverview,
+    ProvenanceReport,
+    QueryRequest,
+    QueryResponse,
+    RelatedItem,
+    SupplierItem,
 )
 
 router = APIRouter(prefix="/intelligence", tags=["intelligence"])

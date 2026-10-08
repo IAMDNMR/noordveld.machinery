@@ -7,13 +7,14 @@ SHIPMENT = """
 MATCH (s:Shipment {shipment_id: $id})
 RETURN properties(s) AS p,
   head([(o:Order)-[:HAS_SHIPMENT]->(s) | o.order_id]) AS order_id,
-  [(s)-[:SHIPS_LINE]->(l:OrderLine) | l.order_line_id] AS order_line_ids,
   head([(s)-[:USES_ROUTE]->(r:TransportRoute) | r.route_id]) AS route_rel,
   head([(s)-[:DISPATCHED_FROM]->(x) | """ + PLACE_ID.format(v="x") + """]) AS origin,
   head([(s)-[:DELIVERS_TO_LOCATION]->(x) | """ + PLACE_ID.format(v="x") + """]) AS destination,
   head([(s)-[:CARRIED_BY]->(c:Carrier) | c.name]) AS carrier,
   head([(s)-[:CARRIED_BY]->(c:Carrier) | c.carrier_id]) AS carrier_id
 """
+
+SHIPMENT_LINES = "MATCH (:Shipment {shipment_id: $id})-[:SHIPS_LINE]->(l:OrderLine) RETURN l.order_line_id AS id ORDER BY id LIMIT 200"
 
 EVENTS = """
 MATCH (s:Shipment {shipment_id: $id})-[:HAS_TRACKING_EVENT]->(e:TrackingEvent)

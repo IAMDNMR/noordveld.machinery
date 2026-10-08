@@ -367,6 +367,9 @@ class Engine:
                     note(rec.id, st)
                     continue
                 diff = {p: v for p, v in mapped.items() if p != key and not same(ex.get(p), v)}
+                # the canonical record is the source of truth for a node THIS ingestion created: its own source_record_id follows the record. A node another source created keeps its own.
+                if ti == 0 and ex.get("source_id") == SRC_CANON and rec.source_record_id and ex.get("source_record_id") != rec.source_record_id:
+                    diff["source_record_id"] = rec.source_record_id
                 if diff:
                     node_writes[(label, key, target.create, self._extra_labels(target, rec))].append({"id": gid, "props": {**diff, **self._update_stamp(spec, now)}, "create": {}})
                     res.nodes_to_update += 1

@@ -7,7 +7,14 @@ from typing import Any
 
 import certifi
 from neo4j import READ_ACCESS, WRITE_ACCESS, GraphDatabase, TrustCustomCAs, unit_of_work
-from neo4j.exceptions import AuthError, ClientError, ConstraintError, DriverError, Neo4jError, ServiceUnavailable
+from neo4j.exceptions import (
+    AuthError,
+    ClientError,
+    ConstraintError,
+    DriverError,
+    Neo4jError,
+    ServiceUnavailable,
+)
 
 from app.core.config import Settings
 from app.core.exceptions import GraphConflictError, GraphUnavailableError
