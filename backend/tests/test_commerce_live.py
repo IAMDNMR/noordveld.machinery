@@ -80,3 +80,19 @@ def test_live_the_graph_is_unchanged_by_everything_above(graph):
         v.run(live, kind, kw)
     v.api_checks(graph)
     assert v.snapshot(graph) == before
+
+
+def test_live_entity_counts_match_the_canonical_files(graph):
+    import commerce_validation_lib as L
+
+    rows = L.entity_counts(L.CypherSource(L.ReadOnlyGraph(graph)))
+    assert all(r["status"] == "PASS" for r in rows), [r for r in rows if r["status"] != "PASS"]
+
+
+def test_live_every_dataset_matches_field_by_field_with_zero_unexplained_differences(graph):
+    import commerce_validation_lib as L
+
+    src = L.CypherSource(L.ReadOnlyGraph(graph))
+    results = L.compare_datasets(src) + L.compare_supplied_relationships(src)
+    bad = {r.dataset: [d for d in r.differences if d["difference_type"] in L.FAILING][:5] for r in results if r.status() != "PASS"}
+    assert not bad, bad
