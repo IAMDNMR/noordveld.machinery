@@ -34,9 +34,10 @@ SOURCE_TYPE = {"SOURCE_DERIVED": "OEM_MASTER", "DERIVED": "OEM_MASTER", "USER_PR
 
 
 class Exporter:
-    def __init__(self, vocab: dict[str, Any] | None = None) -> None:
-        s = get_settings()
-        self.g = GraphClient(dataclasses.replace(s, neo4j_query_timeout=180.0))
+    def __init__(self, vocab: dict[str, Any] | None = None, graph: GraphClient | None = None) -> None:
+        # `graph`: reuse a client that someone else owns (a read-only consumer such as the commerce context engine); it is then never closed here
+        self._owns_graph = graph is None
+        self.g = graph or GraphClient(dataclasses.replace(get_settings(), neo4j_query_timeout=180.0))
         self.vocab = vocab or json.loads((CANON_DIR / "reference" / "discovery_vocabulary.json").read_text(encoding="utf-8"))
         self.geo = json.loads((CANON_DIR / "reference" / "geography.json").read_text(encoding="utf-8"))
 
@@ -46,7 +47,8 @@ class Exporter:
         return {"country": c["name"], "region": c["region"], "timezone": c["timezone"]} if c else {"country": None, "region": None, "timezone": None}
 
     def close(self) -> None:
-        self.g.close()
+        if self._owns_graph:
+            self.g.close()
 
     # ── helpers ──────────────────────────────────────────────────────────────────────────────────
     def rd(self, q: str, **p: Any) -> list[dict[str, Any]]:

@@ -135,3 +135,23 @@ def require(permission: str):
         return user
 
     return guard
+
+
+# ── the commerce context engine ───────────────────────────────────────────────────────────────────
+from app.commerce.engine import CommerceContextEngine  # noqa: E402
+from app.commerce.service import AgenticCommerceService  # noqa: E402
+
+
+def get_commerce_engine(graph: Graph) -> CommerceContextEngine:
+    """One engine per request over the shared read-only graph client. Tests override this with an engine over the canonical files."""
+    return CommerceContextEngine.from_graph(graph)
+
+
+CommerceEngine = Annotated[CommerceContextEngine, Depends(get_commerce_engine)]
+
+
+def get_commerce_service(engine: CommerceEngine) -> AgenticCommerceService:
+    return AgenticCommerceService(engine)
+
+
+CommerceService = Annotated[AgenticCommerceService, Depends(get_commerce_service)]

@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.dependencies import Catalogue, get_graph
-from app.api.routes import accounts, agent, catalogue, checkout, intelligence, orders, parts, site
+from app.api.routes import accounts, agent, catalogue, checkout, commerce, intelligence, orders, parts, site
 from app.core.config import get_settings
 from app.core.exceptions import GraphUnavailableError, NotFoundError
 from app.core.logging import setup_logging
@@ -90,6 +90,7 @@ def create_app() -> FastAPI:
     app.include_router(accounts.router, prefix="/api/v1")
     app.include_router(orders.router, prefix="/api/v1")
     app.include_router(checkout.router, prefix="/api/v1")
+    app.include_router(commerce.router, prefix="/api/v1")
     return app
 
 

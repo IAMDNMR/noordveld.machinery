@@ -56,3 +56,15 @@ ORDER_PART = """
 MATCH (l:OrderLine {order_line_id: $id})-[:REFERENCES_PART]->(p:Part)
 RETURN p.part_id AS part_id, p.part_number AS part_number, p.name AS name, l.quantity AS quantity
 """
+
+ORDER_LINES = """
+MATCH (:Order {order_id: $id})-[:CONTAINS_LINE]->(l:OrderLine)-[:REFERENCES_PART]->(p:Part)
+RETURN l.order_line_id AS order_line_id, p.part_id AS part_id, p.part_number AS part_number, p.name AS name, l.quantity AS quantity,
+       coalesce(l.unit_price, l.unit_price_eur) AS unit_price, l.data_status AS data_status, l.source_record_id AS source_record_id
+ORDER BY l.order_line_id
+LIMIT 100
+"""
+
+SHIPMENT_IDS_OF_ORDER = "MATCH (:Order {order_id: $id})-[:HAS_SHIPMENT]->(s:Shipment) RETURN s.shipment_id AS id ORDER BY id LIMIT 50"
+
+ORDER_IDS_OF_CUSTOMER = "MATCH (o:Order)-[:ORDERED_BY]->(:Customer {customer_id: $id}) RETURN o.order_id AS id ORDER BY id LIMIT 500"

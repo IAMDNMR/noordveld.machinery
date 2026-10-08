@@ -28,6 +28,9 @@ class LogisticsReader(Protocol):
     def location(self, location_id: str) -> dict[str, Any] | None: ...
     def order(self, order_id: str) -> dict[str, Any] | None: ...
     def order_part(self, order_line_id: str) -> dict[str, Any] | None: ...
+    def order_lines(self, order_id: str) -> list[dict[str, Any]]: ...
+    def shipments_of_order(self, order_id: str) -> list[dict[str, Any]]: ...
+    def orders_of_customer(self, customer_id: str) -> list[str]: ...
 
 
 def _clean(row: dict[str, Any]) -> dict[str, Any]:
@@ -101,6 +104,19 @@ class FileReader:
             return None
         part = self._index("part", "part_id", "parts").get(line["part_id"])
         return {"part_id": line["part_id"], "part_number": part["part_number"] if part else None, "name": part["name"] if part else None, "quantity": line["quantity"]}
+
+    def order_lines(self, order_id):
+        lines = [r for r in self._rows("order_lines", "network_order_lines") if r["order_id"] == order_id]
+        parts = self._index("part", "part_id", "parts")
+        return [{"order_line_id": r["order_line_id"], "part_id": r["part_id"], "part_number": (parts.get(r["part_id"]) or {}).get("part_number"), "name": (parts.get(r["part_id"]) or {}).get("name"),
+                 "quantity": r["quantity"], "unit_price": r.get("unit_price"), "data_status": r.get("data_status"), "source_type": r.get("source_type"), "source_record_id": r.get("source_record_id")}
+                for r in sorted(lines, key=lambda x: x["order_line_id"])]
+
+    def shipments_of_order(self, order_id):
+        return sorted((r for r in self._rows("shipments", "network_shipments") if r.get("order_id") == order_id), key=lambda r: r["shipment_id"])
+
+    def orders_of_customer(self, customer_id):
+        return sorted(r["order_id"] for r in self._rows("orders", "network_orders") if r.get("customer_id") == customer_id)
 
 
 # ── the graph ────────────────────────────────────────────────────────────────────────────────────
@@ -184,3 +200,14 @@ class GraphReader:
 
     def order_part(self, order_line_id):
         return self._one(q.ORDER_PART, id=order_line_id)
+
+    def order_lines(self, order_id):
+        return [{"order_line_id": r["order_line_id"], "part_id": r["part_id"], "part_number": r["part_number"], "name": r["name"], "quantity": r["quantity"], "unit_price": r["unit_price"],
+                 "data_status": r["data_status"], "source_type": r["data_status"] if r["data_status"] == "SYNTHETIC_DEMO" else None, "source_record_id": r["source_record_id"]}
+                for r in self._g.read(q.ORDER_LINES, id=order_id)]
+
+    def shipments_of_order(self, order_id):
+        return [s for s in (self.shipment(r["id"]) for r in self._g.read(q.SHIPMENT_IDS_OF_ORDER, id=order_id)) if s]
+
+    def orders_of_customer(self, customer_id):
+        return [r["id"] for r in self._g.read(q.ORDER_IDS_OF_CUSTOMER, id=customer_id)]
