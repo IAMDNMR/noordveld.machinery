@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from app.canonical.engine import APP_SESSION, normalise
+from app.canonical.geography import country_profile, reference
 from app.canonical.io import CANON_DIR, dump_rows
 from app.canonical.registry import BY_NAME, DatasetSpec
 from app.core.config import get_settings
@@ -39,12 +40,11 @@ class Exporter:
         self._owns_graph = graph is None
         self.g = graph or GraphClient(dataclasses.replace(get_settings(), neo4j_query_timeout=180.0))
         self.vocab = vocab or json.loads((CANON_DIR / "reference" / "discovery_vocabulary.json").read_text(encoding="utf-8"))
-        self.geo = json.loads((CANON_DIR / "reference" / "geography.json").read_text(encoding="utf-8"))
+        self.geo = reference()
 
     def where(self, cc: str | None) -> dict[str, Any]:
         """country, region and timezone of a country code, from the geography reference (never guessed: an unknown code gives nothing)."""
-        c = self.geo["countries"].get(cc or "")
-        return {"country": c["name"], "region": c["region"], "timezone": c["timezone"]} if c else {"country": None, "region": None, "timezone": None}
+        return country_profile(cc)  # the one geography reference reader (app/canonical/geography.py)
 
     def close(self) -> None:
         if self._owns_graph:
@@ -89,9 +89,13 @@ class Exporter:
         coords = self.geo["city_coordinates"]
         for r in self.rd("MATCH (l:Location) WHERE " + NOT_NET.format(v="l") + " RETURN properties(l) AS p"):
             p = r["p"]
-            lat, lon = (coords.get(p.get("name") or "") or (None, None)) if p.get("location_type") == "CITY" else (None, None)
+            # the node's own coordinates are the source of truth; only a city the graph holds no coordinates for takes the reference city centre (the supplied SRC-001 cities)
+            lat, lon, basis = p.get("latitude"), p.get("longitude"), p.get("geo_basis")
+            if lat is None and p.get("location_type") == "CITY":
+                lat, lon = coords.get(p.get("name") or "") or (None, None)
+                basis = "REFERENCE_CITY_CENTRE" if lat is not None else None
             out.append({"location_id": p["location_id"], "name": p.get("name"), "location_kind": p["location_type"], "graph_label": "Location", "country_code": p.get("country_code"),
-                        "city": None, "latitude": lat, "longitude": lon, "geo_basis": "REFERENCE_CITY_CENTRE" if lat is not None else None, **self.prov(p)})
+                        "city": None, "latitude": lat, "longitude": lon, "geo_basis": basis, **self.prov(p)})
         for r in self.rd("MATCH (t:TransportTerminal) WHERE " + NOT_NET.format(v="t") + " RETURN properties(t) AS p"):
             p = r["p"]
             tt = p.get("terminal_type")

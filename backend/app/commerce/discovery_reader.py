@@ -7,11 +7,11 @@ Both answer from the same canonical vocabulary (name, description, aliases, comm
 """
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Protocol
 
+from app.canonical.geography import country_profile
 from app.canonical.io import CANON_DIR, load_rows
 from app.canonical.registry import BY_NAME
 from app.graph.client import GraphClient
@@ -100,10 +100,7 @@ class _DatasetReader:
         return self._index("customers", "customer_id").get(customer_id)
 
     def region_of_country(self, country_code):
-        if self._geo is None:
-            self._geo = json.loads((CANON_DIR / "reference" / "geography.json").read_text(encoding="utf-8"))["countries"]
-        c = self._geo.get(country_code or "")
-        return c["region"] if c else None
+        return country_profile(country_code)["region"]
 
 
 class FileDiscoveryReader(_DatasetReader):
@@ -124,7 +121,9 @@ class GraphDiscoveryReader(_DatasetReader):
 
     def __init__(self, graph: GraphClient) -> None:
         super().__init__()
-        from app.canonical.export import Exporter  # imported here: the exporter is the one graph-to-canonical mapping, loaded only when the graph is used
+        from app.canonical.export import (
+            Exporter,  # imported here: the exporter is the one graph-to-canonical mapping, loaded only when the graph is used
+        )
 
         self._ex = Exporter(graph=graph)
 
