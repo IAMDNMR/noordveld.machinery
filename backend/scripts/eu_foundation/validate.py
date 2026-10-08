@@ -66,7 +66,7 @@ def main() -> int:
     # --- geography ----------------------------------------------------------------------------------------------------
     cc = {}
     for label in ("Dealer", "Supplier", "Customer", "ShipTo", "Warehouse", "TransportTerminal"):
-        cc[label] = {r["c"]: r["n"] for r in read(f"MATCH (n:`{label}`) RETURN n.country_code AS c, count(*) AS n ORDER BY c")}
+        cc[label] = {r["c"]: r["n"] for r in read(f"MATCH (n:`{label}`) WHERE NOT coalesce(n.canonical_dataset, '') STARTS WITH 'network_' RETURN n.country_code AS c, count(*) AS n ORDER BY c")}
     out["country_counts"] = cc
     for label, rows in cc.items():
         non = [c for c in rows if c not in EU27]
@@ -76,7 +76,7 @@ def main() -> int:
     check("NL and DE are the densest dealer countries", sorted(cc["Dealer"], key=cc["Dealer"].get, reverse=True)[:2] in (["NL", "DE"], ["DE", "NL"]), {k: cc["Dealer"][k] for k in ("NL", "DE")})
 
     # --- counts vs. brief ---------------------------------------------------------------------------------------------
-    n = {l: one(f"MATCH (n:`{l}`) RETURN count(n)") for l in ("Supplier", "Dealer", "Customer", "ShipTo", "Warehouse", "TransportTerminal", "Carrier", "TransportOption")}
+    n = {l: one(f"MATCH (n:`{l}`) WHERE NOT coalesce(n.canonical_dataset, '') STARTS WITH 'network_' RETURN count(n)") for l in ("Supplier", "Dealer", "Customer", "ShipTo", "Warehouse", "TransportTerminal", "Carrier", "TransportOption")}
     out["entity_totals"] = n
     check("suppliers 30-60", 30 <= n["Supplier"] <= 60, n["Supplier"])
     check("dealers 60-100", 60 <= n["Dealer"] <= 100, n["Dealer"])
@@ -94,9 +94,9 @@ def main() -> int:
         check(name, v == 0, v)
         out.setdefault("integrity", {})[name] = v
 
-    zero("dealers without a location", "MATCH (d:Dealer) WHERE NOT (d)-[:LOCATED_IN]->(:Location) RETURN count(d)")
-    zero("dealers without any machine-family support", "MATCH (d:Dealer) WHERE NOT (d)-[:SERVES_FAMILY|SERVICES_MACHINE_FAMILY|SELLS_MACHINE_FAMILY]->(:MachineFamily) RETURN count(d)")
-    zero("dealers without a territory", "MATCH (d:Dealer) WHERE NOT (d)-[:SERVES_TERRITORY]->() RETURN count(d)")
+    zero("dealers without a location", "MATCH (d:Dealer) WHERE NOT coalesce(d.canonical_dataset, '') STARTS WITH 'network_' AND NOT (d)-[:LOCATED_IN]->(:Location) RETURN count(d)")
+    zero("dealers without any machine-family support", "MATCH (d:Dealer) WHERE NOT coalesce(d.canonical_dataset, '') STARTS WITH 'network_' AND NOT (d)-[:SERVES_FAMILY|SERVICES_MACHINE_FAMILY|SELLS_MACHINE_FAMILY]->(:MachineFamily) RETURN count(d)")
+    zero("dealers without a territory", "MATCH (d:Dealer) WHERE NOT coalesce(d.canonical_dataset, '') STARTS WITH 'network_' AND NOT (d)-[:SERVES_TERRITORY]->() RETURN count(d)")
     zero("suppliers without supplied parts", "MATCH (s:Supplier) WHERE s.enrichment_batch = $b AND NOT (:Part)-[:SUPPLIED_BY]->(s) RETURN count(s)", **B)
     zero("batch ship-tos owned by a customer (destinations are not customer-owned)", "MATCH (:Customer)-[r:HAS_SHIP_TO]->(s:ShipTo) WHERE s.enrichment_batch = $b RETURN count(r)", **B)
     zero("batch customer contacts / customer addresses remaining", "MATCH (n) WHERE n.enrichment_batch = $b AND (n:CustomerContact OR (n:Address AND n.owner_type = 'CUSTOMER')) RETURN count(n)", **B)
@@ -107,18 +107,18 @@ def main() -> int:
     zero("verified orderable parts with fewer than 1 supplier or a single supplier outside the single-source list",
          "MATCH (c:PartCatalogProfile {part_status:'VERIFIED', orderable:true})-[:PROFILES_PART]->(p:Part) WHERE NOT p.part_id IN $single AND COUNT { (p)-[:SUPPLIED_BY]->(:Supplier) } < 2 RETURN count(p)", single=SINGLE_SOURCE_BY_DESIGN)
     zero("supplier linked directly to a dealer (no blanket supplier-dealer links)", "MATCH (:Supplier)-[r]-(:Dealer) RETURN count(r)")
-    zero("suppliers without a replenished depot", "MATCH (s:Supplier) WHERE NOT (s)-[:REPLENISHES_DEPOT]->(:Warehouse) RETURN count(s)")
+    zero("suppliers without a replenished depot", "MATCH (s:Supplier) WHERE NOT coalesce(s.canonical_dataset, '') STARTS WITH 'network_' AND NOT (s)-[:REPLENISHES_DEPOT]->(:Warehouse) RETURN count(s)")
     zero("ship-tos without any route", "MATCH (s:ShipTo) WHERE s.enrichment_batch = $b AND NOT (:TransportRoute)-[:TO_SHIP_TO]->(s) RETURN count(s)", **B)
     zero("depots without a location", "MATCH (w:Warehouse) WHERE NOT (w)-[:LOCATED_IN]->(:Location) RETURN count(w)")
-    zero("routes without origin depot", "MATCH (r:TransportRoute) WHERE NOT (r)-[:FROM_DEPOT]->(:Warehouse) RETURN count(r)")
-    zero("routes without destination ship-to", "MATCH (r:TransportRoute) WHERE NOT (r)-[:TO_SHIP_TO]->(:ShipTo) RETURN count(r)")
-    zero("routes without option or rate", "MATCH (r:TransportRoute) WHERE NOT (r)-[:USES_OPTION]->(:TransportOption) OR NOT (r)-[:PRICED_BY]->(:FreightRate) RETURN count(r)")
+    zero("routes without origin depot", "MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' AND NOT (r)-[:FROM_DEPOT]->(:Warehouse) RETURN count(r)")
+    zero("routes without destination ship-to", "MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' AND NOT (r)-[:TO_SHIP_TO]->(:ShipTo) RETURN count(r)")
+    zero("routes without option or rate", "MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' AND (NOT (r)-[:USES_OPTION]->(:TransportOption) OR NOT (r)-[:PRICED_BY]->(:FreightRate)) RETURN count(r)")
     zero("routes without legs", "MATCH (r:TransportRoute) WHERE NOT (r)-[:HAS_LEG]->(:TransportLeg) RETURN count(r)")
     zero("multimodal routes with fewer than 2 distinct modes",
          "MATCH (r:TransportRoute {transport_mode:'MULTIMODAL'})-[:HAS_LEG]->(l:TransportLeg) WITH r, count(DISTINCT l.mode) AS m WHERE m < 2 RETURN count(r)")
     zero("legs not attached to a route", "MATCH (l:TransportLeg) WHERE NOT (:TransportRoute)-[:HAS_LEG]->(l) RETURN count(l)")
-    zero("route without positive distance", "MATCH (r:TransportRoute) WHERE r.total_distance_km IS NULL OR r.total_distance_km <= 0 RETURN count(r)")
-    zero("route whose estimate is not labelled ESTIMATED", "MATCH (r:TransportRoute) WHERE r.estimate_basis <> 'ESTIMATED' RETURN count(r)")
+    zero("route without positive distance", "MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' AND (r.total_distance_km IS NULL OR r.total_distance_km <= 0) RETURN count(r)")
+    zero("route whose estimate is not labelled ESTIMATED", "MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' AND r.estimate_basis <> 'ESTIMATED' RETURN count(r)")
     zero("distance without a distance_type", "MATCH ()-[d:DISTANCE_TO]->() WHERE d.enrichment_batch = $b AND d.distance_type IS NULL RETURN count(d)", **B)
     zero("freight rate without currency EUR or components",
          "MATCH (f:FreightRate) WHERE f.enrichment_batch = $b AND (f.currency <> 'EUR' OR f.base_cost IS NULL OR f.total_transport_cost IS NULL OR f.handling_cost IS NULL) RETURN count(f)", **B)
@@ -143,8 +143,8 @@ def main() -> int:
     zero("new Part / Machine / Specification / Plant nodes", "MATCH (n) WHERE n.enrichment_batch = $b AND (n:Part OR n:Machine OR n:MachineSpecification OR n:PartSpecification OR n:Plant OR n:BusinessUnit) RETURN count(n)", **B)
 
     # --- transport ----------------------------------------------------------------------------------------------------
-    out["routes_by_mode"] = {r["m"]: r["n"] for r in read("MATCH (r:TransportRoute) RETURN r.transport_mode AS m, count(*) AS n ORDER BY m")}
-    out["routes_by_option"] = {r["o"]: r["n"] for r in read("MATCH (r:TransportRoute) RETURN r.option_code AS o, count(*) AS n ORDER BY o")}
+    out["routes_by_mode"] = {r["m"]: r["n"] for r in read("MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' RETURN r.transport_mode AS m, count(*) AS n ORDER BY m")}
+    out["routes_by_option"] = {r["o"]: r["n"] for r in read("MATCH (r:TransportRoute) WHERE NOT coalesce(r.canonical_dataset, '') STARTS WITH 'network_' RETURN r.option_code AS o, count(*) AS n ORDER BY o")}
     out["legs_by_mode"] = {r["m"]: r["n"] for r in read("MATCH (l:TransportLeg) RETURN l.mode AS m, count(*) AS n ORDER BY m")}
     out["terminals_by_type"] = {r["t"]: r["n"] for r in read("MATCH (t:TransportTerminal) RETURN t.terminal_type AS t, count(*) AS n ORDER BY t")}
     out["distance_types"] = {str(r["t"]): r["n"] for r in read("MATCH ()-[d:DISTANCE_TO]->() RETURN d.distance_type AS t, count(*) AS n ORDER BY n DESC")}

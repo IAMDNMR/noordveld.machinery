@@ -55,6 +55,25 @@ RETURN m{.machine_id, .model_code, .name, .machine_type, .origin_plant, .country
 LIMIT 1
 """
 
+# Which graph records the launch film features: the canonical FeaturedScenario record (scenarios/discovery.json), not constants in code.
+FILM_SCENARIO = """
+MATCH (s:FeaturedScenario {scenario_type: 'FILM'})
+RETURN head([(s)-[:FEATURES_MACHINE]->(m:Machine) | m.model_code]) AS model,
+       head([(s)-[:FEATURES_PART]->(p:Part) | p.part_id]) AS part,
+       head([(s)-[:FEATURES_CUSTOMER]->(c:Customer) | c.customer_id]) AS customer
+ORDER BY s.scenario_id
+LIMIT 1
+"""
+
+# Where a city is, from the graph: city locations first, then the depots, dealers and ship-tos that stand in it. First match wins, so the order is the priority.
+CITY_POINTS = """
+CALL () { MATCH (l:Location {location_type: 'CITY'}) WHERE l.latitude IS NOT NULL RETURN l.name AS city, l.latitude AS lat, l.longitude AS lon, 1 AS pri
+  UNION ALL MATCH (w:Warehouse) WHERE w.latitude IS NOT NULL RETURN w.city AS city, w.latitude AS lat, w.longitude AS lon, 2 AS pri
+  UNION ALL MATCH (d:Dealer) WHERE d.latitude IS NOT NULL RETURN d.city AS city, d.latitude AS lat, d.longitude AS lon, 3 AS pri
+  UNION ALL MATCH (t:ShipTo) WHERE t.latitude IS NOT NULL RETURN t.city AS city, t.latitude AS lat, t.longitude AS lon, 4 AS pri }
+RETURN city, lat, lon, pri ORDER BY pri, city
+"""
+
 FILM_DELIVERY = """
 MATCH (d:DeliveryEstimate)-[:TO_CUSTOMER]->(:Customer {customer_id: $customer})
 MATCH (d)-[:FROM_WAREHOUSE]->(w:Warehouse)

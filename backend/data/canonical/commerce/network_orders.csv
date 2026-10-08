@@ -1,0 +1,4 @@
+order_id,customer_id,dealer_id,order_date,status,priority,currency,total_value,channel,data_status,source_type,source_record_id,ingestion_timestamp,effective_from,effective_to
+ORD-NET-0001,CUS-009,DLR-004,2026-08-10,SHIPPED,,EUR,,DEMO_NETWORK,SYNTHETIC_DEMO,SYNTHETIC_DEMO,network_definition:ORD-NET-0001,,2026-01-01,
+ORD-NET-0002,CUS-010,DLR-097,2026-09-08,SHIPPED,,EUR,,DEMO_NETWORK,SYNTHETIC_DEMO,SYNTHETIC_DEMO,network_definition:ORD-NET-0002,,2026-01-01,
+ORD-NET-0003,CUS-009,DLR-094,2026-09-16,DELIVERED,,EUR,,DEMO_NETWORK,SYNTHETIC_DEMO,SYNTHETIC_DEMO,network_definition:ORD-NET-0003,,2026-01-01,

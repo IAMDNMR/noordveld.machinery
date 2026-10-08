@@ -1,0 +1,2007 @@
+{
+ "dataset": "network_definition",
+ "data_status": "SYNTHETIC_DEMO",
+ "source_type": "SYNTHETIC_DEMO",
+ "canonical_schema_version": "1.0",
+ "dataset_version": "v1",
+ "note": "The single authored source of the Phase 2 network. Everything here is synthetic demonstration data: not real carrier schedules, rates or commitments. A route's days and cost are the sum of its legs and belong to that route only; no mode has a built-in duration or price. The Japan economy sea route (91 days) is one route-specific record.",
+ "cost_currency": "EUR",
+ "cost_basis": "estimated freight for one standard consignment on that route (synthetic)",
+ "effective_from": "2026-01-01",
+ "nl_hub": {
+  "distribution_centre": "WH-005",
+  "seaport": "TRM-SEA-NL-ROTTERDAM",
+  "airport_cargo_terminal": "TRM-AIR-NL-AMSTERDAM"
+ },
+ "suppliers": [
+  {
+   "supplier_id": "SUP-041",
+   "name": "Chubu Hydraulic Components K.K. (demo)",
+   "city": "Toyota",
+   "country_code": "JP",
+   "supplier_type": "COMPONENT_MANUFACTURER",
+   "status": "ACTIVE_DEMO"
+  }
+ ],
+ "dealers": [
+  {
+   "dealer_id": "DLR-094",
+   "name": "Thames Valley Plant Sales (demo)",
+   "city": "Reading",
+   "country_code": "GB",
+   "latitude": 51.45,
+   "longitude": -0.97,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": true
+  },
+  {
+   "dealer_id": "DLR-095",
+   "name": "Zuerich Baumaschinen Partner (demo)",
+   "city": "Zurich",
+   "country_code": "CH",
+   "latitude": 47.38,
+   "longitude": 8.54,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": false
+  },
+  {
+   "dealer_id": "DLR-096",
+   "name": "Fjord Maskin Service (demo)",
+   "city": "Oslo",
+   "country_code": "NO",
+   "latitude": 59.91,
+   "longitude": 10.75,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": true
+  },
+  {
+   "dealer_id": "DLR-097",
+   "name": "Gulf Coast Equipment Co. (demo)",
+   "city": "Houston",
+   "country_code": "US",
+   "latitude": 29.76,
+   "longitude": -95.37,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": true
+  },
+  {
+   "dealer_id": "DLR-098",
+   "name": "Lowcountry Machinery (demo)",
+   "city": "Savannah",
+   "country_code": "US",
+   "latitude": 32.08,
+   "longitude": -81.09,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": false
+  },
+  {
+   "dealer_id": "DLR-099",
+   "name": "Great Lakes Heavy Parts (demo)",
+   "city": "Chicago",
+   "country_code": "US",
+   "latitude": 41.88,
+   "longitude": -87.63,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": true
+  },
+  {
+   "dealer_id": "DLR-100",
+   "name": "Pacific Rim Equipment (demo)",
+   "city": "Los Angeles",
+   "country_code": "US",
+   "latitude": 34.05,
+   "longitude": -118.24,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": true
+  },
+  {
+   "dealer_id": "DLR-101",
+   "name": "Lagos Heavy Equipment Ltd (demo)",
+   "city": "Lagos",
+   "country_code": "NG",
+   "latitude": 6.52,
+   "longitude": 3.38,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": false
+  },
+  {
+   "dealer_id": "DLR-102",
+   "name": "Tema Plant and Machinery (demo)",
+   "city": "Tema",
+   "country_code": "GH",
+   "latitude": 5.67,
+   "longitude": -0.02,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": false
+  },
+  {
+   "dealer_id": "DLR-103",
+   "name": "Durban Machinery Services (demo)",
+   "city": "Durban",
+   "country_code": "ZA",
+   "latitude": -29.86,
+   "longitude": 31.02,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": true
+  },
+  {
+   "dealer_id": "DLR-104",
+   "name": "Coast Equipment Kenya (demo)",
+   "city": "Mombasa",
+   "country_code": "KE",
+   "latitude": -4.04,
+   "longitude": 39.66,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": false,
+   "warranty_capable": false
+  },
+  {
+   "dealer_id": "DLR-105",
+   "name": "Atlas Machinery Maroc (demo)",
+   "city": "Casablanca",
+   "country_code": "MA",
+   "latitude": 33.57,
+   "longitude": -7.59,
+   "dealer_type": "AUTHORISED_DEALER",
+   "status": "ACTIVE_DEMO",
+   "authorized_status": "AUTHORISED",
+   "service_capable": true,
+   "warranty_capable": false
+  }
+ ],
+ "locations": [
+  {
+   "location_id": "SUP-041",
+   "name": "Chubu Hydraulic Components K.K. (demo)",
+   "location_type": "SUPPLIER",
+   "graph_label": "Supplier",
+   "city": "Toyota",
+   "country_code": "JP",
+   "latitude": 35.08,
+   "longitude": 137.16
+  },
+  {
+   "location_id": "TRM-SEA-JP-NAGOYA",
+   "name": "Nagoya Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Nagoya",
+   "country_code": "JP",
+   "latitude": 35.08,
+   "longitude": 136.88,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-JP-CHUBU",
+   "name": "Chubu Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Nagoya",
+   "country_code": "JP",
+   "latitude": 34.86,
+   "longitude": 136.81,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-GB-FELIXSTOWE",
+   "name": "Felixstowe Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Felixstowe",
+   "country_code": "GB",
+   "latitude": 51.96,
+   "longitude": 1.35,
+   "modes": [
+    "SHORT_SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-GB-LONDON",
+   "name": "London Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "London",
+   "country_code": "GB",
+   "latitude": 51.47,
+   "longitude": -0.45,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-CH-ZURICH",
+   "name": "Zurich Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Zurich",
+   "country_code": "CH",
+   "latitude": 47.46,
+   "longitude": 8.55,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-NO-OSLO",
+   "name": "Oslo Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Oslo",
+   "country_code": "NO",
+   "latitude": 59.9,
+   "longitude": 10.74,
+   "modes": [
+    "SHORT_SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-NO-OSLO",
+   "name": "Oslo Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Oslo",
+   "country_code": "NO",
+   "latitude": 60.19,
+   "longitude": 11.1,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-US-HOUSTON",
+   "name": "Houston Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Houston",
+   "country_code": "US",
+   "latitude": 29.73,
+   "longitude": -95.27,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-US-HOUSTON",
+   "name": "Houston Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Houston",
+   "country_code": "US",
+   "latitude": 29.98,
+   "longitude": -95.34,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-XDK-US-HOUSTON",
+   "name": "Houston Regional Logistics Hub (demo)",
+   "location_type": "TERMINAL",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "CROSSDOCK",
+   "city": "Houston",
+   "country_code": "US",
+   "latitude": 29.8,
+   "longitude": -95.4,
+   "modes": [
+    "ROAD"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-US-SAVANNAH",
+   "name": "Savannah Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Savannah",
+   "country_code": "US",
+   "latitude": 32.13,
+   "longitude": -81.14,
+   "modes": [
+    "SEA",
+    "RAIL"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-US-SAVANNAH",
+   "name": "Savannah Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Savannah",
+   "country_code": "US",
+   "latitude": 32.13,
+   "longitude": -81.2,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-XDK-US-SAVANNAH",
+   "name": "Savannah Regional Logistics Hub (demo)",
+   "location_type": "TERMINAL",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "CROSSDOCK",
+   "city": "Savannah",
+   "country_code": "US",
+   "latitude": 32.1,
+   "longitude": -81.2,
+   "modes": [
+    "ROAD"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-US-CHICAGO",
+   "name": "Chicago Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Chicago",
+   "country_code": "US",
+   "latitude": 41.98,
+   "longitude": -87.9,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-XDK-US-CHICAGO",
+   "name": "Chicago Regional Logistics Hub (demo)",
+   "location_type": "TERMINAL",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "CROSSDOCK",
+   "city": "Chicago",
+   "country_code": "US",
+   "latitude": 41.8,
+   "longitude": -87.8,
+   "modes": [
+    "ROAD",
+    "RAIL"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-US-LOSANGELES",
+   "name": "Los Angeles Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Los Angeles",
+   "country_code": "US",
+   "latitude": 33.74,
+   "longitude": -118.26,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-US-LOSANGELES",
+   "name": "Los Angeles Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Los Angeles",
+   "country_code": "US",
+   "latitude": 33.94,
+   "longitude": -118.41,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-XDK-US-LOSANGELES",
+   "name": "Los Angeles Regional Logistics Hub (demo)",
+   "location_type": "TERMINAL",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "CROSSDOCK",
+   "city": "Los Angeles",
+   "country_code": "US",
+   "latitude": 33.95,
+   "longitude": -118.2,
+   "modes": [
+    "ROAD"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-NG-LAGOS",
+   "name": "Lagos Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Lagos",
+   "country_code": "NG",
+   "latitude": 6.44,
+   "longitude": 3.37,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-NG-LAGOS",
+   "name": "Lagos Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Lagos",
+   "country_code": "NG",
+   "latitude": 6.58,
+   "longitude": 3.32,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-GH-TEMA",
+   "name": "Tema Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Tema",
+   "country_code": "GH",
+   "latitude": 5.63,
+   "longitude": 0.01,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-GH-ACCRA",
+   "name": "Accra Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Accra",
+   "country_code": "GH",
+   "latitude": 5.61,
+   "longitude": -0.17,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-ZA-DURBAN",
+   "name": "Durban Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Durban",
+   "country_code": "ZA",
+   "latitude": -29.87,
+   "longitude": 31.03,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-ZA-DURBAN",
+   "name": "Durban Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Durban",
+   "country_code": "ZA",
+   "latitude": -29.97,
+   "longitude": 30.95,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-KE-MOMBASA",
+   "name": "Mombasa Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Mombasa",
+   "country_code": "KE",
+   "latitude": -4.06,
+   "longitude": 39.67,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-KE-MOMBASA",
+   "name": "Mombasa Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Mombasa",
+   "country_code": "KE",
+   "latitude": -4.03,
+   "longitude": 39.59,
+   "modes": [
+    "AIR"
+   ]
+  },
+  {
+   "location_id": "TRM-SEA-MA-CASABLANCA",
+   "name": "Casablanca Seaport (demo)",
+   "location_type": "PORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "SEAPORT",
+   "city": "Casablanca",
+   "country_code": "MA",
+   "latitude": 33.6,
+   "longitude": -7.62,
+   "modes": [
+    "SEA"
+   ]
+  },
+  {
+   "location_id": "TRM-AIR-MA-CASABLANCA",
+   "name": "Casablanca Air Cargo Terminal (demo)",
+   "location_type": "AIRPORT",
+   "graph_label": "TransportTerminal",
+   "terminal_type": "AIRPORTCARGOTERMINAL",
+   "city": "Casablanca",
+   "country_code": "MA",
+   "latitude": 33.37,
+   "longitude": -7.59,
+   "modes": [
+    "AIR"
+   ]
+  }
+ ],
+ "lanes": [
+  {
+   "lane_id": "JPNL",
+   "origin_location_id": "SUP-041",
+   "destination_location_id": "DLR-004",
+   "routes": [
+    {
+     "suffix": "SEA-ECO",
+     "transport_mode": "SEA",
+     "service_level": "ECONOMY",
+     "description": "Route-specific demo record: consolidated low-frequency ocean service including transhipment and port waits. Its 91 days belong to this route only.",
+     "legs": [
+      {
+       "from": "SUP-041",
+       "to": "TRM-SEA-JP-NAGOYA",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 380,
+       "description": "Collection and inland haulage to the origin port"
+      },
+      {
+       "from": "TRM-SEA-JP-NAGOYA",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "SEA",
+       "days": 80,
+       "cost": 2150,
+       "description": "Consolidated ocean service with transhipment and slow steaming"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "WH-005",
+       "mode": "ROAD",
+       "days": 5,
+       "cost": 210,
+       "description": "Port discharge, customs clearance and haulage to the Netherlands distribution centre"
+      },
+      {
+       "from": "WH-005",
+       "to": "DLR-004",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 95,
+       "description": "Distribution centre to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "SEA-STD",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Direct container service.",
+     "legs": [
+      {
+       "from": "SUP-041",
+       "to": "TRM-SEA-JP-NAGOYA",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 350,
+       "description": "Collection and inland haulage to the origin port"
+      },
+      {
+       "from": "TRM-SEA-JP-NAGOYA",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "SEA",
+       "days": 38,
+       "cost": 3100,
+       "description": "Direct container service"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "WH-005",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 240,
+       "description": "Port discharge, customs clearance and haulage to the Netherlands distribution centre"
+      },
+      {
+       "from": "WH-005",
+       "to": "DLR-004",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 95,
+       "description": "Distribution centre to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR-EXP",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight.",
+     "legs": [
+      {
+       "from": "SUP-041",
+       "to": "TRM-AIR-JP-CHUBU",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 420,
+       "description": "Collection and haulage to the origin airport"
+      },
+      {
+       "from": "TRM-AIR-JP-CHUBU",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "AIR",
+       "days": 2,
+       "cost": 11900,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "WH-005",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 260,
+       "description": "Customs clearance and haulage to the Netherlands distribution centre"
+      },
+      {
+       "from": "WH-005",
+       "to": "DLR-004",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 95,
+       "description": "Distribution centre to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLUK",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-094",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SHORT_SEA",
+     "service_level": "STANDARD",
+     "description": "Short-sea crossing.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-GB-FELIXSTOWE",
+       "mode": "SHORT_SEA",
+       "days": 2,
+       "cost": 410,
+       "description": "Short-sea crossing"
+      },
+      {
+       "from": "TRM-SEA-GB-FELIXSTOWE",
+       "to": "DLR-094",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 280,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-GB-LONDON",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 1650,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-GB-LONDON",
+       "to": "DLR-094",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 260,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLCH",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-095",
+   "routes": [
+    {
+     "suffix": "ROAD",
+     "transport_mode": "ROAD",
+     "service_level": "STANDARD",
+     "description": "Road freight with a border crossing.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "DLR-095",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 780,
+       "description": "Road freight including customs clearance at the border"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-CH-ZURICH",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 1420,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-CH-ZURICH",
+       "to": "DLR-095",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 220,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLNO",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-096",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SHORT_SEA",
+     "service_level": "STANDARD",
+     "description": "Short-sea crossing.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-NO-OSLO",
+       "mode": "SHORT_SEA",
+       "days": 4,
+       "cost": 640,
+       "description": "Short-sea crossing"
+      },
+      {
+       "from": "TRM-SEA-NO-OSLO",
+       "to": "DLR-096",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 240,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-NO-OSLO",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 1880,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-NO-OSLO",
+       "to": "DLR-096",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 210,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLUSHOU",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-097",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to a US port, then the regional logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-US-HOUSTON",
+       "mode": "SEA",
+       "days": 19,
+       "cost": 1560,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-US-HOUSTON",
+       "to": "TRM-XDK-US-HOUSTON",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 240,
+       "description": "Port discharge, customs clearance and drayage to the regional logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-HOUSTON",
+       "to": "DLR-097",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 160,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to a US airport, then the regional logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-US-HOUSTON",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 5350,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-US-HOUSTON",
+       "to": "TRM-XDK-US-HOUSTON",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 220,
+       "description": "Customs clearance and haulage to the regional logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-HOUSTON",
+       "to": "DLR-097",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 160,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLUSSAV",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-098",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to a US port, then the regional logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-US-SAVANNAH",
+       "mode": "SEA",
+       "days": 15,
+       "cost": 1480,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-US-SAVANNAH",
+       "to": "TRM-XDK-US-SAVANNAH",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 230,
+       "description": "Port discharge, customs clearance and drayage to the regional logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-SAVANNAH",
+       "to": "DLR-098",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 150,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to a US airport, then the regional logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-US-SAVANNAH",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 5420,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-US-SAVANNAH",
+       "to": "TRM-XDK-US-SAVANNAH",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 220,
+       "description": "Customs clearance and haulage to the regional logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-SAVANNAH",
+       "to": "DLR-098",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 150,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLUSLAX",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-100",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to a US port, then the regional logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-US-LOSANGELES",
+       "mode": "SEA",
+       "days": 28,
+       "cost": 2350,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-US-LOSANGELES",
+       "to": "TRM-XDK-US-LOSANGELES",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 250,
+       "description": "Port discharge, customs clearance and drayage to the regional logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-LOSANGELES",
+       "to": "DLR-100",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 160,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to a US airport, then the regional logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-US-LOSANGELES",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 5640,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-US-LOSANGELES",
+       "to": "TRM-XDK-US-LOSANGELES",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 230,
+       "description": "Customs clearance and haulage to the regional logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-LOSANGELES",
+       "to": "DLR-100",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 160,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLUSCHI",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-099",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA_PLUS_ROAD",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to Savannah, then rail to the Chicago logistics hub.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-US-SAVANNAH",
+       "mode": "SEA",
+       "days": 15,
+       "cost": 1480,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-US-SAVANNAH",
+       "to": "TRM-XDK-US-CHICAGO",
+       "mode": "RAIL",
+       "days": 5,
+       "cost": 780,
+       "description": "Port discharge, customs clearance and rail to the Chicago logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-CHICAGO",
+       "to": "DLR-099",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 160,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to Chicago.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-US-CHICAGO",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 5280,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-US-CHICAGO",
+       "to": "TRM-XDK-US-CHICAGO",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 210,
+       "description": "Customs clearance and haulage to the Chicago logistics hub"
+      },
+      {
+       "from": "TRM-XDK-US-CHICAGO",
+       "to": "DLR-099",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 150,
+       "description": "Regional logistics hub to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLNG",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-101",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to the destination port.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-NG-LAGOS",
+       "mode": "SEA",
+       "days": 24,
+       "cost": 1980,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-NG-LAGOS",
+       "to": "DLR-101",
+       "mode": "ROAD",
+       "days": 6,
+       "cost": 420,
+       "description": "Port discharge, customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to the destination airport.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-NG-LAGOS",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 6120,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-NG-LAGOS",
+       "to": "DLR-101",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 310,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLGH",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-102",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to the destination port.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-GH-TEMA",
+       "mode": "SEA",
+       "days": 22,
+       "cost": 1900,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-GH-TEMA",
+       "to": "DLR-102",
+       "mode": "ROAD",
+       "days": 5,
+       "cost": 380,
+       "description": "Port discharge, customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to the destination airport.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-GH-ACCRA",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 5980,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-GH-ACCRA",
+       "to": "DLR-102",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 280,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLZA",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-103",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to the destination port.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-ZA-DURBAN",
+       "mode": "SEA",
+       "days": 29,
+       "cost": 2150,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-ZA-DURBAN",
+       "to": "DLR-103",
+       "mode": "ROAD",
+       "days": 4,
+       "cost": 360,
+       "description": "Port discharge, customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to the destination airport.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-ZA-DURBAN",
+       "mode": "AIR",
+       "days": 2,
+       "cost": 6850,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-ZA-DURBAN",
+       "to": "DLR-103",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 290,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLKE",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-104",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to the destination port.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-KE-MOMBASA",
+       "mode": "SEA",
+       "days": 33,
+       "cost": 2320,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-KE-MOMBASA",
+       "to": "DLR-104",
+       "mode": "ROAD",
+       "days": 6,
+       "cost": 430,
+       "description": "Port discharge, customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to the destination airport.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-KE-MOMBASA",
+       "mode": "AIR",
+       "days": 2,
+       "cost": 6950,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-KE-MOMBASA",
+       "to": "DLR-104",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 300,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lane_id": "NLMA",
+   "origin_location_id": "WH-005",
+   "destination_location_id": "DLR-105",
+   "routes": [
+    {
+     "suffix": "SEA",
+     "transport_mode": "SEA",
+     "service_level": "STANDARD",
+     "description": "Ocean freight to the destination port.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-SEA-NL-ROTTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 130,
+       "description": "Distribution centre to the departure port"
+      },
+      {
+       "from": "TRM-SEA-NL-ROTTERDAM",
+       "to": "TRM-SEA-MA-CASABLANCA",
+       "mode": "SEA",
+       "days": 7,
+       "cost": 920,
+       "description": "Ocean freight"
+      },
+      {
+       "from": "TRM-SEA-MA-CASABLANCA",
+       "to": "DLR-105",
+       "mode": "ROAD",
+       "days": 3,
+       "cost": 290,
+       "description": "Port discharge, customs clearance and haulage to the dealer"
+      }
+     ]
+    },
+    {
+     "suffix": "AIR",
+     "transport_mode": "AIR",
+     "service_level": "EXPRESS",
+     "description": "Air freight to the destination airport.",
+     "legs": [
+      {
+       "from": "WH-005",
+       "to": "TRM-AIR-NL-AMSTERDAM",
+       "mode": "ROAD",
+       "days": 1,
+       "cost": 140,
+       "description": "Distribution centre to the Amsterdam air cargo terminal"
+      },
+      {
+       "from": "TRM-AIR-NL-AMSTERDAM",
+       "to": "TRM-AIR-MA-CASABLANCA",
+       "mode": "AIR",
+       "days": 1,
+       "cost": 3980,
+       "description": "Air cargo"
+      },
+      {
+       "from": "TRM-AIR-MA-CASABLANCA",
+       "to": "DLR-105",
+       "mode": "ROAD",
+       "days": 2,
+       "cost": 250,
+       "description": "Customs clearance and haulage to the dealer"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "orders": [
+  {
+   "order_id": "ORD-NET-0001",
+   "customer_id": "CUS-009",
+   "dealer_id": "DLR-004",
+   "order_date": "2026-08-10",
+   "status": "SHIPPED",
+   "currency": "EUR",
+   "channel": "DEMO_NETWORK",
+   "lines": [
+    {
+     "order_line_id": "OL-NET-0001",
+     "part_id": "PRT-002",
+     "quantity": 50
+    }
+   ]
+  },
+  {
+   "order_id": "ORD-NET-0002",
+   "customer_id": "CUS-010",
+   "dealer_id": "DLR-097",
+   "order_date": "2026-09-08",
+   "status": "SHIPPED",
+   "currency": "EUR",
+   "channel": "DEMO_NETWORK",
+   "lines": [
+    {
+     "order_line_id": "OL-NET-0002",
+     "part_id": "PRT-003",
+     "quantity": 12
+    }
+   ]
+  },
+  {
+   "order_id": "ORD-NET-0003",
+   "customer_id": "CUS-009",
+   "dealer_id": "DLR-094",
+   "order_date": "2026-09-16",
+   "status": "DELIVERED",
+   "currency": "EUR",
+   "channel": "DEMO_NETWORK",
+   "lines": [
+    {
+     "order_line_id": "OL-NET-0003",
+     "part_id": "PRT-003",
+     "quantity": 4
+    }
+   ]
+  }
+ ],
+ "shipments": [
+  {
+   "shipment_id": "SHP-NET-0001",
+   "order_id": "ORD-NET-0001",
+   "order_line_id": "OL-NET-0001",
+   "route_id": "RTE-NET-JPNL-SEA-ECO",
+   "carrier_id": "CAR-demo-freight-fictional",
+   "tracking_ref": "DEMO-NET-0001",
+   "departure_date": "2026-08-20",
+   "story": "Scenario A: sea shipment, Japan to a Netherlands dealer through Rotterdam and the Netherlands distribution centre (economy service).",
+   "events": [
+    {
+     "n": 1,
+     "timestamp": "2026-08-14T09:00:00Z",
+     "event_type": "ORDER_CONFIRMED",
+     "location_id": "SUP-041",
+     "location_text": null,
+     "description": "Order confirmed by the supplier"
+    },
+    {
+     "n": 2,
+     "timestamp": "2026-08-17T10:30:00Z",
+     "event_type": "BOOKED",
+     "location_id": "SUP-041",
+     "location_text": null,
+     "description": "Ocean freight booked on an economy consolidated service"
+    },
+    {
+     "n": 3,
+     "timestamp": "2026-08-20T08:00:00Z",
+     "event_type": "DEPARTED_ORIGIN",
+     "location_id": "SUP-041",
+     "location_text": null,
+     "description": "Collected from the supplier"
+    },
+    {
+     "n": 4,
+     "timestamp": "2026-08-23T14:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-SEA-JP-NAGOYA",
+     "location_text": null,
+     "description": "Arrived at the origin port"
+    },
+    {
+     "n": 5,
+     "timestamp": "2026-09-02T22:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-SEA-JP-NAGOYA",
+     "location_text": null,
+     "description": "Vessel departed the origin port after consolidation"
+    },
+    {
+     "n": 6,
+     "timestamp": "2026-10-05T00:00:00Z",
+     "event_type": "IN_TRANSIT",
+     "location_id": null,
+     "location_text": "At sea (demo status)",
+     "description": "At sea: a status update, not a live position"
+    }
+   ]
+  },
+  {
+   "shipment_id": "SHP-NET-0002",
+   "order_id": "ORD-NET-0001",
+   "order_line_id": "OL-NET-0001",
+   "route_id": "RTE-NET-JPNL-AIR-EXP",
+   "carrier_id": "CAR-demo-freight-fictional",
+   "tracking_ref": "DEMO-NET-0002",
+   "departure_date": "2026-10-01",
+   "story": "Scenario B: the air alternative for the same order and part: an expedited split of the same lane, Japan to the same dealer.",
+   "events": [
+    {
+     "n": 1,
+     "timestamp": "2026-09-28T09:00:00Z",
+     "event_type": "ORDER_CONFIRMED",
+     "location_id": "SUP-041",
+     "location_text": null,
+     "description": "Order confirmed by the supplier"
+    },
+    {
+     "n": 2,
+     "timestamp": "2026-09-29T11:00:00Z",
+     "event_type": "BOOKED",
+     "location_id": "SUP-041",
+     "location_text": null,
+     "description": "Air freight booked for an expedited split of the order"
+    },
+    {
+     "n": 3,
+     "timestamp": "2026-10-01T07:00:00Z",
+     "event_type": "DEPARTED_ORIGIN",
+     "location_id": "SUP-041",
+     "location_text": null,
+     "description": "Collected from the supplier"
+    },
+    {
+     "n": 4,
+     "timestamp": "2026-10-02T06:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-AIR-JP-CHUBU",
+     "location_text": null,
+     "description": "Arrived at the origin airport cargo terminal"
+    },
+    {
+     "n": 5,
+     "timestamp": "2026-10-02T13:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-AIR-JP-CHUBU",
+     "location_text": null,
+     "description": "Flight departed"
+    },
+    {
+     "n": 6,
+     "timestamp": "2026-10-02T20:00:00Z",
+     "event_type": "IN_TRANSIT",
+     "location_id": null,
+     "location_text": "In flight (demo status)",
+     "description": "In flight: a status update, not a live position"
+    },
+    {
+     "n": 7,
+     "timestamp": "2026-10-04T05:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-AIR-NL-AMSTERDAM",
+     "location_text": null,
+     "description": "Arrived at the Amsterdam air cargo terminal"
+    },
+    {
+     "n": 8,
+     "timestamp": "2026-10-04T09:00:00Z",
+     "event_type": "CUSTOMS",
+     "location_id": "TRM-AIR-NL-AMSTERDAM",
+     "location_text": null,
+     "description": "Customs clearance"
+    },
+    {
+     "n": 9,
+     "timestamp": "2026-10-05T08:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-AIR-NL-AMSTERDAM",
+     "location_text": null,
+     "description": "Released and departed the terminal"
+    },
+    {
+     "n": 10,
+     "timestamp": "2026-10-06T10:00:00Z",
+     "event_type": "ARRIVED_DC",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Arrived at the Netherlands distribution centre"
+    },
+    {
+     "n": 11,
+     "timestamp": "2026-10-07T07:00:00Z",
+     "event_type": "OUT_FOR_DELIVERY",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Out for delivery to the dealer"
+    }
+   ]
+  },
+  {
+   "shipment_id": "SHP-NET-0003",
+   "order_id": "ORD-NET-0002",
+   "order_line_id": "OL-NET-0002",
+   "route_id": "RTE-NET-NLUSHOU-SEA",
+   "carrier_id": "CAR-demo-freight-fictional",
+   "tracking_ref": "DEMO-NET-0003",
+   "departure_date": "2026-09-15",
+   "story": "Scenario C: Netherlands distribution centre to a US dealer through the Houston port and the Houston regional logistics hub.",
+   "events": [
+    {
+     "n": 1,
+     "timestamp": "2026-09-11T09:00:00Z",
+     "event_type": "ORDER_CONFIRMED",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Order confirmed"
+    },
+    {
+     "n": 2,
+     "timestamp": "2026-09-12T10:00:00Z",
+     "event_type": "BOOKED",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Ocean freight booked from Rotterdam to Houston"
+    },
+    {
+     "n": 3,
+     "timestamp": "2026-09-15T08:00:00Z",
+     "event_type": "DEPARTED_ORIGIN",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Dispatched from the Netherlands distribution centre"
+    },
+    {
+     "n": 4,
+     "timestamp": "2026-09-16T10:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-SEA-NL-ROTTERDAM",
+     "location_text": null,
+     "description": "Arrived at the Rotterdam seaport"
+    },
+    {
+     "n": 5,
+     "timestamp": "2026-09-17T20:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-SEA-NL-ROTTERDAM",
+     "location_text": null,
+     "description": "Vessel departed Rotterdam"
+    },
+    {
+     "n": 6,
+     "timestamp": "2026-09-28T00:00:00Z",
+     "event_type": "IN_TRANSIT",
+     "location_id": null,
+     "location_text": "At sea (demo status)",
+     "description": "At sea: a status update, not a live position"
+    },
+    {
+     "n": 7,
+     "timestamp": "2026-10-05T07:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-SEA-US-HOUSTON",
+     "location_text": null,
+     "description": "Arrived at the Houston seaport"
+    },
+    {
+     "n": 8,
+     "timestamp": "2026-10-06T09:00:00Z",
+     "event_type": "CUSTOMS",
+     "location_id": "TRM-SEA-US-HOUSTON",
+     "location_text": null,
+     "description": "Customs clearance"
+    },
+    {
+     "n": 9,
+     "timestamp": "2026-10-07T06:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-SEA-US-HOUSTON",
+     "location_text": null,
+     "description": "Released; on the way to the Houston regional logistics hub"
+    }
+   ]
+  },
+  {
+   "shipment_id": "SHP-NET-0004",
+   "order_id": "ORD-NET-0003",
+   "order_line_id": "OL-NET-0003",
+   "route_id": "RTE-NET-NLUK-AIR",
+   "carrier_id": "CAR-demo-freight-fictional",
+   "tracking_ref": "DEMO-NET-0004",
+   "departure_date": "2026-09-20",
+   "story": "Scenario D: a delivered shipment, Netherlands distribution centre to a UK dealer by air; the complete lifecycle including delivery.",
+   "events": [
+    {
+     "n": 1,
+     "timestamp": "2026-09-18T09:00:00Z",
+     "event_type": "ORDER_CONFIRMED",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Order confirmed"
+    },
+    {
+     "n": 2,
+     "timestamp": "2026-09-19T10:00:00Z",
+     "event_type": "BOOKED",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Air freight booked from Amsterdam to London"
+    },
+    {
+     "n": 3,
+     "timestamp": "2026-09-20T08:00:00Z",
+     "event_type": "DEPARTED_ORIGIN",
+     "location_id": "WH-005",
+     "location_text": null,
+     "description": "Dispatched from the Netherlands distribution centre"
+    },
+    {
+     "n": 4,
+     "timestamp": "2026-09-21T09:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-AIR-NL-AMSTERDAM",
+     "location_text": null,
+     "description": "Arrived at the Amsterdam air cargo terminal"
+    },
+    {
+     "n": 5,
+     "timestamp": "2026-09-21T20:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-AIR-NL-AMSTERDAM",
+     "location_text": null,
+     "description": "Flight departed"
+    },
+    {
+     "n": 6,
+     "timestamp": "2026-09-22T07:00:00Z",
+     "event_type": "ARRIVED_PORT",
+     "location_id": "TRM-AIR-GB-LONDON",
+     "location_text": null,
+     "description": "Arrived at the London air cargo terminal"
+    },
+    {
+     "n": 7,
+     "timestamp": "2026-09-22T12:00:00Z",
+     "event_type": "CUSTOMS",
+     "location_id": "TRM-AIR-GB-LONDON",
+     "location_text": null,
+     "description": "Customs clearance"
+    },
+    {
+     "n": 8,
+     "timestamp": "2026-09-23T06:00:00Z",
+     "event_type": "DEPARTED_PORT",
+     "location_id": "TRM-AIR-GB-LONDON",
+     "location_text": null,
+     "description": "Released and departed the terminal"
+    },
+    {
+     "n": 9,
+     "timestamp": "2026-09-23T09:00:00Z",
+     "event_type": "OUT_FOR_DELIVERY",
+     "location_id": "TRM-AIR-GB-LONDON",
+     "location_text": null,
+     "description": "Out for delivery to the dealer"
+    },
+    {
+     "n": 10,
+     "timestamp": "2026-09-23T14:00:00Z",
+     "event_type": "DELIVERED",
+     "location_id": "DLR-094",
+     "location_text": null,
+     "description": "Delivered to the dealer"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+replacement_id,machine_instance_id,removed_part_id,installed_part_id,removed_installation_id,new_installation_id,replacement_date,reason,work_order_id,data_status,source_type,source_record_id,ingestion_timestamp,effective_from,effective_to
+REP-0001,MI-0001,PRT-003,PRT-003,INS-0001,INS-0003,2025-08-03,Failed in service,WO-0003,SYNTHETIC_DEMO,SYNTHETIC_DEMO,synthetic:REP-0001,,,
+REP-0002,MI-0004,PRT-011,PRT-011,INS-0008,INS-0010,2025-09-23,Failed in service,WO-0010,SYNTHETIC_DEMO,SYNTHETIC_DEMO,synthetic:REP-0002,,,
+REP-0003,MI-0007,PRT-090,PRT-090,INS-0015,INS-0017,2025-11-13,Failed in service,WO-0017,SYNTHETIC_DEMO,SYNTHETIC_DEMO,synthetic:REP-0003,,,
+REP-0004,MI-0010,PRT-051,PRT-051,INS-0022,INS-0023,2026-01-03,Failed in service,WO-0023,SYNTHETIC_DEMO,SYNTHETIC_DEMO,synthetic:REP-0004,,,
+REP-G005-1,MI-G005,PRT-007,PRT-007,INS-G005-A,INS-G005-B,2026-02-10,Failed in service,WO-G005-2,SYNTHETIC_DEMO,SYNTHETIC_DEMO,scenario:WAR-G005,,,
+REP-G005-2,MI-G005,PRT-007,PRT-007,INS-G005-B,INS-G005-C,2026-05-20,Failed in service,WO-G005-3,SYNTHETIC_DEMO,SYNTHETIC_DEMO,scenario:WAR-G005,,,

@@ -1,0 +1,3331 @@
+{
+ "dataset": "parts",
+ "dataset_version": "v1",
+ "canonical_schema_version": "1.0",
+ "generated_at": "2026-10-07T18:19:04Z",
+ "records": [
+  {
+   "part_id": "PRT-001",
+   "part_number": "NVM-4410-SK",
+   "name": "Hydraulic seal kit, main lift cylinder",
+   "description": "Hydraulic seal kit, main lift cylinder. Hydraulic seal kit (Hydraulics). Recorded as fitting KFT-600.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-001",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "AMBIGUOUS",
+   "aliases": [
+    "HK-2291-B",
+    "HK2291B",
+    "NVM4410SK",
+    "gasket",
+    "nvm-4410-sk",
+    "o-ring"
+   ],
+   "common_names": [
+    "gasket",
+    "o-ring"
+   ],
+   "technical_terms": [
+    "Bore 63"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-001",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-002",
+   "part_number": "NVM-1010-HY",
+   "name": "Hydraulic hose, high-pressure 19mm",
+   "description": "Hydraulic hose, high-pressure 19mm. Hydraulic hose (Hydraulics). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-002",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-771",
+    "AS771",
+    "NVM1010HY",
+    "line",
+    "nvm-1010-hy",
+    "pipe"
+   ],
+   "common_names": [
+    "line",
+    "pipe"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-002",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-003",
+   "part_number": "NVM-1020-HY",
+   "name": "Hydraulic hose, high-pressure 13mm",
+   "description": "Hydraulic hose, high-pressure 13mm. Hydraulic hose (Hydraulics). Recorded as fitting NV-2100, NV-3200.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-002",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-772",
+    "AS772",
+    "NVM1020HY",
+    "line",
+    "nvm-1020-hy",
+    "pipe"
+   ],
+   "common_names": [
+    "line",
+    "pipe"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-003",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-004",
+   "part_number": "NVM-1030-HY",
+   "name": "Main lift cylinder, double-acting",
+   "description": "Main lift cylinder, double-acting. Main lift cylinder (Hydraulics). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-003",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-410-C",
+    "AS410C",
+    "NVM1030HY",
+    "nvm-1030-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Bore 100",
+    "stroke 850"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-004",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-005",
+   "part_number": "NVM-1040-HY",
+   "name": "Tilt cylinder, double-acting",
+   "description": "Tilt cylinder, double-acting. Tilt cylinder (Hydraulics). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-004",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-411-C",
+    "AS411C",
+    "NVM1040HY",
+    "nvm-1040-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Bore 80",
+    "stroke 400"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-005",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-006",
+   "part_number": "NVM-1050-HY",
+   "name": "Gear pump, 28cc/rev",
+   "description": "Gear pump, 28cc/rev. Gear pump (Hydraulics). Recorded as fitting KFT-200, KFT-450.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-005",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-310",
+    "KFT310",
+    "NVM1050HY",
+    "hydraulic pump",
+    "nvm-1050-hy"
+   ],
+   "common_names": [
+    "hydraulic pump"
+   ],
+   "technical_terms": [
+    "Displacement 28",
+    "Pressure 210"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-006",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-007",
+   "part_number": "NVM-1060-HY",
+   "name": "Piston pump, variable displacement",
+   "description": "Piston pump, variable displacement. Piston pump (Hydraulics). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-006",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-315",
+    "KFT315",
+    "NVM1060HY",
+    "hydraulic pump",
+    "nvm-1060-hy"
+   ],
+   "common_names": [
+    "hydraulic pump"
+   ],
+   "technical_terms": [
+    "Displacement 45"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-007",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-008",
+   "part_number": "NVM-1070-HY",
+   "name": "Directional control valve, 4-spool",
+   "description": "Directional control valve, 4-spool. Directional control valve (Hydraulics). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-007",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-520",
+    "AS520",
+    "NVM1070HY",
+    "nvm-1070-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Flow rate 80"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-008",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-009",
+   "part_number": "NVM-1080-HY",
+   "name": "Relief valve, 210 bar",
+   "description": "Relief valve, 210 bar. Relief valve (Hydraulics). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-008",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-521",
+    "AS521",
+    "NVM1080HY",
+    "nvm-1080-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Pressure 210"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-009",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-010",
+   "part_number": "NVM-1090-HY",
+   "name": "Hydraulic filter housing, return line",
+   "description": "Hydraulic filter housing, return line. Hydraulic filter housing (Hydraulics). Recorded as fitting BTS-250, BTS-750.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-009",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "UNVERIFIED",
+   "aliases": [
+    "NVM1090HY",
+    "cartridge",
+    "element",
+    "nvm-1090-hy"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [
+    "Filter rating 10"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-010",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-011",
+   "part_number": "NVM-1100-HY",
+   "name": "Quick-release coupling set, ISO 7241-1",
+   "description": "Quick-release coupling set, ISO 7241-1. Quick-release coupling set (Hydraulics). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-010",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-550",
+    "AS550",
+    "NVM1100HY",
+    "nvm-1100-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-011",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-012",
+   "part_number": "NVM-1110-HY",
+   "name": "Hydraulic reservoir tank, 60L",
+   "description": "Hydraulic reservoir tank, 60L. Hydraulic reservoir tank (Hydraulics). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-011",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-340",
+    "KFT340",
+    "NVM1110HY",
+    "nvm-1110-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Volume 60"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-012",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-013",
+   "part_number": "NVM-1120-HY",
+   "name": "Tilt cylinder seal kit",
+   "description": "Tilt cylinder seal kit. Tilt cylinder seal kit (Hydraulics). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-012",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-411-SK",
+    "AS411SK",
+    "NVM1120HY",
+    "gasket",
+    "nvm-1120-hy",
+    "o-ring"
+   ],
+   "common_names": [
+    "gasket",
+    "o-ring"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-013",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-014",
+   "part_number": "NVM-1130-HY",
+   "name": "Boom cylinder pin bushing set",
+   "description": "Boom cylinder pin bushing set. Boom cylinder pin bushing set (Hydraulics). Recorded as fitting BTS-250.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-013",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "UNVERIFIED",
+   "aliases": [
+    "NVM1130HY",
+    "nvm-1130-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "bore 45"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-014",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-015",
+   "part_number": "NVM-1140-HY",
+   "name": "Hydraulic oil cooler, air-to-oil",
+   "description": "Hydraulic oil cooler, air-to-oil. Hydraulic oil cooler (Hydraulics). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-01",
+   "subcategory_id": "SUB-014",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-560",
+    "AS560",
+    "NVM1140HY",
+    "nvm-1140-hy"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Flow rate 40",
+    "Voltage 12"
+   ],
+   "symptoms": [
+    "loss of lifting power",
+    "slow hydraulic response",
+    "oil leak",
+    "spongy controls"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-015",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-016",
+   "part_number": "NVM-2210-GX",
+   "name": "Gearbox output sprocket, 24-tooth",
+   "description": "Gearbox output sprocket, 24-tooth. Gearbox output sprocket (Drivetrain). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-015",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "GX-24T-A",
+    "GX24TA",
+    "NVM2210GX",
+    "nvm-2210-gx"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "bore 32",
+    "pitch 3/4"
+   ],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-016",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-017",
+   "part_number": "NVM-1010-DT",
+   "name": "Drive chain, roller, 3/4 in pitch",
+   "description": "Drive chain, roller, 3/4 in pitch. Drive chain (Drivetrain). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-016",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-610",
+    "AS610",
+    "NVM1010DT",
+    "nvm-1010-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "pitch 3/4"
+   ],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-017",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-018",
+   "part_number": "NVM-1020-DT",
+   "name": "Final drive gearbox assembly",
+   "description": "Final drive gearbox assembly. Final drive gearbox assembly (Drivetrain). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-017",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-410",
+    "KFT410",
+    "NVM1020DT",
+    "nvm-1020-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Ratio 18.5:1"
+   ],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-018",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-019",
+   "part_number": "NVM-1030-DT",
+   "name": "Axle shaft, front, splined",
+   "description": "Axle shaft, front, splined. Axle shaft (Drivetrain). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-018",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-620",
+    "AS620",
+    "NVM1030DT",
+    "nvm-1030-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-019",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-020",
+   "part_number": "NVM-1040-DT",
+   "name": "Axle shaft, rear, splined",
+   "description": "Axle shaft, rear, splined. Axle shaft (Drivetrain). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-018",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-621",
+    "AS621",
+    "NVM1040DT",
+    "nvm-1040-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-020",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-021",
+   "part_number": "NVM-1050-DT",
+   "name": "Differential gear set, 4.1:1 ratio",
+   "description": "Differential gear set, 4.1:1 ratio. Differential gear set (Drivetrain). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-019",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-630",
+    "AS630",
+    "NVM1050DT",
+    "nvm-1050-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "ratio 4.1:1"
+   ],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-021",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-022",
+   "part_number": "NVM-1060-DT",
+   "name": "Wheel hub bearing, tapered roller",
+   "description": "Wheel hub bearing, tapered roller. Wheel hub bearing (Drivetrain). Recorded as fitting BTS-750, BTS-900.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-020",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "UNVERIFIED",
+   "aliases": [
+    "NVM1060DT",
+    "nvm-1060-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-022",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-023",
+   "part_number": "NVM-1070-DT",
+   "name": "Transfer case coupling",
+   "description": "Transfer case coupling. Transfer case coupling (Drivetrain). Recorded as fitting KFT-600.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-021",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-420",
+    "KFT420",
+    "NVM1070DT",
+    "nvm-1070-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-023",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-024",
+   "part_number": "NVM-1080-DT",
+   "name": "Drive belt, poly-V, 6-rib",
+   "description": "Drive belt, poly-V, 6-rib. Drive belt (Drivetrain). Recorded as fitting NV-2100, NV-3200.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-022",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-640",
+    "AS640",
+    "NVM1080DT",
+    "nvm-1080-dt",
+    "strap"
+   ],
+   "common_names": [
+    "strap"
+   ],
+   "technical_terms": [
+    "effective length 1850"
+   ],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-024",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-025",
+   "part_number": "NVM-1090-DT",
+   "name": "Clutch plate assembly",
+   "description": "Clutch plate assembly. Clutch plate assembly (Drivetrain). Recorded as fitting KFT-200, KFT-450.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-023",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-430",
+    "KFT430",
+    "NVM1090DT",
+    "nvm-1090-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-025",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-026",
+   "part_number": "NVM-1100-DT",
+   "name": "Universal joint, heavy duty",
+   "description": "Universal joint, heavy duty. Universal joint (Drivetrain). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-024",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-650",
+    "AS650",
+    "NVM1100DT",
+    "nvm-1100-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-026",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-027",
+   "part_number": "NVM-1110-DT",
+   "name": "Planetary gear carrier",
+   "description": "Planetary gear carrier. Planetary gear carrier (Drivetrain). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-025",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-440",
+    "KFT440",
+    "NVM1110DT",
+    "nvm-1110-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-027",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-028",
+   "part_number": "NVM-1120-DT",
+   "name": "Output shaft seal",
+   "description": "Output shaft seal. Output shaft seal (Drivetrain). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-026",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-651-SK",
+    "AS651SK",
+    "NVM1120DT",
+    "gasket",
+    "nvm-1120-dt",
+    "o-ring"
+   ],
+   "common_names": [
+    "gasket",
+    "o-ring"
+   ],
+   "technical_terms": [
+    "ID 45"
+   ],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-028",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-029",
+   "part_number": "NVM-1130-DT",
+   "name": "Wheel rim, 16-inch, 8-bolt",
+   "description": "Wheel rim, 16-inch, 8-bolt. Wheel rim (Drivetrain). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-027",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-660",
+    "AS660",
+    "NVM1130DT",
+    "nvm-1130-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-029",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-030",
+   "part_number": "NVM-1140-DT",
+   "name": "Track roller assembly",
+   "description": "Track roller assembly. Track roller assembly (Drivetrain). Recorded as fitting NV-7500.",
+   "category_id": "CAT-02",
+   "subcategory_id": "SUB-028",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "IDENTIFICATION_REQUIRED",
+   "aliases": [
+    "AS-670",
+    "AS670",
+    "NVM1140DT",
+    "nvm-1140-dt"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grinding noise",
+    "loss of drive",
+    "vibration under load",
+    "slipping"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-030",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-031",
+   "part_number": "NVM-1010-EL",
+   "name": "Wiring harness, main chassis",
+   "description": "Wiring harness, main chassis. Wiring harness (Electrical). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-029",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-710",
+    "AS710",
+    "NVM1010EL",
+    "nvm-1010-el"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-031",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-032",
+   "part_number": "NVM-1020-EL",
+   "name": "Ignition switch assembly",
+   "description": "Ignition switch assembly. Ignition switch assembly (Electrical). Recorded as fitting NV-2100, NV-3200, NV-4500.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-030",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-711",
+    "AS711",
+    "NVM1020EL",
+    "nvm-1020-el",
+    "relay"
+   ],
+   "common_names": [
+    "relay"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-032",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-033",
+   "part_number": "NVM-1030-EL",
+   "name": "Proximity sensor, boom position",
+   "description": "Proximity sensor, boom position. Proximity sensor (Electrical). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-031",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-510",
+    "KFT510",
+    "NVM1030EL",
+    "nvm-1030-el",
+    "transducer"
+   ],
+   "common_names": [
+    "transducer"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-033",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-034",
+   "part_number": "NVM-1040-EL",
+   "name": "Load sensor, hydraulic pressure transducer",
+   "description": "Load sensor, hydraulic pressure transducer. Load sensor (Electrical). Recorded as fitting KFT-200, KFT-450.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-032",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-511",
+    "KFT511",
+    "NVM1040EL",
+    "nvm-1040-el",
+    "transducer"
+   ],
+   "common_names": [
+    "transducer"
+   ],
+   "technical_terms": [
+    "Current 4-20",
+    "Pressure 0-350"
+   ],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-034",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-035",
+   "part_number": "NVM-1050-EL",
+   "name": "Control module, main ECU",
+   "description": "Control module, main ECU. Control module (Electrical). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-033",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-720",
+    "AS720",
+    "NVM1050EL",
+    "nvm-1050-el"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-035",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-036",
+   "part_number": "NVM-1060-EL",
+   "name": "Joystick controller assembly",
+   "description": "Joystick controller assembly. Joystick controller assembly (Electrical). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-034",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-721",
+    "AS721",
+    "NVM1060EL",
+    "nvm-1060-el"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-036",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-037",
+   "part_number": "NVM-1070-EL",
+   "name": "Battery, 12V 100Ah",
+   "description": "Battery, 12V 100Ah. Battery (Electrical). Recorded as fitting BTS-750, BTS-900.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-035",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "UNVERIFIED",
+   "aliases": [
+    "NVM1070EL",
+    "nvm-1070-el"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Capacity 100",
+    "Voltage 12"
+   ],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-037",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-038",
+   "part_number": "NVM-1080-EL",
+   "name": "Alternator, 90A",
+   "description": "Alternator, 90A. Alternator (Electrical). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-036",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-730",
+    "AS730",
+    "NVM1080EL",
+    "nvm-1080-el"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Current 90",
+    "Voltage 12"
+   ],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-038",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-039",
+   "part_number": "NVM-1090-EL",
+   "name": "Starter motor",
+   "description": "Starter motor. Starter motor (Electrical). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-037",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-731",
+    "AS731",
+    "NVM1090EL",
+    "nvm-1090-el"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Power 2.2",
+    "Voltage 12"
+   ],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-039",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-040",
+   "part_number": "NVM-1100-EL",
+   "name": "Headlight assembly, LED",
+   "description": "Headlight assembly, LED. Headlight assembly (Electrical). Recorded as fitting NV-2100, NV-3200.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-038",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-740",
+    "AS740",
+    "NVM1100EL",
+    "nvm-1100-el"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-040",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-041",
+   "part_number": "NVM-1110-EL",
+   "name": "Warning beacon, amber rotating",
+   "description": "Warning beacon, amber rotating. Warning beacon (Electrical). Recorded as fitting KFT-200, KFT-450, KFT-800.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-039",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-520",
+    "KFT520",
+    "NVM1110EL",
+    "nvm-1110-el"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Voltage 12/24"
+   ],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-041",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-042",
+   "part_number": "NVM-1120-EL",
+   "name": "Instrument cluster display",
+   "description": "Instrument cluster display. Instrument cluster display (Electrical). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-03",
+   "subcategory_id": "SUB-040",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-750",
+    "AS750",
+    "NVM1120EL",
+    "nvm-1120-el"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "machine will not start",
+    "warning light on",
+    "intermittent power loss",
+    "flat battery"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-042",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-043",
+   "part_number": "NVM-2205-BH",
+   "name": "Bearing housing, front axle",
+   "description": "Bearing housing, front axle. Bearing housing (Structural). Recorded as fitting BTS-250.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-041",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "UNVERIFIED",
+   "aliases": [
+    "NVM2205BH",
+    "nvm-2205-bh"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-043",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-044",
+   "part_number": "NVM-1010-ST",
+   "name": "Loader arm assembly, left",
+   "description": "Loader arm assembly, left. Loader arm assembly (Structural). Recorded as fitting BTS-250, KFT-600.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-042",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "IDENTIFICATION_REQUIRED",
+   "aliases": [
+    "KFT-610-L",
+    "KFT610L",
+    "NVM1010ST",
+    "nvm-1010-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-044",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-045",
+   "part_number": "NVM-1020-ST",
+   "name": "Loader arm assembly, right",
+   "description": "Loader arm assembly, right. Loader arm assembly (Structural). Recorded as fitting BTS-250, KFT-600.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-042",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "IDENTIFICATION_REQUIRED",
+   "aliases": [
+    "KFT-610-R",
+    "KFT610R",
+    "NVM1020ST",
+    "nvm-1020-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-045",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-046",
+   "part_number": "NVM-1030-ST",
+   "name": "Boom pivot pin",
+   "description": "Boom pivot pin. Boom pivot pin (Structural). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-043",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-810",
+    "AS810",
+    "NVM1030ST",
+    "nvm-1030-st"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "dia 50"
+   ],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-046",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-047",
+   "part_number": "NVM-1040-ST",
+   "name": "Boom pivot bushing",
+   "description": "Boom pivot bushing. Boom pivot bushing (Structural). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-044",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-811",
+    "AS811",
+    "NVM1040ST",
+    "nvm-1040-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-047",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-048",
+   "part_number": "NVM-1050-ST",
+   "name": "Frame crossmember",
+   "description": "Frame crossmember. Frame crossmember (Structural). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-045",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-820",
+    "AS820",
+    "NVM1050ST",
+    "nvm-1050-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-048",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-049",
+   "part_number": "NVM-1060-ST",
+   "name": "Counterweight bracket",
+   "description": "Counterweight bracket. Counterweight bracket (Structural). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-046",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-821",
+    "AS821",
+    "NVM1060ST",
+    "nvm-1060-st"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Mass 450"
+   ],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-049",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-050",
+   "part_number": "NVM-1070-ST",
+   "name": "Cab mounting bracket",
+   "description": "Cab mounting bracket. Cab mounting bracket (Structural). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-047",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-830",
+    "AS830",
+    "NVM1070ST",
+    "nvm-1070-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-050",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-051",
+   "part_number": "NVM-1080-ST",
+   "name": "Chassis tie rod",
+   "description": "Chassis tie rod. Chassis tie rod (Structural). Recorded as fitting BTS-100, BTS-500.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-048",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "BTS-810",
+    "BTS810",
+    "NVM1080ST",
+    "nvm-1080-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-051",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-052",
+   "part_number": "NVM-1090-ST",
+   "name": "Lift arm linkage plate",
+   "description": "Lift arm linkage plate. Lift arm linkage plate (Structural). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-049",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-620",
+    "KFT620",
+    "NVM1090ST",
+    "nvm-1090-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-052",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-053",
+   "part_number": "NVM-1100-ST",
+   "name": "Bucket pivot pin",
+   "description": "Bucket pivot pin. Bucket pivot pin (Structural). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-050",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-840",
+    "AS840",
+    "NVM1100ST",
+    "nvm-1100-st"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "dia 40"
+   ],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-053",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-054",
+   "part_number": "NVM-1110-ST",
+   "name": "Stabilizer leg assembly",
+   "description": "Stabilizer leg assembly. Stabilizer leg assembly (Structural). Recorded as fitting NV-6000.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-051",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-850",
+    "AS850",
+    "NVM1110ST",
+    "nvm-1110-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-054",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-055",
+   "part_number": "NVM-1120-ST",
+   "name": "Tow hitch bracket",
+   "description": "Tow hitch bracket. Tow hitch bracket (Structural). Recorded as fitting NV-2100, NV-3200, NV-4500.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-052",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-851",
+    "AS851",
+    "NVM1120ST",
+    "nvm-1120-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-055",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-056",
+   "part_number": "NVM-1130-ST",
+   "name": "Engine mount bushing",
+   "description": "Engine mount bushing. Engine mount bushing (Structural). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-053",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-860",
+    "AS860",
+    "NVM1130ST",
+    "nvm-1130-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-056",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-057",
+   "part_number": "NVM-1140-ST",
+   "name": "Footstep bracket, operator platform",
+   "description": "Footstep bracket, operator platform. Footstep bracket (Structural). Recorded as fitting NV-2100, NV-3200.",
+   "category_id": "CAT-04",
+   "subcategory_id": "SUB-054",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-861",
+    "AS861",
+    "NVM1140ST",
+    "nvm-1140-st"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "cracked frame",
+    "excess play at joints",
+    "worn pins and bushes",
+    "bent arm"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-057",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-058",
+   "part_number": "NVM-1010-FL",
+   "name": "Air filter, primary",
+   "description": "Air filter, primary. Air filter (Filtration). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-055",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-910",
+    "AS910",
+    "NVM1010FL",
+    "cartridge",
+    "element",
+    "nvm-1010-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-058",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-059",
+   "part_number": "NVM-1020-FL",
+   "name": "Air filter, secondary/safety",
+   "description": "Air filter, secondary/safety. Air filter (Filtration). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-055",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-911",
+    "AS911",
+    "NVM1020FL",
+    "cartridge",
+    "element",
+    "nvm-1020-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-059",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-060",
+   "part_number": "NVM-1030-FL",
+   "name": "Fuel filter, inline",
+   "description": "Fuel filter, inline. Fuel filter (Filtration). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-056",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-920",
+    "AS920",
+    "NVM1030FL",
+    "cartridge",
+    "element",
+    "nvm-1030-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [
+    "Filter rating 10"
+   ],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-060",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-061",
+   "part_number": "NVM-1040-FL",
+   "name": "Fuel filter, primary/water separator",
+   "description": "Fuel filter, primary/water separator. Fuel filter (Filtration). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-056",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-921",
+    "AS921",
+    "NVM1040FL",
+    "cartridge",
+    "element",
+    "nvm-1040-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-061",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-062",
+   "part_number": "NVM-1050-FL",
+   "name": "Engine oil filter",
+   "description": "Engine oil filter. Engine oil filter (Filtration). Recorded as fitting NV-3200, NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-057",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-930",
+    "AS930",
+    "NVM1050FL",
+    "cartridge",
+    "element",
+    "nvm-1050-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-062",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-063",
+   "part_number": "NVM-1060-FL",
+   "name": "Hydraulic return filter element",
+   "description": "Hydraulic return filter element. Hydraulic return filter element (Filtration). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-058",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-710",
+    "KFT710",
+    "NVM1060FL",
+    "cartridge",
+    "element",
+    "nvm-1060-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [
+    "Filter rating 10"
+   ],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-063",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-064",
+   "part_number": "NVM-1070-FL",
+   "name": "Cabin air filter",
+   "description": "Cabin air filter. Cabin air filter (Filtration). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-059",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-940",
+    "AS940",
+    "NVM1070FL",
+    "cartridge",
+    "element",
+    "nvm-1070-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-064",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-065",
+   "part_number": "NVM-1080-FL",
+   "name": "Transmission filter element",
+   "description": "Transmission filter element. Transmission filter element (Filtration). Recorded as fitting KFT-200, KFT-450.",
+   "category_id": "CAT-05",
+   "subcategory_id": "SUB-060",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-720",
+    "KFT720",
+    "NVM1080FL",
+    "cartridge",
+    "element",
+    "nvm-1080-fl"
+   ],
+   "common_names": [
+    "cartridge",
+    "element"
+   ],
+   "technical_terms": [
+    "Filter rating 20"
+   ],
+   "symptoms": [
+    "loss of power",
+    "dirty or contaminated oil",
+    "reduced airflow",
+    "filter warning light"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-065",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-066",
+   "part_number": "NVM-1010-BR",
+   "name": "Brake pad set, front",
+   "description": "Brake pad set, front. Brake pad set (Brakes). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-061",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1010",
+    "AS1010",
+    "NVM1010BR",
+    "caliper",
+    "nvm-1010-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-066",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-067",
+   "part_number": "NVM-1020-BR",
+   "name": "Brake pad set, rear",
+   "description": "Brake pad set, rear. Brake pad set (Brakes). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-061",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1011",
+    "AS1011",
+    "NVM1020BR",
+    "caliper",
+    "nvm-1020-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-067",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-068",
+   "part_number": "NVM-1030-BR",
+   "name": "Brake disc, front",
+   "description": "Brake disc, front. Brake disc (Brakes). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-062",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1020",
+    "AS1020",
+    "NVM1030BR",
+    "caliper",
+    "nvm-1030-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-068",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-069",
+   "part_number": "NVM-1040-BR",
+   "name": "Brake disc, rear",
+   "description": "Brake disc, rear. Brake disc (Brakes). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-062",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1021",
+    "AS1021",
+    "NVM1040BR",
+    "caliper",
+    "nvm-1040-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-069",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-070",
+   "part_number": "NVM-1050-BR",
+   "name": "Brake caliper assembly",
+   "description": "Brake caliper assembly. Brake caliper assembly (Brakes). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-063",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1030",
+    "AS1030",
+    "NVM1050BR",
+    "caliper",
+    "nvm-1050-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-070",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-071",
+   "part_number": "NVM-1060-BR",
+   "name": "Parking brake cable",
+   "description": "Parking brake cable. Parking brake cable (Brakes). Recorded as fitting KFT-200, KFT-450.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-064",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-810",
+    "KFT810",
+    "NVM1060BR",
+    "caliper",
+    "nvm-1060-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-071",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-072",
+   "part_number": "NVM-1070-BR",
+   "name": "Brake fluid reservoir",
+   "description": "Brake fluid reservoir. Brake fluid reservoir (Brakes). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-065",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1040",
+    "AS1040",
+    "NVM1070BR",
+    "caliper",
+    "nvm-1070-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-072",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-073",
+   "part_number": "NVM-1080-BR",
+   "name": "Brake master cylinder",
+   "description": "Brake master cylinder. Brake master cylinder (Brakes). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-06",
+   "subcategory_id": "SUB-066",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1041",
+    "AS1041",
+    "NVM1080BR",
+    "caliper",
+    "nvm-1080-br",
+    "stopping"
+   ],
+   "common_names": [
+    "caliper",
+    "stopping"
+   ],
+   "technical_terms": [
+    "bore 22"
+   ],
+   "symptoms": [
+    "brakes feel weak",
+    "squealing when braking",
+    "longer stopping distance",
+    "pedal travel too long"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-073",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-074",
+   "part_number": "NVM-1010-CL",
+   "name": "Radiator assembly",
+   "description": "Radiator assembly. Radiator assembly (Cooling). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-07",
+   "subcategory_id": "SUB-067",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1110",
+    "AS1110",
+    "NVM1010CL",
+    "nvm-1010-cl"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "engine overheating",
+    "coolant leak",
+    "fan not working",
+    "temperature warning"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-074",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-075",
+   "part_number": "NVM-1020-CL",
+   "name": "Cooling fan, engine-driven",
+   "description": "Cooling fan, engine-driven. Cooling fan (Cooling). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-07",
+   "subcategory_id": "SUB-068",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1111",
+    "AS1111",
+    "NVM1020CL",
+    "nvm-1020-cl"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "engine overheating",
+    "coolant leak",
+    "fan not working",
+    "temperature warning"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-075",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-076",
+   "part_number": "NVM-1030-CL",
+   "name": "Fan belt",
+   "description": "Fan belt. Fan belt (Cooling). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-07",
+   "subcategory_id": "SUB-069",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1112",
+    "AS1112",
+    "NVM1030CL",
+    "nvm-1030-cl",
+    "strap"
+   ],
+   "common_names": [
+    "strap"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "engine overheating",
+    "coolant leak",
+    "fan not working",
+    "temperature warning"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-076",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-077",
+   "part_number": "NVM-1040-CL",
+   "name": "Thermostat housing",
+   "description": "Thermostat housing. Thermostat housing (Cooling). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-07",
+   "subcategory_id": "SUB-070",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-910",
+    "KFT910",
+    "NVM1040CL",
+    "nvm-1040-cl"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Temperature 82"
+   ],
+   "symptoms": [
+    "engine overheating",
+    "coolant leak",
+    "fan not working",
+    "temperature warning"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-077",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-078",
+   "part_number": "NVM-1050-CL",
+   "name": "Water pump",
+   "description": "Water pump. Water pump (Cooling). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-07",
+   "subcategory_id": "SUB-071",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1120",
+    "AS1120",
+    "NVM1050CL",
+    "hydraulic pump",
+    "nvm-1050-cl"
+   ],
+   "common_names": [
+    "hydraulic pump"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "engine overheating",
+    "coolant leak",
+    "fan not working",
+    "temperature warning"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-078",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-079",
+   "part_number": "NVM-1060-CL",
+   "name": "Coolant hose set",
+   "description": "Coolant hose set. Coolant hose set (Cooling). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-07",
+   "subcategory_id": "SUB-072",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1121",
+    "AS1121",
+    "NVM1060CL",
+    "line",
+    "nvm-1060-cl",
+    "pipe"
+   ],
+   "common_names": [
+    "line",
+    "pipe"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "engine overheating",
+    "coolant leak",
+    "fan not working",
+    "temperature warning"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-079",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-080",
+   "part_number": "NVM-1010-CB",
+   "name": "Operator seat, suspension type",
+   "description": "Operator seat, suspension type. Operator seat (Cab & Controls). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-073",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1210",
+    "AS1210",
+    "NVM1010CB",
+    "nvm-1010-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-080",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-081",
+   "part_number": "NVM-1020-CB",
+   "name": "Seat belt assembly",
+   "description": "Seat belt assembly. Seat belt assembly (Cab & Controls). Recorded as fitting NV-2100, NV-3200, NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-074",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1211",
+    "AS1211",
+    "NVM1020CB",
+    "nvm-1020-cb",
+    "strap"
+   ],
+   "common_names": [
+    "strap"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-081",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-082",
+   "part_number": "NVM-1030-CB",
+   "name": "Steering wheel",
+   "description": "Steering wheel. Steering wheel (Cab & Controls). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-075",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1220",
+    "AS1220",
+    "NVM1030CB",
+    "nvm-1030-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-082",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-083",
+   "part_number": "NVM-1040-CB",
+   "name": "Steering column assembly",
+   "description": "Steering column assembly. Steering column assembly (Cab & Controls). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-076",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1221",
+    "AS1221",
+    "NVM1040CB",
+    "nvm-1040-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-083",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-084",
+   "part_number": "NVM-1050-CB",
+   "name": "Wiper motor assembly",
+   "description": "Wiper motor assembly. Wiper motor assembly (Cab & Controls). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-077",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-1010",
+    "KFT1010",
+    "NVM1050CB",
+    "nvm-1050-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Voltage 12"
+   ],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-084",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-085",
+   "part_number": "NVM-1060-CB",
+   "name": "Cab door glass, left",
+   "description": "Cab door glass, left. Cab door glass (Cab & Controls). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-078",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1230",
+    "AS1230",
+    "NVM1060CB",
+    "nvm-1060-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-085",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-086",
+   "part_number": "NVM-1070-CB",
+   "name": "Cab door glass, right",
+   "description": "Cab door glass, right. Cab door glass (Cab & Controls). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-078",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1231",
+    "AS1231",
+    "NVM1070CB",
+    "nvm-1070-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-086",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-087",
+   "part_number": "NVM-1080-CB",
+   "name": "HVAC blower motor",
+   "description": "HVAC blower motor. HVAC blower motor (Cab & Controls). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-08",
+   "subcategory_id": "SUB-079",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1240",
+    "AS1240",
+    "NVM1080CB",
+    "nvm-1080-cb"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Voltage 12"
+   ],
+   "symptoms": [
+    "joystick unresponsive",
+    "cab door will not close",
+    "cracked glass",
+    "controls feel stiff"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-087",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-088",
+   "part_number": "NVM-1010-AT",
+   "name": "Bucket, general purpose, 1.2m3",
+   "description": "Bucket, general purpose, 1.2m3. Bucket (Attachments). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-080",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1310",
+    "AS1310",
+    "NVM1010AT",
+    "nvm-1010-at"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Volume 1.2"
+   ],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-088",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-089",
+   "part_number": "NVM-1020-AT",
+   "name": "Bucket, high-tip, 1.0m3",
+   "description": "Bucket, high-tip, 1.0m3. Bucket (Attachments). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-080",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1311",
+    "AS1311",
+    "NVM1020AT",
+    "nvm-1020-at"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Volume 1.0"
+   ],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-089",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-090",
+   "part_number": "NVM-1030-AT",
+   "name": "Fork set, pallet, 1200mm",
+   "description": "Fork set, pallet, 1200mm. Fork set (Attachments). Recorded as fitting KFT-200, KFT-450.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-081",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-1110",
+    "KFT1110",
+    "NVM1030AT",
+    "nvm-1030-at"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-090",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-091",
+   "part_number": "NVM-1040-AT",
+   "name": "Tine, bale spike",
+   "description": "Tine, bale spike. Tine (Attachments). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-082",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1320",
+    "AS1320",
+    "NVM1040AT",
+    "nvm-1040-at"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-091",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-092",
+   "part_number": "NVM-1050-AT",
+   "name": "Quick-coupler plate",
+   "description": "Quick-coupler plate. Quick-coupler plate (Attachments). Recorded as fitting NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-083",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1330",
+    "AS1330",
+    "NVM1050AT",
+    "nvm-1050-at"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-092",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-093",
+   "part_number": "NVM-1060-AT",
+   "name": "Grapple attachment",
+   "description": "Grapple attachment. Grapple attachment (Attachments). Recorded as fitting NV-6000, NV-7500.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-084",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1340",
+    "AS1340",
+    "NVM1060AT",
+    "nvm-1060-at"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-093",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-094",
+   "part_number": "NVM-1070-AT",
+   "name": "Sweeper brush attachment",
+   "description": "Sweeper brush attachment. Sweeper brush attachment (Attachments). Recorded as fitting NV-3200, NV-4500.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-085",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1350",
+    "AS1350",
+    "NVM1070AT",
+    "nvm-1070-at"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "width 1.8"
+   ],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-094",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-095",
+   "part_number": "NVM-1080-AT",
+   "name": "Snow blade, 2.4m",
+   "description": "Snow blade, 2.4m. Snow blade (Attachments). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-09",
+   "subcategory_id": "SUB-086",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1360",
+    "AS1360",
+    "NVM1080AT",
+    "nvm-1080-at"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "worn cutting edge",
+    "attachment will not lock",
+    "bucket damage",
+    "reduced digging performance"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-095",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-096",
+   "part_number": "NVM-1010-LU",
+   "name": "Grease nipple set",
+   "description": "Grease nipple set. Grease nipple set (Lubrication). Recorded as fitting NV-3200, NV-4500, NV-6000, NV-7500.",
+   "category_id": "CAT-10",
+   "subcategory_id": "SUB-087",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1410",
+    "AS1410",
+    "NVM1010LU",
+    "nvm-1010-lu"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grease not reaching joints",
+    "low oil pressure",
+    "squeaking joints",
+    "oil starvation"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-096",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-097",
+   "part_number": "NVM-1020-LU",
+   "name": "Central lubrication pump",
+   "description": "Central lubrication pump. Central lubrication pump (Lubrication). Recorded as fitting KFT-600, KFT-800.",
+   "category_id": "CAT-10",
+   "subcategory_id": "SUB-088",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-1210",
+    "KFT1210",
+    "NVM1020LU",
+    "hydraulic pump",
+    "nvm-1020-lu"
+   ],
+   "common_names": [
+    "hydraulic pump"
+   ],
+   "technical_terms": [
+    "Volume 2"
+   ],
+   "symptoms": [
+    "grease not reaching joints",
+    "low oil pressure",
+    "squeaking joints",
+    "oil starvation"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-097",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-098",
+   "part_number": "NVM-1030-LU",
+   "name": "Grease line hose kit",
+   "description": "Grease line hose kit. Grease line hose kit (Lubrication). Recorded as fitting NV-4500, NV-6000.",
+   "category_id": "CAT-10",
+   "subcategory_id": "SUB-089",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1420",
+    "AS1420",
+    "NVM1030LU",
+    "line",
+    "nvm-1030-lu",
+    "pipe"
+   ],
+   "common_names": [
+    "line",
+    "pipe"
+   ],
+   "technical_terms": [],
+   "symptoms": [
+    "grease not reaching joints",
+    "low oil pressure",
+    "squeaking joints",
+    "oil starvation"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-098",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-099",
+   "part_number": "NVM-1040-LU",
+   "name": "Oil dipstick assembly",
+   "description": "Oil dipstick assembly. Oil dipstick assembly (Lubrication). Recorded as fitting NV-3200, NV-4500, NV-6000.",
+   "category_id": "CAT-10",
+   "subcategory_id": "SUB-090",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "AS-1430",
+    "AS1430",
+    "NVM1040LU",
+    "nvm-1040-lu"
+   ],
+   "common_names": [],
+   "technical_terms": [],
+   "symptoms": [
+    "grease not reaching joints",
+    "low oil pressure",
+    "squeaking joints",
+    "oil starvation"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-099",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "part_id": "PRT-100",
+   "part_number": "NVM-1050-LU",
+   "name": "Auto-lube reservoir, 4L",
+   "description": "Auto-lube reservoir, 4L. Auto-lube reservoir (Lubrication). Recorded as fitting KFT-800.",
+   "category_id": "CAT-10",
+   "subcategory_id": "SUB-091",
+   "manufacturer": "Noordveld",
+   "oem_status": "OEM",
+   "status": "VERIFIED",
+   "aliases": [
+    "KFT-1220",
+    "KFT1220",
+    "NVM1050LU",
+    "nvm-1050-lu"
+   ],
+   "common_names": [],
+   "technical_terms": [
+    "Volume 4"
+   ],
+   "symptoms": [
+    "grease not reaching joints",
+    "low oil pressure",
+    "squeaking joints",
+    "oil starvation"
+   ],
+   "data_status": "SOURCE_DERIVED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PRT-100",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "dataset": "network_suppliers",
+ "dataset_version": "v1",
+ "canonical_schema_version": "1.0",
+ "generated_at": "2026-10-07T19:07:39Z",
+ "records": [
+  {
+   "supplier_id": "SUP-041",
+   "name": "Chubu Hydraulic Components K.K. (demo)",
+   "city": "Toyota",
+   "country_code": "JP",
+   "supplier_type": "COMPONENT_MANUFACTURER",
+   "status": "ACTIVE_DEMO",
+   "data_status": "SYNTHETIC_DEMO",
+   "source_type": "SYNTHETIC_DEMO",
+   "source_record_id": "network_definition:SUP-041",
+   "ingestion_timestamp": null,
+   "effective_from": "2026-01-01",
+   "effective_to": null
+  }
+ ]
+}

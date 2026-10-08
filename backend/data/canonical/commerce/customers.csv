@@ -1,0 +1,11 @@
+customer_id,name,city,country_code,customer_type,status,data_status,source_type,source_record_id,ingestion_timestamp,effective_from,effective_to
+CUS-001,Harmsen Logistics BV (demo),Zwolle,NL,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-001,,,
+CUS-002,Vennebos Bouw (demo),Enschede,NL,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-002,,,
+CUS-003,Kustwerf Hamburg GmbH (demo),Hamburg,DE,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-003,,,
+CUS-004,Groenhart Agri (demo),Groningen,NL,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-004,,,
+CUS-005,Rheinhafen Umschlag GmbH (demo),Duesseldorf,DE,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-005,,,
+CUS-006,De Linde Verhuur (demo),Utrecht,NL,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-006,,,
+CUS-007,Emsland Spedition (demo),Meppen,DE,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-007,,,
+CUS-008,Brabantia Warehousing (demo),Eindhoven,NL,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-008,,,
+CUS-009,Nordsee Hafenbetrieb (demo),Bremen,DE,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-009,,,
+CUS-010,Scheldeland Transport (demo),Gent,BE,BUSINESS,DEMO,SYNTHETIC_DEMO,SYNTHETIC_DEMO,CUS-010,,,

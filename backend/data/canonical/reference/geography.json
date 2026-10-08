@@ -1,0 +1,307 @@
+{
+ "dataset": "geography",
+ "data_status": "REFERENCE",
+ "source_type": "REFERENCE",
+ "note": "Reference geography used to fill country, region and timezone on logistics locations and to place cities on maps. Where a city is, not Noordveld business data: which plant, depot, dealer or supplier is in which city always comes from the graph. Moved out of code (app/core/geography.py).",
+ "regions": [
+  "EUROPE",
+  "USA",
+  "AFRICA",
+  "ASIA"
+ ],
+ "countries": {
+  "AT": {
+   "name": "Austria",
+   "region": "EUROPE",
+   "timezone": "Europe/Vienna"
+  },
+  "BE": {
+   "name": "Belgium",
+   "region": "EUROPE",
+   "timezone": "Europe/Brussels"
+  },
+  "BG": {
+   "name": "Bulgaria",
+   "region": "EUROPE",
+   "timezone": "Europe/Sofia"
+  },
+  "HR": {
+   "name": "Croatia",
+   "region": "EUROPE",
+   "timezone": "Europe/Zagreb"
+  },
+  "CY": {
+   "name": "Cyprus",
+   "region": "EUROPE",
+   "timezone": "Asia/Nicosia"
+  },
+  "CZ": {
+   "name": "Czechia",
+   "region": "EUROPE",
+   "timezone": "Europe/Prague"
+  },
+  "DK": {
+   "name": "Denmark",
+   "region": "EUROPE",
+   "timezone": "Europe/Copenhagen"
+  },
+  "EE": {
+   "name": "Estonia",
+   "region": "EUROPE",
+   "timezone": "Europe/Tallinn"
+  },
+  "FI": {
+   "name": "Finland",
+   "region": "EUROPE",
+   "timezone": "Europe/Helsinki"
+  },
+  "FR": {
+   "name": "France",
+   "region": "EUROPE",
+   "timezone": "Europe/Paris"
+  },
+  "DE": {
+   "name": "Germany",
+   "region": "EUROPE",
+   "timezone": "Europe/Berlin"
+  },
+  "GR": {
+   "name": "Greece",
+   "region": "EUROPE",
+   "timezone": "Europe/Athens"
+  },
+  "HU": {
+   "name": "Hungary",
+   "region": "EUROPE",
+   "timezone": "Europe/Budapest"
+  },
+  "IE": {
+   "name": "Ireland",
+   "region": "EUROPE",
+   "timezone": "Europe/Dublin"
+  },
+  "IT": {
+   "name": "Italy",
+   "region": "EUROPE",
+   "timezone": "Europe/Rome"
+  },
+  "LV": {
+   "name": "Latvia",
+   "region": "EUROPE",
+   "timezone": "Europe/Riga"
+  },
+  "LT": {
+   "name": "Lithuania",
+   "region": "EUROPE",
+   "timezone": "Europe/Vilnius"
+  },
+  "LU": {
+   "name": "Luxembourg",
+   "region": "EUROPE",
+   "timezone": "Europe/Luxembourg"
+  },
+  "MT": {
+   "name": "Malta",
+   "region": "EUROPE",
+   "timezone": "Europe/Malta"
+  },
+  "NL": {
+   "name": "Netherlands",
+   "region": "EUROPE",
+   "timezone": "Europe/Amsterdam"
+  },
+  "PL": {
+   "name": "Poland",
+   "region": "EUROPE",
+   "timezone": "Europe/Warsaw"
+  },
+  "PT": {
+   "name": "Portugal",
+   "region": "EUROPE",
+   "timezone": "Europe/Lisbon"
+  },
+  "RO": {
+   "name": "Romania",
+   "region": "EUROPE",
+   "timezone": "Europe/Bucharest"
+  },
+  "SK": {
+   "name": "Slovakia",
+   "region": "EUROPE",
+   "timezone": "Europe/Bratislava"
+  },
+  "SI": {
+   "name": "Slovenia",
+   "region": "EUROPE",
+   "timezone": "Europe/Ljubljana"
+  },
+  "ES": {
+   "name": "Spain",
+   "region": "EUROPE",
+   "timezone": "Europe/Madrid"
+  },
+  "SE": {
+   "name": "Sweden",
+   "region": "EUROPE",
+   "timezone": "Europe/Stockholm"
+  },
+  "GB": {
+   "name": "United Kingdom",
+   "region": "EUROPE",
+   "timezone": "Europe/London"
+  },
+  "CH": {
+   "name": "Switzerland",
+   "region": "EUROPE",
+   "timezone": "Europe/Zurich"
+  },
+  "NO": {
+   "name": "Norway",
+   "region": "EUROPE",
+   "timezone": "Europe/Oslo"
+  },
+  "US": {
+   "name": "United States",
+   "region": "USA",
+   "timezone": "America/Chicago"
+  },
+  "NG": {
+   "name": "Nigeria",
+   "region": "AFRICA",
+   "timezone": "Africa/Lagos"
+  },
+  "GH": {
+   "name": "Ghana",
+   "region": "AFRICA",
+   "timezone": "Africa/Accra"
+  },
+  "ZA": {
+   "name": "South Africa",
+   "region": "AFRICA",
+   "timezone": "Africa/Johannesburg"
+  },
+  "KE": {
+   "name": "Kenya",
+   "region": "AFRICA",
+   "timezone": "Africa/Nairobi"
+  },
+  "MA": {
+   "name": "Morocco",
+   "region": "AFRICA",
+   "timezone": "Africa/Casablanca"
+  },
+  "JP": {
+   "name": "Japan",
+   "region": "ASIA",
+   "timezone": "Asia/Tokyo"
+  }
+ },
+ "city_coordinates": {
+  "Almelo": [
+   52.3567,
+   6.6625
+  ],
+  "Antwerpen": [
+   51.2194,
+   4.4025
+  ],
+  "Assen": [
+   52.9925,
+   6.5642
+  ],
+  "Bremen": [
+   53.0793,
+   8.8017
+  ],
+  "Coevorden": [
+   52.6606,
+   6.7411
+  ],
+  "Dortmund": [
+   51.5136,
+   7.4653
+  ],
+  "Duesseldorf": [
+   51.2277,
+   6.7735
+  ],
+  "Eindhoven": [
+   51.4416,
+   5.4697
+  ],
+  "Emmen": [
+   52.7792,
+   6.9069
+  ],
+  "Enschede": [
+   52.2215,
+   6.8937
+  ],
+  "Gent": [
+   51.0543,
+   3.7174
+  ],
+  "Groningen": [
+   53.2194,
+   6.5665
+  ],
+  "Hamburg": [
+   53.5511,
+   9.9937
+  ],
+  "Hannover": [
+   52.3759,
+   9.732
+  ],
+  "Heerenveen": [
+   52.96,
+   5.92
+  ],
+  "Koeln": [
+   50.9375,
+   6.9603
+  ],
+  "Lingen": [
+   52.5236,
+   7.3187
+  ],
+  "Meppen": [
+   52.6906,
+   7.2924
+  ],
+  "Muenster": [
+   51.9607,
+   7.6261
+  ],
+  "Oldenburg": [
+   53.1435,
+   8.2146
+  ],
+  "Osnabrueck": [
+   52.2799,
+   8.0472
+  ],
+  "Rotterdam": [
+   51.9244,
+   4.4777
+  ],
+  "Utrecht": [
+   52.0907,
+   5.1214
+  ],
+  "Venlo": [
+   51.3704,
+   6.1724
+  ],
+  "Zwolle": [
+   52.5168,
+   6.083
+  ]
+ },
+ "timezone_overrides": {
+  "US:Houston": "America/Chicago",
+  "US:Chicago": "America/Chicago",
+  "US:Savannah": "America/New_York",
+  "US:Los Angeles": "America/Los_Angeles"
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "dataset": "plants",
+ "dataset_version": "v1",
+ "canonical_schema_version": "1.0",
+ "generated_at": "2026-10-07T18:19:04Z",
+ "records": [
+  {
+   "plant_id": "PLT-001",
+   "name": "Assen (NL)",
+   "city": "Assen",
+   "country_code": "NL",
+   "data_status": "USER_PROVIDED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PLT-001",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "plant_id": "PLT-002",
+   "name": "Lingen (DE)",
+   "city": "Lingen",
+   "country_code": "DE",
+   "data_status": "USER_PROVIDED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PLT-002",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "plant_id": "PLT-003",
+   "name": "Coevorden (NL)",
+   "city": "Coevorden",
+   "country_code": "NL",
+   "data_status": "USER_PROVIDED",
+   "source_type": "OEM_MASTER",
+   "source_record_id": "PLT-003",
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  }
+ ]
+}

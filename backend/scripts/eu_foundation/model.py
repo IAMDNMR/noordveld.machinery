@@ -86,8 +86,8 @@ def load_existing() -> Existing:
     machines = read("""MATCH (m:Machine) OPTIONAL MATCH (m)-[:MEMBER_OF_FAMILY]->(f:MachineFamily) OPTIONAL MATCH (m)-[:MANUFACTURED_AT]->(pl:Plant)
                        RETURN m.machine_id AS id, m.model_code AS code, m.machine_type AS type, f.family_id AS family, pl.name AS plant ORDER BY id""")
     families = read("MATCH (f:MachineFamily) RETURN f.family_id AS id, f.name AS name ORDER BY id")
-    dealers = read("MATCH (d:Dealer) WHERE coalesce(d.enrichment_batch,'') <> $b RETURN d.dealer_id AS id, d.name AS name, d.city AS city, d.country_code AS cc ORDER BY id", b=BATCH)
-    suppliers = read("MATCH (s:Supplier) WHERE coalesce(s.enrichment_batch,'') <> $b RETURN s.supplier_id AS id, s.name AS name, s.city AS city, s.country_code AS cc ORDER BY id", b=BATCH)
+    dealers = read("MATCH (d:Dealer) WHERE coalesce(d.enrichment_batch,'') <> $b AND NOT coalesce(d.canonical_dataset, '') STARTS WITH 'network_' RETURN d.dealer_id AS id, d.name AS name, d.city AS city, d.country_code AS cc ORDER BY id", b=BATCH)
+    suppliers = read("MATCH (s:Supplier) WHERE coalesce(s.enrichment_batch,'') <> $b AND NOT coalesce(s.canonical_dataset, '') STARTS WITH 'network_' RETURN s.supplier_id AS id, s.name AS name, s.city AS city, s.country_code AS cc ORDER BY id", b=BATCH)
     customers = read("MATCH (c:Customer) WHERE coalesce(c.enrichment_batch,'') <> $b RETURN c.customer_id AS id, c.name AS name, c.city AS city, c.country_code AS cc ORDER BY id", b=BATCH)
     warehouses = read("MATCH (w:Warehouse) WHERE coalesce(w.enrichment_batch,'') <> $b RETURN w.warehouse_id AS id, w.name AS name, w.city AS city, w.country_code AS cc, w.latitude AS lat, w.longitude AS lon ORDER BY id", b=BATCH)
     regions = read("MATCH (r:Region) WHERE coalesce(r.enrichment_batch,'') <> $b RETURN r.region_id AS id, r.name AS name, r.country_code AS cc ORDER BY id", b=BATCH)
@@ -104,7 +104,7 @@ def load_existing() -> Existing:
     fam = defaultdict(list)
     for r in read("MATCH (d:Dealer)-[r:SERVES_FAMILY]->(f:MachineFamily) WHERE coalesce(r.enrichment_batch,'') <> $b RETURN d.dealer_id AS d, f.family_id AS f ORDER BY d, f", b=BATCH):
         fam[r["d"]].append(r["f"])
-    cap = {r["id"]: r["c"] or [] for r in read("MATCH (d:Dealer) WHERE coalesce(d.enrichment_batch,'') <> $b RETURN d.dealer_id AS id, d.service_capability AS c", b=BATCH)}
+    cap = {r["id"]: r["c"] or [] for r in read("MATCH (d:Dealer) WHERE coalesce(d.enrichment_batch,'') <> $b AND NOT coalesce(d.canonical_dataset, '') STARTS WITH 'network_' RETURN d.dealer_id AS id, d.service_capability AS c", b=BATCH)}
     pd = {(r["p"], r["d"]) for r in read("MATCH (p:Part)-[r:STOCKED_BY]->(d:Dealer) WHERE coalesce(r.enrichment_batch,'') <> $b RETURN p.part_id AS p, d.dealer_id AS d", b=BATCH)}
     ps = {(r["p"], r["s"]) for r in read("MATCH (p:Part)-[r:SUPPLIED_BY]->(s:Supplier) WHERE coalesce(r.enrichment_batch,'') <> $b RETURN p.part_id AS p, s.supplier_id AS s", b=BATCH)}
     stock = {r["p"]: r["n"] for r in read("MATCH (p:Part)-[a:AVAILABLE_AT]->(:Warehouse) WHERE coalesce(a.enrichment_batch,'') <> $b RETURN p.part_id AS p, sum(coalesce(a.available,0)) AS n", b=BATCH)}

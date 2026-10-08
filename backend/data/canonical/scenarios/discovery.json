@@ -1,0 +1,44 @@
+{
+ "dataset": "scenarios_discovery",
+ "dataset_version": "v1",
+ "canonical_schema_version": "1.0",
+ "generated_at": "2026-10-08T06:22:20Z",
+ "records": [
+  {
+   "scenario_id": "SCN-DISC-001",
+   "scenario_type": "DISCOVERY",
+   "title": "Find a hydraulic hose for an NV-4500",
+   "machine_id": "MCH-003",
+   "part_id": "PRT-002",
+   "customer_id": null,
+   "machine_instance_id": null,
+   "shipment_id": null,
+   "order_id": null,
+   "notes": "Natural-language request resolved to a part through fitment, approved source and availability",
+   "data_status": "SYNTHETIC_DEMO",
+   "source_type": "SYNTHETIC_DEMO",
+   "source_record_id": null,
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  },
+  {
+   "scenario_id": "SCN-FILM-001",
+   "scenario_type": "FILM",
+   "title": "Featured records of the launch film (replaces the FILM_* constants)",
+   "machine_id": "MCH-003",
+   "part_id": "PRT-002",
+   "customer_id": "CUS-008",
+   "machine_instance_id": null,
+   "shipment_id": null,
+   "order_id": null,
+   "notes": "The launch film reads this record (services/site.py): the former FILM_* constants no longer exist in code",
+   "data_status": "SYNTHETIC_DEMO",
+   "source_type": "SYNTHETIC_DEMO",
+   "source_record_id": null,
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  }
+ ]
+}

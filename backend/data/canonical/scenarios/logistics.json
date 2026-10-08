@@ -1,0 +1,26 @@
+{
+ "dataset": "scenarios_logistics",
+ "dataset_version": "v1",
+ "canonical_schema_version": "1.0",
+ "generated_at": "2026-10-08T06:22:20Z",
+ "records": [
+  {
+   "scenario_id": "SCN-LOG-001",
+   "scenario_type": "LOGISTICS",
+   "title": "Where is my shipment",
+   "machine_id": null,
+   "part_id": null,
+   "customer_id": null,
+   "machine_instance_id": null,
+   "shipment_id": "SHP-0001",
+   "order_id": "ORD-0001",
+   "notes": "A seeded shipment with tracking events; its route is not determinable yet (see its remediation flags)",
+   "data_status": "SYNTHETIC_DEMO",
+   "source_type": "SYNTHETIC_DEMO",
+   "source_record_id": null,
+   "ingestion_timestamp": null,
+   "effective_from": null,
+   "effective_to": null
+  }
+ ]
+}

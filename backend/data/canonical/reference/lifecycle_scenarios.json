@@ -1,0 +1,916 @@
+{
+ "dataset": "lifecycle_scenarios",
+ "dataset_version": 1,
+ "note": "Golden warranty scenarios: authored data, expanded into lifecycle records by app/canonical/generate.py. expected_outcome is what the deterministic evaluator must return.",
+ "technicians": [
+  {
+   "technician_id": "TEC-DLR-004-1",
+   "dealer_id": "DLR-004",
+   "name": "Hendrik Vos (demo)",
+   "certification": "Noordveld Certified Technician L3",
+   "specialization": "Hydraulics",
+   "status": "ACTIVE"
+  },
+  {
+   "technician_id": "TEC-DLR-002-1",
+   "dealer_id": "DLR-002",
+   "name": "Joost Prins (demo)",
+   "certification": "Noordveld Certified Technician L3",
+   "specialization": "Powertrain",
+   "status": "ACTIVE"
+  }
+ ],
+ "entity_evidence": [
+  {
+   "evidence_id": "EV-DLR-DLR-002",
+   "evidence_type": "DEALER_RECORD",
+   "entity_type": "DEALER",
+   "entity_id": "DLR-002",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-DLR-DLR-004",
+   "evidence_type": "DEALER_RECORD",
+   "entity_type": "DEALER",
+   "entity_id": "DLR-004",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-TEC-TEC-DLR-002-1",
+   "evidence_type": "TECHNICIAN_RECORD",
+   "entity_type": "TECHNICIAN",
+   "entity_id": "TEC-DLR-002-1",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-TEC-TEC-DLR-004-1",
+   "evidence_type": "TECHNICIAN_RECORD",
+   "entity_type": "TECHNICIAN",
+   "entity_id": "TEC-DLR-004-1",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-PRT-PRT-006",
+   "evidence_type": "PART_RECORD",
+   "entity_type": "PART",
+   "entity_id": "PRT-006",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-PRT-PRT-007",
+   "evidence_type": "PART_RECORD",
+   "entity_type": "PART",
+   "entity_id": "PRT-007",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-PRT-PRT-018",
+   "evidence_type": "PART_RECORD",
+   "entity_type": "PART",
+   "entity_id": "PRT-018",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  },
+  {
+   "evidence_id": "EV-PRT-PRT-022",
+   "evidence_type": "PART_RECORD",
+   "entity_type": "PART",
+   "entity_id": "PRT-022",
+   "reference": "Synthetic demonstration record: no real document exists",
+   "created_at": "2025-01-10"
+  }
+ ],
+ "scenarios": [
+  {
+   "scenario_id": "WAR-G001",
+   "title": "Piston pump fitted by an authorised dealer, failed inside the warranty period",
+   "expected_outcome": "ELIGIBLE",
+   "claim_id": "CLM-G001",
+   "machine_instance_id": "MI-G001",
+   "part_id": "PRT-007",
+   "notes": "One work order records two component installations (pump and drivetrain part). Fully evidenced; the failure falls inside the 365-day period.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G001",
+    "machine_id": "MCH-009",
+    "variant_id": "VAR-009-1",
+    "serial_number": "KFT-600-00412",
+    "model_year": 2025,
+    "owner_id": "CUS-001",
+    "location_id": "SHT-001-1",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G001",
+     "machine_instance_id": "MI-G001",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2026-04-12",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Fitting of a replacement pump and drivetrain part"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G001-A",
+     "machine_instance_id": "MI-G001",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G001-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G001",
+     "installation_date": "2026-04-12",
+     "removal_date": null,
+     "status": "CURRENT"
+    },
+    {
+     "installation_id": "INS-G001-B",
+     "machine_instance_id": "MI-G001",
+     "part_id": "PRT-018",
+     "part_serial_number": "SN-018-G001-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G001",
+     "installation_date": "2026-04-12",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G001",
+     "machine_instance_id": "MI-G001",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G001-A",
+     "failure_date": "2026-09-20",
+     "claim_date": "2026-09-22",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G001-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G001-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-04-12"
+    },
+    {
+     "evidence_id": "EV-G001-WO-1",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G001",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-04-12"
+    },
+    {
+     "evidence_id": "EV-G001-INS-B",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G001-B",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-04-12"
+    },
+    {
+     "evidence_id": "EV-G001-SVC",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G001-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-07-01"
+    },
+    {
+     "evidence_id": "EV-G001-INSP",
+     "evidence_type": "INSPECTION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G001-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-08-15"
+    },
+    {
+     "evidence_id": "EV-G001-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G001",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-09-22"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G002",
+   "title": "Piston pump fitted by an unauthorised service partner",
+   "expected_outcome": "NOT_ELIGIBLE",
+   "claim_id": "CLM-G002",
+   "machine_instance_id": "MI-G002",
+   "part_id": "PRT-007",
+   "notes": "Everything else holds, but the installing dealer's authorized_status is SERVICE_PARTNER, not AUTHORISED.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G002",
+    "machine_id": "MCH-009",
+    "variant_id": "VAR-009-2",
+    "serial_number": "KFT-600-05211",
+    "model_year": 2025,
+    "owner_id": "CUS-004",
+    "location_id": "SHT-004-1",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G002",
+     "machine_instance_id": "MI-G002",
+     "dealer_id": "DLR-002",
+     "technician_id": "TEC-DLR-002-1",
+     "service_date": "2026-05-03",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Fitting of a pump"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G002-A",
+     "machine_instance_id": "MI-G002",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G002-A",
+     "dealer_id": "DLR-002",
+     "technician_id": "TEC-DLR-002-1",
+     "work_order_id": "WO-G002",
+     "installation_date": "2026-05-03",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G002",
+     "machine_instance_id": "MI-G002",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G002-A",
+     "failure_date": "2026-08-14",
+     "claim_date": "2026-08-16",
+     "dealer_id": "DLR-002",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G002-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G002-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-03"
+    },
+    {
+     "evidence_id": "EV-G002-WO-2",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G002",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-03"
+    },
+    {
+     "evidence_id": "EV-G002-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G002",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-08-16"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G003",
+   "title": "Piston pump failed after the warranty period ended",
+   "expected_outcome": "NOT_ELIGIBLE",
+   "claim_id": "CLM-G003",
+   "machine_instance_id": "MI-G003",
+   "part_id": "PRT-007",
+   "notes": "Installed 2025-02-10; 365 days end on 2026-02-10; the failure was on 2026-05-01.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G003",
+    "machine_id": "MCH-010",
+    "variant_id": "VAR-010-1",
+    "serial_number": "KFT-800-00733",
+    "model_year": 2024,
+    "owner_id": "CUS-006",
+    "location_id": "SHT-006-1",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G003",
+     "machine_instance_id": "MI-G003",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2025-02-10",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Fitting of a pump"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G003-A",
+     "machine_instance_id": "MI-G003",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G003-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G003",
+     "installation_date": "2025-02-10",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G003",
+     "machine_instance_id": "MI-G003",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G003-A",
+     "failure_date": "2026-05-01",
+     "claim_date": "2026-05-03",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G003-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G003-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2025-02-10"
+    },
+    {
+     "evidence_id": "EV-G003-WO-3",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G003",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2025-02-10"
+    },
+    {
+     "evidence_id": "EV-G003-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G003",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-03"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G004",
+   "title": "Second claim for the same pump on the same machine",
+   "expected_outcome": "REQUIRES_REVIEW",
+   "claim_id": "CLM-G004-2",
+   "machine_instance_id": "MI-G004",
+   "part_id": "PRT-007",
+   "notes": "Eligible on its own facts, but an earlier claim for this part on this machine exists, so a person must review it. The earlier claim is itself decided by the evaluator.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G004",
+    "machine_id": "MCH-010",
+    "variant_id": "VAR-010-2",
+    "serial_number": "KFT-800-06120",
+    "model_year": 2025,
+    "owner_id": "CUS-002",
+    "location_id": "SHT-002-1",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G004",
+     "machine_instance_id": "MI-G004",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2026-03-02",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Fitting of a pump"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G004-A",
+     "machine_instance_id": "MI-G004",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G004-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G004",
+     "installation_date": "2026-03-02",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G004-1",
+     "machine_instance_id": "MI-G004",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G004-A",
+     "failure_date": "2026-05-20",
+     "claim_date": "2026-05-22",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": true
+    },
+    {
+     "claim_id": "CLM-G004-2",
+     "machine_instance_id": "MI-G004",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G004-A",
+     "failure_date": "2026-08-30",
+     "claim_date": "2026-09-01",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G004-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G004-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-03-02"
+    },
+    {
+     "evidence_id": "EV-G004-WO-4",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G004",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-03-02"
+    },
+    {
+     "evidence_id": "EV-G004-CLM-1",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G004-1",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-22"
+    },
+    {
+     "evidence_id": "EV-G004-CLM-2",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G004-2",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G005",
+   "title": "Pump replaced twice, third unit failed",
+   "expected_outcome": "REQUIRES_REVIEW",
+   "claim_id": "CLM-G005",
+   "machine_instance_id": "MI-G005",
+   "part_id": "PRT-007",
+   "notes": "A was replaced by B and B by C. History is preserved: A and B are REMOVED, C is the current installation; repeated replacement goes to review.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G005",
+    "machine_id": "MCH-009",
+    "variant_id": "VAR-009-1",
+    "serial_number": "KFT-600-01877",
+    "model_year": 2025,
+    "owner_id": "CUS-001",
+    "location_id": "SHT-001-2",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G005-1",
+     "machine_instance_id": "MI-G005",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2025-12-01",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Initial fitting"
+    },
+    {
+     "work_order_id": "WO-G005-2",
+     "machine_instance_id": "MI-G005",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2026-02-10",
+     "service_type": "REPLACEMENT",
+     "status": "COMPLETED",
+     "reason": "Pump failed in service"
+    },
+    {
+     "work_order_id": "WO-G005-3",
+     "machine_instance_id": "MI-G005",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2026-05-20",
+     "service_type": "REPLACEMENT",
+     "status": "COMPLETED",
+     "reason": "Replacement pump failed in service"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G005-A",
+     "machine_instance_id": "MI-G005",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G005-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G005-1",
+     "installation_date": "2025-12-01",
+     "removal_date": "2026-02-10",
+     "status": "REMOVED"
+    },
+    {
+     "installation_id": "INS-G005-B",
+     "machine_instance_id": "MI-G005",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G005-B",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G005-2",
+     "installation_date": "2026-02-10",
+     "removal_date": "2026-05-20",
+     "status": "REMOVED"
+    },
+    {
+     "installation_id": "INS-G005-C",
+     "machine_instance_id": "MI-G005",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G005-C",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G005-3",
+     "installation_date": "2026-05-20",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [
+    {
+     "replacement_id": "REP-G005-1",
+     "machine_instance_id": "MI-G005",
+     "removed_part_id": "PRT-007",
+     "installed_part_id": "PRT-007",
+     "removed_installation_id": "INS-G005-A",
+     "new_installation_id": "INS-G005-B",
+     "replacement_date": "2026-02-10",
+     "reason": "Failed in service",
+     "work_order_id": "WO-G005-2"
+    },
+    {
+     "replacement_id": "REP-G005-2",
+     "machine_instance_id": "MI-G005",
+     "removed_part_id": "PRT-007",
+     "installed_part_id": "PRT-007",
+     "removed_installation_id": "INS-G005-B",
+     "new_installation_id": "INS-G005-C",
+     "replacement_date": "2026-05-20",
+     "reason": "Failed in service",
+     "work_order_id": "WO-G005-3"
+    }
+   ],
+   "claims": [
+    {
+     "claim_id": "CLM-G005",
+     "machine_instance_id": "MI-G005",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G005-C",
+     "failure_date": "2026-09-05",
+     "claim_date": "2026-09-07",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G005-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G005-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2025-12-01"
+    },
+    {
+     "evidence_id": "EV-G005-INS-B",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G005-B",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-02-10"
+    },
+    {
+     "evidence_id": "EV-G005-INS-C",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G005-C",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-20"
+    },
+    {
+     "evidence_id": "EV-G005-WO-1",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G005-1",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2025-12-01"
+    },
+    {
+     "evidence_id": "EV-G005-WO-2",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G005-2",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-02-10"
+    },
+    {
+     "evidence_id": "EV-G005-WO-3",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G005-3",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-20"
+    },
+    {
+     "evidence_id": "EV-G005-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G005",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-09-07"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G006",
+   "title": "Pump installation with no technician, work order or evidence",
+   "expected_outcome": "INSUFFICIENT_DATA",
+   "claim_id": "CLM-G006",
+   "machine_instance_id": "MI-G006",
+   "part_id": "PRT-007",
+   "notes": "The installation record says only that a pump was fitted by an authorised dealer. Technician, work order and records are not recorded and are not invented; the installation is INCOMPLETE.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G006",
+    "machine_id": "MCH-009",
+    "variant_id": "VAR-009-2",
+    "serial_number": "KFT-600-07044",
+    "model_year": 2026,
+    "owner_id": "CUS-004",
+    "location_id": "SHT-004-2",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [],
+   "installations": [
+    {
+     "installation_id": "INS-G006-A",
+     "machine_instance_id": "MI-G006",
+     "part_id": "PRT-007",
+     "part_serial_number": "SN-007-G006-A",
+     "dealer_id": "DLR-004",
+     "technician_id": null,
+     "work_order_id": null,
+     "installation_date": "2026-06-01",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G006",
+     "machine_instance_id": "MI-G006",
+     "part_id": "PRT-007",
+     "installation_id": "INS-G006-A",
+     "failure_date": "2026-09-15",
+     "claim_date": "2026-09-17",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G006-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G006",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-09-17"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G007",
+   "title": "Wheel hub bearing that is not a verified catalogue part",
+   "expected_outcome": "NOT_ELIGIBLE",
+   "claim_id": "CLM-G007",
+   "machine_instance_id": "MI-G007",
+   "part_id": "PRT-022",
+   "notes": "PRT-022 is approved for the BTS-750 but its catalogue status is UNVERIFIED, so the APPROVED_PART condition fails.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G007",
+    "machine_id": "MCH-014",
+    "variant_id": "VAR-014-1",
+    "serial_number": "BTS-750-00920",
+    "model_year": 2025,
+    "owner_id": "CUS-003",
+    "location_id": "SHT-003-1",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G007",
+     "machine_instance_id": "MI-G007",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2026-05-10",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Fitting of a wheel hub bearing"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G007-A",
+     "machine_instance_id": "MI-G007",
+     "part_id": "PRT-022",
+     "part_serial_number": "SN-022-G007-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G007",
+     "installation_date": "2026-05-10",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G007",
+     "machine_instance_id": "MI-G007",
+     "part_id": "PRT-022",
+     "installation_id": "INS-G007-A",
+     "failure_date": "2026-09-10",
+     "claim_date": "2026-09-12",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G007-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G007-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-10"
+    },
+    {
+     "evidence_id": "EV-G007-WO-7",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G007",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-05-10"
+    },
+    {
+     "evidence_id": "EV-G007-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G007",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-09-12"
+    }
+   ]
+  },
+  {
+   "scenario_id": "WAR-G008",
+   "title": "Verified gear pump fitted to a model it is not approved for",
+   "expected_outcome": "NOT_ELIGIBLE",
+   "claim_id": "CLM-G008",
+   "machine_instance_id": "MI-G008",
+   "part_id": "PRT-006",
+   "notes": "PRT-006 is verified and approved for other models, but no fitment approves it for the KFT-600. The installation exists; the approval does not.",
+   "machine_instance": {
+    "machine_instance_id": "MI-G008",
+    "machine_id": "MCH-009",
+    "variant_id": "VAR-009-1",
+    "serial_number": "KFT-600-02390",
+    "model_year": 2025,
+    "owner_id": "CUS-006",
+    "location_id": "SHT-006-2",
+    "status": "IN_SERVICE"
+   },
+   "work_orders": [
+    {
+     "work_order_id": "WO-G008",
+     "machine_instance_id": "MI-G008",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "service_date": "2026-04-20",
+     "service_type": "INSTALLATION",
+     "status": "COMPLETED",
+     "reason": "Fitting of a gear pump"
+    }
+   ],
+   "installations": [
+    {
+     "installation_id": "INS-G008-A",
+     "machine_instance_id": "MI-G008",
+     "part_id": "PRT-006",
+     "part_serial_number": "SN-006-G008-A",
+     "dealer_id": "DLR-004",
+     "technician_id": "TEC-DLR-004-1",
+     "work_order_id": "WO-G008",
+     "installation_date": "2026-04-20",
+     "removal_date": null,
+     "status": "CURRENT"
+    }
+   ],
+   "replacements": [],
+   "claims": [
+    {
+     "claim_id": "CLM-G008",
+     "machine_instance_id": "MI-G008",
+     "part_id": "PRT-006",
+     "installation_id": "INS-G008-A",
+     "failure_date": "2026-08-02",
+     "claim_date": "2026-08-04",
+     "dealer_id": "DLR-004",
+     "status": "SUBMITTED",
+     "decision": null,
+     "decision_reason": null,
+     "decided": false
+    }
+   ],
+   "evidence": [
+    {
+     "evidence_id": "EV-G008-INS-A",
+     "evidence_type": "INSTALLATION_RECORD",
+     "entity_type": "INSTALLATION",
+     "entity_id": "INS-G008-A",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-04-20"
+    },
+    {
+     "evidence_id": "EV-G008-WO-8",
+     "evidence_type": "WORK_ORDER",
+     "entity_type": "WORK_ORDER",
+     "entity_id": "WO-G008",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-04-20"
+    },
+    {
+     "evidence_id": "EV-G008-CLM",
+     "evidence_type": "SERVICE_REPORT",
+     "entity_type": "WARRANTY_CLAIM",
+     "entity_id": "CLM-G008",
+     "reference": "Synthetic demonstration record: no real document exists",
+     "created_at": "2026-08-04"
+    }
+   ]
+  }
+ ]
+}

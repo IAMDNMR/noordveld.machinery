@@ -1,0 +1,26 @@
+{
+  "dataset": "discovery_vocabulary",
+  "data_status": "SYNTHETIC_DEMO",
+  "source_type": "REFERENCE",
+  "note": "Reference vocabulary used to enrich canonical parts and warranty policies. Synthetic demonstration wording, not manufacturer facts. Edit here, not in code.",
+  "symptoms_by_category": {
+    "Hydraulics": ["loss of lifting power", "slow hydraulic response", "oil leak", "spongy controls"],
+    "Drivetrain": ["grinding noise", "loss of drive", "vibration under load", "slipping"],
+    "Electrical": ["machine will not start", "warning light on", "intermittent power loss", "flat battery"],
+    "Structural": ["cracked frame", "excess play at joints", "worn pins and bushes", "bent arm"],
+    "Filtration": ["loss of power", "dirty or contaminated oil", "reduced airflow", "filter warning light"],
+    "Brakes": ["brakes feel weak", "squealing when braking", "longer stopping distance", "pedal travel too long"],
+    "Cooling": ["engine overheating", "coolant leak", "fan not working", "temperature warning"],
+    "Cab & Controls": ["joystick unresponsive", "cab door will not close", "cracked glass", "controls feel stiff"],
+    "Attachments": ["worn cutting edge", "attachment will not lock", "bucket damage", "reduced digging performance"],
+    "Lubrication": ["grease not reaching joints", "low oil pressure", "squeaking joints", "oil starvation"]
+  },
+  "warranty": {
+    "coverage_type": "STANDARD",
+    "start_rule": "INSTALLATION_DATE",
+    "coverage_conditions": ["APPROVED_MACHINE_FITMENT", "APPROVED_PART", "AUTHORISED_DEALER_INSTALL", "COVERAGE_PERIOD_ACTIVE", "INSTALLATION_EVIDENCED", "NO_PRIOR_CLAIM", "NO_PRIOR_REPLACEMENT"]
+  },
+  "technician_names": ["Jan de Vries (demo)", "Sanne Bakker (demo)", "Lars Becker (demo)", "Marit Hoekstra (demo)", "Thomas Keller (demo)", "Eva Brandt (demo)",
+                       "Pieter Smit (demo)", "Lotte Visser (demo)", "Jonas Weber (demo)", "Anke Meijer (demo)", "Felix Hartmann (demo)", "Nina Kramer (demo)",
+                       "Daan Mulder (demo)", "Greta Vogel (demo)", "Ruben Jansen (demo)", "Ines Fischer (demo)", "Bram Dekker (demo)", "Clara Schulz (demo)"]
+}

@@ -1,0 +1,4 @@
+order_line_id,order_id,part_id,quantity,unit_price,requested_date,data_status,source_type,source_record_id,ingestion_timestamp,effective_from,effective_to
+OL-NET-0001,ORD-NET-0001,PRT-002,50,742.28,,SYNTHETIC_DEMO,SYNTHETIC_DEMO,network_definition:OL-NET-0001,,2026-01-01,
+OL-NET-0002,ORD-NET-0002,PRT-003,12,771.15,,SYNTHETIC_DEMO,SYNTHETIC_DEMO,network_definition:OL-NET-0002,,2026-01-01,
+OL-NET-0003,ORD-NET-0003,PRT-003,4,771.15,,SYNTHETIC_DEMO,SYNTHETIC_DEMO,network_definition:OL-NET-0003,,2026-01-01,
