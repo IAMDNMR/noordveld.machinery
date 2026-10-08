@@ -163,7 +163,9 @@ def test_the_film_constants_and_city_coordinates_became_canonical_records():
     film = next(r for r in rows("scenarios_discovery") if r["scenario_type"] == "FILM")
     assert film["customer_id"] == "CUS-008" and film["part_id"] and film["machine_id"]
     cities = [r for r in rows("locations") if r["location_kind"] == "CITY" and r["latitude"]]
-    assert cities and all(r["geo_basis"] == "REFERENCE_CITY_CENTRE" for r in cities)
+    # every city coordinate states its basis: the reference city centre (supplied cities the graph has no coordinates for) or the graph's own approximate city centre
+    assert cities and all(r["geo_basis"] in ("REFERENCE_CITY_CENTRE", "APPROX_CITY_CENTRE") for r in cities)
+    assert {r["location_id"] for r in cities if r["geo_basis"] == "REFERENCE_CITY_CENTRE"} >= {"LOC-ASSEN", "LOC-COEVORDEN", "LOC-LINGEN"}
 
 
 def test_route_modes_are_values_of_the_existing_network_never_a_rule():
