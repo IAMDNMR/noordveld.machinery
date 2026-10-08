@@ -47,7 +47,9 @@ DEALER = "MATCH (d:Dealer {dealer_id: $id}) RETURN properties(d) AS p"
 PART = """
 MATCH (p:Part {part_id: $id})
 OPTIONAL MATCH (c:PartCatalogProfile)-[:PROFILES_PART]->(p)
-RETURN properties(p) AS p, c.part_status AS status
+RETURN properties(p) AS p, properties(c) AS prof,
+       head([(p)-[:IN_CATEGORY]->(x:Category) | x.category_id]) AS category_id, head([(p)-[:IN_SUBCATEGORY]->(x:Category) | x.category_id]) AS subcategory_id,
+       [(p)-[:HAS_ALIAS]->(a:SearchAlias) | a.alias] AS aliases
 """
 
 FITMENT = "MATCH (f:FitmentContext {machine_id: $machine, part_id: $part}) RETURN properties(f) AS p ORDER BY f.fitment_id"

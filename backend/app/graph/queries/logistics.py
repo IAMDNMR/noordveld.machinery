@@ -7,11 +7,12 @@ SHIPMENT = """
 MATCH (s:Shipment {shipment_id: $id})
 RETURN properties(s) AS p,
   head([(o:Order)-[:HAS_SHIPMENT]->(s) | o.order_id]) AS order_id,
-  head([(s)-[:SHIPS_LINE]->(l:OrderLine) | l.order_line_id]) AS order_line_id,
+  [(s)-[:SHIPS_LINE]->(l:OrderLine) | l.order_line_id] AS order_line_ids,
   head([(s)-[:USES_ROUTE]->(r:TransportRoute) | r.route_id]) AS route_rel,
   head([(s)-[:DISPATCHED_FROM]->(x) | """ + PLACE_ID.format(v="x") + """]) AS origin,
   head([(s)-[:DELIVERS_TO_LOCATION]->(x) | """ + PLACE_ID.format(v="x") + """]) AS destination,
-  head([(s)-[:CARRIED_BY]->(c:Carrier) | c.name]) AS carrier
+  head([(s)-[:CARRIED_BY]->(c:Carrier) | c.name]) AS carrier,
+  head([(s)-[:CARRIED_BY]->(c:Carrier) | c.carrier_id]) AS carrier_id
 """
 
 EVENTS = """
@@ -29,7 +30,7 @@ RETURN properties(r) AS p, f.total_transport_cost AS cost, f.currency AS currenc
 
 LEGS = """
 MATCH (:TransportRoute {route_id: $id})-[h:HAS_LEG]->(l:TransportLeg)
-RETURN properties(l) AS p, h.sequence AS sequence
+RETURN properties(l) AS p, properties(h) AS hp, h.sequence AS sequence
 ORDER BY h.sequence
 LIMIT 50
 """

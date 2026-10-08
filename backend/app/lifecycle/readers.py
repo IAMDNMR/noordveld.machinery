@@ -11,6 +11,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Protocol
 
+from app.canonical.graph_rows import graph_row, provenance
 from app.canonical.io import CANON_DIR, load_rows
 from app.canonical.registry import BY_NAME
 from app.graph.client import GraphClient
@@ -126,11 +127,6 @@ class FileReader:
 
 
 # ── the graph ────────────────────────────────────────────────────────────────────────────────────
-def _prov(p: dict[str, Any]) -> dict[str, Any]:
-    return {"data_status": p.get("data_status"), "source_type": p.get("source_type") or ("SYNTHETIC_DEMO" if p.get("data_status") == "SYNTHETIC_DEMO" else None),
-            "source_record_id": p.get("source_record_id")}
-
-
 def _list(v: Any) -> list[str]:
     if v is None or v == "":
         return []
@@ -138,12 +134,8 @@ def _list(v: Any) -> list[str]:
 
 
 def _row(dataset: str, p: dict[str, Any], **extra: Any) -> dict[str, Any]:
-    """A canonical-named record from node properties: the registry's field -> property map, inverted."""
-    target = BY_NAME[dataset].targets[0]
-    row = {field: p.get(prop) for field, prop in target.fields.items()}
-    row.update(extra)
-    row.update(_prov(p))
-    return row
+    """A canonical-named record from node properties, with every model field present (see app/canonical/graph_rows.py)."""
+    return graph_row(dataset, p, **extra)
 
 
 class GraphReader:
@@ -192,7 +184,12 @@ class GraphReader:
 
     def part(self, part_id):
         r = self._one(q.PART, id=part_id)
-        return _row("parts", r["p"], status=r["status"]) if r else None
+        if not r:
+            return None
+        profile = BY_NAME["parts"].targets[1].fields  # the synthetic catalogue profile holds the discovery text and the catalogue status
+        prof = r["prof"] or {}
+        return _row("parts", r["p"], **{canon: prof.get(prop) for canon, prop in profile.items()}, category_id=r["category_id"], subcategory_id=r["subcategory_id"],
+                    aliases=sorted({a for a in r["aliases"] if a}))
 
     def fitment(self, machine_id, part_id):
         r = self._one(q.FITMENT, machine=machine_id, part=part_id)
@@ -200,10 +197,13 @@ class GraphReader:
 
     def approved_sources(self, part_id):
         out = []
+        fields = BY_NAME["approved_sources"].rel.fields  # canonical field -> relationship property
         for r in self._g.read(q.APPROVED_SOURCES, id=part_id):
             p = r["p"]
-            out.append({"approved_source_id": str(p.get("rel_id", "")).removeprefix("APPROVED_SOURCE:"), "part_id": part_id, "source_id": r["source_id"],
-                        "source_kind": p.get("source_kind"), "approval_status": p.get("approval_status"), **_prov(p)})
+            row = {"approved_source_id": str(p.get("rel_id", "")).removeprefix("APPROVED_SOURCE:"), "part_id": part_id, "source_id": r["source_id"],
+                   **{canon: p.get(prop) for canon, prop in fields.items()}, **provenance(p), "effective_from": p.get("effective_from"), "effective_to": p.get("effective_to")}
+            row["approved_regions"] = _list(row["approved_regions"])
+            out.append(row)
         return out
 
     def policies(self, part_id):

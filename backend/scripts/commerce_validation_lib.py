@@ -37,6 +37,8 @@ PROTECTED_STATUSES = ("SOURCE_DERIVED", "DERIVED", "REAL")
 PROTECTED_CYPHER = "(x.data_status IN ['SOURCE_DERIVED','DERIVED','REAL'] OR (x.data_status = 'USER_PROVIDED' AND coalesce(x.source_id, '') <> $app))"
 # The datasets that are the supplied, protected catalogue: compared with no tolerance beyond the three listed rules.
 PROTECTED_DATASETS = ("machines", "parts", "categories", "specifications", "plants", "legacy_part_mappings", "assemblies")
+# Overlay entities: separate synthetic nodes the canonical record is projected onto. They own their provenance (it is NOT the owning record's), and are tied to the owner by a relationship.
+OVERLAYS = {"PartCatalogProfile": {"data_status": "SYNTHETIC_DEMO", "link": "PROFILES_PART", "owner_kind": "part"}}
 PROTECTED_ALLOWED_RULES = ("LIST_ORDER", "NUMERIC_TYPE", "NUMERIC_TOLERANCE", "SPEC_NAME_CASEFOLD")
 
 # ── the approved normalisation rules. Nothing else is ever treated as harmless. ─────────────────
@@ -286,8 +288,9 @@ class MemorySource:
                 for t in spec.targets:
                     label, key, gid = Engine._identity(t, rec)
                     props = {gp: v for cf, gp in t.fields.items() if (v := getattr(rec, cf, None)) not in (None, [])}
-                    props.update({"data_status": rec.data_status, "source_record_id": rec.source_record_id or rec.id, "canonical_dataset": spec.name, "source_id": SRC_CANON, key: gid,
-                                  "ingestion_timestamp": "2026-01-01T00:00:00Z"})
+                    overlay = OVERLAYS.get(label)
+                    props.update({"data_status": overlay["data_status"] if overlay else rec.data_status, "source_record_id": rec.source_record_id or rec.id, "canonical_dataset": spec.name,
+                                  "source_id": SRC_CANON, key: gid, "ingestion_timestamp": "2026-01-01T00:00:00Z"})
                     m.n[(label, key)].setdefault(gid, {}).update(props)  # the ingestion SETs n += props: several datasets can describe one node
                     for kind, cands in KINDS.items():
                         if (label, key) in cands:
@@ -306,8 +309,12 @@ class MemorySource:
                         props.update({"rel_id": rt.rel_id.format(id=rec.id), "data_status": rec.data_status, "source_record_id": rec.source_record_id or rec.id, "canonical_dataset": spec.name,
                                       "source_id": SRC_CANON})
                         m.r[(rt.type, fl[0], tl[0])][(getattr(rec, rt.from_field), getattr(rec, rt.to_field))] = props
+                owner_t = Engine._identity(spec.targets[0], rec) if spec.targets else None
                 for t in spec.targets:
                     this = Engine._identity(t, rec)
+                    if t.label in OVERLAYS and owner_t:
+                        m.r[(OVERLAYS[t.label]["link"], this[0], owner_t[0])][(this[2], owner_t[2])] = {"rel_id": f"{OVERLAYS[t.label]['link']}:{this[2]}:{owner_t[2]}", "canonical_dataset": spec.name,
+                                                                                                         "source_id": SRC_CANON}
                     for rd in t.rels:
                         val = getattr(rec, rd.field, None)
                         if val is None:
@@ -565,14 +572,18 @@ def _compare_one(src: GraphSource, spec: DatasetSpec, root: Path, keep: bool) ->
     recs, bad = _records(spec, root)
     res = DatasetResult(spec.name, protected=spec.name in PROTECTED_DATASETS, records=len(recs), invalid=bad)
     # nodes ---------------------------------------------------------------------------------------
+    owner_ident: dict[str, tuple[str, str, str]] = {}
     for t in spec.targets:
-        protected = res.protected and t.mode == "verify"  # the supplied node itself, not the synthetic profile hung on it
+        overlay = OVERLAYS.get(t.label or "")
+        protected = res.protected and t.mode == "verify" and overlay is None  # the supplied node itself, not the synthetic profile hung on it
         ids_by_label: dict[tuple[str, str], list[str]] = defaultdict(list)
         ident = {}
         for rec in recs:
             label, key, gid = Engine._identity(t, rec)
             ids_by_label[(label, key)].append(gid)
             ident[rec.id] = (label, key, gid)
+            if overlay is None:
+                owner_ident[rec.id] = (label, key, gid)
         found: dict[tuple[str, str], dict[str, Any]] = {}
         for (label, key), ids in ids_by_label.items():
             for i, p in src.nodes(label, key, ids).items():
@@ -587,18 +598,39 @@ def _compare_one(src: GraphSource, spec: DatasetSpec, root: Path, keep: bool) ->
             for cf, gp in t.fields.items():
                 dtype, rule = classify(getattr(rec, cf, None), node.get(gp), cf, casefold=cf in t.casefold, protected=protected)
                 res.add(rec.id, f"{label}.{gp}", getattr(rec, cf, None), node.get(gp), dtype, rule, keep)
-            # provenance: the data_status the record claims must be the one the graph holds; source ids are compared when the canonical record states one
-            d, r = classify(rec.data_status, node.get("data_status"), "data_status", protected=protected)
-            res.add(rec.id, f"{label}.data_status", rec.data_status, node.get("data_status"), d, r, keep)
+            # provenance: the data_status the record claims must be the one the graph holds; source ids are compared when the canonical record states one.
+            # An overlay node (the catalogue profile) is its own entity: it is checked against ITS declared provenance, never against the owning record's.
+            expected_status = overlay["data_status"] if overlay else rec.data_status
+            d, r = classify(expected_status, node.get("data_status"), "data_status", protected=protected)
+            res.add(rec.id, f"{label}.data_status", expected_status, node.get("data_status"), d, r, keep)
+            if overlay:
+                continue
             if rec.source_record_id is not None and node.get("source_record_id") is not None:
                 d, r = classify(rec.source_record_id, node.get("source_record_id"), "source_record_id", protected=protected)
                 res.add(rec.id, f"{label}.source_record_id", rec.source_record_id, node.get("source_record_id"), d, r, keep)
+        if overlay:
+            _overlay_links(src, overlay, t, recs, ident, owner_ident, res, keep)
         _graph_only_nodes(src, spec, t, recs, res, keep)
         _edges(src, spec, t, recs, ident, res, keep)
     # relationship datasets ---------------------------------------------------------------------------
     if spec.rel:
         _rel_dataset(src, spec, recs, res, keep)
     return res
+
+
+def _overlay_links(src: GraphSource, overlay: dict[str, str], t: Any, recs: list[Any], ident: dict[str, tuple[str, str, str]], owner: dict[str, tuple[str, str, str]],
+                   res: DatasetResult, keep: bool) -> None:
+    """The overlay must hang on the right owner: (overlay)-[link]->(owner). Checked per record, so a profile attached to the wrong part is reported."""
+    groups: dict[tuple[tuple[str, str], tuple[str, str]], list[tuple[Any, str, str]]] = defaultdict(list)
+    for rec in recs:
+        o, ov = owner.get(rec.id), ident[rec.id]
+        if o:
+            groups[((ov[0], ov[1]), (o[0], o[1]))].append((rec, ov[2], o[2]))
+    for (fl, tl), rows in groups.items():
+        have = src.rels(overlay["link"], fl, tl, [(f, tt) for _, f, tt in rows])
+        for rec, f, tt in rows:
+            ok = (f, tt) in have
+            res.add(rec.id, f"edge:{overlay['link']}", tt, tt if ok else None, MATCH if ok else MISSING_IN_GRAPH, None, keep)
 
 
 def _graph_only_nodes(src: GraphSource, spec: DatasetSpec, t: Any, recs: list[Any], res: DatasetResult, keep: bool) -> None:

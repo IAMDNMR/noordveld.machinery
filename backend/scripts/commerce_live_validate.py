@@ -65,6 +65,15 @@ def reachable() -> tuple[bool, str]:
 
 
 # ── snapshot ─────────────────────────────────────────────────────────────────────────────────────
+NORMALISATION_LIST_CAP = 500
+
+
+def listed_differences(r: L.DatasetResult) -> list[dict[str, Any]]:
+    """Every failing difference, always (a real mismatch is never cut off), then the approved-normalisation ones up to a cap: those are counted per rule in the dataset summary."""
+    failing = [d for d in r.differences if d["difference_type"] in L.FAILING]
+    return failing + [d for d in r.differences if d["difference_type"] not in L.FAILING][:NORMALISATION_LIST_CAP]
+
+
 def snapshot(graph: Any) -> dict[str, Any]:
     """node_count, relationship_count, protected counts, integrity checksum, SRC-CANON fingerprint and per-label / per-relationship-type counts. Read-only."""
     g = graph if isinstance(graph, L.ReadOnlyGraph) else L.ReadOnlyGraph(graph)
@@ -464,7 +473,7 @@ def run_pass(src: Any, files: CommerceContextEngine, make_live: Any, api_target:
     prov += [{"domain": "warranty", "context": r["scenario"], "status": r["provenance_status"]} for r in warr]
     return {
         "entity_counts": L.entity_counts(src), "dataset_comparison": summary,
-        "dataset_differences": {r.dataset: {"count": len(r.differences), "listed": r.differences[:500], "truncated": max(0, len(r.differences) - 500)} for r in all_results if r.differences},
+        "dataset_differences": {r.dataset: {"count": len(r.differences), "listed": listed_differences(r), "truncated": max(0, sum(d["difference_type"] not in L.FAILING for d in r.differences) - NORMALISATION_LIST_CAP)} for r in all_results if r.differences},
         "dataset_samples": {r.dataset: r.samples[:12] for r in all_results if r.samples}, "dataset_detail": ({r.dataset: r.detail for r in all_results} if keep_detail else None),
         "protected_comparison": [r.summary() for r in all_results if r.protected], "normalization": L.normalization_report(all_results),
         "engine_files_vs_graph": engine_cmp, "discovery": disc, "logistics": logi, "warranty": warr, "authorization": auth, "apis": api, "api_endpoints": api_endpoint_summary(api),
