@@ -58,12 +58,20 @@ def test_both_account_roles_hold_the_commerce_permission(repo):
 
 # ── the golden journeys through the API ──────────────────────────────────────────────────────────
 def test_discovery_endpoint_returns_the_structured_context(repo):
+    c = client("U-C001")
+    body = c.post(BASE + "/discovery/context", json={"request": "I need a hydraulic pump for my KFT-200."}).json()
+    assert body["context_type"] == "DISCOVERY" and body["decision"]["status"] == "SUCCESS" and body["decision"]["decision"] == "RECOMMEND" and body["recommended_part"]["part_id"] == "PRT-006"
+    assert body["decision"]["facts"]["fitment"] == "APPROVED" and body["evidence_path"][0]["entity"] == "Part" and body["visibility"]["role"] == "END_CUSTOMER"
+    assert body["confidence"]["fact_verified"] is True and body["confidence"]["data_status"] == body["data_status"] and body["confidence"]["real_world_verified"] is False
+
+
+def test_discovery_endpoint_the_kft600_pump_is_compatible_but_unavailable_and_the_lubrication_pump_is_not_offered(repo):
     r = client("U-C001").post(BASE + "/discovery/context", json=BODIES["/discovery/context"])
     body = r.json()
-    assert r.status_code == 200 and body["context_type"] == "DISCOVERY" and body["decision"]["status"] == "SUCCESS" and body["decision"]["decision"] == "RECOMMEND"
-    assert body["recommended_part"]["part_id"] == "PRT-097" and body["recommended_part"]["approved_source"] is True and body["decision"]["facts"]["fitment"] == "APPROVED"
-    assert body["evidence_path"][0]["entity"] == "Part" and body["rejection_reasons"]["PRT-007"][0]["code"] == "NOT_AVAILABLE"
-    assert body["visibility"]["role"] == "END_CUSTOMER"
+    assert r.status_code == 200 and body["decision"]["decision"] == "NO_AVAILABLE_RECOMMENDATION" and body["recommended_part"] is None
+    assert body["compatible_part"]["part_id"] == "PRT-007" and body["compatible_part"]["availability"] == "UNAVAILABLE" and body["compatible_part"]["approved_source"] is True
+    assert body["alternatives"] == [] and "PRT-097" not in json.dumps([body["recommended_part"], body["compatible_part"], body["alternatives"], body["unconfirmed_matches"]])
+    assert body["rejection_reasons"]["PRT-097"][0]["code"] == "CANONICAL_TYPE_MISMATCH" and body["rejection_reasons"]["PRT-007"][0]["code"] == "NOT_AVAILABLE"
 
 
 def test_discovery_endpoint_negative_and_clarification(repo):
@@ -145,6 +153,21 @@ def test_a_customer_sees_their_own_records_and_the_request_route_cannot_bypass_o
     assert other.post(BASE + "/request", json={"intent": "WARRANTY", "claim_id": "CLM-G001"}).status_code == 403
     mine = other.post(BASE + "/logistics/context", json={}).json()  # 'my shipment': only theirs
     assert mine["shipment"]["shipment_id"] == "SHP-NET-0003"
+
+
+def test_a_supplied_intent_selects_the_flow_but_every_domain_check_still_runs(repo):
+    other, jane = client("U-C010"), client("U-JANE")
+    for intent, body in (("LOGISTICS", {"shipment_id": "SHP-NET-0001"}), ("LOGISTICS", {"order_id": "ORD-NET-0001"}), ("WARRANTY", {"claim_id": "CLM-G001"}),
+                         ("DISCOVERY", {"machine_instance_id": "MI-G001", "request": "hydraulic pump"})):
+        assert other.post(BASE + "/request", json={"intent": intent, **body}).status_code == 403, (intent, body)
+    # no references: the flow's own clarification, never a guess
+    assert jane.post(BASE + "/request", json={"intent": "WARRANTY"}).json()["decision"]["status"] == "REQUIRES_CLARIFICATION"
+    assert jane.post(BASE + "/request", json={"intent": "DISCOVERY", "request": "I need a hydraulic filter for my X200."}).json()["decision"]["status"] == "REQUIRES_CLARIFICATION"
+    assert jane.post(BASE + "/request", json={"intent": "LOGISTICS", "shipment_id": "SHP-0001"}).json()["decision"]["status"] == "INSUFFICIENT_DATA"
+    # the same facts through /request and through the flow's own route
+    direct = jane.post(BASE + "/discovery/context", json={"request": "hydraulic pump for my KFT-600"}).json()
+    via = jane.post(BASE + "/request", json={"intent": "DISCOVERY", "request": "hydraulic pump for my KFT-600"}).json()
+    assert via["context"] == direct and via["decision"] == direct["decision"]
 
 
 def test_dealer_and_oem_visibility_through_the_api(repo):

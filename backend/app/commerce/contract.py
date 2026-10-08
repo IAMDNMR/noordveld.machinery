@@ -53,18 +53,30 @@ def aggregate_data_status(records: list[dict[str, Any]]) -> str:
     return "NONE" if not values else values[0] if len(values) == 1 else "MIXED"
 
 
-def confidence_for(status: str, records: list[dict[str, Any]], missing: list[str]) -> dict[str, Any]:
-    """How complete the answer is and whether the underlying records can support the word 'verified'. Demonstration data never can."""
+def confidence_for(status: str, records: list[dict[str, Any]], missing: list[str], fact_verified: bool | None = None) -> dict[str, Any]:
+    """Three separate things, never merged:
+
+      level               how complete the answer is (COMPLETE / PARTIAL / INSUFFICIENT)
+      data_status         what kind of data the records are (SYNTHETIC_DEMO, SOURCE_DERIVED, MIXED ...), as the records state it
+      fact_verified       every fact in the decision was checked against graph records and the records agree with each other (the relationships exist, the dates and statuses
+                          are consistent). True on synthetic demonstration data too: it says the demo graph is internally consistent, not that the data is real.
+      real_world_verified true only when nothing is missing and every record is REAL or SOURCE_DERIVED
+    `fact_verified` defaults to 'a decision was reached from records' (status is not NOT_FOUND / REQUIRES_CLARIFICATION / INSUFFICIENT_DATA); a domain passes it explicitly when
+    its own outcome is a verified fact even though no purchase or shipment follows (for example: the right part exists and is out of stock)."""
     level = "INSUFFICIENT" if status in UNDECIDED else "PARTIAL" if missing else "COMPLETE"
+    if fact_verified is None:
+        fact_verified = status not in UNDECIDED
+    fact_verified = bool(fact_verified and records and all(r.get("id") for r in records))
+    data_status = aggregate_data_status(records)
     statuses = {r.get("data_status") for r in records}
-    verified = level == "COMPLETE" and bool(records) and statuses <= GRAPH_SUPPORTED
+    real = level == "COMPLETE" and bool(records) and statuses <= GRAPH_SUPPORTED
     if not records:
         basis = "No record supports this result."
-    elif verified:
-        basis = "Every source record is graph-verified data."
+    elif fact_verified:
+        basis = "Facts checked against graph records and consistent with each other" + ("" if real else f"; data_status is {data_status}, so this is a demonstration-data result, not a real-world one") + "."
     else:
-        basis = "Deterministic result on " + ", ".join(sorted(s for s in statuses if s)) + " records; not verified against real-world records."
-    return {"level": level, "verified": verified, "basis": basis}
+        basis = "The facts needed for a verified answer are missing or the request is unresolved."
+    return {"level": level, "data_status": data_status, "fact_verified": fact_verified, "real_world_verified": real, "basis": basis}
 
 
 def context_id(context_type: str, inputs: dict[str, Any], as_of: str, status: str, decision: str, records: list[dict[str, Any]]) -> str:
@@ -119,10 +131,10 @@ def now_iso(clock: Any = None) -> str:
 
 
 def meta(context_type: str, inputs: dict[str, Any], as_of: str, generated_at: str, decision: CommerceDecision, records: list[dict[str, Any]], evidence: list[dict[str, Any]],
-         path: list[dict[str, Any]]) -> dict[str, Any]:
+         path: list[dict[str, Any]], fact_verified: bool | None = None) -> dict[str, Any]:
     """Every common field, computed once and the same way for all three journeys. The decision carries the same records and missing list as the context."""
     records = dedupe_records(records)
     decision.source_records = records
     return {"context_id": context_id(context_type, inputs, as_of, decision.status, decision.decision, records), "context_type": context_type, "generated_at": generated_at,
-            "data_status": aggregate_data_status(records), "source_records": records, "evidence": evidence, "confidence": confidence_for(decision.status, records, decision.missing),
+            "data_status": aggregate_data_status(records), "source_records": records, "evidence": evidence, "confidence": confidence_for(decision.status, records, decision.missing, fact_verified),
             "missing": list(decision.missing), "warnings": list(decision.warnings), "decision": decision, "evidence_path": path}

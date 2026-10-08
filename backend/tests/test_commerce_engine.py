@@ -64,12 +64,28 @@ def test_every_context_carries_the_common_metadata_and_a_decision(engine):
         json.dumps(d)  # plain JSON, nothing to serialise specially
 
 
-def test_nothing_is_called_verified_on_demonstration_data(engine):
+def test_synthetic_data_is_not_the_same_as_unverified_facts(engine):
     for ctx in all_contexts(engine):
-        assert ctx.confidence["verified"] is False and "not verified" in ctx.confidence["basis"]
-    assert c.confidence_for(c.SUCCESS, [{"data_status": "SOURCE_DERIVED"}], [])["verified"] is True  # only graph-supported data can ever be called verified
-    assert c.confidence_for(c.SUCCESS, [{"data_status": "SOURCE_DERIVED"}], ["price:P-1"])["verified"] is False
-    assert c.confidence_for(c.INSUFFICIENT_DATA, [{"data_status": "REAL"}], [])["verified"] is False
+        conf = ctx.confidence
+        assert conf["data_status"] in ("SYNTHETIC_DEMO", "MIXED") and ctx.data_status == conf["data_status"]  # what kind of data it is, stated as the records state it
+        assert conf["fact_verified"] is True  # the relationships and values were checked against graph records and agree
+        assert conf["real_world_verified"] is False and "demonstration-data" in conf["basis"]  # ... and none of it is called real
+        assert "verified" not in conf  # the old single flag that conflated the two is gone
+    rec = [{"entity": "Part", "id": "P-1", "data_status": "SOURCE_DERIVED"}]
+    assert c.confidence_for(c.SUCCESS, rec, [])["real_world_verified"] is True  # only graph-supported data can ever be called real-world verified
+    assert c.confidence_for(c.SUCCESS, rec, ["price:P-1"])["real_world_verified"] is False and c.confidence_for(c.SUCCESS, rec, ["price:P-1"])["fact_verified"] is True
+    for undecided in (c.INSUFFICIENT_DATA, c.REQUIRES_CLARIFICATION, c.NOT_FOUND):
+        assert c.confidence_for(undecided, rec, [])["fact_verified"] is False
+    assert c.confidence_for(c.NOT_FOUND, rec, [], fact_verified=True)["fact_verified"] is True  # a domain can state a verified negative (the right part exists and is out of stock)
+    assert c.confidence_for(c.SUCCESS, [], [])["fact_verified"] is False  # no record, no verified fact
+
+
+def test_unresolved_and_insufficient_results_are_not_fact_verified_and_verified_negatives_are(engine):
+    assert engine.build_logistics_context(shipment_id="SHP-0001").confidence["fact_verified"] is False  # route not determinable
+    assert engine.build_warranty_context(claim_id="CLM-G006").confidence["fact_verified"] is False  # missing technician and work order
+    assert engine.build_warranty_context(claim_id="CLM-G002").confidence["fact_verified"] is True  # a definite NOT_ELIGIBLE rests on checked records
+    assert engine.build_discovery_context("I need a hydraulic filter for my X200.").confidence["fact_verified"] is False
+    assert engine.build_discovery_context("I need a hydraulic pump for my NV-2100").confidence["fact_verified"] is True  # every candidate was checked and rejected
 
 
 def test_the_same_request_on_the_same_data_gives_the_same_structured_result():
@@ -89,36 +105,56 @@ def test_with_a_real_clock_only_generated_at_may_differ():
 
 
 # ── discovery: golden scenarios on the real data ─────────────────────────────────────────────────
-def test_discovery_positive_kft600_hydraulic_pump_gets_an_approved_fitting_available_part_with_an_approved_source(engine):
-    ctx = engine.build_discovery_context("I need a hydraulic pump for my KFT-600.")
-    assert ctx.machine["resolution"] == "RESOLVED" and ctx.machine["model"] == "KFT-600" and ctx.machine["machine_id"] == "MCH-009" and ctx.machine["via"] == "model_identifier"
+def test_discovery_positive_a_canonical_fitting_approved_available_part_is_recommended(engine):
+    ctx = engine.build_discovery_context("I need a hydraulic pump for my KFT-200.")
+    assert ctx.machine["resolution"] == "RESOLVED" and ctx.machine["model"] == "KFT-200" and ctx.machine["machine_id"] == "MCH-007" and ctx.machine["via"] == "model_identifier"
     rec = ctx.recommended_part
-    assert ctx.decision.status == c.SUCCESS and ctx.decision.decision == "RECOMMEND" and rec["part_id"] == "PRT-097"
-    assert (rec["fitment"], rec["approved_source"], rec["availability"]) == ("APPROVED", True, "AVAILABLE")
-    # the recommendation rests on records: the approved fitment, the approved sources and the stock, in that order
+    assert ctx.decision.status == c.SUCCESS and ctx.decision.decision == "RECOMMEND" and rec["part_id"] == "PRT-006"
+    assert (rec["product_match"], rec["fitment"], rec["approved_source"], rec["availability"], rec["recommendation"]) == (True, "APPROVED", True, "AVAILABLE", True)
     assert [s["entity"] for s in ctx.evidence_path] == ["Part", "Fitment", "ApprovedSource", "Inventory", "Price"]
-    fitment = next(r for r in ctx.fitment_results if r["part_id"] == "PRT-097")
+    fitment = next(r for r in ctx.fitment_results if r["part_id"] == "PRT-006")
     assert fitment["state"] == "APPROVED" and fitment["fitment_id"] == ctx.evidence_path[1]["id"]
-    assert next(a for a in ctx.approved_sources if a["part_id"] == "PRT-097")["has_approved_source"] is True
+    assert next(a for a in ctx.approved_sources if a["part_id"] == "PRT-006")["has_approved_source"] is True
 
 
-def test_the_fitting_pump_that_is_out_of_stock_is_rejected_not_hidden_and_not_recommended(engine):
+def test_the_hydraulic_pump_for_the_kft600_is_compatible_and_approved_but_unavailable_and_nothing_else_is_offered_in_its_place(engine):
+    ctx = engine.build_discovery_context("hydraulic pump for my KFT-600")
+    assert ctx.machine["machine_id"] == "MCH-009"
+    assert ctx.recommended_part is None and (ctx.decision.status, ctx.decision.decision) == (c.NOT_FOUND, "NO_AVAILABLE_RECOMMENDATION")
+    seven = ctx.compatible_part
+    assert (seven["part_id"], seven["product_match"], seven["fitment"], seven["approved_source"], seven["availability"], seven["recommendation"]) == ("PRT-007", True, "APPROVED", True, "UNAVAILABLE", False)
+    assert ctx.decision.facts["compatible_part"]["part_id"] == "PRT-007" and ctx.decision.facts["availability"] == "UNAVAILABLE" and ctx.decision.facts["alternatives"] == []
+    assert [r["code"] for r in ctx.rejection_reasons["PRT-007"]] == ["NOT_AVAILABLE"] and ctx.alternatives == []
+    assert [s["entity"] for s in ctx.evidence_path][:3] == ["Part", "Fitment", "ApprovedSource"] and ctx.evidence_path[0]["id"] == "PRT-007"  # the evidence is for the right part
+    assert ctx.confidence["fact_verified"] is True and ctx.decision.recommended_next_action
+
+
+def test_a_lubrication_pump_is_never_the_answer_to_a_hydraulic_pump_request(engine):
     ctx = engine.build_discovery_context("I need a hydraulic pump for my KFT-600.")
-    assert "PRT-007" in ctx.rejection_reasons and [r["code"] for r in ctx.rejection_reasons["PRT-007"]] == ["NOT_AVAILABLE"]  # PRT-007 fits and has an approved source: no stock anywhere
-    assert ctx.decision.facts["valid_candidates"] == 1 and ctx.decision.facts["rejected_candidates"] == len(ctx.rejection_reasons)
-    assert ctx.recommended_part["part_id"] != "PRT-007"
+    ninety_seven = next(x for x in ctx.candidate_parts if x["part_id"] == "PRT-097")
+    assert ninety_seven["product_match"] == "CANONICAL_TYPE_MISMATCH" and ninety_seven["recommendation"] is False and ninety_seven["validation"] == "REJECTED"
+    assert ninety_seven["fitment"] == "APPROVED" and ninety_seven["approved_source"] is True and ninety_seven["availability"] == "AVAILABLE"  # fits, is approved, is in stock ... and is still the wrong product
+    assert "CANONICAL_TYPE_MISMATCH" in [r["code"] for r in ctx.rejection_reasons["PRT-097"]] and ctx.rejection_reasons["PRT-097"][0]["code"] == "CANONICAL_TYPE_MISMATCH"  # the first (highest-authority) reason
+    assert ninety_seven["semantic_match"]["conflicting_terms"] == ["hydraulic"]
+    shown = json.dumps([ctx.recommended_part, ctx.compatible_part, ctx.alternatives, ctx.unconfirmed_matches, ctx.ranking])
+    assert "PRT-097" not in shown and "PRT-078" not in shown  # not offered anywhere a user sees; diagnostics only
+    assert "PRT-097" in ctx.decision.facts["canonical_type_mismatches"] and any("alias match only" in w for w in ctx.warnings)
+
+
+def test_the_priority_order_of_the_rejection_reasons_follows_the_authority_of_the_check(engine):
+    ctx = engine.build_discovery_context("hydraulic pump for my NV-2100")
+    assert [r["code"] for r in ctx.rejection_reasons["PRT-078"]] == ["CANONICAL_TYPE_MISMATCH", "NO_FITMENT"]  # product class, then fitment
+    assert [r["code"] for r in ctx.rejection_reasons["PRT-007"]] == ["NO_FITMENT", "NOT_AVAILABLE"]  # fitment, then stock
+
+
+def test_each_candidate_is_stated_as_separate_facts_not_one_score(engine):
+    ctx = engine.build_discovery_context("I need a hydraulic pump for my KFT-600.")
+    for cand in ctx.candidate_parts:
+        assert {"product_match", "fitment", "approved_source", "availability", "recommendation", "flags"} <= set(cand)
+        assert set(cand["flags"]) == {"MATCHED", "PRODUCT_MATCH", "COMPATIBLE", "APPROVED", "AVAILABLE", "RECOMMENDED", "REJECTED"} and cand["flags"]["MATCHED"] is True
+        assert cand["flags"]["RECOMMENDED"] is (not cand["flags"]["REJECTED"])
     seven = next(x for x in ctx.candidate_parts if x["part_id"] == "PRT-007")
-    assert seven["validation"] == "REJECTED" and seven["rank"] is None
-    assert next(a for a in ctx.availability if a["part_id"] == "PRT-007")["state"] == "NOT_AVAILABLE"
-    assert [r["code"] for r in ctx.rejection_reasons["PRT-006"]] == ["NO_FITMENT"] and [r["code"] for r in ctx.rejection_reasons["PRT-078"]] == ["NO_FITMENT"]  # pumps for other machines
-
-
-def test_the_recommendation_says_how_good_the_vocabulary_match_is(engine):
-    ctx = engine.build_discovery_context("I need a hydraulic pump for my KFT-600.")
-    assert ctx.recommended_part["semantic_match"] == "MEDIUM"  # 'hydraulic pump' is only an alias of this lubrication pump; not claimed as a perfect match
-    assert any("secondary vocabulary" in w for w in ctx.warnings)
-    assert ctx.recommended_part["explanation"]["lines"][:3] == ["fitment = APPROVED", "approved_source = YES", "availability = AVAILABLE"]
-    assert ctx.confidence["verified"] is False
+    assert seven["flags"] == {"MATCHED": True, "PRODUCT_MATCH": "CANONICAL_MATCH", "COMPATIBLE": True, "APPROVED": True, "AVAILABLE": "UNAVAILABLE", "RECOMMENDED": False, "REJECTED": True}
 
 
 def test_discovery_negative_a_pump_that_fits_other_machines_only_gives_no_valid_recommendation(engine):
@@ -167,7 +203,7 @@ def test_the_machine_can_come_from_an_id_or_an_owned_instance_never_from_a_guess
 def test_a_part_number_is_looked_up_exactly(engine):
     ctx = engine.build_discovery_context("NVM-1060-HY for my KFT-600")
     assert ctx.extracted["part_identifiers"] == ["PRT-007"] and ctx.candidate_parts[0]["semantic_match"]["via"] == "IDENTIFIER"
-    assert ctx.decision.decision == "NO_VALID_RECOMMENDATION" and [r["code"] for r in ctx.rejection_reasons["PRT-007"]] == ["NOT_AVAILABLE"]
+    assert ctx.decision.decision == "NO_AVAILABLE_RECOMMENDATION" and ctx.compatible_part["part_id"] == "PRT-007" and [r["code"] for r in ctx.rejection_reasons["PRT-007"]] == ["NOT_AVAILABLE"]
 
 
 # ── discovery: every rejection reason, on small controlled data ──────────────────────────────────
@@ -182,7 +218,7 @@ def codes(ctx, pid="P-1"):
 def test_the_all_green_candidate_is_recommended_with_its_price():
     ctx = build()
     assert ctx.decision.decision == "RECOMMEND" and ctx.recommended_part["part_id"] == "P-1" and ctx.recommended_part["price"]["unit_price"] == 10.0
-    assert ctx.recommended_part["semantic_match"] == "HIGH" and ctx.rejection_reasons == {}
+    assert ctx.recommended_part["product_match_status"] == "CANONICAL_MATCH" and ctx.rejection_reasons == {}
 
 
 def test_no_fitment_not_approved_and_deprecated_fitment_are_told_apart():
@@ -254,12 +290,73 @@ def test_weights_are_an_explicit_policy_that_sums_to_one():
     assert round(sum(WEIGHTS.values()), 6) == 1.0 and set(WEIGHTS) == {"fitment_score", "approval_score", "availability_score", "semantic_match_score", "regional_score"}
 
 
-def test_a_stronger_vocabulary_match_ranks_above_a_weaker_one_with_everything_else_equal():
-    parts = [t.part("P-1", "Gear pump"), t.part("P-2", "Lift cylinder", aliases=["gear pump"], common_names=["gear pump"])]
-    ds = {"parts": parts, "categories": [{"category_id": "C-1", "name": "Hydraulics"}, {"category_id": "S-1", "name": "Misc"}], "fitment": [t.fit(p["part_id"]) for p in parts],
-          "approved_sources": [t.source(p["part_id"]) for p in parts], "inventory": [t.stock(p["part_id"]) for p in parts], "pricing": []}
+def alias_dataset():
+    """P-1 is a gear pump (Hydraulics). P-2 is a lift cylinder carrying the aliases 'gear pump' and 'hydraulic pump'. P-3 is a Lubrication pump carrying the alias 'hydraulic pump'."""
+    parts = [t.part("P-1", "Gear pump"), t.part("P-2", "Lift cylinder", category_id="C-3", subcategory_id="S-3", aliases=["gear pump"], common_names=["gear pump"]),
+             t.part("P-3", "Central lubrication pump", category_id="C-2", subcategory_id="S-2", aliases=["hydraulic pump"], common_names=["hydraulic pump"])]
+    cats = [{"category_id": "C-1", "name": "Hydraulics"}, {"category_id": "S-1", "name": "Gear pump"}, {"category_id": "C-2", "name": "Lubrication"}, {"category_id": "S-2", "name": "Central lubrication pump"},
+            {"category_id": "C-3", "name": "Cylinders"}, {"category_id": "S-3", "name": "Lift cylinder"}]
+    return {"parts": parts, "categories": cats, "fitment": [t.fit(p["part_id"]) for p in parts], "approved_sources": [t.source(p["part_id"]) for p in parts],
+            "inventory": [t.stock(p["part_id"]) for p in parts], "pricing": []}
+
+
+def test_alias_collision_a_misleading_alias_cannot_override_the_canonical_category_or_type():
+    ctx = memory_builder(**alias_dataset()).build("hydraulic pump for my ZX-100")
+    states = {x["part_id"]: x["product_match"] for x in ctx.candidate_parts}
+    assert states["P-3"] == "CANONICAL_TYPE_MISMATCH" and ctx.recommended_part["part_id"] == "P-1"  # 'hydraulic pump' is an alias of a lubrication pump: it fits, is approved and in stock, and is still refused
+    assert codes(ctx, "P-3")[0] == "CANONICAL_TYPE_MISMATCH" and "P-3" not in json.dumps([ctx.alternatives, ctx.unconfirmed_matches, ctx.compatible_part])
+    gear = memory_builder(**alias_dataset()).build("gear pump for my ZX-100")
+    assert gear.recommended_part["part_id"] == "P-1" and gear.recommended_part["product_match"] is True  # the canonical gear pump wins ...
+    assert {x["part_id"]: x["product_match"] for x in gear.candidate_parts}["P-2"] == "CANONICAL_TYPE_MISMATCH"  # ... and the cylinder named 'gear pump' by alias is a different product class
+    assert [r["part_id"] for r in gear.ranking] == ["P-1"]
+
+
+def test_an_alias_with_no_class_conflict_identifies_a_candidate_but_is_never_recommended():
+    parts = [t.part("P-1", "Seal kit", aliases=["o-ring"], common_names=["o-ring"], category_id="C-1", subcategory_id="S-1")]
+    ds = {"parts": parts, **ok_dataset(), "categories": [{"category_id": "C-1", "name": "Hydraulics"}, {"category_id": "S-1", "name": "Seal kit"}]}
+    ctx = memory_builder(**ds).build("o-ring for my ZX-100")
+    assert ctx.candidate_parts[0]["product_match"] == "ALIAS_ONLY_MATCH" and ctx.recommended_part is None and ctx.decision.decision == "NO_VALID_RECOMMENDATION"
+    assert [u["part_id"] for u in ctx.unconfirmed_matches] == ["P-1"] and ctx.unconfirmed_matches[0]["recommendation"] is False  # offered for confirmation only, labelled as unconfirmed
+    assert codes(ctx) == ["ALIAS_ONLY_MATCH"]
+
+
+def test_canonical_class_is_read_from_name_subcategory_and_category_not_from_text():
+    ds = ok_dataset()
+    assert memory_builder(**ds).build("hydraulics for my ZX-100").recommended_part["part_id"] == "P-1"  # category word
+    assert memory_builder(**ds).build("gear for my ZX-100").recommended_part["part_id"] == "P-1"  # name / subcategory word
+    assert memory_builder(**ds).build("PN-P-1 for my ZX-100").recommended_part["part_id"] == "P-1"  # part number
+
+
+def test_a_correct_part_that_is_unavailable_gives_no_available_recommendation_and_never_a_substitute():
+    ds = alias_dataset() | {"inventory": [t.stock("P-1", qty=0, status="OUT_OF_STOCK"), t.stock("P-2"), t.stock("P-3")]}
+    ctx = memory_builder(**ds).build("hydraulic pump for my ZX-100")
+    assert (ctx.decision.status, ctx.decision.decision) == (c.NOT_FOUND, "NO_AVAILABLE_RECOMMENDATION") and ctx.recommended_part is None
+    assert ctx.compatible_part["part_id"] == "P-1" and ctx.compatible_part["availability"] == "UNAVAILABLE" and ctx.alternatives == []
+    unknown = alias_dataset() | {"inventory": [{**t.stock("P-1"), "available_quantity": None, "status": "UNKNOWN"}, t.stock("P-2"), t.stock("P-3")]}
+    u = memory_builder(**unknown).build("gear pump for my ZX-100")
+    assert u.decision.decision == "NO_AVAILABLE_RECOMMENDATION" and u.decision.status == c.INSUFFICIENT_DATA and u.compatible_part["availability"] == "UNKNOWN" and "availability:P-1" in u.missing
+
+
+def test_an_alternative_is_offered_only_if_it_passes_canonical_match_fitment_and_approved_source_itself():
+    parts = [t.part("P-1", "Gear pump"), t.part("P-2", "Gear pump assembly"), t.part("P-3", "Gear pump kit"), t.part("P-4", "Gear pump seal"), t.part("P-5", "Pump", category_id="C-2", subcategory_id="S-2", aliases=["gear pump"])]
+    cats = [{"category_id": "C-1", "name": "Hydraulics"}, {"category_id": "S-1", "name": "Gear pump"}, {"category_id": "C-2", "name": "Lubrication"}, {"category_id": "S-2", "name": "Lube pump"}]
+    ds = {"parts": parts, "categories": cats, "fitment": [t.fit("P-1"), t.fit("P-2"), t.fit("P-3"), t.fit("P-5")],  # P-4 has no fitment
+          "approved_sources": [t.source("P-1"), t.source("P-2", status="NOT_APPROVED"), t.source("P-3"), t.source("P-4"), t.source("P-5")],  # P-2 has no approved source
+          "inventory": [t.stock(p["part_id"]) for p in parts], "pricing": []}
     ctx = memory_builder(**ds).build("gear pump for my ZX-100")
-    assert [r["part_id"] for r in ctx.ranking] == ["P-1", "P-2"] and ctx.ranking[0]["explanation"]["semantic_match"] == "HIGH" and ctx.ranking[1]["explanation"]["semantic_match"] == "MEDIUM"
+    assert ctx.recommended_part["part_id"] == "P-1"
+    assert [a["part_id"] for a in ctx.alternatives] == ["P-3"]  # P-2 no source, P-4 no fitment, P-5 wrong product class
+    assert all(a["product_match"] and a["fitment"] == "APPROVED" and a["approved_source"] for a in ctx.alternatives)
+    assert codes(ctx, "P-2") == ["NO_APPROVED_SOURCE"] and codes(ctx, "P-4") == ["NO_FITMENT"] and codes(ctx, "P-5")[0] == "CANONICAL_TYPE_MISMATCH"
+
+
+def test_a_part_for_another_machine_or_without_an_approved_source_is_never_recommended_whatever_else_is_true():
+    other = memory_builder(**ok_dataset(fitment=[t.fit(mid="M-9")])).build("gear pump for my ZX-100")
+    assert other.recommended_part is None and codes(other) == ["NO_FITMENT"] and other.compatible_part is None
+    none_ = memory_builder(**ok_dataset(approved_sources=[])).build("gear pump for my ZX-100")
+    assert none_.recommended_part is None and codes(none_) == ["NO_APPROVED_SOURCE"] and none_.compatible_part is None and none_.alternatives == []
+    unapproved = memory_builder(**ok_dataset(approved_sources=[t.source(status="CONDITIONAL")])).build("gear pump for my ZX-100")
+    assert unapproved.recommended_part is None and codes(unapproved) == ["NO_APPROVED_SOURCE"]
 
 
 def test_regional_stock_is_a_ranking_component_only_when_the_destination_is_known():
@@ -506,12 +603,12 @@ def test_visibility_by_role_removes_fields_on_a_copy_and_says_what_it_removed(en
     assert "name" not in w_cust.technician and "technician.name" in w_cust.visibility["hidden_fields"]
     assert all("name" not in row["installed_by"] for row in w_cust.traceability["installed_now"] if row["installed_by"])
     stock = engine.build_discovery_context("I need a hydraulic pump for my KFT-600.", principal=P("END_CUSTOMER", customer_id="CUS-001"))
-    assert all("warehouses" not in a for a in stock.availability) and stock.recommended_part["availability"] == "AVAILABLE"
+    assert all("warehouses" not in a for a in stock.availability) and stock.compatible_part["availability"] == "UNAVAILABLE"
     assert all("warehouses" in a for a in engine.build_discovery_context("I need a hydraulic pump for my KFT-600.", principal=P("DEALER", dealer_id="DLR-004")).availability)
 
 
 def test_a_customers_destination_defaults_to_their_own_country(engine):
-    ctx = engine.build_discovery_context("hydraulic pump for my KFT-600", principal=P("END_CUSTOMER", customer_id="CUS-001"))
+    ctx = engine.build_discovery_context("hydraulic pump for my KFT-200", principal=P("END_CUSTOMER", customer_id="CUS-001"))
     assert ctx.extracted["destination_country"] == "NL" and ctx.extracted["destination_region"] == "EUROPE"
     assert ctx.ranking[0]["components"]["regional_score"] == 1.0
 
@@ -544,7 +641,8 @@ def test_the_service_calls_the_engine_and_returns_its_decision_unchanged(engine)
     w = svc.handle(ServiceRequest(text="Is this covered under warranty?", principal=P("OEM"), claim_id="CLM-G003"))
     assert w.intent == "WARRANTY" and w.decision.decision == "NOT_ELIGIBLE"
     d = svc.handle(ServiceRequest(text="Which hydraulic pump fits my KFT-600?"))
-    assert d.intent == "DISCOVERY" and d.decision.decision == "RECOMMEND"
+    assert d.intent == "DISCOVERY" and d.decision.decision == "NO_AVAILABLE_RECOMMENDATION" and d.context.compatible_part["part_id"] == "PRT-007"
+    assert svc.handle(ServiceRequest(text="Which hydraulic pump fits my KFT-200?")).decision.decision == "RECOMMEND"
     json.dumps(d.to_dict())
 
 

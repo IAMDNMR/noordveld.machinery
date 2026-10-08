@@ -145,7 +145,7 @@ class WarrantyContextAssembler:
                                       warnings=warnings, recommended_next_action=NEXT_ACTION[ctx.outcome])
         trace = self._b.traceability(facts.instance["machine_instance_id"], (facts.part or {}).get("part_id")) if facts.instance else None
         return WarrantyContext(
-            **c.meta("WARRANTY", inputs, self.as_of.isoformat(), self.generated_at, decision, records, evidence, path), machine=ctx.machine, current_part=ctx.current_part, installation=ctx.installation,
+            **c.meta("WARRANTY", inputs, self.as_of.isoformat(), self.generated_at, decision, records, evidence, path, fact_verified=ctx.outcome != rules.INSUFFICIENT_DATA), machine=ctx.machine, current_part=ctx.current_part, installation=ctx.installation,
             dealer=ctx.dealer, technician=ctx.technician, work_order=ctx.work_order, fitment=ctx.fitment, approved_source=ctx.approved_source, warranty_policy=ctx.warranty_policy,
             coverage_start=ctx.coverage_start, coverage_end=ctx.coverage_end, replacement_history=ctx.replacement_history, prior_claims=ctx.prior_claims, claim=ctx.claim,
             decision_factors=factors, provenance=ctx.provenance, reference_date=ctx.reference_date, traceability=trace)

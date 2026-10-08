@@ -94,6 +94,7 @@ class LogisticsContextBuilder:
         if not sc.events:
             missing.append("tracking_events")
         warnings = list(sc.notes)
+        coherence_problem = any("not a coherent sequence" in n for n in sc.notes)
         requires_review = route is None
         records = [c.record("Shipment", s["shipment_id"], s)] + [c.record("Order", order["order_id"], order)] * bool(order) + [c.record("OrderLine", x["order_line_id"], x) for x in lines]
         if route:
@@ -138,7 +139,8 @@ class LogisticsContextBuilder:
                 reasons=[f"route progress is read from tracking events against the legs of {route['route_id']}"], evidence=evidence, missing=missing, warnings=warnings,
                 recommended_next_action="Explain status, remaining legs and ETA from the facts; mention alternatives only as recorded options with their recorded time and cost.")
         return LogisticsContext(
-            **c.meta("LOGISTICS", inputs, self.as_of.isoformat(), self.generated_at, decision, records, evidence, path), order=order, order_lines=lines, shipment=s, part=sc.part, origin=sc.origin,
+            **c.meta("LOGISTICS", inputs, self.as_of.isoformat(), self.generated_at, decision, records, evidence, path, fact_verified=route is not None and not coherence_problem),
+            order=order, order_lines=lines, shipment=s, part=sc.part, origin=sc.origin,
             destination=sc.destination, current_status=sc.current_status, current_location=sc.current_location, route=route, route_legs=sc.route_legs, route_progress=progress, completed_legs=done,
             remaining_legs=todo, planned_eta=sc.planned_eta, alternative_routes=sc.alternative_routes, transport_comparison=sc.transport_comparison, tracking_events=sc.events,
             route_resolution_status=sc.route_resolution_status, requires_review=requires_review, provenance=c.dedupe_records(records))
