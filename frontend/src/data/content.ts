@@ -35,6 +35,7 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
         { label: 'Parts Store', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
         { label: 'Agentic Shopping', to: '/agentic-shopping' },
+        { label: 'Commerce Assistant', to: '/commerce' },
         { label: 'My Orders', to: '/orders' },
       ]
     : role === 'ORDER_PROCESSOR'
@@ -42,6 +43,7 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
           { label: 'Orders', to: '/orders' },
           { label: 'Parts Intelligence', to: '/parts-intelligence' },
           { label: 'Parts Store', to: '/parts-store' },
+          { label: 'Commerce Assistant', to: '/commerce' },
           { label: 'Fulfilment', to: '/orders?queue=needs_fulfilment' },
           { label: 'Shipments', to: '/orders?queue=shipped' },
         ]

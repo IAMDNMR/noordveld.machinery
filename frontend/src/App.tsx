@@ -12,6 +12,7 @@ const PartsStorePage = lazy(() => import('./pages/PartsStorePage'))
 const PartDetailPage = lazy(() => import('./pages/PartDetailPage'))
 const PartsIntelligencePage = lazy(() => import('./pages/PartsIntelligencePage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
+const CommercePage = lazy(() => import('./pages/CommercePage'))
 const AgenticShoppingPage = lazy(() => import('./pages/AgenticShoppingPage'))
 const LegalPage = lazy(() => import('./pages/LegalPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="agent" element={<AgentRedirect />} />
             <Route path=":partNo" element={<PartDetailPage />} />
           </Route>
+          <Route path="commerce" element={<CommercePage />} />
           <Route path="agentic-shopping" element={<AgenticShoppingPage />} />
           <Route path="parts-intelligence" element={<PartsIntelligencePage />} />
           <Route path="sign-in" element={<SignInPage />} />
