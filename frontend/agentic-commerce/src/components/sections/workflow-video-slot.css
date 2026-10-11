@@ -1,0 +1,3 @@
+/* The workflow film under the Agentic E-Commerce introduction: same width as the page content. */
+.wf-slot { background: var(--paper); padding-block: clamp(1.5rem, 4vw, 4rem) clamp(2.5rem, 6vw, 6rem); }
+.wf-slot__video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius-m, 1rem); background: #f5f3ee; object-fit: contain; box-shadow: 0 30px 60px -36px rgb(10 50 44 / 0.35); }

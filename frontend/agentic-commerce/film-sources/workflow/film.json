@@ -1,0 +1,105 @@
+{
+  "title": "Noordveld Agentic E-Commerce: the end-to-end workflow",
+  "voice": "en-US-AndrewNeural",
+  "rate": "-4%",
+  "fps": 30,
+  "disclaimer": "Demonstration data. Not real operational data.",
+  "rail": ["Know", "Investigate", "Need", "Purchase", "Track", "Ask", "Trust", "Ship"],
+  "scenes": [
+    {
+      "id": "hook", "kind": "hook", "image": "shots/00-machine.jpg",
+      "kicker": "KFT-200", "title": "Machine down.",
+      "vo": "A forklift stops. Somewhere, a customer needs a part, and doesn't know its number."
+    },
+    {
+      "id": "store", "kind": "screen", "rail": 0, "kicker": "Parts Store", "title": "Know the part? Buy it.",
+      "chips": ["Full catalogue", "Fitment", "Price and stock"],
+      "vo": "If you know what you want, the Parts Store has the full catalogue: fitment, price and stock on every part.",
+      "shots": [
+        { "image": "shots/02-store.jpg", "w": 1440, "h": 1000, "until": 0.5,
+          "camera": [[0, 0, 0, 1440], [1, 380, 380, 960]], "highlights": [[0.45, 1, 425, 450, 290, 340]] },
+        { "image": "shots/03-part.jpg", "w": 1440, "h": 1000, "until": 1,
+          "camera": [[0, 0, 0, 1440], [1, 560, 130, 860]], "highlights": [[0.3, 1, 728, 180, 560, 300]] }
+      ]
+    },
+    {
+      "id": "intel", "kind": "screen", "rail": 1, "kicker": "Parts Intelligence", "title": "Investigate. Verify.",
+      "chips": ["Knowledge graph", "Graph path", "Source on every answer"],
+      "vo": "Parts Intelligence answers questions about the catalogue from the knowledge graph. Every answer shows its graph path, and its source.",
+      "shots": [
+        { "image": "shots/04-intel.jpg", "w": 1440, "h": 1000, "until": 1,
+          "camera": [[0, 0, 0, 1440], [0.45, 140, 150, 1160], [1, 140, 260, 1160]], "highlights": [[0.2, 0.5, 160, 180, 830, 70], [0.55, 1, 160, 650, 1120, 300]] }
+      ]
+    },
+    {
+      "id": "shopping", "kind": "screen", "rail": 2, "kicker": "Agentic Shopping", "title": "Describe the need. The agent does the rest.",
+      "chips": ["Need", "Evaluate", "Recommend"],
+      "vo": "Don't know the part? Describe the problem. The agent identifies the machine and the part, checks fitment and stock, compares fulfilment options, and recommends one.",
+      "shots": [
+        { "image": "shots/05-shopping.jpg", "w": 1440, "h": 1250, "until": 1,
+          "camera": [[0, 0, 60, 1440], [0.35, 140, 300, 1160], [1, 250, 620, 940]], "highlights": [[0.15, 0.4, 150, 150, 1140, 120], [0.4, 0.7, 160, 470, 1120, 90], [0.72, 1, 320, 1062, 800, 50]] }
+      ]
+    },
+    {
+      "id": "checkout", "kind": "screen", "rail": 3, "kicker": "Cart and checkout", "title": "One step to the cart.",
+      "chips": ["Delivery", "Dealer", "Availability", "Fulfilment"],
+      "vo": "One step to the cart. Checkout walks through delivery, the dealer, availability and fulfilment, before anything is ordered.",
+      "shots": [
+        { "image": "shots/06-checkout.jpg", "w": 1440, "h": 1250, "until": 1,
+          "camera": [[0, 0, 0, 1440], [1, 200, 140, 1040]], "highlights": [[0.2, 0.55, 280, 340, 900, 90], [0.55, 1, 256, 212, 905, 44]] }
+      ]
+    },
+    {
+      "id": "orders", "kind": "screen", "rail": 4, "kicker": "Orders and fulfilment", "title": "Every order, tracked.",
+      "chips": ["Allocation", "Fulfilment", "Shipment", "Delivery"],
+      "vo": "Once it's placed, the order is tracked step by step: allocation, fulfilment, shipment and delivery.",
+      "shots": [
+        { "image": "shots/08-order.jpg", "w": 1440, "h": 1100, "until": 1,
+          "camera": [[0, 0, 0, 1440], [1, 140, 90, 1160]], "highlights": [[0.3, 1, 165, 262, 1110, 110]] }
+      ]
+    },
+    {
+      "id": "assistant", "kind": "screen", "rail": 5, "kicker": "Commerce Assistant", "title": "One question. One answer.",
+      "chips": ["Reads typos", "Fits, sourced, in stock", "Shows what it rejected"],
+      "vo": "Or simply ask. The Commerce Assistant reads a mistyped word as the catalogue word, and says so. It recommends only a part that fits, has an approved source and is in stock, and shows what it rejected, and why.",
+      "shots": [
+        { "image": "shots/09-assistant-discovery.jpg", "w": 1440, "h": 1350, "until": 1,
+          "camera": [[0, 250, 40, 1000], [0.35, 300, 440, 900], [0.72, 300, 440, 900], [1, 300, 780, 900]], "highlights": [[0.18, 0.42, 340, 600, 420, 60], [0.45, 0.72, 345, 705, 750, 210], [0.78, 1, 345, 1085, 760, 180]] }
+      ]
+    },
+    {
+      "id": "warranty", "kind": "screen", "rail": 6, "kicker": "Warranty and traceability", "title": "The rules decide. The evidence shows why.",
+      "chips": ["Rules, not the model", "Every check", "Evidence path"],
+      "vo": "Warranty is decided by rules, not by the AI. Every check, the installation, the dealer and the evidence sit right beside the verdict.",
+      "shots": [
+        { "image": "shots/12-assistant-warranty.jpg", "w": 1440, "h": 1350, "until": 0.62,
+          "camera": [[0, 250, 60, 1000], [0.35, 300, 440, 900], [1, 300, 760, 900]], "highlights": [[0.1, 0.38, 330, 490, 780, 90], [0.42, 0.75, 340, 710, 760, 340], [0.78, 1, 340, 1080, 760, 200]] },
+        { "image": "shots/13-assistant-evidence.jpg", "w": 1440, "h": 1100, "until": 1,
+          "camera": [[0, 200, 250, 1040], [1, 260, 520, 920]], "highlights": [[0.2, 1, 310, 590, 850, 420]] }
+      ]
+    },
+    {
+      "id": "seaair", "kind": "screen", "rail": 7, "kicker": "Logistics", "title": "Sea: 91 days.\nAir: 6 days.",
+      "chips": ["Tracked by leg", "Recorded alternatives", "No invented numbers"],
+      "vo": "A shipment from Japan is travelling by economy sea: leg one of four, due on the nineteenth of November. The recorded air route takes six days instead of ninety-one, at twelve thousand, six hundred and seventy-five euros, against two thousand, eight hundred and thirty-five. Every number comes from the route's own record.",
+      "shots": [
+        { "image": "shots/10-assistant-seaair.jpg", "w": 1440, "h": 1350, "until": 1,
+          "camera": [[0, 250, 60, 1000], [0.3, 280, 460, 920], [0.62, 300, 760, 880], [1, 300, 760, 880]], "highlights": [[0.08, 0.3, 330, 540, 780, 80], [0.32, 0.55, 330, 1020, 780, 90], [0.58, 1, 330, 1130, 440, 150]] }
+      ]
+    },
+    {
+      "id": "routes", "kind": "screen", "rail": 7, "kicker": "Logistics", "title": "Air: 5 days.\nSea: 31 days.",
+      "chips": ["Potential routes", "Never a promise"],
+      "vo": "Even where nothing has shipped yet, it shows the routes the network records. Lagos: five days by air, or thirty-one by sea, labelled as potential routes, never as promises.",
+      "shots": [
+        { "image": "shots/11-assistant-routes.jpg", "w": 1440, "h": 1350, "until": 1,
+          "camera": [[0, 250, 60, 1000], [0.4, 300, 420, 880], [1, 320, 520, 820]], "highlights": [[0.3, 0.75, 340, 700, 700, 140], [0.72, 1, 340, 855, 760, 70]] }
+      ]
+    },
+    {
+      "id": "outro", "kind": "outro", "title": "From need to fulfilment, and after.",
+      "words": ["AGENTIC", "E-COMMERCE"],
+      "vo": "Find it. Buy it. Track it. Trust it. Agentic e-commerce, at Noordveld."
+    }
+  ]
+}
