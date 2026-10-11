@@ -11,8 +11,9 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.api.dependencies import CommerceEngine, CommerceService, require
+from app.api.dependencies import CommerceAgentDep, CommerceEngine, CommerceService, require
 from app.commerce.access import AccessDenied, Principal, principal_for
+from app.commerce.agent import AgentRequest
 from app.commerce.service import ServiceRequest
 from app.services.orders import User
 
@@ -71,6 +72,28 @@ class RequestBody(Scope):
     part_id: Ref | None = None
 
 
+class AgentState(BaseModel):
+    """What the previous answer returned (and what the interface let the user select): identifiers and the last search text, never a decision."""
+
+    model_config = ConfigDict(extra="forbid")
+    shipment_id: Ref | None = None
+    order_id: Ref | None = None
+    claim_id: Ref | None = None
+    machine_instance_id: Ref | None = None
+    part_id: Ref | None = None
+    machine_id: Ref | None = None
+    machine_model: Annotated[str, Field(max_length=40)] | None = None
+    part_number: Annotated[str, Field(max_length=40)] | None = None
+    last_request: Annotated[str, Field(max_length=500)] | None = None
+    last_domains: list[Literal["DISCOVERY", "LOGISTICS", "WARRANTY"]] = Field(default_factory=list, max_length=3)
+
+
+class AgentBody(Scope):
+    message: str = Field(min_length=1, max_length=500)
+    state: AgentState = Field(default_factory=AgentState)
+    destination_country: Country | None = None
+
+
 def _principal(user: User, scope: Scope) -> Principal:
     try:
         return principal_for(user, scope.user_role, scope.dealer_id)
@@ -112,3 +135,12 @@ def request_context(body: RequestBody, user: Caller, service: CommerceService) -
         text=body.request, intent=body.intent, principal=p, machine_id=body.machine_id, machine_instance_id=body.machine_instance_id,
         destination_country=body.destination_country.upper() if body.destination_country else None, shipment_id=body.shipment_id, order_id=body.order_id, claim_id=body.claim_id,
         part_id=body.part_id)).to_dict()
+
+
+@router.post("/agent")
+def agent(body: AgentBody, user: Caller, agent: CommerceAgentDep) -> dict:
+    """The Commerce Agent: one message (and the state of the previous answer) -> one evidence-grounded answer over discovery, logistics and warranty.
+    Every context inside is already scoped to the caller; a refusal in any journey is a 403 for the whole request."""
+    p = _principal(user, body)
+    return _guard(agent.handle, AgentRequest(message=body.message, principal=p, state=body.state.model_dump(exclude_none=True, exclude_defaults=True),
+                                             destination_country=body.destination_country.upper() if body.destination_country else None))

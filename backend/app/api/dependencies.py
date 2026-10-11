@@ -160,3 +160,14 @@ def get_commerce_service(engine: CommerceEngine) -> AgenticCommerceService:
 
 
 CommerceService = Annotated[AgenticCommerceService, Depends(get_commerce_service)]
+
+
+from app.commerce.agent import CommerceAgent
+
+
+def get_commerce_agent(engine: CommerceEngine, llm: Annotated[LLMClient | None, Depends(get_llm)]) -> CommerceAgent:
+    """The Commerce Agent over the same engine; the language model is optional (routing an unclear message, rewording the lead) and the agent works without it."""
+    return CommerceAgent(engine, llm)
+
+
+CommerceAgentDep = Annotated[CommerceAgent, Depends(get_commerce_agent)]

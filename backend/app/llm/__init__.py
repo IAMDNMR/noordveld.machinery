@@ -5,6 +5,7 @@ from functools import lru_cache
 
 from app.core.config import Settings
 from app.llm.base import (
+    CommerceParse,
     LLMClient,
     LLMError,
     LLMInvalidResponse,
@@ -13,7 +14,7 @@ from app.llm.base import (
     ShoppingParse,
 )
 
-__all__ = ["PROVIDERS", "LLMClient", "LLMError", "LLMInvalidResponse", "LLMParse", "LLMUnavailable", "ShoppingParse", "create_llm"]
+__all__ = ["PROVIDERS", "CommerceParse", "LLMClient", "LLMError", "LLMInvalidResponse", "LLMParse", "LLMUnavailable", "ShoppingParse", "create_llm"]
 
 PROVIDERS = ("groq", "gemini")
 

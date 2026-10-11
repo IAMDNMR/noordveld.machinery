@@ -28,6 +28,8 @@ def gemini_schema(schema: dict[str, Any]) -> dict[str, Any]:
         out["type"] = kind.upper()
     if "enum" in schema:
         out["enum"] = [v for v in schema["enum"] if v is not None]
+    if "items" in schema:
+        out["items"] = gemini_schema(schema["items"])
     if "properties" in schema:
         out["properties"] = {k: gemini_schema(v) for k, v in schema["properties"].items()}
         out["required"] = list(schema.get("required", []))

@@ -15,11 +15,13 @@ import time
 from collections import OrderedDict, deque
 from typing import Any
 
-from app.llm.base import LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
+from app.llm.base import CommerceParse, LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
 from app.llm.prompts import (
+    COMMERCE_RULES,
     GROUNDING_RULES,
     SHOPPING_RULES,
     UNDERSTAND_RULES,
+    commerce_prompt,
     question_prompt,
     shopping_prompt,
 )
@@ -28,7 +30,7 @@ log = logging.getLogger("app.llm")
 
 # Token budget: replies are short structures or two sentences, and only the evidence the wording needs is sent.
 # "question_retry" is the single second attempt after an unusable reply: temperature is 0, so the same cap would truncate the same way
-MAX_OUTPUT_TOKENS = {"question": 320, "question_retry": 480, "shopping": 150, "grounded_answer": 120}
+MAX_OUTPUT_TOKENS = {"commerce": 120, "question": 320, "question_retry": 480, "shopping": 150, "grounded_answer": 120}
 MAX_EVIDENCE_ITEMS = 12  # records sent to the wording step: the summary record plus up to 11 results
 
 ENTITY_KEYS = ("part", "second_part", "machine", "supplier", "dealer", "assembly", "category", "order", "warehouse")
@@ -65,6 +67,24 @@ SHOPPING_SCHEMA = _obj({
     "budget_max": {"type": ["number", "null"]}, "budget_currency": _STR,
     "availability": {"type": "string", "enum": ["require", "prefer", "future", "none"]},
 })
+
+
+COMMERCE_DOMAINS = ("DISCOVERY", "WARRANTY", "LOGISTICS")
+COMMERCE_SCHEMA = _obj({"in_scope": {"type": "boolean"}, "domains": {"type": "array", "items": {"type": "string", "enum": list(COMMERCE_DOMAINS)}}, "clarification_question": _STR})
+
+
+def to_commerce_parse(text: str) -> CommerceParse:
+    """The model's routing of a message, validated: a journey outside the three is rejected, so the model cannot invent one."""
+    data = _load(text)
+    try:
+        if not isinstance(data["in_scope"], bool) or not isinstance(data["domains"], list):
+            raise LLMInvalidResponse("not valid structured output")
+        domains = tuple(d for d in COMMERCE_DOMAINS if d in data["domains"])
+        if any(d not in COMMERCE_DOMAINS for d in data["domains"]):
+            raise LLMInvalidResponse("journey outside the approved list")
+        return CommerceParse(in_scope=data["in_scope"], domains=domains if data["in_scope"] else (), clarification_question=_text(data.get("clarification_question")))
+    except (KeyError, TypeError) as exc:
+        raise LLMInvalidResponse("not valid structured output") from exc
 
 
 # ── validation ───────────────────────────────────────────────────────────────────────────────────
@@ -226,6 +246,9 @@ class StructuredLLM:
 
     def resolve_entities(self, question: str, intents: dict[str, str]) -> tuple[str, ...]:
         return self.parse_question(question, intents).mentions
+
+    def parse_commerce_request(self, message: str) -> CommerceParse:
+        return self._cached("commerce", message, lambda: to_commerce_parse(self._guarded("commerce", COMMERCE_RULES, commerce_prompt(message), COMMERCE_SCHEMA)))
 
     def parse_shopping_request(self, request: str) -> ShoppingParse:
         return self._cached("shopping", request, lambda: to_shopping_parse(self._guarded("shopping", SHOPPING_RULES, shopping_prompt(request), SHOPPING_SCHEMA)))

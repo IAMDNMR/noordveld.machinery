@@ -54,6 +54,15 @@ class ShoppingParse:
     availability: str = "none"  # require ("must be in stock", "available now") | prefer ("preferably in stock") | future (accepts waiting for on-order stock) | none
 
 
+@dataclass(frozen=True)
+class CommerceParse:
+    """Which commerce journeys a message asks about. Only the journeys: every identifier in the message is read by the backend, never by the model."""
+
+    in_scope: bool
+    domains: tuple[str, ...] = ()  # subset of DISCOVERY, LOGISTICS, WARRANTY
+    clarification_question: str | None = None
+
+
 class LLMClient(Protocol):
     name: str
 
@@ -65,6 +74,9 @@ class LLMClient(Protocol):
 
     def generate_grounded_response(self, question: str, intent: str, evidence: list[dict[str, Any]], draft: str) -> str:
         """Reword `draft` using ONLY `evidence`. Must not add facts. The caller validates the result."""
+
+    def parse_commerce_request(self, message: str) -> CommerceParse:
+        """Which of DISCOVERY / LOGISTICS / WARRANTY a message is about (several are allowed). Never reads an identifier, never decides a fact."""
 
     def parse_shopping_request(self, request: str) -> ShoppingParse:
         """Read a purchase request: the machine, the part needed, the preference and the delivery place. Never decides a fact."""

@@ -59,6 +59,22 @@ SHOPPING_RULES = (
 )
 
 
+COMMERCE_RULES = (
+    "You route messages for the Noordveld Agentic E-Commerce assistant. It has three journeys: DISCOVERY (finding, comparing or asking about the availability of a machinery part "
+    "for a machine, or why a part is recommended), LOGISTICS (where a shipment or order is, its status, delay, delivery speed or what is in it) and WARRANTY "
+    "(whether a part is covered, who installed it and whether correctly, replacement history, claims). A message can belong to several journeys. "
+    "You do not answer, and you never read, invent or complete an identifier, a machine, a part, a stock level, a date or a warranty decision. "
+    "in_scope is false for general knowledge, chat, jokes, coding, advice or anything that is not one of the three journeys. "
+    "domains lists every journey the message asks about, in the order DISCOVERY, WARRANTY, LOGISTICS; empty when out of scope or when you cannot tell. "
+    "clarification_question: one short question when the message is about commerce but too vague to choose a journey; otherwise null."
+    + JSON_ONLY
+)
+
+
+def commerce_prompt(message: str) -> str:
+    return f"Message: {message}"
+
+
 def question_prompt(question: str, intents: dict[str, str]) -> str:
     listing = "\n".join(f"- {name}: {desc}" for name, desc in intents.items())
     return f"Approved intents:\n{listing}\n\nQuestion: {question}"
