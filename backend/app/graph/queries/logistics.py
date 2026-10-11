@@ -46,6 +46,16 @@ ORDER BY r.route_id
 LIMIT 40
 """
 
+# the transport lanes between named places (routes carrying location ids on both ends); the seeded depot-to-ship-to routes carry ship-to ids and are not lanes
+ROUTES_NETWORK = """
+MATCH (r:TransportRoute)
+WHERE r.destination_location_id IS NOT NULL
+OPTIONAL MATCH (r)-[:PRICED_BY]->(f:FreightRate)
+RETURN properties(r) AS p, f.total_transport_cost AS cost, f.currency AS currency
+ORDER BY r.route_id
+LIMIT 200
+"""
+
 # one query per candidate label (the label and its key come from the registry, never from user input)
 LOCATION = "MATCH (n:`{label}` {{`{key}`: $id}}) RETURN properties(n) AS p, labels(n) AS labels"
 

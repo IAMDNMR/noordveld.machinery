@@ -198,6 +198,24 @@ def test_logistics_faster_lists_only_recorded_alternative_routes():
     assert any("RTE-NET-JPNL-AIR-EXP (AIR), 6 days" in ln and "faster" in ln for ln in lines)
 
 
+def test_logistics_compare_sea_and_air_shows_the_recorded_trade_off_for_the_japan_lane():
+    r = ask("Compare sea and air for shipment SHP-NET-0001", customer("CUS-009"))
+    assert r["intent"] == "LOGISTICS"
+    text = "\n".join(sections(r)["LOGISTICS"]["lines"])
+    assert "RTE-NET-JPNL-SEA-ECO (SEA)" in text and "RTE-NET-JPNL-AIR-EXP (AIR), 6 days, 12675.0 EUR" in text and "RTE-NET-JPNL-SEA-STD (SEA), 45 days" in text
+
+
+def test_logistics_a_shipment_past_its_planned_eta_with_no_delivery_is_reported_as_behind_plan():
+    later = CommerceContextEngine.from_files(CANON_DIR, as_of=date(2026, 10, 11))  # SHP-NET-0003: planned ETA 2026-10-09, still departed_port
+
+    def say(engine, message):
+        return "\n".join(sections(CommerceAgent(engine, None).handle(AgentRequest(message=message, principal=OEM, state={})))["LOGISTICS"]["lines"])
+
+    assert "Past the planned ETA by 2 days" in say(later, "Is shipment SHP-NET-0003 late?") and "no new ETA is recorded" in say(later, "Is shipment SHP-NET-0003 late?")
+    assert "Not past its planned ETA" in say(ENGINE, "Is shipment SHP-NET-0003 late?")  # on 2026-10-07 it is still on plan
+    assert "Past the planned ETA" not in say(later, "Is shipment SHP-NET-0004 late?")  # delivered
+
+
 def test_logistics_follow_up_uses_the_shipment_of_the_previous_answer():
     first = ask("Where is SHP-NET-0001?", customer("CUS-009"))
     r = ask("Why is it taking so long?", customer("CUS-009"), first["state"])
@@ -487,3 +505,67 @@ def test_an_order_placed_in_the_shop_is_recognised_and_reads_its_owner_through_t
     assert "PLACED_BY" in q.ORDER and "ACTS_FOR" in q.ORDER and q.ORDER.index("ORDERED_BY") < q.ORDER.index("PLACED_BY")  # a customer order link still comes first
     r = ask("Where is order ORD-NET-0001?", customer("CUS-009"))
     assert r["status"] == "REQUIRES_CLARIFICATION" and r["clarification"]["domain"] == "LOGISTICS"
+
+
+# ── Waterfall: business outcome A edge cases ─────────────────────────────────────────────────────
+def test_discovery_reads_a_misspelt_catalogue_word_as_the_closest_catalogue_word_and_says_so():
+    r = ask("I need a hydrualic pomp for KFT-600")
+    s = sections(r)["DISCOVERY"]
+    assert "NVM-1060-HY" in s["headline"] and any("“pomp” as “pump”" in n for n in s["notes"]) and any("“hydrualic” as “hydraulic”" in n for n in s["notes"])
+
+
+def test_spelling_correction_leaves_unknown_words_and_identifiers_alone():
+    from app.commerce_agent.agent import correct_spelling
+    assert correct_spelling("flux capacitor for KFT-600 NVM-1060-HY", ENGINE) == ("flux capacitor for KFT-600 NVM-1060-HY", [])
+    r = ask("I need a flux capacitor for KFT-600")
+    assert sections(r)["DISCOVERY"]["decision"] == "NO_VALID_RECOMMENDATION" and r["contexts"]["DISCOVERY"]["recommended_part"] is None
+
+
+def test_discovery_names_an_invalid_machine_identifier_and_assumes_nothing():
+    r = ask("Find a hydraulic pump for XYZ-999")
+    s = sections(r)["DISCOVERY"]
+    assert s["decision"] == "REQUIRES_CLARIFICATION" and any("“XYZ-999” is not a machine model in the catalogue" in ln for ln in s["lines"]) and r["contexts"]["DISCOVERY"]["recommended_part"] is None
+
+
+# ── Waterfall: outcome C wording ─────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("claim,start", [("CLM-G003", "Not eligible. The check “The warranty period is active” failed"), ("CLM-G006", "Not enough data to decide. The check “The installation is evidenced")])
+def test_warranty_headline_names_the_failed_check_instead_of_reading_as_a_positive_claim(claim, start):
+    h = sections(ask(f"Is claim {claim} covered?"))["WARRANTY"]["headline"]
+    assert h.startswith(start) and "Not eligible: The warranty period is active" not in h
+
+
+# ── Waterfall: outcome B, a destination with recorded lanes but no shipment (potential routes, not assigned) ──
+@pytest.mark.parametrize("message,cities", [("How long to ship a hose to Lagos?", {"Lagos"}), ("Can you deliver to the USA?", {"Houston", "Savannah", "Chicago", "Los Angeles"}),
+                                            ("Shipping to Africa by sea or air", {"Lagos", "Tema", "Durban", "Mombasa", "Casablanca"}), ("What are the delivery options to the UK", {"Reading"})])
+def test_route_options_name_the_recorded_lanes_for_a_place_nobody_has_shipped_to(message, cities):
+    r = ask(message, customer("CUS-009"))
+    s = sections(r)["LOGISTICS"]
+    x = r["contexts"]["LOGISTICS"]
+    assert s["decision"] == "ROUTE_OPTIONS" and {d["city"] for d in x["destinations"]} == cities
+    text = "\n".join(s["lines"])
+    assert "potential routes" in text and "none is assigned to a shipment" in text
+    for d in x["destinations"]:
+        assert {o["transport_mode"] for o in d["routes"]} >= {"AIR"} and all(o["planned_transit_days"] is not None for o in d["routes"])
+    assert r["evidence"] and r["source_records"] and x["data_status"] == "SYNTHETIC_DEMO"
+
+
+def test_route_options_use_each_routes_own_days_and_never_a_built_in_value():
+    x = ask("How long to ship to Lagos?")["contexts"]["LOGISTICS"]
+    by = {o["transport_mode"]: o["planned_transit_days"] for o in x["destinations"][0]["routes"]}
+    assert by == {"AIR": 5, "SEA": 31} and [leg["sequence"] for leg in x["destinations"][0]["routes"][0]["legs"]] == sorted(leg["sequence"] for leg in x["destinations"][0]["routes"][0]["legs"])
+
+
+def test_a_shipment_reference_wins_over_a_place_in_the_message():
+    r = ask("Where is SHP-NET-0003 in the USA?")
+    assert sections(r)["LOGISTICS"]["decision"] != "ROUTE_OPTIONS" and r["contexts"]["LOGISTICS"]["shipment"]["shipment_id"] == "SHP-NET-0003"
+
+
+def test_a_place_with_no_recorded_lane_is_not_given_a_route():
+    r = ask("How long to ship to Atlantis?")
+    assert sections(r)["LOGISTICS"]["decision"] != "ROUTE_OPTIONS" and not r["contexts"].get("LOGISTICS", {}).get("destinations") if isinstance(r["contexts"].get("LOGISTICS"), dict) else True
+
+
+def test_multi_domain_part_request_with_a_destination_gets_the_part_and_the_potential_routes():
+    r = ask("I need a hydraulic pump for KFT-200 delivered to Lagos")
+    s = sections(r)
+    assert r["intent"] == "MULTI_DOMAIN" and s["DISCOVERY"]["decision"] == "RECOMMEND" and s["LOGISTICS"]["decision"] == "ROUTE_OPTIONS"

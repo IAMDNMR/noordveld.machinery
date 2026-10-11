@@ -157,6 +157,14 @@ def main() -> int:
         need(fit.get("lookup") == "PART_FITMENT" and [m["model"] for m in fit["machines"]] == ["KFT-200", "KFT-450"], f"G: which machines use the part: {[m['model'] for m in fit.get('machines', [])]}", p)
         need(origin.get("lookup") == "PART_ORIGIN" and [s["source_id"] for s in origin["sources"]] == ["SUP-011", "SUP-025"] and r[2]["source_records"] > 0, "G: where the part came from: approved sources and provenance expected", p)
 
+    def route_options(r: list[dict], p: list[str]) -> None:
+        lagos = r[0]["_data"]["contexts"]["LOGISTICS"]
+        need(r[0]["sections"][0]["decision"] == "ROUTE_OPTIONS" and {o["transport_mode"]: o["planned_transit_days"] for o in lagos["destinations"][0]["routes"]} == {"AIR": 5, "SEA": 31}, "H: Lagos must list its recorded air and sea routes with their own days", p)
+        us = r[1]["_data"]["contexts"]["LOGISTICS"]
+        need({d["city"] for d in us["destinations"]} == {"Houston", "Savannah", "Chicago", "Los Angeles"}, "H: the USA must list its four recorded destinations", p)
+        need(r[2]["_data"]["contexts"]["LOGISTICS"]["shipment"]["shipment_id"] == "SHP-NET-0001" and "RTE-NET-JPNL-AIR-EXP (AIR), 6 days" in " ".join(r[2]["sections"][0]["lines"]), "H: the Japan-origin sea shipment must show its recorded air alternative", p)
+        need(all("potential routes" in " ".join(x["sections"][0]["lines"]) for x in r[:2]), "H: lanes must be labelled potential, not assigned", p)
+
     def security(r: list[dict], p: list[str]) -> None:
         need([x["http"] for x in r] == [403, 403, 403], f"security: expected three 403s for another customer's records, got {[x['http'] for x in r]}", p)
         need(all(x["_data"].get("error", {}).get("code") == "forbidden" and "Hendrik" not in json.dumps(x["_data"]) for x in r), "security: the refusal must be the generic forbidden error", p)
@@ -180,6 +188,7 @@ def main() -> int:
     run.flows.append({"flow": "F shop order: Where is order HCME-ORD-000001 (owner, another customer, OEM)", "user": "lars/anna/jane", "passed": not problems, "problems": problems, "turns": results})
     run.flow("G part questions: which machines use it, where it came from", "lars", [{"message": "Find a hydraulic pump for KFT-200."}, {"message": "Which machine uses this part?"}, {"message": "Where did this part come from?"}], part_questions)
 
+    run.flow("H route options: Lagos, USA; Japan sea-vs-air for an OEM-visible shipment", "jane", [{"message": "How long to ship a hose to Lagos?"}, {"message": "Can you deliver to the USA?"}, {"message": "Compare sea and air for shipment SHP-NET-0001"}], route_options)
     run.flow("Security: Anna cannot reach Lars's shipment, claim or machine", "anna", [{"message": "Where is SHP-0010?"}, {"message": "Is claim CLM-G001 covered?"},
              {"message": "Is it covered?", "state": {"machine_instance_id": "MI-G001", "part_id": "PRT-007"}}], security)
 

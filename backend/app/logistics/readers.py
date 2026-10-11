@@ -27,6 +27,7 @@ class LogisticsReader(Protocol):
     def route(self, route_id: str) -> dict[str, Any] | None: ...
     def legs(self, route_id: str) -> list[dict[str, Any]]: ...
     def routes_between(self, origin: str, destination: str) -> list[dict[str, Any]]: ...
+    def network_routes(self) -> list[dict[str, Any]]: ...
     def location(self, location_id: str) -> dict[str, Any] | None: ...
     def order(self, order_id: str) -> dict[str, Any] | None: ...
     def order_part(self, order_line_id: str) -> dict[str, Any] | None: ...
@@ -102,6 +103,9 @@ class FileReader:
                 grouped[(r["origin_location_id"], r["destination_location_id"])].append(r)
             self._cache[key] = grouped  # type: ignore[assignment]
         return sorted(self._cache[key].get((origin, destination), []), key=lambda r: r["route_id"])  # type: ignore[union-attr]
+
+    def network_routes(self):
+        return sorted(self._rows("network_routes"), key=lambda r: r["route_id"])
 
     def location(self, location_id):
         return self._index("location", "location_id", "locations", "network_locations").get(location_id)
@@ -188,6 +192,9 @@ class GraphReader:
 
     def routes_between(self, origin, destination):
         return [self._route_row(r) for r in self._g.read(q.ROUTES_BETWEEN, origin=origin, destination=destination)]
+
+    def network_routes(self):
+        return [self._route_row(r) for r in self._g.read(q.ROUTES_NETWORK)]
 
     def location(self, location_id):
         for label, key in KINDS["location"]:

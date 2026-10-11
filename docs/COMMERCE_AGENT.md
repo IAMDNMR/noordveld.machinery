@@ -77,6 +77,12 @@ The page formats the backend's contexts and holds no business data (the existing
 * *Which machine uses this part?* (`PART_FITMENT`) and *Where did this part come from?* (`PART_ORIGIN`): `app/commerce/part_lookup.py` reads the fitment and approved-source records (a machine is listed only when a fitment record approves it; a source only when an approved-source record exists; anything not held is "not recorded", never a confirmed negative). The result carries the common contract (decision, evidence, evidence path, source records, confidence).
 * *Where is order HCME-ORD-000001?*: an order the shop placed is recognised, and the logistics reader reads its owner through the account that placed it (`PLACED_BY` → `ACTS_FOR` → customer) after the existing `ORDERED_BY` link, so a customer sees their own shop order. It reports the order, its lines and "no shipment recorded yet" when there is none.
 
+### Added in the Waterfall audit (see [WATERFALL_TRACEABILITY.md](WATERFALL_TRACEABILITY.md))
+* **Potential routes (`ROUTE_OPTIONS`)**: "How long to ship to Lagos?", "Can you deliver to the USA?" with no shipment or order named. `app/commerce/route_options.py` reads the transport lanes the network records to a place (city, country or region; `network_routes()` on both logistics readers, one read-only query) and lists each route with its own days, cost and legs, fastest first. They are labelled potential routes: none is assigned to a shipment, and the numbers are the route records' own demonstration values. A place with no lane gets no route. A shipment or order number in the message always wins.
+* **Comparison and lateness**: "compare sea and air", "by air", "alternatives" show the recorded alternative routes; a shipment past its planned ETA with no delivery is stated as such (no new ETA is invented).
+* **Discovery**: a word the catalogue does not know is read as the closest catalogue word when one is close (every change is listed in the answer's notes); an unmatched machine identifier is named; "I need a …" is routed by rules; a trailing "delivered to <place>" is not part of the part search.
+* **Warranty wording**: the check that decided a verdict is introduced as the check that failed, was incomplete or needs review, not as a bare requirement.
+
 ## 4. Validation
 
 * `tests/test_commerce_agent.py` (75 tests): intents, discovery, logistics (single, multi-line, split, delivered, unresolved), warranty G001–G008, multi-domain, evidence, wording guard, the API, customer/dealer/OEM isolation, malformed requests.
@@ -84,7 +90,7 @@ The page formats the backend's contexts and holds no business data (the existing
 * `scripts/commerce_agent_flows.py`: Flows A to D, the security and OEM flows, through the real FastAPI app against live Neo4j, with and without the model; the graph snapshot (counts, protected counts, checksum, fingerprint) is compared before and after.
 
 ## 5. Limits
-* No delivery estimate for a part that has not been ordered (see above).
+* No delivery estimate for a specific part that has not been ordered: the Assistant lists the network's potential routes to the place instead (Agentic Shopping computes route-based delivery for a part).
 * Discovery clarifications that ask for a machine offer no options: the user types the model.
 * The model-wording guard is a conservative check (outcomes and absences), not a proof; the deterministic text is always the fallback and is what the evidence tab backs.
 * Synthetic demonstration data throughout.

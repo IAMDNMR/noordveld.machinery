@@ -6,6 +6,7 @@ Nothing here decides fitment, stock, a shipment's state, a date or warranty elig
 """
 from __future__ import annotations
 
+import dataclasses
 import logging
 import re
 from typing import Any
@@ -60,6 +61,9 @@ def discovery_lines(x: dict[str, Any], focus: list[str]) -> list[str]:
     part = x.get("recommended_part") or x.get("compatible_part")
     if x.get("clarification"):
         cl = x["clarification"]
+        mach = x.get("machine") or {}
+        if mach.get("unmatched_identifiers"):
+            lines.append(f"“{', '.join(i.upper() for i in mach['unmatched_identifiers'])}” is not a machine model in the catalogue; nothing was assumed in its place.")
         lines += [f"Needed: {m}" for m in d.get("missing", [])] + [f"Option: {o if isinstance(o, str) else o.get('label') or o.get('model') or o}" for o in (cl.get("options") or [])[:8]]
         return lines
     if part:
@@ -88,7 +92,22 @@ def discovery_lines(x: dict[str, Any], focus: list[str]) -> list[str]:
 
 
 # ── logistics ────────────────────────────────────────────────────────────────────────────────────
+def route_option_lines(x: dict[str, Any]) -> list[str]:
+    """ROUTE_OPTIONS: the recorded routes to a place, fastest first, each with its own days and cost, labelled as potential."""
+    lines = []
+    for r in x.get("destinations", []):
+        lines.append(f"{r.get('city') or r.get('name')} ({r.get('country')}):")
+        for o in r["routes"]:
+            cost = f", {o['estimated_cost']} {o.get('currency')}" if o.get("estimated_cost") is not None else ""
+            lines.append(f"  {o['route_id']} ({str(o['transport_mode']).replace('_', ' ').lower()}, {str(o.get('service_level') or 'service level not recorded').lower()}): {o['planned_transit_days']} days{cost}, from {o['origin'].get('name') or o['origin']['location_id']}.")
+    if x.get("destinations"):
+        lines.append("These are potential routes on the network: none is assigned to a shipment, and the days and cost are the route records' own demonstration values.")
+    return lines
+
+
 def logistics_lines(x: dict[str, Any], focus: list[str]) -> list[str]:
+    if x.get("lookup") == "ROUTE_OPTIONS":
+        return route_option_lines(x)
     d = x["decision"]
     facts, lines = d.get("facts") or {}, []
     if x.get("clarification"):
@@ -119,12 +138,16 @@ def logistics_lines(x: dict[str, Any], focus: list[str]) -> list[str]:
     if eta.get("planned_eta"):
         when = f", {_days(abs(eta['days_to_eta']))} {'ago' if eta['days_to_eta'] < 0 else 'to go'}" if eta.get("days_to_eta") is not None and not eta.get("delivered") else ""
         lines.append(f"{'Delivered' if eta.get('delivered') else 'Planned ETA'}: {eta.get('actual_eta') or eta['planned_eta']}{when}.")
+        if eta.get("days_to_eta") is not None and eta["days_to_eta"] < 0 and not eta.get("delivered"):
+            lines.append(f"Past the planned ETA by {_days(abs(eta['days_to_eta']))}: no delivery is recorded yet, so this shipment is behind its recorded plan (no new ETA is recorded).")
+        elif "late" in focus and eta.get("days_to_eta") is not None and not eta.get("delivered"):
+            lines.append("Not past its planned ETA on the records.")
     loc = x.get("current_location") or {}
     if loc.get("known") and loc.get("location"):
         lines.append(f"Last known place: {loc['location'].get('name')} ({loc.get('as_of')}).")
     elif loc and not loc.get("known"):
         lines.append(f"No live position: {loc.get('description') or 'the last event has no place'}.")
-    if "faster" in focus or "why_slow" in focus:
+    if "faster" in focus or "why_slow" in focus or "compare" in focus:
         alts = [a for a in facts.get("alternatives", [])]
         if not x.get("route"):
             lines.append("A faster option cannot be named: the route of this shipment is not determinable from the records.")
@@ -192,8 +215,21 @@ COMPOSERS = {DISCOVERY: discovery_lines, LOGISTICS: logistics_lines, WARRANTY: w
 
 
 # ── the response ─────────────────────────────────────────────────────────────────────────────────
+CHECK_VERBS = {"Not eligible": "failed", "Needs review": "needs a person to review it", "Not enough data to decide": "could not be completed"}
+CHECK_HEADLINE = re.compile(r"^(Not eligible|Needs review|Not enough data to decide): (.+?): (.+)$")
+
+
+def _warranty_headline(summary: str) -> str:
+    """The warranty summary names the check that decided the outcome by its requirement (“The warranty period is active”). Read after “Not eligible:” that sounds like the opposite,
+    so say it is the check that failed (or could not be completed), then give the recorded reason."""
+    m = CHECK_HEADLINE.match(summary or "")
+    return f"{m.group(1)}. The check “{m.group(2)}” {CHECK_VERBS[m.group(1)]}: {m.group(3)}" if m else summary
+
+
 def _section(step: Any, focus: list[str]) -> dict[str, Any]:
     x = step.context
+    if step.domain == WARRANTY:
+        step = dataclasses.replace(step, summary=_warranty_headline(step.summary)) if dataclasses.is_dataclass(step) else step
     if x is None:  # a step the agent itself closed (a question, or a journey with nothing to track)
         return {"domain": step.domain, "title": TITLES[step.domain], "status": step.status, "decision": step.decision, "headline": step.summary, "lines": [], "notes": step.resolution}
     return {"domain": step.domain, "title": TITLES[step.domain], "status": step.status, "decision": step.decision, "headline": step.summary,

@@ -150,6 +150,21 @@ export interface RouteOption {
   is_current?: boolean
 }
 
+/** "How could a part get to <place>?": the transport routes recorded for a place nobody has shipped to. Potential routes, none assigned to a shipment. */
+export interface RouteOptionsContext extends CommerceContext {
+  lookup: 'ROUTE_OPTIONS'
+  destinations: {
+    location_id: string
+    name: string | null
+    city: string | null
+    country: string | null
+    region: string | null
+    routes: { route_id: string; transport_mode: string | null; service_level: string | null; planned_transit_days: number | null; estimated_cost: number | null; currency: string | null; origin: { name: string | null; location_id: string } }[]
+  }[]
+}
+
+export const isRouteOptions = (c: LogisticsContext | RouteOptionsContext): c is RouteOptionsContext => 'lookup' in c && c.lookup === 'ROUTE_OPTIONS'
+
 export interface LogisticsContext extends CommerceContext {
   order: { order_id: string; status?: string; order_date?: string | null } | null
   order_lines: { order_line_id: string; part_number: string | null; name: string | null; quantity: number | null }[]
@@ -230,7 +245,7 @@ export interface AgentResponse {
     grounding: { mode: 'TEMPLATE' | 'LLM'; validated: boolean; note?: string }
   }
   steps: { domain: Domain; status: string; decision: string; summary: string; resolution: string[] }[]
-  contexts: { DISCOVERY?: DiscoveryContext | PartLookupContext; LOGISTICS?: LogisticsContext; WARRANTY?: WarrantyContext }
+  contexts: { DISCOVERY?: DiscoveryContext | PartLookupContext; LOGISTICS?: LogisticsContext | RouteOptionsContext; WARRANTY?: WarrantyContext }
   clarification: { domain: Domain | null; question: string; options: Record<string, unknown>[] } | null
   evidence: EvidenceItem[]
   evidence_paths: Partial<Record<Domain, PathStep[]>>

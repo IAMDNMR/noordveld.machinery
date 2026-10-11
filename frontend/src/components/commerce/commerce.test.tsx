@@ -59,6 +59,12 @@ const lookup = response({
     machines: [{ machine_id: 'MCH-1', model: 'M-1', name: 'Machine one', fitment_id: 'F-1', fitment_rule: 'EXACT_MODEL' }, { machine_id: 'MCH-2', model: 'M-2', name: 'Machine two', fitment_id: 'F-2', fitment_rule: 'EXACT_MODEL' }],
     other_fitments: [], sources: [], catalogue: null } as never },
 })
+const routeOptions = response({
+  intent: 'LOGISTICS', answer: answer('Recorded routes (potential, not assigned to any shipment): Place A: air 5 days, sea 31 days.', [section('LOGISTICS', 'ROUTE_OPTIONS', 'Recorded routes (potential, not assigned to any shipment): Place A: air 5 days, sea 31 days.')]),
+  contexts: { LOGISTICS: { ...base('LOGISTICS', 'ROUTE_OPTIONS', 'Recorded routes'), lookup: 'ROUTE_OPTIONS', destinations: [{ location_id: 'L1', name: 'Dealer A', city: 'Place A', country: 'Country A', region: 'R', routes: [
+    { route_id: 'RTE-AIR', transport_mode: 'AIR', service_level: 'EXPRESS', planned_transit_days: 5, estimated_cost: 6570, currency: 'EUR', origin: { name: 'Hub', location_id: 'H1' } },
+    { route_id: 'RTE-SEA', transport_mode: 'SEA', service_level: 'STANDARD', planned_transit_days: 31, estimated_cost: 2530, currency: 'EUR', origin: { name: 'Hub', location_id: 'H1' } }] }] } as never },
+})
 const clarifying = (options: Record<string, unknown>[]) => response({
   intent: 'WARRANTY', status: 'REQUIRES_CLARIFICATION', answer: answer('Which machine do you mean?', [section('WARRANTY', 'REQUIRES_CLARIFICATION', 'Which machine do you mean?', 'REQUIRES_CLARIFICATION')]),
   clarification: { domain: 'WARRANTY', question: 'Which machine do you mean?', options }, contexts: {}, state: { pending_message: 'Is this part under warranty?', last_domains: ['WARRANTY'] },
@@ -190,6 +196,18 @@ describe('Commerce Assistant: one input, one answer', () => {
     const table = within(await a.findByRole('table', { name: 'Approved machines' }))
     expect(table.getByText('M-1')).toBeTruthy()
     expect(table.getByText('M-2')).toBeTruthy()
+  })
+
+  it('shows the recorded routes to a place with no shipment as potential routes, with no shipment follow-ups', async () => {
+    replies = [{ body: routeOptions }]
+    mount()
+    await ask('How long to ship to Place A?')
+    const a = await answerOf()
+    const table = within(await a.findByRole('table', { name: 'Routes to Place A' }))
+    expect(table.getByText('RTE-AIR')).toBeTruthy()
+    expect(table.getByText('31 days')).toBeTruthy()
+    expect(a.getByText(/none is assigned to a shipment/)).toBeTruthy()
+    expect(a.queryByRole('button', { name: 'Can I get it faster?' })).toBeNull()
   })
 
   it('asks a clarification in the conversation, offers the records it has, and carries on with the same question when one is chosen', async () => {

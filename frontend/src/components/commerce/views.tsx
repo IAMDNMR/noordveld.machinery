@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type {
-  AgentResponse, CommerceContext, PartLookupContext, Confidence, DataRef, DiscoveryContext, Domain, EvidenceItem, LogisticsContext, PathStep, WarrantyContext,
+  AgentResponse, CommerceContext, PartLookupContext, Confidence, DataRef, DiscoveryContext, Domain, EvidenceItem, LogisticsContext, PathStep, RouteOptionsContext, WarrantyContext,
 } from '../../api/commerce'
 
 /**
@@ -155,6 +155,31 @@ export function LookupView({ ctx }: { ctx: PartLookupContext }) {
 }
 
 // ── logistics ────────────────────────────────────────────────────────────────────────────────────
+/** The recorded routes to a place with no shipment: potential, fastest first, each with its own days and cost. */
+export function RouteOptionsView({ ctx }: { ctx: RouteOptionsContext }) {
+  return (
+    <section className="cw-view" aria-label="Recorded routes to the destination">
+      {ctx.destinations.map((d) => (
+        <div key={d.location_id}>
+          <h4 className="cw-h">{d.city ?? d.name} <span className="cw-meta">{d.country}</span></h4>
+          <table className="cw-table" aria-label={`Routes to ${d.city ?? d.name}`}>
+            <thead><tr><th>Route</th><th>Mode</th><th>Transit</th><th>Cost</th><th>From</th></tr></thead>
+            <tbody>
+              {d.routes.map((r) => (
+                <tr key={r.route_id}>
+                  <td className="cw-mono">{r.route_id}</td><td>{label(r.transport_mode)}{r.service_level ? ` · ${label(r.service_level)}` : ''}</td><td>{days(r.planned_transit_days)}</td>
+                  <td>{r.estimated_cost != null ? `${r.estimated_cost} ${r.currency ?? ''}`.trim() : 'not recorded'}</td><td>{r.origin.name ?? r.origin.location_id}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+      <p className="cw-note">Potential routes on the network: none is assigned to a shipment, and the days and cost are the route records' own demonstration values, not a booking or a delivery date.</p>
+    </section>
+  )
+}
+
 export function LogisticsView({ ctx, onPick, bare }: { ctx: LogisticsContext; onPick?: (o: Record<string, unknown>) => void; bare?: boolean }) {
   const s = ctx.shipment
   const total = ctx.route_legs.length

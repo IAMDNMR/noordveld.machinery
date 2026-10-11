@@ -12,6 +12,7 @@ and an AccessDenied from any journey is the answer to the whole request (HTTP 40
 """
 from __future__ import annotations
 
+import difflib
 import logging
 import re
 from dataclasses import dataclass, field
@@ -19,10 +20,12 @@ from typing import Any
 
 from app.commerce import contract as c
 from app.commerce.access import CommerceRole, Principal
+from app.commerce.discovery import STOPWORDS
 from app.commerce.engine import CommerceContextEngine
 from app.commerce.intent import DISCOVERY, LOGISTICS, WARRANTY
 from app.commerce.intent import score as base_score
 from app.commerce.part_lookup import part_fitment, part_origin
+from app.commerce.route_options import find_destinations, route_options
 from app.commerce_agent import answer as ans
 from app.llm.base import LLMError
 
@@ -36,10 +39,14 @@ MIN_SCORE = 2
 # Cues the three single-journey selector does not carry: speed and delay (logistics), the traceability questions (warranty), availability and "why" (discovery).
 EXTRA_CUES: dict[str, tuple[tuple[str, int], ...]] = {
     DISCOVERY: ((r"\bwhich (machines?|models?|equipment)\b.{0,40}\b(use|uses|used|fit|fits|take|takes|compatible)\b", 3),
-                (r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b", 3), (r"\bdo you have\b", 2), (r"\b(why|how come)\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b", 3), (r"\bis (it|this|that) (available|in stock)\b", 2)),
+                (r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b", 3), (r"\bdo you have\b", 2),
+                (r"\b(i|we)\s+(need|want|require|am looking for|are looking for|'m looking for)\s+(a|an|the|some|new|replacement|spare)\b|\blooking for (a|an|the|some)\b", 2), (r"\b(why|how come)\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b", 3), (r"\bis (it|this|that) (available|in stock)\b", 2)),
     LOGISTICS: ((r"\bhow (quickly|fast|soon)\b", 2), (r"\burgent\w*|\bas soon as\b|\basap\b", 2), (r"\b(faster|quicker|speed (it )?up|expedite)\b", 2),
                 (r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b", 2), (r"\bwhat (parts|items|products)\b.{0,30}\b(in|on|inside)\b|\bparts? (are )?in (this|the|my|that)\b", 3),
-                (r"\b(what is|what's|whats) the status\b", 2)),
+                (r"\b(what is|what's|whats) the status\b", 2),
+                (r"\b(compare|comparison|versus)\b.{0,40}\b(sea|air|ocean|road|rail|route|transport)\b|\b(sea|ocean)\b.{0,12}\b(or|and|vs\.?|versus)\b.{0,12}\bair\b|\bair\b.{0,12}\b(or|and|vs\.?|versus)\b.{0,12}\b(sea|ocean)\b", 3),
+                (r"\b(is|are|was) (it|this|that|the shipment|the order) (late|overdue|delayed|on time|behind schedule)\b|\boverdue\b|\bbehind schedule\b", 2),
+                (r"\b(ship\w*|deliver\w*|send|sent|freight|transit|transport|get (it|there|one))\b.{0,30}\b(to|into|in)\b|\bhow long\b.{0,25}\bto\b|\b(sea|air)\b.{0,20}\b(to|for)\b", 2)),
     WARRANTY: ((r"\bunder warranty\b", 2), (r"\b(installed|fitted) (correctly|properly)\b|\bwho (installed|fitted)\b|\breplaced before\b|\bbeen replaced\b", 3),
                (r"\b(not )?eligible\b|\beligibility\b", 2), (r"\bwhy is (this|the|my) claim\b", 3)),
 }
@@ -105,7 +112,9 @@ def focus_of(message: str) -> list[str]:
     for name, pattern in (("which_machines", r"\bwhich (machines?|models?|equipment)\b.{0,40}\b(use|uses|used|fit|fits|take|takes|compatible)\b"),
                           ("origin", r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b"), ("explain", r"\bwhy\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b"), ("availability", r"\b(available|in stock|do you have)\b"),
                           ("parts_in_shipment", r"\bwhat (parts|items|products)\b|\bparts? (are )?in\b"), ("faster", r"\b(faster|quicker|speed (it )?up|expedite|how (quickly|fast|soon))\b"),
-                          ("why_slow", r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b"), ("status", r"\bstatus\b|\bwhere (is|are)\b"),
+                          ("why_slow", r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b"),
+                          ("compare", r"\b(compare|comparison|versus|alternatives?)\b|\b(sea|ocean)\b.{0,12}\b(or|and|vs\.?)\b.{0,12}\bair\b|\bair\b.{0,12}\b(or|and|vs\.?)\b.{0,12}\b(sea|ocean)\b|\bby (air|sea)\b"),
+                          ("late", r"\b(late|overdue|on time|behind schedule)\b"), ("status", r"\bstatus\b|\bwhere (is|are)\b"),
                           ("who_installed", r"\bwho (installed|fitted)\b"), ("installed_correctly", r"\b(installed|fitted) (correctly|properly)\b"),
                           ("replaced_before", r"\breplaced before\b|\bbeen replaced\b|\breplacement history\b"), ("why_not_eligible", r"\bwhy\b.{0,30}\b(not eligible|rejected|not covered)\b|\bwhy is (this|the|my) claim\b")):
         if re.search(pattern, low):
@@ -113,6 +122,8 @@ def focus_of(message: str) -> list[str]:
     return out
 
 
+SPEED_WORD_SET = frozenset(["urgent", "urgently", "asap", "immediately", "quickly", "quick", "fast", "soon", "faster", "quicker", "covered", "failed", "broken", "cover"])
+DELIVERY_TAIL = re.compile(r"\s*\b(?:delivered|shipped|sent|deliver|ship|send|shipping|delivery)\s+(?:it\s+)?(?:to|into|in)\b.*$", re.IGNORECASE)
 SPEED_WORDS = re.compile(r"\b(urgent(ly)?|asap|as soon as possible|immediately|quickly|quick|fast|soon)\b", re.IGNORECASE)
 
 
@@ -219,6 +230,8 @@ class CommerceAgent:
         if {"which_machines", "origin"} & set(u.focus):
             return self._part_question(req, u, state, ctx, notes)
         text = discovery_text(req.message, lambda clause: _mentions_model(clause, self.engine)) if len(u.domains) > 1 else req.message
+        if len(u.domains) > 1:  # “… delivered to Lagos” is the delivery journey's question, not part of the part's name
+            text = DELIVERY_TAIL.sub("", text).strip() or text
         if text != req.message:
             notes.append(f"The part search used “{text}”; the other journeys were answered from the rest of the message.")
         if "explain" in u.focus and state.get("last_request"):
@@ -231,6 +244,8 @@ class CommerceAgent:
         instance = None if _mentions_model(text, self.engine) else state.get("machine_instance_id")
         if instance:
             notes.append(f"The machine is taken from {instance}.")
+        text, spelling = correct_spelling(text, self.engine)
+        notes.extend(spelling)
         context = self.engine.build_discovery_context(text, principal=req.principal, machine_instance_id=instance, destination_country=req.destination_country)
         ctx[DISCOVERY] = context
         d = context.decision
@@ -338,11 +353,18 @@ class CommerceAgent:
     def _logistics(self, req: AgentRequest, u: Understanding, state: dict[str, Any], ctx: dict[str, Any], multi: bool) -> Step:
         shipment_id = u.references.get("shipment_id") or (None if u.references.get("order_id") else state.get("shipment_id"))
         order_id = u.references.get("order_id") or (None if shipment_id else state.get("order_id"))
-        if multi and not shipment_id and not order_id and DISCOVERY in ctx:
+        if multi and not shipment_id and not order_id and DISCOVERY in ctx and not find_destinations(self.engine, req.message):
             # a replacement that has not been ordered has no shipment: the commerce logistics context tracks shipments and orders, it does not quote delivery for a part nobody has ordered
             summary = ("No shipment or order exists for the replacement yet, so there is no tracked delivery to report. The logistics context follows shipments and orders; "
                        "it does not estimate delivery for a part that has not been ordered.")
             return Step(LOGISTICS, c.INSUFFICIENT_DATA, "NO_SHIPMENT_FOR_UNORDERED_PART", summary, ["No shipment or order was referred to."], None, None)
+        if not shipment_id and not order_id:
+            places = find_destinations(self.engine, req.message)
+            if places:  # a place with recorded transport lanes and nothing to track: the lanes are the answer, labelled as potential routes
+                lanes = route_options(self.engine, places)
+                ctx[LOGISTICS] = lanes
+                notes = ["No shipment or order was referred to, so these are the recorded routes to the place, not a tracked delivery."]
+                return Step(LOGISTICS, lanes.decision.status, lanes.decision.decision, lanes.decision.summary, notes, lanes.to_dict(), None)
         context = self.engine.build_logistics_context(principal=req.principal, shipment_id=shipment_id, order_id=order_id)
         ctx[LOGISTICS] = context
         d = context.decision
@@ -387,6 +409,33 @@ class CommerceAgent:
         if message and any(s.status == c.REQUIRES_CLARIFICATION for s in steps):
             nxt["pending_message"] = message[:500]  # the next short message answers this
         return nxt
+
+
+def correct_spelling(text: str, engine: CommerceContextEngine) -> tuple[str, list[str]]:
+    """Read a mistyped catalogue word as the catalogue word it is closest to (“hydrualic pomp” → “hydraulic pump”). Only words that are not catalogue words, STOPWORDS or identifiers are
+    touched, only against words the catalogue itself uses, and every change is reported, so a guess is never hidden. A word with no close catalogue word is left alone."""
+    vocab: set[str] = set()
+    for p in engine.discovery.parts():
+        for field in (p.get("name"), *(p.get("common_names") or []), *(a for a in (p.get("aliases") or []) if not re.search(r"\d", a))):
+            vocab.update(w for w in re.findall(r"[a-z]+", str(field or "").lower()) if len(w) >= 4)
+    for cat in engine.discovery.categories():
+        vocab.update(w for w in re.findall(r"[a-z]+", str(cat.get("name") or "").lower()) if len(w) >= 4)
+    models = {w for m in engine.discovery.machines() for w in re.findall(r"[a-z]+", f"{m['model']} {m['name']} {m['machine_type']}".lower())}
+    notes: list[str] = []
+
+    def fix(match: re.Match[str]) -> str:
+        word = match.group(0)
+        low = word.lower()
+        if len(low) < 4 or low in vocab or low in models or low in STOPWORDS or low in SPEED_WORD_SET:
+            return word
+        cutoff = 0.74 if len(low) == 4 else 0.8
+        close = [v for v in difflib.get_close_matches(low, sorted(vocab), n=1, cutoff=cutoff) if v[0] == low[0] and (len(low) > 4 or v[-1] == low[-1])]
+        if not close:
+            return word
+        notes.append(f"Read “{word}” as “{close[0]}”.")
+        return close[0]
+
+    return re.sub(r"(?<![A-Za-z0-9\-])[A-Za-z]{4,}(?![A-Za-z0-9\-])", fix, text), notes
 
 
 def _mentions_model(text: str, engine: CommerceContextEngine) -> bool:

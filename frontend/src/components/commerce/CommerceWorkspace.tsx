@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError, isAbort } from '../../api'
-import { askCommerceAgent, isLookup, type AgentResponse, type AgentSection, type AgentState, type Domain, type Scope } from '../../api/commerce'
+import { askCommerceAgent, isLookup, isRouteOptions, type AgentResponse, type AgentSection, type AgentState, type Domain, type Scope } from '../../api/commerce'
 import { partPath } from '../../lib/storeQuery'
 import { useSession } from '../../store/session'
-import { bundleFrom, Chip, DiscoveryView, EvidenceView, LogisticsView, LookupView, WarrantyView } from './views'
+import { bundleFrom, Chip, DiscoveryView, EvidenceView, LogisticsView, LookupView, RouteOptionsView, WarrantyView } from './views'
 import './commerce.css'
 
 interface Turn { id: number; question: string; response: AgentResponse }
@@ -165,7 +165,7 @@ function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onCh
   const part = d ? (isLookup(d) ? d.part : (d.recommended_part ?? d.compatible_part)) : null
   const notEligible = r.contexts.WARRANTY && r.contexts.WARRANTY.decision.facts.outcome !== 'ELIGIBLE'
   // shipment questions only make sense once a shipment is in the answer (an order with no shipment yet has nothing to ask about)
-  const next = r.clarification || !primary || (primary === 'LOGISTICS' && !r.contexts.LOGISTICS?.shipment) ? [] : FOLLOW_UPS[primary]
+  const next = r.clarification || !primary || (primary === 'LOGISTICS' && !(r.contexts.LOGISTICS && 'shipment' in r.contexts.LOGISTICS && r.contexts.LOGISTICS.shipment)) ? [] : FOLLOW_UPS[primary]
   return (
     <article className={`cw-answer${dim ? ' is-dim' : ''}`} aria-label="Answer">
       <p className="cw-question">{turn.question}</p>
@@ -224,7 +224,7 @@ function Detail({ section, response }: { section: AgentSection; response: AgentR
       <h3 className="cw-detail__title">{section.title} <Chip value={section.decision} /></h3>
       {section.notes.map((n) => <p key={n} className="cw-meta">{n}</p>)}
       {section.domain === 'DISCOVERY' && (isLookup(ctx as never) ? <LookupView ctx={ctx as never} /> : <DiscoveryView ctx={ctx as never} bare />)}
-      {section.domain === 'LOGISTICS' && <LogisticsView ctx={ctx as never} bare />}
+      {section.domain === 'LOGISTICS' && (isRouteOptions(ctx as never) ? <RouteOptionsView ctx={ctx as never} /> : <LogisticsView ctx={ctx as never} bare />)}
       {section.domain === 'WARRANTY' && <WarrantyView ctx={ctx as never} bare />}
     </section>
   )
