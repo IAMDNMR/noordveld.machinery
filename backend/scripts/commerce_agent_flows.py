@@ -139,9 +139,46 @@ def main() -> int:
              {"message": "Is this failed part covered by warranty?", "state": {"machine_instance_id": "MI-G001"}}, {"message": "Is this failed part covered by warranty?", "state": {"machine_instance_id": "MI-G001", "part_id": "PRT-007"}}], flow_c)
     run.flow("D multi-domain: replacement pump urgently, covered, how fast", "lars", [{"message": "I need a replacement hydraulic pump urgently. Is the failed one covered and how fast can I get the replacement?", "state": {"machine_instance_id": "MI-G001"}}], flow_d)
 
+    def clarification(r: list[dict], p: list[str]) -> None:
+        need(r[0]["status"] == "REQUIRES_CLARIFICATION" and "pending_message" in r[0]["_data"]["state"], "E: the first turn must ask and remember the waiting question", p)
+        need(r[1]["intent"] == "MULTI_DOMAIN" and r[1]["sections"][0]["decision"] == "NO_AVAILABLE_RECOMMENDATION", "E: the typed machine model must be read as the answer and continue the request", p)
+        need(r[1]["clarification"] and {o["machine_instance_id"] for o in r[1]["clarification"]["options"]} == {"MI-G001", "MI-G005"}, "E: only the customer's two KFT-600 machines may be offered", p)
+        need(r[2]["status"] == "PARTIAL" and {s["domain"]: s["decision"] for s in r[2]["sections"]}.get("WARRANTY") == "ELIGIBLE" and "pending_message" not in r[2]["_data"]["state"], "E: choosing a machine must finish the original request", p)
+
+    def shop_order(r: list[dict], p: list[str]) -> None:
+        x = r[0]["_data"]["contexts"].get("LOGISTICS")
+        need(r[0]["http"] == 200 and x is not None and x["order"]["order_id"] == "HCME-ORD-000001" and x["shipment"] is None, "F: the owner must see the shop order with no shipment", p)
+        need(x is not None and x["order"].get("status") == "ALLOCATED" and len(x["order_lines"]) >= 1 and r[0]["sections"][0]["decision"] == "NO_SHIPMENT_RECORDED", "F: order status, lines and the no-shipment statement expected", p)
+        need(r[1]["http"] == 403 and r[1]["_data"].get("error", {}).get("code") == "forbidden", "F: another customer must be refused", p)
+        need(r[2]["http"] == 200 and r[2]["_data"]["visibility"]["LOGISTICS"]["role"] == "OEM", "F: the OEM must see the order", p)
+
+    def part_questions(r: list[dict], p: list[str]) -> None:
+        fit, origin = r[1]["_data"]["contexts"]["DISCOVERY"], r[2]["_data"]["contexts"]["DISCOVERY"]
+        need(fit.get("lookup") == "PART_FITMENT" and [m["model"] for m in fit["machines"]] == ["KFT-200", "KFT-450"], f"G: which machines use the part: {[m['model'] for m in fit.get('machines', [])]}", p)
+        need(origin.get("lookup") == "PART_ORIGIN" and [s["source_id"] for s in origin["sources"]] == ["SUP-011", "SUP-025"] and r[2]["source_records"] > 0, "G: where the part came from: approved sources and provenance expected", p)
+
     def security(r: list[dict], p: list[str]) -> None:
         need([x["http"] for x in r] == [403, 403, 403], f"security: expected three 403s for another customer's records, got {[x['http'] for x in r]}", p)
         need(all(x["_data"].get("error", {}).get("code") == "forbidden" and "Hendrik" not in json.dumps(x["_data"]) for x in r), "security: the refusal must be the generic forbidden error", p)
+
+    run.flow("E clarification: ask, answer in a few words, choose, finish", "lars", [{"message": "I need a replacement hydraulic pump urgently. Is the failed one covered and how fast can I get the replacement?"}, {"message": "KFT-600"},
+             {"message": "KFT-600", "state": {"machine_instance_id": "MI-G001"}}], clarification)
+    # three principals, one flow: owner, another customer, OEM
+    c_lars, c_anna, c_jane = client("lars"), client("anna"), client("jane")
+    results, problems = [], []
+    for c, name in ((c_lars, "lars"), (c_anna, "anna"), (c_jane, "jane")):
+        status, data, secs = post(c, {"message": "Where is order HCME-ORD-000001?", "state": {}})
+        results.append({"request": name, "http": status, "seconds": round(secs, 1), "intent": data.get("intent"), "status": data.get("status"),
+                        "sections": [{"domain": x["domain"], "decision": x["decision"], "headline": x["headline"], "lines": x["lines"]} for x in data.get("answer", {}).get("sections", [])],
+                        "answer": data.get("answer", {}).get("text"), "grounding": data.get("answer", {}).get("grounding"), "source_records": len(data.get("source_records", [])), "_data": data})
+    try:
+        shop_order(results, problems)
+    except AssertionError as exc:
+        problems.append(str(exc))
+    for r in results:
+        r.pop("_data")
+    run.flows.append({"flow": "F shop order: Where is order HCME-ORD-000001 (owner, another customer, OEM)", "user": "lars/anna/jane", "passed": not problems, "problems": problems, "turns": results})
+    run.flow("G part questions: which machines use it, where it came from", "lars", [{"message": "Find a hydraulic pump for KFT-200."}, {"message": "Which machine uses this part?"}, {"message": "Where did this part come from?"}], part_questions)
 
     run.flow("Security: Anna cannot reach Lars's shipment, claim or machine", "anna", [{"message": "Where is SHP-0010?"}, {"message": "Is claim CLM-G001 covered?"},
              {"message": "Is it covered?", "state": {"machine_instance_id": "MI-G001", "part_id": "PRT-007"}}], security)
