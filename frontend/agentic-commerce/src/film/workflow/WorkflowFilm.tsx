@@ -58,10 +58,7 @@ function Glow({ t }: { t: number }) {
 
 function Brand({ dark = false }: { dark?: boolean }) {
   return (
-    <div style={{ position: 'absolute', left: 96, top: 52, display: 'flex', alignItems: 'baseline', gap: 12, color: dark ? '#fff' : INK }}>
-      <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em' }}>Noordveld</span>
-      <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.22em', opacity: 0.7 }}>MACHINERY B.V.</span>
-    </div>
+    <Img src={staticFile(dark ? 'logo-reversed.png' : 'logo.png')} style={{ position: 'absolute', left: 96, top: 40, height: 56 }} />
   )
 }
 
@@ -202,11 +199,10 @@ function OutroScene({ scene, t }: { scene: Scene; t: number }) {
         })}
       </div>
       <p style={{ position: 'absolute', left: 0, right: 0, top: 640, textAlign: 'center', margin: 0, fontSize: 44, fontWeight: 500, color: INK2, opacity: ramp(t, 1.9, 2.6) }}>{scene.title}</p>
-      <div style={{ position: 'absolute', left: 0, right: 0, top: 760, display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: 12, opacity: ramp(t, 2.6, 3.3), color: INK }}>
-        <span style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.02em' }}>Noordveld</span>
-        <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: '0.22em', opacity: 0.7 }}>MACHINERY B.V.</span>
+      <div style={{ position: 'absolute', left: 0, right: 0, top: 735, display: 'flex', justifyContent: 'center', opacity: ramp(t, 2.6, 3.3), transform: `translateY(${(1 - ramp(t, 2.6, 3.4)) * 16}px)` }}>
+        <Img src={staticFile('logo.png')} style={{ height: 92 }} />
       </div>
-      <p style={{ position: 'absolute', left: 0, right: 0, bottom: 150, textAlign: 'center', margin: 0, fontSize: 20, color: INK3, opacity: ramp(t, 3.2, 3.8) }}>{film.disclaimer}</p>
+      <p style={{ position: 'absolute', left: 0, right: 0, top: 850, textAlign: 'center', margin: 0, fontSize: 20, color: INK3, opacity: ramp(t, 3.2, 3.8) }}>{film.disclaimer}</p>
     </AbsoluteFill>
   )
 }
