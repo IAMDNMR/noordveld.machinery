@@ -1,93 +1,93 @@
-import { useCallback, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError, isAbort } from '../../api'
-import {
-  askCommerceAgent, discoveryContext, logisticsContext, warrantyContext,
-  type AgentResponse, type AgentState, type DiscoveryContext, type Domain, type LogisticsContext, type Scope, type WarrantyContext,
-} from '../../api/commerce'
-import { roleLabel, useSession } from '../../store/session'
-import { bundleFrom, Chip, DiscoveryView, EvidenceView, LogisticsView, Options, WarrantyView } from './views'
+import { askCommerceAgent, isLookup, type AgentResponse, type AgentSection, type AgentState, type Domain, type Scope } from '../../api/commerce'
+import { partPath } from '../../lib/storeQuery'
+import { useSession } from '../../store/session'
+import { bundleFrom, Chip, DiscoveryView, EvidenceView, LogisticsView, LookupView, WarrantyView } from './views'
 import './commerce.css'
 
-type Tab = 'discovery' | 'logistics' | 'warranty' | 'evidence'
-interface Message { id: number; role: 'user' | 'assistant'; text: string; response?: AgentResponse }
-interface Contexts { DISCOVERY?: DiscoveryContext; LOGISTICS?: LogisticsContext; WARRANTY?: WarrantyContext }
+interface Turn { id: number; question: string; response: AgentResponse }
+interface Failed { message: string; patch: Partial<AgentState>; text: string }
 
-/** Example requests are words the user may send, not data: they name no machine, shipment or claim, so the assistant asks which one (and offers the user's own) when it needs to. */
+/** Starting points are words the user may send, not data: they name no machine, shipment or claim, so the assistant asks which (and offers the user's own) when it needs to. */
 export const EXAMPLES = [
   'Find a hydraulic pump.',
   'Where is my shipment and what parts are in it?',
   'Is this failed part covered by warranty?',
   'I need a replacement hydraulic pump urgently. Is the failed one covered and how fast can I get the replacement?',
 ]
-const STATE_KEYS = ['machine_instance_id', 'part_id', 'claim_id', 'shipment_id', 'order_id'] as const
-const TAB_OF: Record<Domain, Tab> = { DISCOVERY: 'discovery', LOGISTICS: 'logistics', WARRANTY: 'warranty' }
+/** Follow-up questions that make sense after an answer of that kind. Prompts only: each is sent to the assistant like anything typed. */
+const FOLLOW_UPS: Record<Domain, string[]> = {
+  DISCOVERY: ['Why are you recommending this part?', 'Do you have this part available?', 'Which machine uses this part?', 'Where did this part come from?'],
+  LOGISTICS: ['What parts are in this shipment?', 'Can I get it faster?', 'Why is it taking so long?'],
+  WARRANTY: ['Who installed it?', 'Was it installed correctly?', 'Has this part been replaced before?'],
+}
+const REFERENCE_KEYS = ['machine_instance_id', 'part_id', 'claim_id', 'shipment_id', 'order_id'] as const
+const LABELLED: Record<string, string> = { serial_number: 'serial', model_year: 'year' }
+const NOT_ELIGIBLE_PROMPT = 'Why is this claim not eligible?'
 
 const errorText = (e: unknown): string =>
-  e instanceof ApiError ? (e.status === 401 ? 'Sign in to use the commerce assistant.' : e.status === 403 ? 'You do not have access to that record.' : e.message) : 'Something went wrong.'
+  e instanceof ApiError
+    ? e.status === 401 ? 'Sign in to use the commerce assistant.' : e.status === 403 ? 'You do not have access to that record.' : e.status === 0 ? 'The service could not be reached. Check your connection and try again.' : e.message
+    : 'Something went wrong.'
+
+/** A short, readable label for one clarification option: the identifier first, then what tells similar ones apart. */
+export const optionText = (o: Record<string, unknown>): string => {
+  const first = REFERENCE_KEYS.find((k) => typeof o[k] === 'string')
+  const rest = Object.entries(o)
+    .filter(([k, v]) => k !== first && v != null && v !== '' && !(Array.isArray(v) && v.length === 0))
+    .map(([k, v]) => (LABELLED[k] ? `${LABELLED[k]} ${String(v)}` : Array.isArray(v) ? v.join(', ') : String(v)))
+  return [first ? String(o[first]) : null, ...rest].filter(Boolean).join(' · ')
+}
 
 export function CommerceWorkspace() {
   const { user, ready } = useSession()
-  const [thread, setThread] = useState<Message[]>([])
-  const [agentState, setAgentState] = useState<AgentState>({})
-  const [contexts, setContexts] = useState<Contexts>({})
-  const [notice, setNotice] = useState<string | null>(null)
-  const [tab, setTab] = useState<Tab>('discovery')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [turns, setTurns] = useState<Turn[]>([])
   const [draft, setDraft] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState<Failed | null>(null)
   const [lens, setLens] = useState<{ role: 'OEM' | 'DEALER'; dealer: string }>({ role: 'OEM', dealer: '' })
-  const last = useRef<string>('')
+  const input = useRef<HTMLInputElement>(null)
   const nextId = useRef(1)
+  const abort = useRef<AbortController | null>(null)
+  const inputId = useId()
+  const latest = turns[turns.length - 1]
+  const state = useMemo<AgentState>(() => latest?.response.state ?? {}, [latest])
+  const asking = latest?.response.clarification ?? null
+
+  useEffect(() => () => abort.current?.abort(), [])
 
   const scope = useCallback((): Scope => (user?.role === 'ORDER_PROCESSOR' && lens.role === 'DEALER' ? { user_role: 'DEALER', dealer_id: lens.dealer.trim() } : {}), [user, lens])
 
-  const run = useCallback(async <T,>(work: () => Promise<T>, done: (r: T) => void) => {
-    setBusy(true)
-    setError(null)
-    try {
-      done(await work())
-    } catch (e) {
-      if (!isAbort(e)) setError(errorText(e))
-    } finally {
-      setBusy(false)
-    }
-  }, [])
-
-  const send = useCallback((message: string, patch: Partial<AgentState> = {}) => {
+  const send = useCallback(async (message: string, patch: Partial<AgentState> = {}, shown?: string) => {
     const text = message.trim()
     if (!text || busy) return
-    last.current = text
-    const state = { ...agentState, ...patch }
-    setThread((t) => [...t, { id: nextId.current++, role: 'user', text }])
+    abort.current?.abort()
+    const controller = (abort.current = new AbortController())
+    setBusy(true)
+    setFailed(null)
     setDraft('')
-    return run(() => askCommerceAgent(text, state, scope()), (r) => {
-      setAgentState(r.state)
-      setThread((t) => [...t, { id: nextId.current++, role: 'assistant', text: r.answer.text, response: r }])
-      setNotice(r.answer.synthetic_notice)
-      setContexts((c) => ({ ...c, ...r.contexts }))
-      const shown = r.answer.sections.find((s) => s.status !== 'REQUIRES_CLARIFICATION') ?? r.answer.sections[0]
-      if (shown) setTab(TAB_OF[shown.domain])
-    })
-  }, [agentState, busy, run, scope])
+    try {
+      const response = await askCommerceAgent(text, { ...state, ...patch }, scope(), controller.signal)
+      setTurns((t) => [...t, { id: nextId.current++, question: shown ?? text, response }])
+    } catch (e) {
+      if (!isAbort(e)) setFailed({ message: text, patch, text: errorText(e) })
+    } finally {
+      setBusy(false)
+      input.current?.focus()
+    }
+  }, [busy, scope, state])
 
-  /** A clarification option: remember the references it names and ask the same question again. */
+  /** A clarification option: remember the reference it names and carry on with the same question; the user does not start again. */
   const choose = useCallback((option: Record<string, unknown>) => {
     const patch: Partial<AgentState> = {}
-    for (const k of STATE_KEYS) if (typeof option[k] === 'string') patch[k] = option[k] as string
-    send(last.current || 'Continue', patch)
-  }, [send])
+    for (const k of REFERENCE_KEYS) if (typeof option[k] === 'string') patch[k] = option[k] as string
+    void send(latest?.question ?? 'Continue', patch, optionText(option))
+  }, [latest, send])
 
-  // a choice made in a panel runs that journey directly (the same API); only the conversation re-asks the assistant
-  const pickShipment = (o: Record<string, unknown>) => { if (typeof o.shipment_id === 'string') run(() => logisticsContext({ shipment_id: o.shipment_id as string }, scope()), (c) => setContexts((x) => ({ ...x, LOGISTICS: c }))) }
-  const pickWarranty = (o: Record<string, unknown>) => {
-    const only = Array.isArray(o.installed_part_ids) && o.installed_part_ids.length === 1 ? (o.installed_part_ids[0] as string) : undefined
-    const ref = typeof o.claim_id === 'string' ? { claim_id: o.claim_id } : typeof o.machine_instance_id === 'string' && (typeof o.part_id === 'string' || only)
-      ? { machine_instance_id: o.machine_instance_id, part_id: (o.part_id as string | undefined) ?? only } : null
-    if (ref) run(() => warrantyContext(ref, scope()), (c) => setContexts((x) => ({ ...x, WARRANTY: c })))
-  }
-  const submit = (e: FormEvent) => { e.preventDefault(); send(draft) }
-  const reset = () => { setThread([]); setAgentState({}); setContexts({}); setNotice(null); setError(null); last.current = '' }
+  const submit = (e: FormEvent) => { e.preventDefault(); void send(draft) }
+  const reset = () => { abort.current?.abort(); setTurns([]); setFailed(null); setBusy(false); setDraft(''); input.current?.focus() }
 
   if (!ready) return null
   if (!user) {
@@ -99,149 +99,133 @@ export function CommerceWorkspace() {
       </div>
     )
   }
-  const bundle = Object.keys(contexts).length ? bundleFrom(contexts, notice) : null
+  const remembered = (['machine_model', 'part_number', 'machine_instance_id', 'claim_id', 'shipment_id', 'order_id'] as const).filter((k) => state[k]).map((k) => `${k.replace(/_/g, ' ')} ${state[k]}`)
 
   return (
     <div className="cw">
-      <div className="cw-grid">
-        <section className="cw-assistant" aria-label="Commerce Assistant">
-          <header className="cw-assistant__head">
-            <h2>Commerce Assistant</h2>
-            <span className="cw-meta">{roleLabel(user.role)}{user.customer ? ` · ${user.customer}` : ''}</span>
-          </header>
-          {user.role === 'ORDER_PROCESSOR' && (
-            <div className="cw-lens" role="group" aria-label="View as">
-              <label>View as
-                <select value={lens.role} onChange={(e) => setLens({ ...lens, role: e.target.value as 'OEM' | 'DEALER' })}>
-                  <option value="OEM">OEM (everything)</option>
-                  <option value="DEALER">Dealer</option>
-                </select>
-              </label>
-              {lens.role === 'DEALER' && <label>Dealer id<input value={lens.dealer} onChange={(e) => setLens({ ...lens, dealer: e.target.value })} placeholder="Dealer id" /></label>}
+      <div className="cw-unified">
+        {user.role === 'ORDER_PROCESSOR' && (
+          <div className="cw-lens" role="group" aria-label="View as">
+            <label>View as
+              <select value={lens.role} onChange={(e) => setLens({ ...lens, role: e.target.value as 'OEM' | 'DEALER' })}>
+                <option value="OEM">OEM (everything)</option>
+                <option value="DEALER">Dealer</option>
+              </select>
+            </label>
+            {lens.role === 'DEALER' && <label>Dealer id<input value={lens.dealer} onChange={(e) => setLens({ ...lens, dealer: e.target.value })} placeholder="Dealer id" /></label>}
+          </div>
+        )}
+        <form className="cw-ask" onSubmit={submit}>
+          <label className="cw-ask__label" htmlFor={inputId}>What can I help you with?</label>
+          <div className="cw-ask__row">
+            <input id={inputId} ref={input} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={500} autoComplete="off"
+              placeholder={asking ? asking.question : 'Ask about a part, order or warranty…'} aria-describedby={`${inputId}-hint`} />
+            <button type="submit" className="cw-primary" disabled={busy || !draft.trim()}>Ask</button>
+          </div>
+          <p id={`${inputId}-hint`} className="cw-meta cw-ask__hint">
+            {asking ? (asking.options.length ? 'Choose below, or type your answer here.' : 'Type your answer here.') : 'Every answer comes from the Noordveld records and shows its evidence.'}
+            {remembered.length > 0 && <> · Remembering {remembered.join(' · ')} <button type="button" className="cw-link" onClick={reset}>Start over</button></>}
+          </p>
+        </form>
+
+        {turns.length === 0 && !busy && !failed && (
+          <ul className="cw-chips" aria-label="Things you can ask">{EXAMPLES.map((q) => <li key={q}><button type="button" onClick={() => void send(q)}>{q}</button></li>)}</ul>
+        )}
+
+        <div className="cw-answer-area" aria-live="polite" aria-busy={busy}>
+          {busy && <p className="cw-working" role="status"><span className="cw-spinner" aria-hidden /> Checking the records…</p>}
+          {failed && (
+            <div className="cw-error" role="alert">
+              <p>{failed.text}</p>
+              {failed.text !== 'Sign in to use the commerce assistant.' && <button type="button" className="cw-link" onClick={() => void send(failed.message, failed.patch)}>Try again</button>}
             </div>
           )}
-          <div className="cw-thread" aria-live="polite" aria-label="Conversation">
-            {thread.length === 0 && (
-              <div className="cw-welcome">
-                <p>Ask about a part, a shipment or a warranty. Every answer comes from the Noordveld records and shows its evidence.</p>
-                <ul className="cw-examples">{EXAMPLES.map((q) => <li key={q}><button type="button" onClick={() => send(q)} disabled={busy}>{q}</button></li>)}</ul>
-              </div>
-            )}
-            {thread.map((m) => (m.role === 'user' ? <p key={m.id} className="cw-msg cw-msg--user">{m.text}</p> : <AssistantMessage key={m.id} message={m} onChoose={choose} onOpen={setTab} />))}
-            {busy && <p className="cw-msg cw-msg--pending" role="status">Checking the records…</p>}
-            {error && <p className="cw-error" role="alert">{error}</p>}
-          </div>
-          <form className="cw-compose" onSubmit={submit}>
-            <label className="cw-sr" htmlFor="cw-input">Your request</label>
-            <input id="cw-input" value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={500} placeholder="Ask about a part, a shipment or a warranty…" autoComplete="off" />
-            <button type="submit" className="cw-primary" disabled={busy || !draft.trim()}>Ask</button>
-          </form>
-          <Remembered state={agentState} onClear={reset} />
-        </section>
+          {latest && <Answer key={latest.id} turn={latest} dim={busy} onChoose={choose} onAsk={(q) => void send(q)} />}
+        </div>
 
-        <section className="cw-work" aria-label="Commerce workspace">
-          <div role="tablist" aria-label="Workspace areas" className="cw-tabs">
-            {([['discovery', 'Part Discovery'], ['logistics', 'Shipment / Logistics'], ['warranty', 'Warranty / Traceability'], ['evidence', 'Evidence / Context']] as [Tab, string][]).map(([id, name]) => (
-              <button key={id} type="button" role="tab" id={`cw-tab-${id}`} aria-selected={tab === id} aria-controls={`cw-panel-${id}`} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>
-                {name}{id !== 'evidence' && contexts[id === 'discovery' ? 'DISCOVERY' : id === 'logistics' ? 'LOGISTICS' : 'WARRANTY'] ? <i aria-label="has a result" className="cw-dot" /> : null}
-              </button>
-            ))}
-          </div>
-          <div role="tabpanel" id={`cw-panel-${tab}`} aria-labelledby={`cw-tab-${tab}`} className="cw-panel">
-            {tab === 'discovery' && <DiscoveryPanel ctx={contexts.DISCOVERY} busy={busy} onRun={(q) => run(() => discoveryContext(q, scope()), (c) => setContexts((x) => ({ ...x, DISCOVERY: c })))} />}
-            {tab === 'logistics' && <LogisticsPanel ctx={contexts.LOGISTICS} busy={busy} onPick={pickShipment} onRun={(ref) => run(() => logisticsContext(ref, scope()), (c) => setContexts((x) => ({ ...x, LOGISTICS: c })))} />}
-            {tab === 'warranty' && <WarrantyPanel ctx={contexts.WARRANTY} busy={busy} onPick={pickWarranty} onRun={(ref) => run(() => warrantyContext(ref, scope()), (c) => setContexts((x) => ({ ...x, WARRANTY: c })))} />}
-            {tab === 'evidence' && <EvidenceView bundle={bundle} />}
-          </div>
-          {notice && <p className="cw-notice" role="note">{notice}</p>}
-        </section>
+        {turns.length > 1 && (
+          <details className="cw-history">
+            <summary>Earlier in this conversation ({turns.length - 1})</summary>
+            <ol>{turns.slice(0, -1).map((t) => <li key={t.id}><strong>{t.question}</strong><span>{t.response.answer.text}</span></li>)}</ol>
+          </details>
+        )}
       </div>
     </div>
   )
 }
 
-function Remembered({ state, onClear }: { state: AgentState; onClear: () => void }) {
-  const items = (['machine_model', 'part_number', 'machine_instance_id', 'claim_id', 'shipment_id', 'order_id'] as const).filter((k) => state[k]).map((k) => `${k.replace(/_/g, ' ')}: ${state[k]}`)
-  if (!items.length) return null
+function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onChoose: (o: Record<string, unknown>) => void; onAsk: (q: string) => void }) {
+  const r = turn.response
+  const answeredSections = r.answer.sections.filter((s) => s.status !== 'REQUIRES_CLARIFICATION')
+  // a question is asked once, in the clarification box: what precedes it is the part of the request that could be answered
+  const lead = r.clarification && r.answer.text.endsWith(r.clarification.question) ? r.answer.text.slice(0, -r.clarification.question.length).trim() : r.answer.text
+  const bundle = answeredSections.length && Object.keys(r.contexts).length ? bundleFrom(r.contexts, r.answer.synthetic_notice) : null
+  const primary = r.answer.sections.find((s) => s.status !== 'REQUIRES_CLARIFICATION')?.domain
+  const d = r.contexts.DISCOVERY
+  const part = d ? (isLookup(d) ? d.part : (d.recommended_part ?? d.compatible_part)) : null
+  const notEligible = r.contexts.WARRANTY && r.contexts.WARRANTY.decision.facts.outcome !== 'ELIGIBLE'
+  // shipment questions only make sense once a shipment is in the answer (an order with no shipment yet has nothing to ask about)
+  const next = r.clarification || !primary || (primary === 'LOGISTICS' && !r.contexts.LOGISTICS?.shipment) ? [] : FOLLOW_UPS[primary]
   return (
-    <p className="cw-remembered" aria-label="What the assistant is remembering">
-      Remembering {items.join(' · ')} <button type="button" className="cw-link" onClick={onClear}>Start over</button>
-    </p>
-  )
-}
+    <article className={`cw-answer${dim ? ' is-dim' : ''}`} aria-label="Answer">
+      <p className="cw-question">{turn.question}</p>
+      {lead && <p className="cw-lead">{lead}</p>}
 
-function AssistantMessage({ message, onChoose, onOpen }: { message: Message; onChoose: (o: Record<string, unknown>) => void; onOpen: (t: Tab) => void }) {
-  const r = message.response
-  if (!r) return <p className="cw-msg">{message.text}</p>
-  return (
-    <div className="cw-msg cw-msg--assistant">
-      <p className="cw-lead">{message.text}</p>
-      {r.answer.sections.map((s) => (
-        <div key={s.domain} className="cw-sec">
-          <h4>{s.title} <Chip value={s.decision} /></h4>
-          {s.notes.map((n) => <p key={n} className="cw-meta">{n}</p>)}
-          {s.lines.length > 0 && <ul>{s.lines.filter((l) => !l.startsWith('Option:')).map((l, i) => <li key={i}>{l}</li>)}</ul>}
-          <button type="button" className="cw-link" onClick={() => onOpen(TAB_OF[s.domain])}>Open in workspace</button>
+      {r.answer.sections.map((s) => <Detail key={s.domain} section={s} response={r} />)}
+
+      {r.clarification && (
+        <div className="cw-clarify" role="group" aria-label="Clarification">
+          <p className="cw-clarify__q">{r.clarification.question}</p>
+          {r.clarification.options.length > 0 ? (
+            <ul className="cw-chips cw-chips--options">
+              {r.clarification.options.slice(0, 12).map((o, i) => <li key={i}><button type="button" onClick={() => onChoose(o)}>{optionText(o)}</button></li>)}
+            </ul>
+          ) : (
+            <p className="cw-meta">Type your answer in the box above and I will carry on with your question.</p>
+          )}
         </div>
-      ))}
-      {r.clarification && (<div className="cw-ask"><p>{r.clarification.question}</p><Options options={r.clarification.options} onPick={onChoose} /></div>)}
-      {r.answer.synthetic_notice && <p className="cw-meta">{r.answer.synthetic_notice}</p>}
+      )}
+
+      {r.status === 'OUT_OF_SCOPE' && (
+        <ul className="cw-chips" aria-label="Things you can ask">{EXAMPLES.slice(0, 3).map((q) => <li key={q}><button type="button" onClick={() => onAsk(q)}>{q}</button></li>)}</ul>
+      )}
+
+      {(next.length > 0 || part) && (
+        <div className="cw-next" aria-label="What next">
+          {part && <Link to={partPath(part.part_number)} className="cw-link">Open {part.part_number} in the parts store</Link>}
+          {next.map((q) => <button key={q} type="button" className="cw-chip-btn" onClick={() => onAsk(q)}>{q}</button>)}
+          {notEligible && <button type="button" className="cw-chip-btn" onClick={() => onAsk(NOT_ELIGIBLE_PROMPT)}>{NOT_ELIGIBLE_PROMPT}</button>}
+        </div>
+      )}
+
+      {bundle && (
+        <details className="cw-evidence-box">
+          <summary>Evidence and sources ({bundle.evidence.length || bundle.source_records.length})</summary>
+          <EvidenceView bundle={bundle} />
+        </details>
+      )}
+
       <p className="cw-meta cw-how">
-        {r.answer.grounding.mode === 'LLM' ? 'Worded by the language model and checked against the evidence.' : 'Written directly from the records.'} Understood as {r.understanding.intent.replace('_', ' ').toLowerCase()}
-        {r.understanding.source === 'LLM' ? ' (routed by the language model)' : ''}.
+        {r.answer.synthetic_notice ? `${r.answer.synthetic_notice} ` : ''}
+        {r.answer.grounding.mode === 'LLM' ? 'Worded by the language model and checked against the evidence.' : 'Written directly from the records.'}
+        {r.understanding.source === 'LLM' ? ' Routed by the language model.' : ''}
       </p>
-    </div>
+    </article>
   )
 }
 
-// ── the direct panels: each journey on its own, same APIs ─────────────────────────────────────────
-function Empty({ children }: { children: string }) { return <p className="cw-empty">{children}</p> }
-
-function DiscoveryPanel({ ctx, busy, onRun }: { ctx?: DiscoveryContext; busy: boolean; onRun: (q: string) => void }) {
-  const [q, setQ] = useState('')
+/** One journey's detail inside the answer. A journey that was only a question is asked in the conversation, not shown as an empty panel. */
+function Detail({ section, response }: { section: AgentSection; response: AgentResponse }) {
+  const ctx = response.contexts[section.domain]
+  if (section.status === 'REQUIRES_CLARIFICATION') return section.notes.length ? <p className="cw-meta">{section.notes.join(' ')}</p> : null
+  if (!ctx) return <p className="cw-meta cw-detail--note">{section.headline}</p>
   return (
-    <>
-      <form className="cw-form" onSubmit={(e) => { e.preventDefault(); if (q.trim().length >= 3) onRun(q.trim()) }}>
-        <label>Part request<input value={q} onChange={(e) => setQ(e.target.value)} placeholder="a hydraulic filter for my machine" maxLength={500} /></label>
-        <button type="submit" className="cw-primary" disabled={busy || q.trim().length < 3}>Find part</button>
-      </form>
-      {ctx ? <DiscoveryView ctx={ctx} /> : <Empty>Find a part for a machine. The backend checks product type, fitment, approved source and availability before anything is recommended.</Empty>}
-    </>
+    <section className="cw-detail" aria-label={section.title}>
+      <h3 className="cw-detail__title">{section.title} <Chip value={section.decision} /></h3>
+      {section.notes.map((n) => <p key={n} className="cw-meta">{n}</p>)}
+      {section.domain === 'DISCOVERY' && (isLookup(ctx as never) ? <LookupView ctx={ctx as never} /> : <DiscoveryView ctx={ctx as never} bare />)}
+      {section.domain === 'LOGISTICS' && <LogisticsView ctx={ctx as never} bare />}
+      {section.domain === 'WARRANTY' && <WarrantyView ctx={ctx as never} bare />}
+    </section>
   )
 }
-
-function LogisticsPanel({ ctx, busy, onRun, onPick }: { ctx?: LogisticsContext; busy: boolean; onRun: (r: { shipment_id?: string; order_id?: string }) => void; onPick: (o: Record<string, unknown>) => void }) {
-  const [id, setId] = useState('')
-  const v = id.trim().toUpperCase()
-  const ref = /^ORD-/.test(v) ? { order_id: v } : { shipment_id: v }
-  return (
-    <>
-      <form className="cw-form" onSubmit={(e) => { e.preventDefault(); if (v) onRun(ref) }}>
-        <label>Shipment or order number<input value={id} onChange={(e) => setId(e.target.value)} placeholder="Shipment or order number" maxLength={64} /></label>
-        <button type="submit" className="cw-primary" disabled={busy || !v}>Track</button>
-      </form>
-      {ctx ? <LogisticsView ctx={ctx} onPick={onPick} /> : <Empty>Track a shipment or an order. A shipment can carry several order lines; an order can be split over several shipments.</Empty>}
-    </>
-  )
-}
-
-function WarrantyPanel({ ctx, busy, onRun, onPick }: { ctx?: WarrantyContext; busy: boolean; onRun: (r: { claim_id?: string; machine_instance_id?: string; part_id?: string }) => void; onPick: (o: Record<string, unknown>) => void }) {
-  const [claim, setClaim] = useState('')
-  const [instance, setInstance] = useState('')
-  const [part, setPart] = useState('')
-  const byClaim = claim.trim() !== ''
-  const ok = byClaim ? true : instance.trim() !== '' && part.trim() !== ''
-  return (
-    <>
-      <form className="cw-form" onSubmit={(e) => { e.preventDefault(); if (ok) onRun(byClaim ? { claim_id: claim.trim().toUpperCase() } : { machine_instance_id: instance.trim().toUpperCase(), part_id: part.trim().toUpperCase() }) }}>
-        <label>Claim<input value={claim} onChange={(e) => setClaim(e.target.value)} placeholder="Claim number" maxLength={64} /></label>
-        <span className="cw-or">or</span>
-        <label>Machine<input value={instance} onChange={(e) => setInstance(e.target.value)} placeholder="Machine number" maxLength={64} disabled={byClaim} /></label>
-        <label>Part<input value={part} onChange={(e) => setPart(e.target.value)} placeholder="Part number" maxLength={64} disabled={byClaim} /></label>
-        <button type="submit" className="cw-primary" disabled={busy || !ok}>Check warranty</button>
-      </form>
-      {ctx ? <WarrantyView ctx={ctx} onPick={onPick} /> : <Empty>Check a claim, or a machine and part. The decision comes from the deterministic warranty rules and lists every check behind it.</Empty>}
-    </>
-  )
-}
-

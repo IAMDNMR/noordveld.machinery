@@ -1,4 +1,4 @@
-"""Phase 5: the Commerce Agent (app/commerce/agent.py, app/commerce/answer.py) and POST /api/v1/commerce/agent.
+"""Phase 5: the Commerce Agent (app/commerce_agent/agent.py, app/commerce_agent/answer.py) and POST /api/v1/commerce/agent.
 
 The engine runs over the canonical dataset files (the validated Phase 4 data); accounts come from the in-memory repository. Nothing here touches the graph. The language model is a fake:
 the tests prove what the agent does WITH a model (route an unclear message, reword a lead) and that it is correct without one."""
@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from app.api.dependencies import get_commerce_engine, get_llm, get_orders_repository
 from app.canonical.io import CANON_DIR
 from app.commerce.access import CommerceRole, Principal
-from app.commerce.agent import CommerceAgent, AgentRequest, discovery_text, extract_references
+from app.commerce_agent.agent import CommerceAgent, AgentRequest, discovery_text, extract_references
 from app.commerce.engine import CommerceContextEngine
 from app.llm.base import CommerceParse, LLMUnavailable
 from app.main import app
@@ -245,7 +245,10 @@ def test_warranty_without_a_claim_or_machine_asks_which_and_offers_only_the_cust
 
 def test_warranty_machine_and_part_without_a_claim_is_judged_by_the_same_rules():
     r = ask("Is the pump on MI-G002 under warranty?", OEM, {"part_id": "PRT-007"})
-    assert r["contexts"]["WARRANTY"]["decision"]["facts"]["outcome"] in ("NOT_ELIGIBLE", "REQUIRES_REVIEW", "INSUFFICIENT_DATA", "ELIGIBLE")
+    assert r["contexts"]["WARRANTY"]["decision"]["facts"]["outcome"] == "NOT_ELIGIBLE" and r["contexts"]["WARRANTY"]["claim"]["claim_id"] == "CLM-G002"  # the one recorded claim is the failed part judged
+    assert any("only claim recorded for PRT-007 on MI-G002" in n for n in sections(r)["WARRANTY"]["notes"])
+    none = ask("Is the pump on MI-G001 under warranty?", OEM, {"part_id": "PRT-018"})  # a part with no claim is judged on its installation alone
+    assert none["contexts"]["WARRANTY"]["claim"] is None and none["contexts"]["WARRANTY"]["decision"]["facts"]["outcome"]
 
 
 # ── multi-domain ─────────────────────────────────────────────────────────────────────────────────
@@ -271,6 +274,27 @@ def test_discovery_and_logistics_delivery_speed_for_an_unordered_part_is_not_inv
     assert sections(r)["LOGISTICS"]["decision"] == "NO_SHIPMENT_FOR_UNORDERED_PART" and "days" not in sections(r)["LOGISTICS"]["headline"].replace("no tracked", "")
 
 
+def test_a_short_reply_to_a_question_the_agent_asked_is_read_as_the_answer_to_it():
+    me = customer("CUS-001")
+    first = ask("I need a replacement hydraulic pump urgently. Is the failed one covered and how fast can I get the replacement?", me)
+    assert first["status"] == "REQUIRES_CLARIFICATION" and first["clarification"]["domain"] in ("DISCOVERY", "WARRANTY") and "pending_message" in first["state"]
+    second = ask("KFT-600", me, first["state"])  # the user names the machine model
+    assert second["understanding"]["domains"] == ["DISCOVERY", "WARRANTY", "LOGISTICS"] and any("read as the answer" in r for r in second["understanding"]["reasons"])
+    assert sections(second)["DISCOVERY"]["decision"] == "NO_AVAILABLE_RECOMMENDATION" and second["clarification"]["domain"] == "WARRANTY"  # now only the machine instance is missing
+    assert {o["machine_instance_id"] for o in second["clarification"]["options"]} == {"MI-G001", "MI-G005"} and "pending_message" in second["state"]
+    third = ask("KFT-600", me, {**second["state"], "machine_instance_id": "MI-G001"})  # the user picks one of the offered machines
+    assert third["status"] == "PARTIAL" and sections(third)["WARRANTY"]["decision"] == "ELIGIBLE" and "pending_message" not in third["state"]
+
+
+def test_a_new_request_drops_the_question_that_was_waiting():
+    first = ask("Is this part under warranty?", customer("CUS-001"))
+    assert "pending_message" in first["state"]
+    nxt = ask("Where is SHP-0010?", customer("CUS-001"), first["state"])
+    assert nxt["intent"] == "LOGISTICS" and "pending_message" not in nxt["state"] and not any("read as the answer" in r for r in nxt["understanding"]["reasons"])
+    long_off_topic = ask("please write me a long poem about the sea and the sky and the stars tonight", customer("CUS-001"), first["state"])
+    assert long_off_topic["intent"] == "UNKNOWN" and "pending_message" not in long_off_topic["state"]  # a long message is a new request, never an answer
+
+
 # ── evidence-first, provenance, disclosure ───────────────────────────────────────────────────────
 def test_every_answer_carries_context_evidence_path_provenance_and_the_demo_disclosure():
     r = ask("Where is SHP-NET-0001?", customer("CUS-009"))
@@ -281,7 +305,7 @@ def test_every_answer_carries_context_evidence_path_provenance_and_the_demo_disc
 
 def test_the_state_the_agent_returns_holds_identifiers_only_never_a_decision():
     r = ask("Is claim CLM-G001 covered?", customer("CUS-001"))
-    assert set(r["state"]) <= {"shipment_id", "order_id", "claim_id", "machine_instance_id", "part_id", "machine_id", "machine_model", "part_number", "last_request", "last_domains"}
+    assert set(r["state"]) <= {"shipment_id", "order_id", "claim_id", "machine_instance_id", "part_id", "machine_id", "machine_model", "part_number", "last_request", "last_domains", "pending_message"}
     assert "ELIGIBLE" not in json.dumps(r["state"]) and r["state"]["claim_id"] == "CLM-G001" and r["state"]["machine_instance_id"] == "MI-G001"
 
 
@@ -318,6 +342,19 @@ def test_model_wording_is_kept_only_when_it_is_grounded_in_the_evidence():
     r = ask("Find a hydraulic pump for KFT-200.", llm=invented)
     assert r["answer"]["text"] == lead and r["answer"]["grounding"]["mode"] == "TEMPLATE" and "not grounded" in r["answer"]["grounding"]["note"]
     assert ask("Find a hydraulic pump for KFT-200.", llm=FakeLLM(fail=True))["answer"]["text"] == lead
+
+
+@pytest.mark.parametrize("message,state,owner,bad", [
+    ("Is claim CLM-G001 covered?", {}, "CUS-001", "The claim is not eligible and is not covered under warranty."),  # the decision is ELIGIBLE
+    ("Is claim CLM-G002 covered?", {}, "CUS-004", "Claim CLM-G002 is eligible and covered."),  # the decision is NOT_ELIGIBLE
+    ("Is claim CLM-G002 covered?", {}, "CUS-004", "Claim CLM-G002 was installed on 2026-05-03."),  # true, but the outcome is dropped
+    ("Where is SHP-0010?", {}, "CUS-001", "Shipment SHP-0010 is in transit and its live position is Linehaul hub."),  # the record says there is no live position
+    ("I need a hydraulic pump for my KFT-600.", {}, "CUS-001", "The piston pump NVM-1060-HY is recommended and in stock."),
+])
+def test_model_wording_that_changes_the_sense_of_a_decision_is_rejected_even_when_its_numbers_are_in_the_evidence(message, state, owner, bad):
+    r = ask(message, customer(owner), state, llm=FakeLLM(reword=bad))
+    assert r["answer"]["text"] == r["answer"]["lead"] and r["answer"]["grounding"]["mode"] == "TEMPLATE", bad
+    assert "rejected" in r["answer"]["grounding"]["note"]
 
 
 def test_the_model_is_never_asked_to_word_a_clarification():
@@ -415,3 +452,38 @@ def test_the_agent_endpoint_only_reads(api):
     before = json.dumps(http("U-C001").post(BASE, json={"message": "Where is SHP-0010?"}).json(), sort_keys=True)
     after = json.dumps(http("U-C001").post(BASE, json={"message": "Where is SHP-0010?"}).json(), sort_keys=True)
     assert before == after  # same request, same body: nothing changed between them
+
+
+# ── questions about one part, and orders the shop placed ─────────────────────────────────────────
+def test_which_machine_uses_this_part_lists_only_machines_a_fitment_record_approves():
+    first = ask("Find a hydraulic pump for KFT-200.")
+    r = ask("Which machine uses this part?", OEM, first["state"])
+    x, s = r["contexts"]["DISCOVERY"], sections(r)["DISCOVERY"]
+    assert r["intent"] == "DISCOVERY" and s["decision"] == "PART_FITMENT" and [m["model"] for m in x["machines"]] == ["KFT-200", "KFT-450"]
+    assert {e["entity"] for e in r["evidence"]} == {"Fitment"} and r["evidence_paths"]["DISCOVERY"][0]["entity"] == "Part" and any("“This part” was read as NVM-1050-HY" in n for n in s["notes"])
+    named = ask("Which machine uses NVM-1060-HY?")
+    assert [m["model"] for m in named["contexts"]["DISCOVERY"]["machines"]] == ["KFT-600", "KFT-800"]
+
+
+def test_where_did_this_part_come_from_reports_the_recorded_manufacturer_catalogue_record_and_approved_sources():
+    first = ask("Find a hydraulic pump for KFT-200.")
+    r = ask("Where did this part come from?", OEM, first["state"])
+    x, text = r["contexts"]["DISCOVERY"], "\n".join(sections(r)["DISCOVERY"]["lines"])
+    assert sections(r)["DISCOVERY"]["decision"] == "PART_ORIGIN" and [s["source_id"] for s in x["sources"]] == ["SUP-011", "SUP-025"]
+    assert "Manufacturer: Noordveld" in text and "Approved supplier source: SUP-011." in text and x["catalogue"]["data_status"] == "SOURCE_DERIVED" and r["source_records"]
+    assert x["decision"]["facts"]["approved_source_count"] == 2 and r["data_status"] in ("MIXED", "SOURCE_DERIVED", "SYNTHETIC_DEMO")
+
+
+def test_a_question_about_a_part_with_no_part_to_refer_to_asks_which_and_does_not_guess():
+    r = ask("Where did this part come from?")
+    assert r["status"] == "REQUIRES_CLARIFICATION" and r["clarification"]["domain"] == "DISCOVERY" and r["contexts"] == {}
+    assert ask("Which machine uses PRT-999?")["contexts"]["DISCOVERY"]["decision"]["decision"] == "NOT_FOUND"
+
+
+def test_an_order_placed_in_the_shop_is_recognised_and_reads_its_owner_through_the_account_that_placed_it():
+    from app.graph.queries import logistics as q
+
+    assert extract_references("Where is order HCME-ORD-000001?", ENGINE.discovery) == {"order_id": "HCME-ORD-000001"}
+    assert "PLACED_BY" in q.ORDER and "ACTS_FOR" in q.ORDER and q.ORDER.index("ORDERED_BY") < q.ORDER.index("PLACED_BY")  # a customer order link still comes first
+    r = ask("Where is order ORD-NET-0001?", customer("CUS-009"))
+    assert r["status"] == "REQUIRES_CLARIFICATION" and r["clarification"]["domain"] == "LOGISTICS"

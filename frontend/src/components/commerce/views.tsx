@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type {
-  AgentResponse, CommerceContext, Confidence, DataRef, DiscoveryContext, Domain, EvidenceItem, LogisticsContext, PathStep, WarrantyContext,
+  AgentResponse, CommerceContext, PartLookupContext, Confidence, DataRef, DiscoveryContext, Domain, EvidenceItem, LogisticsContext, PathStep, WarrantyContext,
 } from '../../api/commerce'
 
 /**
@@ -31,7 +31,7 @@ export function Banner({ ctx }: { ctx: CommerceContext }) {
         <Chip value={d.status}>{label(d.status)}</Chip>
       </div>
       <p className="cw-banner__summary">{d.summary}</p>
-      {d.recommended_next_action && <p className="cw-banner__next">{d.recommended_next_action}</p>}
+      {/* decision.recommended_next_action is an instruction for the agent, not wording for the user, so it is not shown */}
     </div>
   )
 }
@@ -58,14 +58,15 @@ export function Options({ options, onPick }: { options: Record<string, unknown>[
 }
 
 // ── discovery ────────────────────────────────────────────────────────────────────────────────────
-export function DiscoveryView({ ctx, onPick }: { ctx: DiscoveryContext; onPick?: (o: Record<string, unknown>) => void }) {
+/** `bare`: inside the unified answer, where the lead sentence already says the decision and a clarification is asked in the conversation, so neither is repeated here. */
+export function DiscoveryView({ ctx, onPick, bare }: { ctx: DiscoveryContext; onPick?: (o: Record<string, unknown>) => void; bare?: boolean }) {
   const part = ctx.recommended_part ?? ctx.compatible_part
   const rejected = Object.entries(ctx.rejection_reasons ?? {})
   const nameOf = (id: string) => ctx.candidate_parts.find((p) => p.part_id === id)
   const avail = part ? ctx.availability.find((a) => a.part_id === part.part_id) : undefined
   return (
     <section className="cw-view" aria-label="Part discovery result">
-      <Banner ctx={ctx} />
+      {!bare && <Banner ctx={ctx} />}
       {ctx.machine && ctx.machine.resolution === 'RESOLVED' && <p className="cw-meta">Machine: {ctx.machine.name ?? ctx.machine.model} ({ctx.machine.model})</p>}
       {part && (
         <article className="cw-card" aria-label={ctx.recommended_part ? 'Recommended part' : 'Compatible part'}>
@@ -114,20 +115,70 @@ export function DiscoveryView({ ctx, onPick }: { ctx: DiscoveryContext; onPick?:
           </ul>
         </>
       )}
-      {ctx.clarification && (<><h4 className="cw-h">{ctx.clarification.question}</h4><Options options={ctx.clarification.options} onPick={onPick} /></>)}
+      {!bare && ctx.clarification && (<><h4 className="cw-h">{ctx.clarification.question}</h4><Options options={ctx.clarification.options} onPick={onPick} /></>)}
+    </section>
+  )
+}
+
+// ── one part: which machines use it, where it came from ──────────────────────────────────────────
+export function LookupView({ ctx }: { ctx: PartLookupContext }) {
+  const cat = ctx.catalogue
+  return (
+    <section className="cw-view" aria-label={ctx.lookup === 'PART_FITMENT' ? 'Machines this part is approved for' : 'Recorded origin of this part'}>
+      {ctx.part && <p className="cw-meta"><span className="cw-mono">{ctx.part.part_number}</span> {ctx.part.name}</p>}
+      {ctx.lookup === 'PART_FITMENT' ? (
+        <>
+          {ctx.machines.length > 0 ? (
+            <table className="cw-table" aria-label="Approved machines">
+              <thead><tr><th>Machine</th><th>Model</th><th>Fitment</th></tr></thead>
+              <tbody>{ctx.machines.map((m) => <tr key={m.fitment_id}><td>{m.name}</td><td className="cw-mono">{m.model}</td><td>{label(m.fitment_rule)}</td></tr>)}</tbody>
+            </table>
+          ) : <p className="cw-meta">No fitment record approves this part for a machine model.</p>}
+          {ctx.other_fitments.length > 0 && <p className="cw-meta">Other fitment records, not approved: {ctx.other_fitments.map((m) => `${m.model} (${label(m.approval_status)})`).join(', ')}.</p>}
+        </>
+      ) : (
+        <>
+          {cat && (
+            <dl className="cw-facts">
+              <dt>Manufacturer</dt><dd>{cat.manufacturer ?? 'not recorded'}</dd>
+              <dt>OEM status</dt><dd>{label(cat.oem_status)}</dd>
+              <dt>Catalogue record</dt><dd>{label(cat.catalogue_status)} · {label(cat.data_status)}</dd>
+            </dl>
+          )}
+          {ctx.sources.length > 0 ? (
+            <ul className="cw-list">{ctx.sources.map((s) => <li key={s.approved_source_id}>Approved {label(s.source_kind)} source <span className="cw-mono">{s.source_id}</span></li>)}</ul>
+          ) : <p className="cw-meta">No approved source is recorded for this part.</p>}
+        </>
+      )}
     </section>
   )
 }
 
 // ── logistics ────────────────────────────────────────────────────────────────────────────────────
-export function LogisticsView({ ctx, onPick }: { ctx: LogisticsContext; onPick?: (o: Record<string, unknown>) => void }) {
+export function LogisticsView({ ctx, onPick, bare }: { ctx: LogisticsContext; onPick?: (o: Record<string, unknown>) => void; bare?: boolean }) {
   const s = ctx.shipment
   const total = ctx.route_legs.length
   const done = ctx.completed_legs.length
   const alternatives = (ctx.transport_comparison?.options ?? []).filter((o) => !o.is_current)
   return (
     <section className="cw-view" aria-label="Shipment result">
-      <Banner ctx={ctx} />
+      {!bare && <Banner ctx={ctx} />}
+      {!s && ctx.order && (
+        <>
+          <dl className="cw-facts">
+            <dt>Order</dt><dd className="cw-mono">{ctx.order.order_id}</dd>
+            <dt>Status</dt><dd>{label(ctx.order.status)}</dd>
+            {ctx.order.order_date && (<><dt>Placed</dt><dd>{ctx.order.order_date}</dd></>)}
+            <dt>Shipment</dt><dd>none recorded yet</dd>
+          </dl>
+          {ctx.order_lines.length > 0 && (
+            <table className="cw-table" aria-label="Order lines">
+              <thead><tr><th>Order line</th><th>Part</th><th>Qty</th></tr></thead>
+              <tbody>{ctx.order_lines.map((l) => <tr key={l.order_line_id}><td className="cw-mono">{l.order_line_id}</td><td><span className="cw-mono">{l.part_number ?? 'not recorded'}</span> {l.name ?? ''}</td><td>{l.quantity ?? '—'}</td></tr>)}</tbody>
+            </table>
+          )}
+        </>
+      )}
       {s && (
         <dl className="cw-facts">
           <dt>Shipment</dt><dd className="cw-mono">{s.shipment_id}</dd>
@@ -194,18 +245,18 @@ export function LogisticsView({ ctx, onPick }: { ctx: LogisticsContext; onPick?:
           </ol>
         </>
       )}
-      {ctx.clarification && (<><h4 className="cw-h">{ctx.clarification.question}</h4><Options options={ctx.clarification.options} onPick={onPick} /></>)}
+      {!bare && ctx.clarification && (<><h4 className="cw-h">{ctx.clarification.question}</h4><Options options={ctx.clarification.options} onPick={onPick} /></>)}
     </section>
   )
 }
 
 // ── warranty ─────────────────────────────────────────────────────────────────────────────────────
-export function WarrantyView({ ctx, onPick }: { ctx: WarrantyContext; onPick?: (o: Record<string, unknown>) => void }) {
+export function WarrantyView({ ctx, onPick, bare }: { ctx: WarrantyContext; onPick?: (o: Record<string, unknown>) => void; bare?: boolean }) {
   const hidden = ctx.visibility?.hidden_fields ?? []
   const options = (ctx.decision.facts.options as Record<string, unknown>[] | undefined) ?? []
   return (
     <section className="cw-view" aria-label="Warranty result">
-      <Banner ctx={ctx} />
+      {!bare && <Banner ctx={ctx} />}
       {ctx.coverage_start && <p className="cw-meta">Coverage {ctx.coverage_start} to {ctx.coverage_end}</p>}
       {ctx.decision_factors.length > 0 && (
         <>
@@ -242,7 +293,7 @@ export function WarrantyView({ ctx, onPick }: { ctx: WarrantyContext; onPick?: (
           {ctx.prior_claims.length > 0 && <p className="cw-meta">Earlier claims: {ctx.prior_claims.map((c) => `${c.claim_id} (${label(c.status)})`).join(', ')}</p>}
         </>
       )}
-      {options.length > 0 && (<><h4 className="cw-h">Which one do you mean?</h4><Options options={options} onPick={onPick} /></>)}
+      {!bare && options.length > 0 && (<><h4 className="cw-h">Which one do you mean?</h4><Options options={options} onPick={onPick} /></>)}
     </section>
   )
 }

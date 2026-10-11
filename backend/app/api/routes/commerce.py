@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.api.dependencies import CommerceAgentDep, CommerceEngine, CommerceService, require
 from app.commerce.access import AccessDenied, Principal, principal_for
-from app.commerce.agent import AgentRequest
+from app.commerce_agent.agent import AgentRequest
 from app.commerce.service import ServiceRequest
 from app.services.orders import User
 
@@ -86,6 +86,7 @@ class AgentState(BaseModel):
     part_number: Annotated[str, Field(max_length=40)] | None = None
     last_request: Annotated[str, Field(max_length=500)] | None = None
     last_domains: list[Literal["DISCOVERY", "LOGISTICS", "WARRANTY"]] = Field(default_factory=list, max_length=3)
+    pending_message: Annotated[str, Field(max_length=500)] | None = None
 
 
 class AgentBody(Scope):

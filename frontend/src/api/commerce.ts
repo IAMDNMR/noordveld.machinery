@@ -112,6 +112,18 @@ export interface DiscoveryContext extends CommerceContext {
   clarification: Clarification | null
 }
 
+/** "Which machine uses this part?" and "Where did this part come from?": one part, read from the fitment and approved-source records. */
+export interface PartLookupContext extends CommerceContext {
+  lookup: 'PART_FITMENT' | 'PART_ORIGIN'
+  part: { part_id: string; part_number: string; name: string } | null
+  machines: { machine_id: string; model: string; name: string; fitment_id: string; fitment_rule: string | null }[]
+  other_fitments: { model: string; approval_status: string }[]
+  sources: { approved_source_id: string; source_id: string; source_kind: string }[]
+  catalogue: { manufacturer: string | null; oem_status: string | null; catalogue_status: string | null; data_status: string | null } | null
+}
+
+export const isLookup = (c: DiscoveryContext | PartLookupContext): c is PartLookupContext => 'lookup' in c
+
 export interface ShipmentLine {
   order_line_id: string
   part_id: string | null
@@ -139,7 +151,8 @@ export interface RouteOption {
 }
 
 export interface LogisticsContext extends CommerceContext {
-  order: { order_id: string; status?: string } | null
+  order: { order_id: string; status?: string; order_date?: string | null } | null
+  order_lines: { order_line_id: string; part_number: string | null; name: string | null; quantity: number | null }[]
   shipment: { shipment_id: string; order_id?: string | null; status?: string; carrier?: string | null; remediation_flags?: string[] } | null
   part: { part_id: string; part_number: string; name: string; quantity?: number } | null
   shipment_lines: ShipmentLine[]
@@ -203,6 +216,7 @@ export interface AgentState {
   part_number?: string
   last_request?: string
   last_domains?: Domain[]
+  pending_message?: string
 }
 
 export interface AgentResponse {
@@ -216,7 +230,7 @@ export interface AgentResponse {
     grounding: { mode: 'TEMPLATE' | 'LLM'; validated: boolean; note?: string }
   }
   steps: { domain: Domain; status: string; decision: string; summary: string; resolution: string[] }[]
-  contexts: { DISCOVERY?: DiscoveryContext; LOGISTICS?: LogisticsContext; WARRANTY?: WarrantyContext }
+  contexts: { DISCOVERY?: DiscoveryContext | PartLookupContext; LOGISTICS?: LogisticsContext; WARRANTY?: WarrantyContext }
   clarification: { domain: Domain | null; question: string; options: Record<string, unknown>[] } | null
   evidence: EvidenceItem[]
   evidence_paths: Partial<Record<Domain, PathStep[]>>
@@ -232,12 +246,3 @@ export interface AgentResponse {
 
 export const askCommerceAgent = (message: string, state: AgentState, scope: Scope = {}, signal?: AbortSignal): Promise<AgentResponse> =>
   apiPost<AgentResponse>('/commerce/agent', { message, state, ...scope }, signal)
-
-export const discoveryContext = (request: string, scope: Scope = {}, signal?: AbortSignal): Promise<DiscoveryContext> =>
-  apiPost<DiscoveryContext>('/commerce/discovery/context', { request, ...scope }, signal)
-
-export const logisticsContext = (ref: { shipment_id?: string; order_id?: string }, scope: Scope = {}, signal?: AbortSignal): Promise<LogisticsContext> =>
-  apiPost<LogisticsContext>('/commerce/logistics/context', { ...ref, ...scope }, signal)
-
-export const warrantyContext = (ref: { claim_id?: string; machine_instance_id?: string; part_id?: string }, scope: Scope = {}, signal?: AbortSignal): Promise<WarrantyContext> =>
-  apiPost<WarrantyContext>('/commerce/warranty/context', { ...ref, ...scope }, signal)

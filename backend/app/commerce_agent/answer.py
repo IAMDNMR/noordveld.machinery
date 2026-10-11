@@ -7,6 +7,7 @@ Nothing here decides fitment, stock, a shipment's state, a date or warranty elig
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 from app.commerce import contract as c
@@ -29,14 +30,32 @@ def _money(price: dict[str, Any] | None) -> str | None:
     return f"{price['unit_price']:,.2f} {price.get('currency') or ''}".strip() + (f" ({status})" if status else "")
 
 
-def _days(n: int | float) -> str:
+def _days(n: float) -> str:
     n = int(n)
     return f"{n} day" if n == 1 else f"{n} days"
 
 
 # ── discovery ────────────────────────────────────────────────────────────────────────────────────
+def lookup_lines(x: dict[str, Any]) -> list[str]:
+    """PART_FITMENT / PART_ORIGIN: one part's approved machines, or its recorded manufacturer, catalogue record and approved sources."""
+    lines = []
+    if x["lookup"] == "PART_FITMENT":
+        lines += [f"Approved for {m['name']} ({m['model']}), fitment {m['fitment_rule'] or 'rule not stated'}." for m in x.get("machines", [])]
+        if x.get("other_fitments"):
+            lines.append("Other fitment records, not approved: " + ", ".join(f"{m['model']} ({str(m['approval_status']).lower()})" for m in x["other_fitments"]) + ".")
+    else:
+        cat = x.get("catalogue") or {}
+        lines.append(f"Manufacturer: {cat.get('manufacturer') or 'not recorded'}; OEM status: {str(cat.get('oem_status') or 'not recorded').lower()}; catalogue status: {str(cat.get('catalogue_status') or 'not recorded').lower()}.")
+        lines += [f"Approved {str(s.get('source_kind')).lower()} source: {s['source_id']}." for s in x.get("sources", [])]
+        if not x.get("sources"):
+            lines.append("No approved source is recorded for this part.")
+    return lines
+
+
 def discovery_lines(x: dict[str, Any], focus: list[str]) -> list[str]:
     d = x["decision"]
+    if x.get("lookup"):
+        return lookup_lines(x)
     facts, lines = d.get("facts") or {}, []
     part = x.get("recommended_part") or x.get("compatible_part")
     if x.get("clarification"):
@@ -222,6 +241,34 @@ def compose(u: Any, steps: list[Any], message: str, llm: Any = None) -> dict[str
             "warnings": sorted({w for ctx in contexts.values() for w in ctx.get("warnings", [])}), "missing": sorted({m for ctx in contexts.values() for m in ctx.get("missing", [])})}
 
 
+# What a decision obliges the wording to keep, and what it must never say. is_grounded checks numbers and identifiers; these check the SENSE of the headline outcomes.
+MUST_SAY: dict[str, str] = {
+    "NOT_ELIGIBLE": r"not (eligible|covered)|ineligible|rejected|not under warranty", "REQUIRES_REVIEW": r"review", "INSUFFICIENT_DATA": r"insufficient|cannot|not enough|unknown|missing|not (available|recorded)|could not",
+    "NO_AVAILABLE_RECOMMENDATION": r"unavailable|not available|out of stock|no stock|not in stock", "NO_VALID_RECOMMENDATION": r"no (valid|suitable|part)|not found|nothing|none|cannot|no candidate",
+    "ROUTE_NOT_DETERMINABLE": r"route", "NO_SHIPMENT_FOR_UNORDERED_PART": r"no (tracked )?(shipment|order|delivery)|not (been )?ordered|no tracked",
+}
+MUST_NOT_SAY: dict[str, str] = {
+    "ELIGIBLE": r"not (eligible|covered)|ineligible|not under warranty", "RECOMMEND": r"unavailable|out of stock|not available|not recommended|no stock",
+    "NOT_ELIGIBLE": r"\b(is|are|was) (eligible|covered)\b", "NO_AVAILABLE_RECOMMENDATION": r"\b(is|are) (in stock|available now)\b|recommend(ed)? (the )?\w+ (instead|as an alternative)",
+}
+
+
+def contradicts(candidate: str, sections: list[dict[str, Any]]) -> str | None:
+    """Why the wording says something other than the decisions it describes, or None. The facts may be right and the sense still wrong ("its live position is X" where the record says
+    there is none), so the outcome of every section must survive, and a recorded absence must not be turned into a presence."""
+    low = candidate.lower()
+    for s in sections:
+        need, never = MUST_SAY.get(s["decision"]), MUST_NOT_SAY.get(s["decision"])
+        if need and not re.search(need, low):
+            return f"{s['domain']} {s['decision']} is not kept"
+        if never and re.search(never, low):
+            return f"{s['domain']} {s['decision']} is contradicted"
+        for line in s["lines"]:
+            if line.startswith("No live position") and re.search(r"live position", low) and not re.search(r"no live position|not (a )?live position|without a live position", low):
+                return "a recorded absence of a live position is stated as a position"
+    return None
+
+
 def _reword(llm: Any, message: str, intent: str, lead: str, evidence: list[dict[str, Any]], sections: list[dict[str, Any]]) -> tuple[str, dict[str, Any]]:
     """The model may phrase the lead; it is kept only when every number and identifier in it is already in the evidence or the deterministic lead."""
     support = [{"domain": s["domain"], "facts": s["lines"][:12]} for s in sections] + [{"fact": e.get("fact"), "entity": e.get("entity"), "id": e.get("id")} for e in evidence[:12]]
@@ -230,7 +277,10 @@ def _reword(llm: Any, message: str, intent: str, lead: str, evidence: list[dict[
     except LLMError as exc:
         log.info("commerce wording unavailable: %s", type(exc).__name__)
         return lead, {"mode": "TEMPLATE", "validated": True, "note": "language model unavailable"}
-    if is_grounded(candidate, support, lead, message):
-        return candidate, {"mode": "LLM", "validated": True}
-    log.info("commerce wording rejected: not grounded in the evidence")
-    return lead, {"mode": "TEMPLATE", "validated": True, "note": "model wording rejected (not grounded)"}
+    if not is_grounded(candidate, support, lead, message):
+        log.info("commerce wording rejected: not grounded in the evidence")
+        return lead, {"mode": "TEMPLATE", "validated": True, "note": "model wording rejected (not grounded)"}
+    if (why := contradicts(candidate, sections)) is not None:
+        log.info("commerce wording rejected: %s", why)
+        return lead, {"mode": "TEMPLATE", "validated": True, "note": f"model wording rejected ({why})"}
+    return candidate, {"mode": "LLM", "validated": True}

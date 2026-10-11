@@ -4,7 +4,7 @@
     -> understanding   which journeys, which references                (deterministic cues first; the language model only routes an unclear message)
     -> resolution      which machine / shipment / claim the references mean   (each step recorded; nothing is guessed, an ambiguity is a question)
     -> the commerce contexts   CommerceContextEngine.build_*_context   (the engine decides; this module decides nothing about fitment, stock, shipments or warranty)
-    -> answer          composed from the contexts' own decision, facts and evidence (app/commerce/answer.py)
+    -> answer          composed from the contexts' own decision, facts and evidence (app/commerce_agent/answer.py)
 
 The agent adds no domain rule. It never reads a database, never builds a record, and never weakens a context's visibility: every context is already scoped to the principal by the engine,
 and an AccessDenied from any journey is the answer to the whole request (HTTP 403 at the API). The language model may route an unclear message and may reword the lead sentence of an answer
@@ -17,12 +17,13 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-from app.commerce import answer as ans
 from app.commerce import contract as c
 from app.commerce.access import CommerceRole, Principal
 from app.commerce.engine import CommerceContextEngine
 from app.commerce.intent import DISCOVERY, LOGISTICS, WARRANTY
 from app.commerce.intent import score as base_score
+from app.commerce.part_lookup import part_fitment, part_origin
+from app.commerce_agent import answer as ans
 from app.llm.base import LLMError
 
 log = logging.getLogger(__name__)
@@ -34,7 +35,8 @@ MIN_SCORE = 2
 
 # Cues the three single-journey selector does not carry: speed and delay (logistics), the traceability questions (warranty), availability and "why" (discovery).
 EXTRA_CUES: dict[str, tuple[tuple[str, int], ...]] = {
-    DISCOVERY: ((r"\bdo you have\b", 2), (r"\b(why|how come)\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b", 3), (r"\bis (it|this|that) (available|in stock)\b", 2)),
+    DISCOVERY: ((r"\bwhich (machines?|models?|equipment)\b.{0,40}\b(use|uses|used|fit|fits|take|takes|compatible)\b", 3),
+                (r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b", 3), (r"\bdo you have\b", 2), (r"\b(why|how come)\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b", 3), (r"\bis (it|this|that) (available|in stock)\b", 2)),
     LOGISTICS: ((r"\bhow (quickly|fast|soon)\b", 2), (r"\burgent\w*|\bas soon as\b|\basap\b", 2), (r"\b(faster|quicker|speed (it )?up|expedite)\b", 2),
                 (r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b", 2), (r"\bwhat (parts|items|products)\b.{0,30}\b(in|on|inside)\b|\bparts? (are )?in (this|the|my|that)\b", 3),
                 (r"\b(what is|what's|whats) the status\b", 2)),
@@ -45,14 +47,14 @@ FOLLOW_UP = re.compile(r"\b(this|that|it|its|they|them|these|those|status|why|fa
 
 PATTERNS = {
     "shipment_id": re.compile(r"\bSHP-(?:NET-)?\d{4}\b", re.IGNORECASE),
-    "order_id": re.compile(r"\bORD-(?:NET-)?\d{4}\b", re.IGNORECASE),
+    "order_id": re.compile(r"\b(?:[A-Z]{2,6}-)?ORD-(?:NET-)?\d{4,8}\b", re.IGNORECASE),  # ORD-0001, ORD-NET-0001 and an order the shop placed (HCME-ORD-000001)
     "claim_id": re.compile(r"\bCLM-[A-Z0-9]+(?:-\d+)?\b", re.IGNORECASE),
     "machine_instance_id": re.compile(r"\bMI-[A-Z]?\d{3,4}\b", re.IGNORECASE),
     "part_id": re.compile(r"\bPRT-\d{3}\b", re.IGNORECASE),
 }
 PART_NUMBER = re.compile(r"\bNVM-\d{4}-[A-Z]{2}\b", re.IGNORECASE)
 REF_KEYS = ("shipment_id", "order_id", "claim_id", "machine_instance_id", "part_id", "machine_id")
-STATE_KEYS = (*REF_KEYS, "machine_model", "part_number", "last_request", "last_domains")
+STATE_KEYS = (*REF_KEYS, "machine_model", "part_number", "last_request", "last_domains", "pending_message")  # pending_message: the question the last answer is waiting on
 
 
 # ── request / response ───────────────────────────────────────────────────────────────────────────
@@ -100,7 +102,8 @@ def extract_references(message: str, discovery: Any = None) -> dict[str, str]:
 def focus_of(message: str) -> list[str]:
     low = (message or "").lower()
     out = []
-    for name, pattern in (("explain", r"\bwhy\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b"), ("availability", r"\b(available|in stock|do you have)\b"),
+    for name, pattern in (("which_machines", r"\bwhich (machines?|models?|equipment)\b.{0,40}\b(use|uses|used|fit|fits|take|takes|compatible)\b"),
+                          ("origin", r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b"), ("explain", r"\bwhy\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b"), ("availability", r"\b(available|in stock|do you have)\b"),
                           ("parts_in_shipment", r"\bwhat (parts|items|products)\b|\bparts? (are )?in\b"), ("faster", r"\b(faster|quicker|speed (it )?up|expedite|how (quickly|fast|soon))\b"),
                           ("why_slow", r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b"), ("status", r"\bstatus\b|\bwhere (is|are)\b"),
                           ("who_installed", r"\bwho (installed|fitted)\b"), ("installed_correctly", r"\b(installed|fitted) (correctly|properly)\b"),
@@ -120,14 +123,14 @@ def clause_scores(clause: str) -> dict[str, int]:
     return scores
 
 
-def discovery_text(message: str) -> str:
+def discovery_text(message: str, keep_if: Any = None) -> str:
     """The part of a multi-journey message that is the part search. The clauses about warranty or delivery are not search terms (they would only add unmatched words), so they are
     left out and urgency words are dropped; the other journeys still receive the whole message. A message with one journey is passed on unchanged."""
     clauses = [x.strip() for x in re.split(r"(?<=[.?!;])\s+|\s+(?:and|but|also)\s+(?=(?:tell|is|are|how|when|where|what|can|will)\b)", message or "") if x.strip()]
     kept = []
     for clause in clauses:
         s = clause_scores(clause)
-        if s[DISCOVERY] > 0 and s[DISCOVERY] >= max(s[LOGISTICS], s[WARRANTY]):
+        if (s[DISCOVERY] > 0 and s[DISCOVERY] >= max(s[LOGISTICS], s[WARRANTY])) or (keep_if is not None and keep_if(clause)):  # a clause naming the machine is part of the search
             kept.append(re.sub(r"\s+([.?!,;])", r"\1", re.sub(r"\s{2,}", " ", SPEED_WORDS.sub(" ", clause))).strip())
     return " ".join(kept) if kept and len(clauses) > 1 else (message or "")
 
@@ -178,8 +181,21 @@ class CommerceAgent:
         return (domains, "LLM") if parsed.in_scope and domains else None
 
     # ── the run ──────────────────────────────────────────────────────────────────────────────────
+    def _as_answer(self, req: AgentRequest) -> tuple[AgentRequest, str | None]:
+        """A short message that follows a question the agent asked is the ANSWER to it (a machine model, a number): it is read together with the question's original message.
+        A message that brings a journey or a reference of its own is a new request and drops the waiting question."""
+        pending = (req.state or {}).get("pending_message")
+        text = req.message or ""
+        if not pending or len(text.split()) > 12 or any(v >= MIN_SCORE for v in clause_scores(text).values()) or any(k in extract_references(text, self.engine.discovery) for k in ("shipment_id", "order_id", "claim_id")):
+            return req, None
+        combined = f"{pending} {text}"[:500]
+        return AgentRequest(message=combined, principal=req.principal, state={k: v for k, v in req.state.items() if k != "pending_message"}, destination_country=req.destination_country), pending
+
     def handle(self, req: AgentRequest) -> dict[str, Any]:
+        req, answered = self._as_answer(req)
         u = self.understand(req)
+        if answered:
+            u.reasons.append(f"read as the answer to the question about “{answered[:80]}”")
         state = {**{k: v for k, v in (req.state or {}).items() if k in STATE_KEYS and v}, **u.references}
         if u.intent in (CLARIFICATION, UNKNOWN):
             return self._respond(req, u, [], state)
@@ -200,7 +216,9 @@ class CommerceAgent:
     # discovery ........................................................................................
     def _discovery(self, req: AgentRequest, u: Understanding, state: dict[str, Any], ctx: dict[str, Any]) -> Step:
         notes: list[str] = []
-        text = discovery_text(req.message) if len(u.domains) > 1 else req.message
+        if {"which_machines", "origin"} & set(u.focus):
+            return self._part_question(req, u, state, ctx, notes)
+        text = discovery_text(req.message, lambda clause: _mentions_model(clause, self.engine)) if len(u.domains) > 1 else req.message
         if text != req.message:
             notes.append(f"The part search used “{text}”; the other journeys were answered from the rest of the message.")
         if "explain" in u.focus and state.get("last_request"):
@@ -218,6 +236,18 @@ class CommerceAgent:
         d = context.decision
         return Step(DISCOVERY, d.status, d.decision, d.summary, notes, context.to_dict(), context.clarification)
 
+    def _part_question(self, req: AgentRequest, u: Understanding, state: dict[str, Any], ctx: dict[str, Any], notes: list[str]) -> Step:
+        """Which machine uses this part / where did it come from: about one part, named in the message or remembered from the previous answer. Never a guessed part."""
+        part_id = u.references.get("part_id") or state.get("part_id")
+        if not part_id:
+            return self._ask("DISCOVERY", "Which part do you mean? Give a part number, or ask me to find a part first.", [], notes)
+        if not u.references.get("part_id"):
+            notes.append(f"“This part” was read as {state.get('part_number') or part_id}, the part of the previous answer.")
+        context = part_fitment(self.engine, part_id) if "which_machines" in u.focus else part_origin(self.engine, part_id)
+        ctx[DISCOVERY] = context
+        d = context.decision
+        return Step(DISCOVERY, d.status, d.decision, d.summary, notes, context.to_dict(), None)
+
     # warranty .........................................................................................
     def _warranty(self, req: AgentRequest, u: Understanding, state: dict[str, Any], ctx: dict[str, Any], multi: bool) -> Step:
         e, p = self.engine, req.principal
@@ -230,6 +260,13 @@ class CommerceAgent:
             if isinstance(resolved, Step):
                 return resolved
             claim_id, instance_id, part_id = resolved
+        elif not claim_id:  # a machine and part were given: a claim recorded for that part is "the failed one", so it is the claim that is judged
+            e.access.instance(p, e.lifecycle.instance(instance_id))
+            found = self._claim_for(instance_id, part_id, notes)
+            if isinstance(found, Step):
+                return found
+            if found:
+                claim_id, instance_id, part_id = found, None, None
         context = (e.build_warranty_context(principal=p, claim_id=claim_id) if claim_id else e.build_warranty_context(principal=p, machine_instance_id=instance_id, part_id=part_id))
         ctx[WARRANTY] = context
         d = context.decision
@@ -266,14 +303,21 @@ class CommerceAgent:
                     notes.append(f"{part_id} is the only part installed on {instance_id} that is the kind of part you asked about.")
             else:
                 return self._ask("WARRANTY", "Which installed part do you mean?", [{"machine_instance_id": instance_id, "part_id": x} for x in (matching or sorted({i["part_id"] for i in installed}))], notes)
-        claims = [x for x in e.lifecycle.claims(instance_id) if x["part_id"] == part_id]
+        found = self._claim_for(instance_id, part_id, notes)
+        if isinstance(found, Step):
+            return found
+        return (found, None, None) if found else (None, instance_id, part_id)
+
+    def _claim_for(self, instance_id: str, part_id: str, notes: list[str]) -> str | Step | None:
+        """The claim recorded for this part on this machine: one is used, several are a question, none leaves the part judged on its own installation."""
+        claims = [x for x in self.engine.lifecycle.claims(instance_id) if x["part_id"] == part_id]
         if len(claims) == 1:
             notes.append(f"Claim {claims[0]['claim_id']} is the only claim recorded for {part_id} on {instance_id}.")
-            return claims[0]["claim_id"], None, None
+            return claims[0]["claim_id"]
         if len(claims) > 1:
             return self._ask("WARRANTY", f"{len(claims)} claims are recorded for this part. Which one do you mean?",
                              [{"claim_id": x["claim_id"], "claim_date": x["claim_date"], "status": x["status"]} for x in claims], notes)
-        return None, instance_id, part_id
+        return None
 
     def _instances_of(self, p: Principal, machine_id: str) -> list[dict[str, Any]]:
         """The asker's own machines of this model. Only a customer can be narrowed this way; an OEM or dealer must name the machine."""
@@ -311,21 +355,21 @@ class CommerceAgent:
     # ── the answer ───────────────────────────────────────────────────────────────────────────────
     def _respond(self, req: AgentRequest, u: Understanding, steps: list[Step], state: dict[str, Any]) -> dict[str, Any]:
         out = ans.compose(u, steps, req.message, llm=self.llm)
-        out["state"] = self._next_state(state, u, steps)
+        out["state"] = self._next_state(state, u, steps, req.message)
         out["understanding"] = {"intent": u.intent, "domains": u.domains, "source": u.source, "scores": u.scores, "focus": u.focus, "references": u.references, "reasons": u.reasons}
         return out
 
     @staticmethod
-    def _next_state(state: dict[str, Any], u: Understanding, steps: list[Step]) -> dict[str, Any]:
+    def _next_state(state: dict[str, Any], u: Understanding, steps: list[Step], message: str = "") -> dict[str, Any]:
         """What the next message may rely on: the references the answer was about. Only identifiers and the last search text; never a decision."""
-        nxt = {k: v for k, v in state.items() if k in STATE_KEYS and v}
+        nxt = {k: v for k, v in state.items() if k in STATE_KEYS and v and k != "pending_message"}
         for s in steps:
             x = s.context or {}
             if s.domain == DISCOVERY:
                 m = x.get("machine") or {}
                 if m.get("machine_id"):
                     nxt["machine_id"], nxt["machine_model"] = m["machine_id"], m.get("model")
-                part = x.get("recommended_part") or x.get("compatible_part")
+                part = x.get("recommended_part") or x.get("compatible_part") or x.get("part")
                 if part:
                     nxt["part_id"], nxt["part_number"] = part["part_id"], part["part_number"]
                 if "explain" not in u.focus and "availability" not in u.focus:
@@ -340,6 +384,8 @@ class CommerceAgent:
                 if x.get("current_part"):
                     nxt["part_id"] = x["current_part"]["part_id"]
         nxt["last_domains"] = list(u.domains)
+        if message and any(s.status == c.REQUIRES_CLARIFICATION for s in steps):
+            nxt["pending_message"] = message[:500]  # the next short message answers this
         return nxt
 
 

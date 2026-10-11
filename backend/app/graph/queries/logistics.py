@@ -51,7 +51,7 @@ LOCATION = "MATCH (n:`{label}` {{`{key}`: $id}}) RETURN properties(n) AS p, labe
 
 ORDER = """
 MATCH (o:Order {order_id: $id})
-RETURN properties(o) AS p, head([(o)-[:FOR_DEALER]->(d:Dealer) | d.dealer_id]) AS dealer_id, head([(o)-[:ORDERED_BY]->(c:Customer) | c.customer_id]) AS customer_id
+RETURN properties(o) AS p, head([(o)-[:FOR_DEALER]->(d:Dealer) | d.dealer_id]) AS dealer_id, coalesce(head([(o)-[:ORDERED_BY]->(c:Customer) | c.customer_id]), head([(o)-[:PLACED_BY]->(:AppUser)-[:ACTS_FOR]->(c:Customer) | c.customer_id])) AS customer_id
 """
 
 ORDER_PART = """
