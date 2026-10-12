@@ -19,6 +19,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 const SignInPage = lazy(() => import('./pages/SignInPage'))
 const OrdersPage = lazy(() => import('./pages/OrdersPage'))
 const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage'))
+const PartsServicesPage = lazy(() => import('./pages/PartsServicesPage'))
 
 function AgentRedirect() {
   const { search } = useLocation()
@@ -32,6 +33,7 @@ export default function App() {
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="parts-services" element={<PartsServicesPage />} />
           <Route path="machines" element={<MachinesPage />} />
           <Route path="machines/:model" element={<MachineDetailPage />} />
           <Route path="parts-store" element={<StoreLayout />}>

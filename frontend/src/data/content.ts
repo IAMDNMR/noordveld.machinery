@@ -21,6 +21,7 @@ export const AGENTIC_ROUTE = '/agentic-commerce/'
 
 export const nav: readonly NavItem[] = [
   { label: 'Machines', to: '/machines' },
+  { label: 'Parts & Services', to: '/parts-services' },
   { label: 'Parts Store', to: '/parts-store' },
   { label: 'Parts Intelligence', to: '/parts-intelligence' },
   { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true }, // its "See it work" step opens Agentic Shopping
@@ -32,6 +33,7 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
   role === 'END_USER'
     ? [
         { label: 'Machines', to: '/machines' },
+        { label: 'Parts & Services', to: '/parts-services' },
         { label: 'Parts Store', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
         { label: 'Agentic Shopping', to: '/agentic-shopping' },
