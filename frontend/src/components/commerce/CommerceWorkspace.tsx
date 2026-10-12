@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError, isAbort } from '../../api'
 import { askCommerceAgent, isLookup, isRouteOptions, type AgentResponse, type AgentSection, type AgentState, type Domain, type Scope } from '../../api/commerce'
 import { CHECKOUT_ROUTE, partPath } from '../../lib/storeQuery'
 import { useCart } from '../../store/CartContext'
+import { useApi } from '../../hooks/useApi'
 import { useSession } from '../../store/session'
 import { bundleFrom, Chip, DiscoveryView, EvidenceView, LogisticsView, LookupView, RouteOptionsView, WarrantyView } from './views'
 import './commerce.css'
@@ -44,6 +45,7 @@ export const optionText = (o: Record<string, unknown>): string => {
 
 export function CommerceWorkspace() {
   const { user, ready } = useSession()
+  const location = useLocation()
   const [turns, setTurns] = useState<Turn[]>([])
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
@@ -96,7 +98,7 @@ export function CommerceWorkspace() {
       <div className="cw-gate">
         <h2>Sign in to use the commerce assistant</h2>
         <p>Answers are scoped to your account: a customer sees their own machines, orders and claims; an order processor sees the OEM or a dealer view.</p>
-        <Link to="/sign-in" className="cw-primary">Sign in</Link>
+        <Link to={`/sign-in?${new URLSearchParams({ next: location.pathname + location.search })}`} className="cw-primary">Sign in</Link>
       </div>
     )
   }
@@ -169,7 +171,63 @@ function CartHandoff({ partId, partNumber, machine }: { partId: string; partNumb
   )
 }
 
-function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onChoose: (o: Record<string, unknown>) => void; onAsk: (q: string) => void }) {
+/** Only the journeys asked for: their sections and contexts; the lead is their own headlines when others were left out. */
+const only = (r: AgentResponse, domains: readonly Domain[]): AgentResponse => {
+  const sections = r.answer.sections.filter((s) => domains.includes(s.domain))
+  if (sections.length === r.answer.sections.length) return r
+  const contexts = Object.fromEntries(Object.entries(r.contexts).filter(([d]) => domains.includes(d as Domain))) as AgentResponse['contexts']
+  const text = sections.map((s) => s.headline).join(' ')
+  const clarification = r.clarification && domains.includes(r.clarification.domain as Domain) ? r.clarification : null
+  return { ...r, contexts, clarification, answer: { ...r.answer, sections, text, lead: text } }
+}
+
+/**
+ * The commerce assistant's answer to one question, shown on the Agentic Shopping screen: the same Commerce Agent API, contexts, evidence and views, restricted to the
+ * journeys the request asked about (orders, shipments, warranty, part questions), and no second input. A follow-up question runs through the screen's own request flow.
+ * The agent needs a signed-in user (answers are scoped to the account); a signed-out visitor is sent through the existing sign-in and brought back to the same request.
+ */
+export function CommerceAnswerPanel({ question, domains }: { question: string; domains: readonly Domain[] }) {
+  const { user, ready } = useSession()
+  const location = useLocation()
+  const navigate = useNavigate()
+  // the first answer is read like any other API resource; a chosen clarification option asks again with the reference it names
+  const first = useApi((signal) => (user ? askCommerceAgent(question, {}, {}, signal) : Promise.resolve(null)), `commerce-panel:${user?.id ?? '-'}:${question}`)
+  const [chosen, setChosen] = useState<{ response: AgentResponse | null; error: string | null; busy: boolean }>({ response: null, error: null, busy: false })
+  if (!ready) return null
+  if (!user) {
+    return (
+      <div className="cw-gate">
+        <h2>Sign in for your orders, shipments and warranty</h2>
+        <p>These answers come from your own records, so they need your account. You will come straight back to this request.</p>
+        <Link to={`/sign-in?${new URLSearchParams({ next: location.pathname + location.search })}`} className="cw-primary">Sign in</Link>
+      </div>
+    )
+  }
+  const raw = chosen.response ?? first.data
+  const turn: Turn | null = raw ? { id: 1, question, response: only(raw, domains) } : null
+  const error = chosen.error ?? (first.error ? errorText(first.error) : null)
+  const choose = async (option: Record<string, unknown>) => {
+    const patch: Partial<AgentState> = {}
+    for (const k of REFERENCE_KEYS) if (typeof option[k] === 'string') patch[k] = option[k] as string
+    setChosen((c) => ({ ...c, busy: true, error: null }))
+    try {
+      setChosen({ response: await askCommerceAgent(question, { ...(raw?.state ?? {}), ...patch }, {}), error: null, busy: false })
+    } catch (e) {
+      setChosen((c) => ({ ...c, busy: false, error: errorText(e) }))
+    }
+  }
+  return (
+    <div className="cw-unified cw-embedded" aria-live="polite">
+      {first.loading && !turn ? <p className="cw-working"><span className="cw-spinner" aria-hidden="true" /> Checking your records…</p> : null}
+      {error ? (
+        <div className="cw-error" role="alert"><p>{error}</p><button type="button" className="cw-link" onClick={first.reload}>Try again</button></div>
+      ) : null}
+      {turn ? <Answer turn={turn} dim={chosen.busy} onChoose={(o) => void choose(o)} onAsk={(q) => navigate(`${location.pathname}?${new URLSearchParams({ q })}`)} typeHint="Add it to your request (for example the claim number or the machine model) and ask again." /> : null}
+    </div>
+  )
+}
+
+function Answer({ turn, dim, onChoose, onAsk, typeHint = 'Type your answer in the box above and I will carry on with your question.' }: { turn: Turn; dim: boolean; onChoose: (o: Record<string, unknown>) => void; onAsk: (q: string) => void; typeHint?: string }) {
   const r = turn.response
   const answeredSections = r.answer.sections.filter((s) => s.status !== 'REQUIRES_CLARIFICATION')
   // a question is asked once, in the clarification box: what precedes it is the part of the request that could be answered
@@ -198,7 +256,7 @@ function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onCh
               {r.clarification.options.slice(0, 12).map((o, i) => <li key={i}><button type="button" onClick={() => onChoose(o)}>{optionText(o)}</button></li>)}
             </ul>
           ) : (
-            <p className="cw-meta">Type your answer in the box above and I will carry on with your question.</p>
+            <p className="cw-meta">{typeHint}</p>
           )}
         </div>
       )}

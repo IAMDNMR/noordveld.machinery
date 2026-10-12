@@ -22,6 +22,8 @@ interface SiteNavProps {
 const isCurrent = (item: NavItem, pathname: string): boolean => {
   const [path] = pathname.split('?')
   if (item.to === '/agentic-commerce/') return path.startsWith('/agentic-commerce') || path.startsWith('/agentic-shopping')
+  // Agentic E-Commerce: the Agentic Shopping screen, the commerce assistant it hands over to, and the introduction page
+  if (item.to === '/agentic-shopping') return path.startsWith('/agentic-shopping') || path.startsWith('/commerce') || path.startsWith('/agentic-commerce')
   if (item.to.includes('?')) return pathname === item.to // a queue of the order list
   if (item.to === '/orders') return path.startsWith('/orders') && !pathname.includes('queue=')
   return ['/parts-store', '/parts-intelligence', '/machines', '/agentic-shopping'].includes(item.to) && path.startsWith(item.to)

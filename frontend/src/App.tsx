@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SiteLayout } from './components/SiteLayout'
 import { HomePage } from './pages/HomePage'
-import { SessionProvider } from './store/session'
+import { SessionProvider, useSession } from './store/session'
 
 // Secondary routes load on demand to keep the first bundle small
 const MachinesPage = lazy(() => import('./pages/MachinesPage'))
@@ -20,6 +20,14 @@ const SignInPage = lazy(() => import('./pages/SignInPage'))
 const OrdersPage = lazy(() => import('./pages/OrdersPage'))
 const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage'))
 const PartsServicesPage = lazy(() => import('./pages/PartsServicesPage'))
+
+/** End users and visitors use the one Agentic E-Commerce screen (Agentic Shopping); the assistant screen is the order processor's workspace. Bookmarks keep working. */
+function CommerceRoute() {
+  const { user, ready } = useSession()
+  const { search } = useLocation()
+  if (!ready) return null
+  return user?.role === 'ORDER_PROCESSOR' ? <CommercePage /> : <Navigate to={`/agentic-shopping${search}`} replace />
+}
 
 function AgentRedirect() {
   const { search } = useLocation()
@@ -42,7 +50,7 @@ export default function App() {
             <Route path="agent" element={<AgentRedirect />} />
             <Route path=":partNo" element={<PartDetailPage />} />
           </Route>
-          <Route path="commerce" element={<CommercePage />} />
+          <Route path="commerce" element={<CommerceRoute />} />
           <Route path="agentic-shopping" element={<AgenticShoppingPage />} />
           <Route path="parts-intelligence" element={<PartsIntelligencePage />} />
           <Route path="sign-in" element={<SignInPage />} />

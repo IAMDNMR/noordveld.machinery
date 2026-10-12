@@ -78,6 +78,7 @@ let replies: { status?: number; body: unknown; hold?: Promise<void> }[]
 const mount = (role: 'END_USER' | 'ORDER_PROCESSOR' | null = 'END_USER') => {
   calls = []
   cartCalls = []
+  localStorage.clear() // the cart lives in the browser too: every test starts with an empty one
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
     const path = url.replace('/api/v1', '')
     if (path === '/me') return role ? new Response(JSON.stringify(ME(role)), { status: 200 }) : new Response(JSON.stringify({ error: { code: 'not_signed_in', message: 'Sign in' } }), { status: 401 })
@@ -197,10 +198,10 @@ describe('Commerce Assistant: one input, one answer', () => {
     await ask('Find a pump for the machine')
     const a = await answerOf()
     const add = await a.findByRole('button', { name: 'Add NVM-X to cart' })
-    expect(cartCalls.some((c) => c.body)).toBe(false) // nothing is added before the user asks
+    expect(cartCalls.some((c) => JSON.stringify(c.body ?? '').includes('PRT-1'))).toBe(false) // nothing is added before the user asks
     fireEvent.click(add)
     expect((await a.findByRole('link', { name: 'Added · Review order' })).getAttribute('href')).toBe('/parts-store/checkout')
-    await waitFor(() => expect(cartCalls.find((c) => c.body)?.body).toEqual({ lines: [{ part_id: 'PRT-1', quantity: 1, machine: 'M-1' }] }))
+    await waitFor(() => expect(cartCalls.filter((c) => c.body).at(-1)?.body).toEqual({ lines: [{ part_id: 'PRT-1', quantity: 1, machine: 'M-1' }] }))
     expect(a.getByRole('link', { name: 'Compare delivery and fulfilment options' }).getAttribute('href')).toContain('/agentic-shopping?q=')
   })
 

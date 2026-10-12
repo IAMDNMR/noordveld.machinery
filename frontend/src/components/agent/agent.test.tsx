@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AgentResponse } from '../../api/agent'
 import type { PartSummary } from '../../api'
 import AgenticShoppingPage from '../../pages/AgenticShoppingPage'
+import { SessionProvider } from '../../store/session'
 
 const part = (id: string, no: string, status: string, orderable: boolean, amount: number, state = 'IN_STOCK'): PartSummary => ({
   part_id: id, part_number: no, name: `Part ${no}`, category: 'Hydraulics', subcategory: 'Hose', fitment: [{ model_code: 'M-1', fitment_status: 'CONFIRMED' }],
@@ -14,7 +15,7 @@ const KEYS = ['request', 'understand', 'machine', 'part', 'fitment', 'availabili
 const steps = (blockedAt = -1): AgentResponse['steps'] =>
   KEYS.map((key, i) => ({ key, label: `Label ${key}`, message: `msg ${key}`, status: i === blockedAt ? 'blocked' : blockedAt >= 0 && i > blockedAt ? 'skipped' : 'done' }))
 const base: Omit<AgentResponse, 'state' | 'steps'> = {
-  request: 'r', interpretation: { machine: 'M-1', part_type: 'Hose', preference: 'cheapest', delivery_place: null, quantity: null, budget_max: 800, budget_currency: 'EUR', availability: 'none' }, question: null, options: [], candidates: [],
+  request: 'r', commerce_domains: [], interpretation: { machine: 'M-1', part_type: 'Hose', preference: 'cheapest', delivery_place: null, quantity: null, budget_max: 800, budget_currency: 'EUR', availability: 'none' }, question: null, options: [], candidates: [],
   recommended: null, reason: null, evidence: [], comparison: null, excluded: [], delivery: null, notes: [], disclaimer: 'Demo data disclaimer.',
   decision: null, why: [], how_we_know: [],
 }
@@ -40,9 +41,20 @@ const recommendation: AgentResponse = {
 }
 const SUGGESTIONS = [{ request: 'I need a hose for my M-1, preferably in stock.', need: 'Hose', context: 'M-1', action: 'Prefer in stock' }]
 
-function mount(response: ((request: string) => AgentResponse) | { status: number; code: string }, q: string | null = 'I need a hose') {
+// the commerce assistant's answer for the same request, as the Commerce Agent API returns it (only what the panel reads)
+const commerceAnswer = (domain: 'LOGISTICS' | 'WARRANTY', headline: string) => ({ intent: domain, status: 'ANSWERED', steps: [], clarification: null, evidence: [], evidence_paths: {}, source_records: [], data_status: 'SYNTHETIC_DEMO', confidence: {}, visibility: {}, warnings: [], missing: [], state: {},
+  understanding: { intent: domain, domains: [domain], source: 'RULES', focus: [], references: {}, reasons: [] }, contexts: {},
+  answer: { text: `Part answer. ${headline}`, lead: `Part answer. ${headline}`, synthetic_notice: null, grounding: { mode: 'TEMPLATE', validated: true },
+    sections: [{ domain: 'DISCOVERY', title: 'Part discovery', status: 'SUCCESS', decision: 'RECOMMEND', headline: 'Part answer.', lines: [], notes: [] }, { domain, title: domain, status: 'SUCCESS', decision: 'X', headline, lines: [], notes: [] }] } })
+
+let commerceCalls: string[] = []
+function mount(response: ((request: string) => AgentResponse) | { status: number; code: string }, q: string | null = 'I need a hose', session: { signedIn?: boolean; commerce?: unknown } = {}) {
   const calls: string[] = []
+  commerceCalls = []
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+    if (url.endsWith('/me')) return session.signedIn ? new Response(JSON.stringify({ id: 'U1', name: 'U', email: 'u@x', role: 'END_USER', customer: 'C', permissions: [] })) : new Response(JSON.stringify({ error: { code: 'not_signed_in', message: 'x' } }), { status: 401 })
+    if (url.endsWith('/me/cart')) return new Response(JSON.stringify([]))
+    if (url.endsWith('/commerce/agent')) { commerceCalls.push(JSON.parse(String(init?.body)).message); return new Response(JSON.stringify(session.commerce)) }
     if (url.endsWith('/agent/suggestions')) return new Response(JSON.stringify(SUGGESTIONS))
     if (url.endsWith('/cart/quote')) return new Response(JSON.stringify({ lines: [], rejected: [], unknown_part_ids: [], subtotal: null, unpriced_part_ids: [], order_placement_available: false, note: '' }))
     const body = JSON.parse(String(init?.body)) as { request: string }
@@ -50,7 +62,7 @@ function mount(response: ((request: string) => AgentResponse) | { status: number
     if (typeof response !== 'function') return new Response(JSON.stringify({ error: { code: response.code, message: 'internal detail' } }), { status: response.status })
     return new Response(JSON.stringify({ ...response(body.request), request: body.request })) // the API echoes the request
   }))
-  render(<MemoryRouter initialEntries={[q ? `/agentic-shopping?q=${encodeURIComponent(q)}` : '/agentic-shopping']}><AgenticShoppingPage /></MemoryRouter>)
+  render(<MemoryRouter initialEntries={[q ? `/agentic-shopping?q=${encodeURIComponent(q)}` : '/agentic-shopping']}><SessionProvider><AgenticShoppingPage /></SessionProvider></MemoryRouter>)
   return calls
 }
 
@@ -204,10 +216,33 @@ describe('agentic shopping', () => {
     expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy()
   })
 
-  it('keeps out-of-scope requests out of the shopping flow and points to Parts Intelligence', async () => {
+  it('keeps a request that is neither a part nor an order, shipment or warranty question out of the shopping flow and points to Parts Intelligence', async () => {
     mount(() => ({ ...base, state: 'out_of_scope', steps: steps(0), question: 'I find and help order Noordveld machine parts.' }), 'tell me a joke')
     await screen.findByText('I find and help order Noordveld machine parts.')
     expect(document.querySelector('.ag-note a')?.getAttribute('href')).toBe('/parts-intelligence')
     expect(document.querySelectorAll('.reco-card')).toHaveLength(0)
+  })
+
+  it('answers an order or shipment question on the same screen through the commerce assistant, with no second input box', async () => {
+    mount(() => ({ ...base, state: 'out_of_scope', steps: steps(0), question: 'not a part', commerce_domains: ['LOGISTICS'] }), 'Where is my shipment?', { signedIn: true, commerce: commerceAnswer('LOGISTICS', 'Shipment S-1 is in transit.') })
+    expect((await screen.findAllByText('Shipment S-1 is in transit.')).length).toBeGreaterThan(0)
+    expect(commerceCalls).toEqual(['Where is my shipment?'])
+    expect(screen.queryByText('Part answer.')).toBeNull() // only the journeys the request asked about
+    expect(screen.queryByRole('textbox', { name: 'What can I help you with?' })).toBeNull()
+  })
+
+  it('asks a signed-out visitor to sign in for order, shipment and warranty answers and comes back to the same request', async () => {
+    mount(() => ({ ...base, state: 'out_of_scope', steps: steps(0), question: 'not a part', commerce_domains: ['WARRANTY'] }), 'Is this failed part covered by warranty?')
+    const link = await screen.findByRole('link', { name: 'Sign in' })
+    expect(link.getAttribute('href')).toBe(`/sign-in?${new URLSearchParams({ next: `/agentic-shopping?q=${encodeURIComponent('Is this failed part covered by warranty?')}` })}`)
+    expect(commerceCalls).toEqual([]) // nothing is asked for a visitor
+  })
+
+  it('shows the warranty answer of a combined request under the part recommendation', async () => {
+    mount(() => ({ ...recommendation, commerce_domains: ['WARRANTY'] }), 'I need a hose. Is the failed one covered?', { signedIn: true, commerce: commerceAnswer('WARRANTY', 'Claim C-1 is eligible.') })
+    fireEvent.click(await screen.findByRole('button', { name: /View recommendation/ }))
+    expect((await screen.findAllByText('Claim C-1 is eligible.')).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Also in your request · Warranty/)).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /Add to cart/ }).length).toBeGreaterThan(0) // the shopping recommendation and its cart action are unchanged
   })
 })

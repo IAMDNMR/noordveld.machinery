@@ -10,6 +10,7 @@ import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { formatMoney } from '../lib/format'
 import { CHECKOUT_ROUTE, partPath } from '../lib/storeQuery'
+import { CommerceAnswerPanel } from '../components/commerce/CommerceWorkspace'
 import { CartProvider, useCart } from '../store/CartContext'
 import '../styles/wf.css'
 import '../components/store/store.css'
@@ -58,6 +59,9 @@ function CartButton() {
 }
 
 // ── compose ─────────────────────────────────────────────────────────────────────────────────────
+/** Order, shipment and warranty questions the same screen answers (through the commerce assistant, for a signed-in user). No record is named. */
+const COMMERCE_EXAMPLES = ['Where is my shipment and what parts are in it?', 'Is this failed part covered by warranty?']
+
 function Compose({ onRun }: { onRun: (q: string) => void }) {
   const suggestions = useApi((s) => getAgentSuggestions(s), 'agent-suggestions')
   return (
@@ -71,17 +75,17 @@ function Compose({ onRun }: { onRun: (q: string) => void }) {
           <h1 id="ag-title" className="ag-compose__title">
             What do you need?
           </h1>
-          <p className="ag-compose__lede">Describe what you're looking for in plain language. The agent checks the right part against your requirements and finds the best available path.</p>
+          <p className="ag-compose__lede">Describe what you're looking for in plain language. The agent checks the right part against your requirements and finds the best available path. You can also ask about your orders, shipments and warranty.</p>
           <p className="ag-compose__aside">
             Built on Parts Intelligence: the same machines, parts, fitment and availability. <Link to={PI}>Open Parts Intelligence</Link>
           </p>
           <RequestBox onRun={onRun} placeholder={suggestions.data?.[0]?.request ? `e.g. ${suggestions.data[0].request}` : undefined} />
           {suggestions.data?.length ? (
             <ul className="ag-pills" aria-label="Example requests">
-              {suggestions.data.map((s) => (
-                <li key={s.request}>
-                  <button type="button" onClick={() => onRun(s.request)}>
-                    {s.request}
+              {[...suggestions.data.map((s) => s.request), ...COMMERCE_EXAMPLES].map((request) => (
+                <li key={request}>
+                  <button type="button" onClick={() => onRun(request)}>
+                    {request}
                   </button>
                 </li>
               ))}
@@ -290,20 +294,36 @@ function ServiceState({ error, onRetry }: { error: ApiError; onRetry: () => void
   )
 }
 
+/** Orders, shipments, warranty and part questions in the same request: the commerce assistant's answer, on this screen. */
+function CommerceSection({ r }: { r: AgentResponse }) {
+  const title = r.commerce_domains.map((d) => ({ DISCOVERY: 'This part', LOGISTICS: 'Orders and shipments', WARRANTY: 'Warranty' })[d]).join(' · ')
+  return (
+    <section className="ag-commerce card card-pad" aria-label={title}>
+      <p className="eyebrow">{r.state === 'out_of_scope' ? title : `Also in your request · ${title}`}</p>
+      <CommerceAnswerPanel question={r.request} domains={r.commerce_domains} />
+    </section>
+  )
+}
+
 // ── results ─────────────────────────────────────────────────────────────────────────────────────
 function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) => void }) {
   const i = r.interpretation
   const best = r.candidates.find((c) => c.recommended)
 
   if (r.state === 'out_of_scope') {
+    // not a parts request: orders, shipments, warranty and claims are answered by the commerce assistant, here, with the same question (it needs a signed-in user)
     return (
-      <div className="ag-note card card-pad">
-        <h2>That isn't a parts request.</h2>
-        <p className="muted">{r.question}</p>
-        <Link className="btn btn-secondary btn-sm" to={PI}>
-          Open Parts Intelligence
-        </Link>
-      </div>
+      r.commerce_domains.length ? (
+        <CommerceSection r={r} />
+      ) : (
+        <div className="ag-note card card-pad">
+          <h2>That isn't a parts, order, shipment or warranty request.</h2>
+          <p className="muted">{r.question}</p>
+          <Link className="btn btn-secondary btn-sm" to={PI}>
+            Open Parts Intelligence
+          </Link>
+        </div>
+      )
     )
   }
 
@@ -361,6 +381,7 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
           ) : null}
         </>
       ) : null}
+      {r.commerce_domains.length ? <CommerceSection r={r} /> : null}
       <p className="disclaimer">{r.disclaimer}</p>
     </div>
   )

@@ -42,8 +42,9 @@ EXTRA_CUES: dict[str, tuple[tuple[str, int], ...]] = {
                 (r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b", 3), (r"\bdo you have\b", 2),
                 (r"\b(i|we)\s+(need|want|require|am looking for|are looking for|'m looking for)\s+(a|an|the|some|new|replacement|spare)\b|\blooking for (a|an|the|some)\b", 2), (r"\b(why|how come)\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b", 3), (r"\bis (it|this|that) (available|in stock)\b", 2)),
     LOGISTICS: ((r"\bhow (quickly|fast|soon)\b", 2), (r"\burgent\w*|\bas soon as\b|\basap\b", 2), (r"\b(faster|quicker|speed (it )?up|expedite)\b", 2),
-                (r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b", 2), (r"\bwhat (parts|items|products)\b.{0,30}\b(in|on|inside)\b|\bparts? (are )?in (this|the|my|that)\b", 3),
+                (r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b", 2), (r"\bwhat (parts|items|products)\b.{0,30}\b(in|on|inside)\b|\bparts? (are )?in (this|the|my|that)\b|\b(parts?|items?)\b.{0,25}\bincluded in (this|the|my|that)\b", 3),
                 (r"\b(what is|what's|whats) the status\b", 2),
+                (r"\b(orders?|shipments?)\b.{0,30}\b(status|shipped|allocated|dispatched|arrived?|delivered|lines?|included|in it|contain\w*)\b|\b(has|have|is|was) (my|the|this|our) (order|shipment)\b|\bstatus of (my|the|this|our|an?) (order|shipment)\b", 2),
                 (r"\b(compare|comparison|versus)\b.{0,40}\b(sea|air|ocean|road|rail|route|transport)\b|\b(sea|ocean)\b.{0,12}\b(or|and|vs\.?|versus)\b.{0,12}\bair\b|\bair\b.{0,12}\b(or|and|vs\.?|versus)\b.{0,12}\b(sea|ocean)\b", 3),
                 (r"\b(is|are|was) (it|this|that|the shipment|the order) (late|overdue|delayed|on time|behind schedule)\b|\boverdue\b|\bbehind schedule\b", 2),
                 (r"\b(ship\w*|deliver\w*|send|sent|freight|transit|transport|get (it|there|one))\b.{0,30}\b(to|into|in)\b|\bhow long\b.{0,25}\bto\b|\b(sea|air)\b.{0,20}\b(to|for)\b", 2)),
@@ -111,7 +112,7 @@ def focus_of(message: str) -> list[str]:
     out = []
     for name, pattern in (("which_machines", r"\bwhich (machines?|models?|equipment)\b.{0,40}\b(use|uses|used|fit|fits|take|takes|compatible)\b"),
                           ("origin", r"\bwhere (did|does|do)\b.{0,30}\b(come|originate)\b|\b(origin of|supplied by|who supplies)\b"), ("explain", r"\bwhy\b.{0,40}\b(recommend\w*|suggest\w*|this part|that part)\b"), ("availability", r"\b(available|in stock|do you have)\b"),
-                          ("parts_in_shipment", r"\bwhat (parts|items|products)\b|\bparts? (are )?in\b"), ("faster", r"\b(faster|quicker|speed (it )?up|expedite|how (quickly|fast|soon))\b"),
+                          ("parts_in_shipment", r"\bwhat (parts|items|products)\b|\bparts? (are )?in\b|\b(parts?|items?)\b.{0,25}\bincluded in\b"), ("faster", r"\b(faster|quicker|speed (it )?up|expedite|how (quickly|fast|soon))\b"),
                           ("why_slow", r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b"),
                           ("compare", r"\b(compare|comparison|versus|alternatives?)\b|\b(sea|ocean)\b.{0,12}\b(or|and|vs\.?)\b.{0,12}\bair\b|\bair\b.{0,12}\b(or|and|vs\.?)\b.{0,12}\b(sea|ocean)\b|\bby (air|sea)\b"),
                           ("late", r"\b(late|overdue|on time|behind schedule)\b"), ("status", r"\bstatus\b|\bwhere (is|are)\b"),
@@ -164,6 +165,8 @@ class CommerceAgent:
             scores[WARRANTY] += 3
         focus = focus_of(text)
         domains = [d for d in ORDER if scores[d] >= MIN_SCORE]
+        if "parts_in_shipment" in focus and LOGISTICS in domains:  # “which parts are in my shipment” asks about a shipment's contents, not for a part search
+            domains = [d for d in domains if d != DISCOVERY]
         reasons = [f"{d} {scores[d]}" for d in ORDER if scores[d]]
         source = "RULES"
         if not domains:
@@ -409,6 +412,30 @@ class CommerceAgent:
         if message and any(s.status == c.REQUIRES_CLARIFICATION for s in steps):
             nxt["pending_message"] = message[:500]  # the next short message answers this
         return nxt
+
+
+TRACKED = re.compile(r"\b(shipments?|orders?|tracking|tracked|parcel|consignment|eta)\b", re.IGNORECASE)
+
+
+def commerce_domains(message: str, engine: CommerceContextEngine, parts_answered: bool) -> list[str]:
+    """The commerce journeys a request to Agentic Shopping ALSO asks about, so the one Agentic E-Commerce screen can show their answers next to the part recommendation.
+
+    Agentic Shopping answers the part search and the delivery of the part it recommends (its own route and depot logic). This reads the same request with the Commerce Agent's
+    rules (no language model, no record is read except a part number's id) and returns what remains: WARRANTY whenever the request asks about warranty or a claim; LOGISTICS when
+    it refers to a shipment or an order by number, names a place with recorded transport lanes, or is not a parts request and mentions a shipment or order; DISCOVERY only when Agentic Shopping did not take the
+    request as a parts request (part questions such as "which machines use this part" are answered by the commerce part lookup). Nothing here decides an answer."""
+    u = CommerceAgent(engine, None).understand(AgentRequest(message=message, principal=Principal(CommerceRole.END_CUSTOMER, user_id="routing"), state={}))
+    out: list[str] = []
+    for d in u.domains:
+        if d == DISCOVERY and parts_answered:
+            continue
+        if d == LOGISTICS and not ({"shipment_id", "order_id"} & set(u.references)) and not find_destinations(engine, message):
+            if parts_answered:
+                continue  # how fast the recommended part can arrive is Agentic Shopping's own delivery answer
+            if not TRACKED.search(message):
+                continue  # “shipping to <a place with no recorded lane>” is not about a recorded shipment or order: nothing to look up
+        out.append(d)
+    return out
 
 
 def correct_spelling(text: str, engine: CommerceContextEngine) -> tuple[str, list[str]]:

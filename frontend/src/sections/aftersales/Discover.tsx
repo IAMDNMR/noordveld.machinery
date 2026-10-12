@@ -110,7 +110,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
           {!isQuestion && q.length >= 2 && !live.loading && live.data && results.length === 0 ? (
             <p className="as-note">
               No catalogue part matches “{q}”. Check the spelling or the part number, or{' '}
-              <Link to="/commerce">describe the problem in Agentic E-Commerce</Link>. Nothing is suggested without a match.
+              <Link to={`/agentic-shopping?${new URLSearchParams({ q })}`}>describe the problem in Agentic E-Commerce</Link>. Nothing is suggested without a match.
             </p>
           ) : null}
           {results.length > 0 ? (

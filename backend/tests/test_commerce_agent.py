@@ -569,3 +569,29 @@ def test_multi_domain_part_request_with_a_destination_gets_the_part_and_the_pote
     r = ask("I need a hydraulic pump for KFT-200 delivered to Lagos")
     s = sections(r)
     assert r["intent"] == "MULTI_DOMAIN" and s["DISCOVERY"]["decision"] == "RECOMMEND" and s["LOGISTICS"]["decision"] == "ROUTE_OPTIONS"
+
+
+# ── one Agentic E-Commerce screen: what a shopping request also asks the commerce assistant ──────
+@pytest.mark.parametrize("message,parts_answered,expected", [
+    ("I need a hydraulic pump for KFT-200", True, []),  # a part request: Agentic Shopping answers it, delivery included
+    ("Find the cheapest cooling fan for the NV-4500.", True, []),
+    ("Where is my shipment?", False, ["LOGISTICS"]),
+    ("Has my order shipped?", False, ["LOGISTICS"]),
+    ("Which parts are included in my shipment?", False, ["LOGISTICS"]),
+    ("Is claim CLM-G001 covered?", False, ["WARRANTY"]),
+    ("Which machines use NVM-1050-HY?", False, ["DISCOVERY"]),  # not a shopping request: the commerce part lookup answers it
+    ("I urgently need a replacement hydraulic pump for my machine. Find a compatible part, compare the available delivery options, and check whether the failed part is covered by warranty.", True, ["WARRANTY"]),
+    ("I need a pump delivered to Lagos", True, ["LOGISTICS"]),  # a place with recorded lanes: the potential routes are shown too
+    ("Compare sea and air for shipment SHP-NET-0001", False, ["LOGISTICS"]),
+    ("hello", False, []),
+    ("How long does shipping to Atlantis take?", False, []),  # no recorded lane and no shipment or order named: nothing to look up
+    ("Show me the status of my order.", False, ["LOGISTICS"]),
+])
+def test_commerce_domains_names_only_what_agentic_shopping_does_not_answer(message, parts_answered, expected):
+    from app.commerce_agent.agent import commerce_domains
+    assert commerce_domains(message, ENGINE, parts_answered) == expected
+
+
+def test_shipment_contents_questions_are_logistics_not_a_part_search():
+    r = ask("Which parts are included in my shipment?", customer("CUS-001"))
+    assert r["intent"] == "LOGISTICS" and "DISCOVERY" not in r["understanding"]["domains"]

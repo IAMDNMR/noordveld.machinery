@@ -56,6 +56,8 @@ export interface AgentInterpretation {
 
 export interface AgentResponse {
   request: string
+  /** the order, shipment, warranty or part questions the request also asks: answered by the commerce assistant (signed-in) on the same screen */
+  commerce_domains: ('DISCOVERY' | 'LOGISTICS' | 'WARRANTY')[]
   state: AgentState
   interpretation: AgentInterpretation
   steps: AgentStep[]

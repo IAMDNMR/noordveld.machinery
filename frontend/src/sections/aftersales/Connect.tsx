@@ -15,6 +15,8 @@ import { useSession } from '../../store/session'
 import { label, withImage } from './data'
 
 const PI = (q: string) => `/parts-intelligence?${new URLSearchParams({ q })}`
+/** A question for the one Agentic E-Commerce screen (parts, delivery, orders, shipments and warranty). */
+const ASK = (q: string) => `/agentic-shopping?${new URLSearchParams({ q })}`
 const signInTo = (hash: string) => `/sign-in?${new URLSearchParams({ next: `/parts-services${hash}` })}`
 
 /* ───────── Parts Intelligence: the relationships the graph holds ───────── */
@@ -33,17 +35,17 @@ export function IntelligenceMap({ parts }: { parts: PartSummary[] | null }) {
     { name: 'Dealer', rel: 'STOCKED_BY', icon: Store, to: no ? PI(`Which dealers stock ${no}?`) : null, note: 'dealer stock records' },
     { name: 'Depot', rel: 'AVAILABLE_AT', icon: Boxes, to: no ? PI(`Which warehouses have ${no}?`) : null, note: 'depot inventory' },
     { name: 'Order', rel: 'REFERENCES_PART', icon: PackageCheck, to: '/orders', note: 'your orders (sign-in)' },
-    { name: 'Shipment', rel: 'HAS_SHIPMENT', icon: Ship, to: '/commerce', note: 'shipment tracking (sign-in)' },
-    { name: 'Service', rel: 'INSTALLED_PART', icon: Wrench, to: '/commerce', note: 'installation and warranty records (sign-in)' },
+    { name: 'Shipment', rel: 'HAS_SHIPMENT', icon: Ship, to: ASK('Where is my shipment and what parts are in it?'), note: 'shipment tracking (sign-in)' },
+    { name: 'Service', rel: 'INSTALLED_PART', icon: Wrench, to: ASK('Is this failed part covered by warranty?'), note: 'installation and warranty records (sign-in)' },
   ]
   const questions = no
     ? [
         { q: `Which machines use ${no}?`, to: PI(`Which machines use ${no}?`) },
         { q: `Who supplies ${no}?`, to: PI(`Who supplies ${no}?`) },
         { q: `Which dealers stock ${no}?`, to: PI(`Which dealers stock ${no}?`) },
-        { q: 'What recorded transport routes are available?', to: '/commerce' },
+        { q: 'What recorded transport routes are available?', to: ASK('How long to ship a part to Lagos?') },
         { q: 'What is the status of an existing order?', to: '/orders' },
-        { q: 'What warranty or service information is recorded?', to: '/commerce' },
+        { q: 'What warranty or service information is recorded?', to: ASK('Is this failed part covered by warranty?') },
       ]
     : []
   const ref = useRef<HTMLOListElement>(null)
@@ -183,11 +185,11 @@ const sentenceOr = (code: string | null) => (code ? label(code).replace(/^./, (c
 
 export function ServiceJourney() {
   const steps: { name: string; state: 'available' | 'partial' | 'unavailable'; text: string; to?: string; cta?: string }[] = [
-    { name: 'Identify issue', state: 'available', text: 'Describe the problem in plain words; the assistant identifies the machine and the part (sign-in).', to: '/commerce', cta: 'Agentic E-Commerce' },
+    { name: 'Identify issue', state: 'available', text: 'Describe the problem in plain words; the agent identifies the machine and the part.', to: '/agentic-shopping', cta: 'Agentic E-Commerce' },
     { name: 'Find part', state: 'available', text: 'Verify the part and its recorded fitment.', to: STORE_ROUTE, cta: 'Parts Store' },
     { name: 'Order', state: 'available', text: 'Check out through the Parts Store (sign-in).', to: `${STORE_ROUTE}/checkout`, cta: 'Checkout' },
     { name: 'Receive', state: 'available', text: 'Follow the recorded order and shipment status.', to: '/orders', cta: 'My Orders' },
-    { name: 'Install', state: 'partial', text: 'Installation records exist for demonstration machines and are shown with warranty answers; booking an installation is not available.', to: '/commerce', cta: 'Agentic E-Commerce' },
+    { name: 'Install', state: 'partial', text: 'Installation records exist for demonstration machines and are shown with warranty answers; booking an installation is not available.', to: ASK('Is this failed part covered by warranty?'), cta: 'Agentic E-Commerce' },
     { name: 'Service completion', state: 'unavailable', text: 'Service booking and completion are not connected in this platform.' },
   ]
   const img = editorialImageUrl('service')

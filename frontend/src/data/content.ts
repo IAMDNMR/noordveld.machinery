@@ -29,7 +29,12 @@ export const nav: readonly NavItem[] = [
 ]
 
 /** The top navigation bar: the site menu without Machines and Contact (both stay in the footer). */
-export const primaryNav: readonly NavItem[] = nav.filter((item) => item.label !== 'Machines' && item.label !== 'Contact')
+/** The one Agentic E-Commerce experience, signed in or not: the Agentic Shopping screen (it hands order, shipment and warranty questions to the commerce assistant). */
+export const AGENTIC_SHOPPING_ROUTE = '/agentic-shopping'
+
+export const primaryNav: readonly NavItem[] = nav
+  .filter((item) => item.label !== 'Machines' && item.label !== 'Contact')
+  .map((item) => (item.to === AGENTIC_ROUTE ? { label: item.label, to: AGENTIC_SHOPPING_ROUTE } : item))
 
 /** What each signed-in role works with. Hiding a link is presentation only: the backend checks every request. */
 export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly NavItem[] =>
@@ -39,7 +44,7 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
         { label: 'Parts Store', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
         // one conversational entry: discovery, recommendation, cart hand-off, orders, shipments and warranty (Agentic Shopping stays reachable from its answers)
-        { label: 'Agentic E-Commerce', to: '/commerce' },
+        { label: 'Agentic E-Commerce', to: AGENTIC_SHOPPING_ROUTE },
         { label: 'My Orders', to: '/orders' },
       ]
     : role === 'ORDER_PROCESSOR'
