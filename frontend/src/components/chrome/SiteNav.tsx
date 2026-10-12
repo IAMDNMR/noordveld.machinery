@@ -1,6 +1,6 @@
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { nav, type NavItem } from '../../data/content'
+import { primaryNav, type NavItem } from '../../data/content'
 import { Logo } from '../Logo'
 import './chrome-tokens.css'
 import './chrome.css'
@@ -27,7 +27,7 @@ const isCurrent = (item: NavItem, pathname: string): boolean => {
   return ['/parts-store', '/parts-intelligence', '/machines', '/agentic-shopping'].includes(item.to) && path.startsWith(item.to)
 }
 
-export function SiteNav({ pathname, heroTone, Link, items = nav, account }: SiteNavProps) {
+export function SiteNav({ pathname, heroTone, Link, items = primaryNav, account }: SiteNavProps) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const overHero = heroTone && !scrolled && !open

@@ -28,11 +28,13 @@ export const nav: readonly NavItem[] = [
   { label: 'Contact', to: `mailto:${company.email}`, external: true },
 ]
 
+/** The top navigation bar: the site menu without Machines and Contact (both stay in the footer). */
+export const primaryNav: readonly NavItem[] = nav.filter((item) => item.label !== 'Machines' && item.label !== 'Contact')
+
 /** What each signed-in role works with. Hiding a link is presentation only: the backend checks every request. */
 export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly NavItem[] =>
   role === 'END_USER'
     ? [
-        { label: 'Machines', to: '/machines' },
         { label: 'Parts & Services', to: '/parts-services' },
         { label: 'Parts Store', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
@@ -49,7 +51,7 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
           { label: 'Fulfilment', to: '/orders?queue=needs_fulfilment' },
           { label: 'Shipments', to: '/orders?queue=shipped' },
         ]
-      : nav
+      : primaryNav
 
 export interface Industry {
   name: string
