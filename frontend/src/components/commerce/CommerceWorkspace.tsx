@@ -2,7 +2,8 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEven
 import { Link } from 'react-router-dom'
 import { ApiError, isAbort } from '../../api'
 import { askCommerceAgent, isLookup, isRouteOptions, type AgentResponse, type AgentSection, type AgentState, type Domain, type Scope } from '../../api/commerce'
-import { partPath } from '../../lib/storeQuery'
+import { CHECKOUT_ROUTE, partPath } from '../../lib/storeQuery'
+import { useCart } from '../../store/CartContext'
 import { useSession } from '../../store/session'
 import { bundleFrom, Chip, DiscoveryView, EvidenceView, LogisticsView, LookupView, RouteOptionsView, WarrantyView } from './views'
 import './commerce.css'
@@ -154,6 +155,20 @@ export function CommerceWorkspace() {
   )
 }
 
+/**
+ * The explicit hand-off into the existing Parts Store cart (the same cart, CartContext, that the store and Agentic Shopping use). Offered only for a part the discovery decision
+ * recommends: a canonical match with approved fitment, an approved source and availability. Nothing is ordered here; checkout stays in the Parts Store.
+ */
+function CartHandoff({ partId, partNumber, machine }: { partId: string; partNumber: string; machine: string | null }) {
+  const { add } = useCart()
+  const [added, setAdded] = useState(false)
+  return added ? (
+    <Link to={CHECKOUT_ROUTE} className="cw-primary">Added · Review order</Link>
+  ) : (
+    <button type="button" className="cw-primary" onClick={() => { add(partId, 1, machine); setAdded(true) }}>Add {partNumber} to cart</button>
+  )
+}
+
 function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onChoose: (o: Record<string, unknown>) => void; onAsk: (q: string) => void }) {
   const r = turn.response
   const answeredSections = r.answer.sections.filter((s) => s.status !== 'REQUIRES_CLARIFICATION')
@@ -163,6 +178,8 @@ function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onCh
   const primary = r.answer.sections.find((s) => s.status !== 'REQUIRES_CLARIFICATION')?.domain
   const d = r.contexts.DISCOVERY
   const part = d ? (isLookup(d) ? d.part : (d.recommended_part ?? d.compatible_part)) : null
+  const recommended = d && !isLookup(d) && d.decision.decision === 'RECOMMEND' ? d.recommended_part : null
+  const machineModel = d && !isLookup(d) ? (d.machine?.model ?? null) : null
   const notEligible = r.contexts.WARRANTY && r.contexts.WARRANTY.decision.facts.outcome !== 'ELIGIBLE'
   // shipment questions only make sense once a shipment is in the answer (an order with no shipment yet has nothing to ask about)
   const next = r.clarification || !primary || (primary === 'LOGISTICS' && !(r.contexts.LOGISTICS && 'shipment' in r.contexts.LOGISTICS && r.contexts.LOGISTICS.shipment)) ? [] : FOLLOW_UPS[primary]
@@ -192,6 +209,8 @@ function Answer({ turn, dim, onChoose, onAsk }: { turn: Turn; dim: boolean; onCh
 
       {(next.length > 0 || part) && (
         <div className="cw-next" aria-label="What next">
+          {recommended && <CartHandoff partId={recommended.part_id} partNumber={recommended.part_number} machine={machineModel} />}
+          {recommended && <Link to={`/agentic-shopping?${new URLSearchParams({ q: turn.question })}`} className="cw-link">Compare delivery and fulfilment options</Link>}
           {part && <Link to={partPath(part.part_number)} className="cw-link">Open {part.part_number} in the parts store</Link>}
           {next.map((q) => <button key={q} type="button" className="cw-chip-btn" onClick={() => onAsk(q)}>{q}</button>)}
           {notEligible && <button type="button" className="cw-chip-btn" onClick={() => onAsk(NOT_ELIGIBLE_PROMPT)}>{NOT_ELIGIBLE_PROMPT}</button>}

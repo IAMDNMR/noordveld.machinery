@@ -73,12 +73,15 @@ const outOfScope = response({ intent: 'UNKNOWN', status: 'OUT_OF_SCOPE', answer:
 
 interface Call { url: string; body: Record<string, unknown> | null }
 let calls: Call[]
+let cartCalls: Call[] = []
 let replies: { status?: number; body: unknown; hold?: Promise<void> }[]
 const mount = (role: 'END_USER' | 'ORDER_PROCESSOR' | null = 'END_USER') => {
   calls = []
+  cartCalls = []
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
     const path = url.replace('/api/v1', '')
     if (path === '/me') return role ? new Response(JSON.stringify(ME(role)), { status: 200 }) : new Response(JSON.stringify({ error: { code: 'not_signed_in', message: 'Sign in' } }), { status: 401 })
+    if (path === '/me/cart') return (cartCalls.push({ url: path, body: init?.body ? JSON.parse(String(init.body)) : null }), new Response(JSON.stringify(init?.method === 'PUT' ? JSON.parse(String(init.body)).lines : []), { status: 200 })) // the existing Parts Store cart
     calls.push({ url: path, body: init?.body ? JSON.parse(String(init.body)) : null })
     const next = replies.shift() ?? { status: 500, body: { error: { code: 'x', message: 'no reply queued' } } }
     if (next.hold) await next.hold
@@ -186,6 +189,28 @@ describe('Commerce Assistant: one input, one answer', () => {
     expect(a.getByText(/\(name not shown to your role\)/)).toBeTruthy()
     expect(a.getByText(/REP-1/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Why is this claim not eligible?' })).toBeTruthy() // offered because the decision is not eligible
+  })
+
+  it('hands a recommended part to the existing Parts Store cart, with the machine, only when the user chooses to', async () => {
+    replies = [{ body: discovery }]
+    mount()
+    await ask('Find a pump for the machine')
+    const a = await answerOf()
+    const add = await a.findByRole('button', { name: 'Add NVM-X to cart' })
+    expect(cartCalls.some((c) => c.body)).toBe(false) // nothing is added before the user asks
+    fireEvent.click(add)
+    expect((await a.findByRole('link', { name: 'Added · Review order' })).getAttribute('href')).toBe('/parts-store/checkout')
+    await waitFor(() => expect(cartCalls.find((c) => c.body)?.body).toEqual({ lines: [{ part_id: 'PRT-1', quantity: 1, machine: 'M-1' }] }))
+    expect(a.getByRole('link', { name: 'Compare delivery and fulfilment options' }).getAttribute('href')).toContain('/agentic-shopping?q=')
+  })
+
+  it('offers no cart hand-off when nothing is recommended', async () => {
+    replies = [{ body: lookup }]
+    mount()
+    await ask('Which machine uses this part?')
+    const a = await answerOf()
+    await a.findByRole('table', { name: 'Approved machines' })
+    expect(a.queryByRole('button', { name: /to cart/ })).toBeNull()
   })
 
   it('shows machines a part is approved for and any other single-part answer in the same place', async () => {

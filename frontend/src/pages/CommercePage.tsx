@@ -1,5 +1,6 @@
 import { CommerceWorkspace } from '../components/commerce/CommerceWorkspace'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { CartProvider } from '../store/CartContext'
 import '../styles/wf.css'
 
 export const COMMERCE_ROUTE = '/commerce'
@@ -16,7 +17,9 @@ export default function CommercePage() {
         <h1>Agentic E-Commerce</h1>
         <p>Find the right part, follow its shipment and check its warranty in one conversation. The assistant explains; the Noordveld records decide.</p>
       </header>
-      <CommerceWorkspace />
+      <CartProvider>
+        <CommerceWorkspace />
+      </CartProvider>
     </main>
   )
 }

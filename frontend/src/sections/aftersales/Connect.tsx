@@ -183,11 +183,11 @@ const sentenceOr = (code: string | null) => (code ? label(code).replace(/^./, (c
 
 export function ServiceJourney() {
   const steps: { name: string; state: 'available' | 'partial' | 'unavailable'; text: string; to?: string; cta?: string }[] = [
-    { name: 'Identify issue', state: 'available', text: 'Describe the problem in plain words; the agent identifies the machine and the part.', to: '/agentic-shopping', cta: 'Agentic Shopping' },
+    { name: 'Identify issue', state: 'available', text: 'Describe the problem in plain words; the assistant identifies the machine and the part (sign-in).', to: '/commerce', cta: 'Agentic E-Commerce' },
     { name: 'Find part', state: 'available', text: 'Verify the part and its recorded fitment.', to: STORE_ROUTE, cta: 'Parts Store' },
     { name: 'Order', state: 'available', text: 'Check out through the Parts Store (sign-in).', to: `${STORE_ROUTE}/checkout`, cta: 'Checkout' },
     { name: 'Receive', state: 'available', text: 'Follow the recorded order and shipment status.', to: '/orders', cta: 'My Orders' },
-    { name: 'Install', state: 'partial', text: 'Installation records exist for demonstration machines and are shown with warranty answers; booking an installation is not available.', to: '/commerce', cta: 'Commerce Assistant' },
+    { name: 'Install', state: 'partial', text: 'Installation records exist for demonstration machines and are shown with warranty answers; booking an installation is not available.', to: '/commerce', cta: 'Agentic E-Commerce' },
     { name: 'Service completion', state: 'unavailable', text: 'Service booking and completion are not connected in this platform.' },
   ]
   const img = editorialImageUrl('service')

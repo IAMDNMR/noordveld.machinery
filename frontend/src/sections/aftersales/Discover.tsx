@@ -110,7 +110,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
           {!isQuestion && q.length >= 2 && !live.loading && live.data && results.length === 0 ? (
             <p className="as-note">
               No catalogue part matches “{q}”. Check the spelling or the part number, or{' '}
-              <Link to={`/agentic-shopping?${new URLSearchParams({ q })}`}>describe the problem to Agentic Shopping</Link>. Nothing is suggested without a match.
+              <Link to="/commerce">describe the problem in Agentic E-Commerce</Link>. Nothing is suggested without a match.
             </p>
           ) : null}
           {results.length > 0 ? (
@@ -217,7 +217,7 @@ export function MachineFinder() {
           <div className="as-finder__media">{img ? <img src={img} alt={machine?.full_name ?? ''} loading="lazy" /> : <span className="as-finder__empty">{machine ? 'No photo of this machine' : 'Choose a machine model'}</span>}</div>
           {model && fits.loading ? <p className="as-note">Reading the recorded fitment…</p> : null}
           {fits.error ? <p className="as-note as-note--bad">The fitment could not be read right now.</p> : null}
-          {model && fits.data && fits.data.total === 0 ? <p className="as-note">No part has a recorded fitment for {model}. Ask Parts Intelligence or describe the problem in Agentic Shopping rather than guessing.</p> : null}
+          {model && fits.data && fits.data.total === 0 ? <p className="as-note">No part has a recorded fitment for {model}. Ask Parts Intelligence or describe the problem in Agentic E-Commerce rather than guessing.</p> : null}
           {fits.data && fits.data.items.length > 0 ? (
             <>
               <ul className="as-fits">

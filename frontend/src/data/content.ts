@@ -38,8 +38,8 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
         { label: 'Parts & Services', to: '/parts-services' },
         { label: 'Parts Store', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
-        { label: 'Agentic Shopping', to: '/agentic-shopping' },
-        { label: 'Commerce Assistant', to: '/commerce' },
+        // one conversational entry: discovery, recommendation, cart hand-off, orders, shipments and warranty (Agentic Shopping stays reachable from its answers)
+        { label: 'Agentic E-Commerce', to: '/commerce' },
         { label: 'My Orders', to: '/orders' },
       ]
     : role === 'ORDER_PROCESSOR'

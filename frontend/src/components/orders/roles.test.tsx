@@ -57,7 +57,7 @@ describe('roles', () => {
 
   it('shows the End User navigation and a subtle role label', async () => {
     mount('/orders', anna, { '/orders': () => new Response(JSON.stringify([row('O-1', 'NEW')])) })
-    await waitFor(() => expect(navLabels()).toEqual(['Parts & Services', 'Parts Store', 'Parts Intelligence', 'Agentic Shopping', 'Commerce Assistant', 'My Orders']))
+    await waitFor(() => expect(navLabels()).toEqual(['Parts & Services', 'Parts Store', 'Parts Intelligence', 'Agentic E-Commerce', 'My Orders']))
     expect(document.querySelector('.nav__bar .nav__role')?.textContent).toBe('End User')
   })
 
