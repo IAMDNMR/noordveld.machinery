@@ -12,7 +12,7 @@ SIGN_IN = "Sign in as an End User. The example order and claim belong to the dem
 INTELLIGENCE_CATALOG: list[dict] = [
   {
     "category": "Find parts",
-    "questions": ["Find NVM-1050-HY", "Find air filters for the NV-3200", "Which parts are in the Hydraulics category?"],
+    "questions": ["Find NVM-1050-HY", "Find air filters for the NV-3200", "Find hydraulic hoses"],
   },
   {
     "category": "Machines & fitment",

@@ -109,7 +109,7 @@ P = "MATCH (p:Part {part_number: $pn})"
 PI_CHECKS: dict[str, Check] = {
     "Find NVM-1050-HY": lambda d: (d.get("intent") == "PART_SEARCH" and [x["title"] for x in d.get("results") or []] == ["NVM-1050-HY"], f"intent {d.get('intent')}; shown {[x['title'] for x in d.get('results') or []]}"),
     "Find air filters for the NV-3200": records(("PART_SEARCH", "MACHINE_TO_PART"), "MATCH (p:Part)-[f:FITS]->(:Machine {model_code: 'NV-3200'}) WHERE toLower(p.name) CONTAINS 'air filter' AND toUpper(f.fitment_status) = 'CONFIRMED' RETURN p.part_number"),
-    "Which parts are in the Hydraulics category?": records(("PART_SEARCH",), "MATCH (p:Part {category: 'Hydraulics'}) RETURN p.part_number"),
+    "Find hydraulic hoses": records(("PART_SEARCH",), "MATCH (p:Part) WHERE toLower(p.name) CONTAINS 'hydraulic hose' RETURN p.part_number"),
     "Which parts fit the NV-4500?": records(("MACHINE_TO_PART",), FITS, m="NV-4500"),
     "Which machines use NVM-1050-HY?": records(("PART_TO_MACHINE",), P + "-[:FITS]->(m:Machine) RETURN m.model_code", pn="NVM-1050-HY"),
     "Does NVM-1050-HY fit the KFT-200?": both(records(("PART_TO_MACHINE",), P + "-[:FITS]->(m:Machine {model_code: 'KFT-200'}) RETURN m.model_code", pn="NVM-1050-HY"), lambda d: ("fitting KFT-200" in summary(d) or "fits KFT-200" in summary(d), summary(d)[:100])),
