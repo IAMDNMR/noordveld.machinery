@@ -59,9 +59,6 @@ function CartButton() {
 }
 
 // ── compose ─────────────────────────────────────────────────────────────────────────────────────
-/** Order, shipment and warranty questions the same screen answers (through the commerce assistant, for a signed-in user). No record is named. */
-const COMMERCE_EXAMPLES = ['Where is my shipment and what parts are in it?', 'Is this failed part covered by warranty?']
-
 function Compose({ onRun }: { onRun: (q: string) => void }) {
   const suggestions = useApi((s) => getAgentSuggestions(s), 'agent-suggestions')
   return (
@@ -75,14 +72,14 @@ function Compose({ onRun }: { onRun: (q: string) => void }) {
           <h1 id="ag-title" className="ag-compose__title">
             What do you need?
           </h1>
-          <p className="ag-compose__lede">Describe what you're looking for in plain language. The agent checks the right part against your requirements and finds the best available path. You can also ask about your orders, shipments and warranty.</p>
+          <p className="ag-compose__lede">Describe what you're looking for in plain language. The agent checks the right part against your requirements and finds the best available path.</p>
           <p className="ag-compose__aside">
             Built on Parts Intelligence: the same machines, parts, fitment and availability. <Link to={PI}>Open Parts Intelligence</Link>
           </p>
           <RequestBox onRun={onRun} placeholder={suggestions.data?.[0]?.request ? `e.g. ${suggestions.data[0].request}` : undefined} />
           {suggestions.data?.length ? (
             <ul className="ag-pills" aria-label="Example requests">
-              {[...suggestions.data.map((s) => s.request), ...COMMERCE_EXAMPLES].map((request) => (
+              {suggestions.data.map((s) => s.request).map((request) => (
                 <li key={request}>
                   <button type="button" onClick={() => onRun(request)}>
                     {request}
