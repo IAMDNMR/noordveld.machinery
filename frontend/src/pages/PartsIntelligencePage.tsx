@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { askQuestion, getSuggestions, type PartTab } from '../api'
+import { askQuestion, getIntelligenceCatalog, getSuggestions, type PartTab } from '../api'
 import { ErrorNotice, ThinkingNotice } from '../components/intelligence/Notices'
 import { PartWorkspace, TABS } from '../components/intelligence/PartWorkspace'
 import { PiHero } from '../components/intelligence/PiHero'
+import { QuestionCatalog } from '../components/catalog/QuestionCatalog'
 import { QuestionInput } from '../components/intelligence/QuestionInput'
 import { ResultView } from '../components/intelligence/ResultView'
 import { useApi } from '../hooks/useApi'
-import { labelQuestion, rememberQuestion, useRecentQuestions } from '../store/recentQuestions'
+import { labelQuestion, rememberQuestion } from '../store/recentQuestions'
 import { usePageMeta } from '../hooks/usePageMeta'
 import '../styles/wf.css'
 import '../components/intelligence/intelligence.css'
@@ -30,7 +31,7 @@ export default function PartsIntelligencePage() {
   const part = params.get('part')
   const tab = parseTab(params.get('tab'))
   const suggestions = useApi((signal) => getSuggestions(signal), 'suggestions')
-  const recent = useRecentQuestions()
+  const catalog = useApi((signal) => getIntelligenceCatalog(signal), 'intelligence-catalog')
 
   useEffect(() => {
     if (question) rememberQuestion(question)
@@ -63,14 +64,20 @@ export default function PartsIntelligencePage() {
     <div className="wf pi-page">
       <section className={`pih ${question ? 'pih--answering' : ''}`} aria-labelledby="pi-title">
         <PiHero>
-          <QuestionInput value={question} busy={false} onAsk={ask} suggestions={suggestions.data} recent={recent} />
-          {suggestions.error ? <p className="sq__note">Suggested questions are unavailable right now. You can still type a question above.</p> : null}
+          <QuestionInput value={question} busy={false} onAsk={ask} />
+          {!question && catalog.data?.length ? <QuestionCatalog groups={catalog.data} onAsk={ask} /> : null}
         </PiHero>
 
         <div className="wf-container">
           {question ? (
             <div className="pih__answer">
               <Answer key={question} question={question} suggestions={suggestions.data} onAsk={ask} onInvestigate={investigate} onClear={() => setParams(new URLSearchParams())} />
+              {catalog.data?.length ? (
+                <details className="qc-more">
+                  <summary>More questions from the catalog</summary>
+                  <QuestionCatalog groups={catalog.data} onAsk={ask} />
+                </details>
+              ) : null}
             </div>
           ) : null}
 

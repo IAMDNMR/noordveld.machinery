@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, CircleAlert, RotateCcw, ShoppingBag, ShoppingCart } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { askAgent, getAgentPipeline, getAgentSuggestions, type AgentCandidate, type AgentInterpretation, type AgentResponse, type AgentStep } from '../api/agent'
+import { askAgent, getAgentPipeline, getAgentSuggestions, getShoppingCatalog, type AgentCandidate, type AgentInterpretation, type AgentResponse, type AgentStep } from '../api/agent'
 import type { ApiError } from '../api'
 import { canOrder } from '../components/store/Badges'
 import { CartDrawer } from '../components/store/CartDrawer'
@@ -12,6 +12,7 @@ import { formatMoney } from '../lib/format'
 import { CHECKOUT_ROUTE, partPath } from '../lib/storeQuery'
 import { CommerceAnswerPanel } from '../components/commerce/CommerceWorkspace'
 import { CartProvider, useCart } from '../store/CartContext'
+import { QuestionCatalog } from '../components/catalog/QuestionCatalog'
 import '../styles/wf.css'
 import '../components/store/store.css'
 import '../components/agent/agent.css'
@@ -61,6 +62,7 @@ function CartButton() {
 // ── compose ─────────────────────────────────────────────────────────────────────────────────────
 function Compose({ onRun }: { onRun: (q: string) => void }) {
   const suggestions = useApi((s) => getAgentSuggestions(s), 'agent-suggestions')
+  const catalog = useApi((s) => getShoppingCatalog(s), 'shopping-catalog')
   return (
     <section className="ag-compose" aria-labelledby="ag-title">
       <div className="wf-container">
@@ -77,17 +79,7 @@ function Compose({ onRun }: { onRun: (q: string) => void }) {
             Built on Parts Intelligence: the same machines, parts, fitment and availability. <Link to={PI}>Open Parts Intelligence</Link>
           </p>
           <RequestBox onRun={onRun} placeholder={suggestions.data?.[0]?.request ? `e.g. ${suggestions.data[0].request}` : undefined} />
-          {suggestions.data?.length ? (
-            <ul className="ag-pills" aria-label="Example requests">
-              {suggestions.data.map((s) => s.request).map((request) => (
-                <li key={request}>
-                  <button type="button" onClick={() => onRun(request)}>
-                    {request}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          {catalog.data?.length ? <QuestionCatalog groups={catalog.data} onAsk={onRun} align="center" /> : null}
         </div>
       </div>
     </section>

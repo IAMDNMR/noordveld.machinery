@@ -255,3 +255,11 @@ export interface PartQuery {
   offset: number
   limit: number
 }
+
+/** One category of the question catalog (GET /intelligence/catalog, GET /agent/catalog). */
+export interface CatalogGroup {
+  category: string
+  /** shown under the category name, e.g. that the questions need sign-in */
+  note?: string | null
+  questions: string[]
+}

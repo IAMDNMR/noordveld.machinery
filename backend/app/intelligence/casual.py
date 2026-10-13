@@ -22,5 +22,18 @@ def content_words(question: str) -> list[str]:
     return [singular(w) for w in words if w not in FILLER]
 
 
+def qualified(question: str, term: str) -> str | None:
+    """The question's own word directly before a one-word search term ("air" in "air filters" when the term is "filter"), so a qualifier
+    the user wrote is not lost. Only words from the question are used; machine codes and numbers are not qualifiers."""
+    if len(term.split()) != 1:
+        return None
+    words = content_words(question)
+    want = singular(term.lower())
+    for i, w in enumerate(words[1:], 1):
+        if w == want and not re.search(r"\d", words[i - 1]):
+            return f"{words[i - 1]} {want}"
+    return None
+
+
 def content_text(question: str) -> str:
     return " ".join(content_words(question))

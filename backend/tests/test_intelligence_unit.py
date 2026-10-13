@@ -556,3 +556,48 @@ def test_a_model_that_only_asks_for_detail_is_not_overridden():
     """The model's own reading decides: a clarification it asks for is asked, not answered by a word-stripping guess."""
     r = ask(service(FakeRepo(), FakeLLM(parse=LLMParse("UNSUPPORTED", requires_clarification=True, clarification_question="Which belt do you mean?"))), "show me that belt")
     assert r.scope == "NEEDS_CLARIFICATION" and r.clarification.question == "Which belt do you mean?" and r.results == []
+
+
+def test_a_qualifier_the_user_wrote_is_kept_when_the_model_drops_it():
+    """'Find air filters' read as the term 'filter' must not list the engine oil filter: the question's own 'air' is searched first."""
+    from app.intelligence.casual import qualified
+    from app.intelligence.handlers import Context, part_search
+
+    assert qualified("Find air filters for the NV-3200", "filter") == "air filter"
+    assert qualified("Show me all hydraulic pumps", "pump") == "hydraulic pump"
+    assert qualified("Find filters for the NV-3200", "filter") is None  # nothing written before it
+    assert qualified("NV-3200 filter", "filter") is None  # a machine code is not a qualifier
+    assert qualified("I need a brake pad set", "brake pad") is None  # only one-word terms
+
+    class Parts:
+        def __init__(self, found: dict[str, int]) -> None:
+            self.found, self.calls = found, []
+
+        def search(self, *, text, **kw):
+            self.calls.append(text)
+            return self.found.get(text, 0), []
+
+        def summaries(self, ids):
+            return []
+
+    narrow = Parts({"air filter": 2, "filter": 3})
+    part_search(Context("Find air filters", "filter", 12, None, narrow))  # type: ignore[arg-type]
+    assert narrow.calls == ["air filter"]
+    nothing = Parts({"filter": 3})  # the narrower words find nothing: the model's term is searched as before
+    part_search(Context("Find air filters", "filter", 12, None, nothing))  # type: ignore[arg-type]
+    assert nothing.calls == ["air filter", "filter"]
+
+
+def test_relationship_types_are_counted_not_rows():
+    """One relationship type that reaches two kinds of entity is one type: 3 rows, 2 types, 6 relationships."""
+    from app.intelligence.handlers import Context, part_graph
+    from app.intelligence.models import Kind, Resolved
+
+    class Repo:
+        def relationships(self, part_id):
+            return [{"relationship": "FITS", "other_label": "Machine", "data_status": "SOURCE_DERIVED", "n": 2},
+                    {"relationship": "HAS_SPECIFICATION", "other_label": "PartSpecification", "data_status": "SOURCE_DERIVED", "n": 3},
+                    {"relationship": "HAS_SPECIFICATION", "other_label": "Evidence", "data_status": "SOURCE_DERIVED", "n": 1}]
+
+    c = Context("Show the relationships for AB-1000-XY.", "", 12, Repo(), None, {Kind.PART: Resolved(Kind.PART, "PRT-1", "AB-1000-XY", None, "SOURCE_DERIVED", 2)})  # type: ignore[arg-type]
+    assert part_graph(c).summary == "AB-1000-XY has 6 direct relationships across 2 relationship types."

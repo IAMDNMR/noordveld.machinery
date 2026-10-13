@@ -4,6 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.api.dependencies import EntityDetails, Overviews, Questions, Workspaces
+from app.question_catalog import INTELLIGENCE_CATALOG
 from app.schemas.intelligence import (
     AssemblyItem,
     ComplianceItem,
@@ -34,6 +35,12 @@ def ask(request: QueryRequest, service: Questions) -> QueryResponse:
 @router.get("/suggestions")
 def suggestions(service: Overviews) -> list[dict[str, str]]:
     return service.suggestions()
+
+
+@router.get("/catalog")
+def catalog() -> list[dict]:
+    """The question catalog: example questions by category, each checked against the live graph."""
+    return INTELLIGENCE_CATALOG
 
 
 @router.get("/kpis", response_model=Kpis)

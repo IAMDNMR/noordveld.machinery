@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from './client'
-import type { PartSummary } from './types'
+import type { CatalogGroup, PartSummary } from './types'
 
 /** Response shapes of the Agentic Shopping API (backend/app/schemas/agent.py). Every value comes from the graph. */
 export type AgentStepKey = 'request' | 'understand' | 'machine' | 'part' | 'fitment' | 'availability' | 'fulfilment' | 'compare' | 'recommend'
@@ -103,4 +103,5 @@ export interface AgentSuggestion {
   action: string
 }
 
+export const getShoppingCatalog = (signal?: AbortSignal): Promise<CatalogGroup[]> => apiGet<CatalogGroup[]>('/agent/catalog', {}, signal)
 export const getAgentSuggestions = (signal?: AbortSignal): Promise<AgentSuggestion[]> => apiGet<AgentSuggestion[]>('/agent/suggestions', {}, signal)

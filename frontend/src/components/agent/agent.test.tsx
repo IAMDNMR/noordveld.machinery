@@ -40,6 +40,7 @@ const recommendation: AgentResponse = {
   excluded: [{ part_number: 'AB-9', name: 'x', status_label: 'Identification required' }],
 }
 const SUGGESTIONS = [{ request: 'I need a hose for my M-1, preferably in stock.', need: 'Hose', context: 'M-1', action: 'Prefer in stock' }]
+const CATALOG = [{ category: 'Find a part', note: null, questions: ['I need a hose for my M-1.'] }, { category: 'Orders', note: 'Sign in for these.', questions: ['Where is my order?'] }]
 
 // the commerce assistant's answer for the same request, as the Commerce Agent API returns it (only what the panel reads)
 const commerceAnswer = (domain: 'LOGISTICS' | 'WARRANTY', headline: string) => ({ intent: domain, status: 'ANSWERED', steps: [], clarification: null, evidence: [], evidence_paths: {}, source_records: [], data_status: 'SYNTHETIC_DEMO', confidence: {}, visibility: {}, warnings: [], missing: [], state: {},
@@ -56,6 +57,7 @@ function mount(response: ((request: string) => AgentResponse) | { status: number
     if (url.endsWith('/me/cart')) return new Response(JSON.stringify([]))
     if (url.endsWith('/commerce/agent')) { commerceCalls.push(JSON.parse(String(init?.body)).message); return new Response(JSON.stringify(session.commerce)) }
     if (url.endsWith('/agent/suggestions')) return new Response(JSON.stringify(SUGGESTIONS))
+    if (url.endsWith('/agent/catalog')) return new Response(JSON.stringify(CATALOG))
     if (url.endsWith('/cart/quote')) return new Response(JSON.stringify({ lines: [], rejected: [], unknown_part_ids: [], subtotal: null, unpriced_part_ids: [], order_placement_available: false, note: '' }))
     const body = JSON.parse(String(init?.body)) as { request: string }
     calls.push(body.request)
@@ -77,13 +79,23 @@ describe('agentic shopping', () => {
     vi.unstubAllGlobals()
   })
 
-  it('starts as a request to an agent, with example requests from the API, not a search box', async () => {
+  it('starts as a request to an agent, with the question catalog from the API, not a search box', async () => {
     mount(() => recommendation, null)
     expect(screen.getByRole('heading', { name: 'What do you need?' })).toBeTruthy()
     expect(screen.getByText(/checks the right part against your requirements/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Find the right part' })).toBeTruthy()
     expect(screen.queryByPlaceholderText(/search parts/i)).toBeNull()
-    expect(await screen.findByRole('button', { name: 'I need a hose for my M-1, preferably in stock.' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Question catalog' })).toBeTruthy()
+    expect(screen.getByRole('list', { name: 'Find a part questions' })).toBeTruthy()
+    expect(screen.getByText('Sign in for these.')).toBeTruthy()
+    expect(document.querySelector('.ag-pills')).toBeNull() // the earlier example pills are replaced by the catalog
+  })
+
+  it('runs a catalog question directly when it is chosen', async () => {
+    const calls = mount(() => recommendation, null)
+    fireEvent.click(await screen.findByRole('button', { name: 'I need a hose for my M-1.' }))
+    expect(await screen.findByText(/I need a hose for my M-1\./, { selector: 'h1' })).toBeTruthy()
+    await waitFor(() => expect(calls).toEqual(['I need a hose for my M-1.']))
   })
 
   it('shows how the request was read, with only the fields that were understood', async () => {

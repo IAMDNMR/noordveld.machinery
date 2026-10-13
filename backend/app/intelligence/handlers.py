@@ -11,7 +11,7 @@ from urllib.parse import quote
 
 from app.graph.repositories.intelligence import IntelligenceRepository
 from app.graph.repositories.parts import PartRepository
-from app.intelligence.casual import singular
+from app.intelligence.casual import qualified, singular
 from app.intelligence.models import Intent, Kind, Outcome, Resolved
 from app.intelligence.provenance import LABELS, data_class
 from app.schemas.intelligence import Action, Evidence, Fact, FactGroup, ResultItem
@@ -391,7 +391,8 @@ def part_graph(c: Context) -> Outcome:
     results = [ResultItem(kind="path", key=f"{r['relationship']}-{r['other_label']}-{r['data_status']}", title=r["relationship"], subtitle=r["other_label"], relationship=r["relationship"],
                           data_class=data_class(r["data_status"]), facts=[Fact(label="Connected entities", value=str(r["n"])), Fact(label="Data class", value=LABELS[data_class(r["data_status"])])]) for r in rels]
     evidence = [ev(part.label, "PART", r["relationship"], f"{r['n']} × {r['other_label']}", r["other_label"].upper(), r["data_status"]) for r in rels]
-    return Outcome(f"{part.label} has {sum(r['n'] for r in rels)} direct relationships across {_count(len(rels), 'type')}.", results, evidence, ["Part", "any relationship", "any"], len(results),
+    # a row is one relationship type to one kind of entity (HAS_SPECIFICATION can reach two), so the types are counted, not the rows
+    return Outcome(f"{part.label} has {sum(r['n'] for r in rels)} direct relationships across {_count(len({r['relationship'] for r in rels}), 'relationship type')}.", results, evidence, ["Part", "any relationship", "any"], len(results),
                    actions=[investigate_action(part.label)])
 
 
@@ -591,7 +592,13 @@ def part_search(c: Context) -> Outcome:
     if category and text.lower() in category.label.lower():
         text = ""
     wide = 100 if machine else c.limit  # with a machine, only confirmed fits are kept, so look at more candidates first
-    total, ids = c.parts.search(text=text, category=category.label if category else None, machine=machine.label if machine else None, availability=None, orderable=None, sort="relevance", offset=0, limit=wide)
+    narrow = qualified(c.question, text) if text else None  # "air filters" read as "filter": search what the user wrote first
+    if narrow:
+        total, ids = c.parts.search(text=narrow, category=category.label if category else None, machine=machine.label if machine else None, availability=None, orderable=None, sort="relevance", offset=0, limit=wide)
+        if total:
+            text = narrow
+    if not narrow or not total:
+        total, ids = c.parts.search(text=text, category=category.label if category else None, machine=machine.label if machine else None, availability=None, orderable=None, sort="relevance", offset=0, limit=wide)
     if not total and text:  # "brake pads" -> "brake pad": a plural or phrasing should not hide a part
         plain = " ".join(singular(w) for w in text.split())
         if plain != text:

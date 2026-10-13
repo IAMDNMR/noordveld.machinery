@@ -7,6 +7,7 @@ from app.agent.service import LABELS
 from app.api.dependencies import Agents, CommerceEngine
 from app.commerce_agent.agent import commerce_domains
 from app.llm import LLMError
+from app.question_catalog import SHOPPING_CATALOG
 from app.schemas.agent import AgentRequest, AgentResponse, AgentSuggestion, Interpretation
 
 router = APIRouter(prefix="/agent", tags=["agentic shopping"])
@@ -37,6 +38,12 @@ UNAVAILABLE = "The shopping agent's language service is not responding right now
 def pipeline() -> list[dict[str, str]]:
     """The agent's steps, in order, so the interface never defines them itself."""
     return [{"key": k, "label": v} for k, v in LABELS.items()]
+
+
+@router.get("/catalog")
+def catalog() -> list[dict]:
+    """The question catalog for the Agentic E-Commerce screen: parts, delivery, orders, shipments, warranty and combined questions."""
+    return SHOPPING_CATALOG
 
 
 @router.get("/suggestions", response_model=list[AgentSuggestion])

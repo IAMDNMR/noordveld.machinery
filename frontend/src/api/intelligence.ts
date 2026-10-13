@@ -1,4 +1,5 @@
 import { apiGet, apiPost } from './client'
+import type { CatalogGroup } from './types'
 import type {
   AssemblyItem,
   ComplianceItem,
@@ -21,6 +22,7 @@ const part = (key: string, tail = '') => `/intelligence/parts/${encodeURICompone
 export const askQuestion = (question: string, selected: { kind: string; key: string }[] = [], limit = 12, signal?: AbortSignal): Promise<QueryResponse> =>
   apiPost<QueryResponse>('/intelligence/query', { question, selected, limit }, signal)
 
+export const getIntelligenceCatalog = (signal?: AbortSignal): Promise<CatalogGroup[]> => apiGet<CatalogGroup[]>('/intelligence/catalog', {}, signal)
 export const getSuggestions = (signal?: AbortSignal): Promise<Suggestion[]> => apiGet<Suggestion[]>('/intelligence/suggestions', {}, signal)
 
 export const getPartOverview = (key: string, signal?: AbortSignal): Promise<PartOverview> => apiGet<PartOverview>(part(key), {}, signal)
