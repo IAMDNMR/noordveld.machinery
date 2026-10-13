@@ -214,6 +214,17 @@ describe('Commerce Assistant: one input, one answer', () => {
     expect(a.queryByRole('button', { name: /to cart/ })).toBeNull()
   })
 
+  it("shows a part's recorded stock without asking for a machine and says stock is not fitment", async () => {
+    const stock = { ...lookup, contexts: { DISCOVERY: { ...(lookup.contexts.DISCOVERY as object), lookup: 'PART_STOCK', stock: { state: 'AVAILABLE', total_available: 12, depots: null } } as never } }
+    replies = [{ body: stock }]
+    mount()
+    await ask('Do you have this part in stock?')
+    const a = await answerOf()
+    expect(await a.findByText(/12 units recorded/)).toBeTruthy()
+    expect(a.getByText(/Stock does not establish that the part fits a machine/)).toBeTruthy()
+    expect(a.queryByRole('table', { name: 'Stock by depot' })).toBeNull() // depots are not in a customer's answer
+  })
+
   it('shows machines a part is approved for and any other single-part answer in the same place', async () => {
     replies = [{ body: lookup }]
     mount()

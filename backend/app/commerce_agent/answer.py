@@ -40,6 +40,12 @@ def _days(n: float) -> str:
 def lookup_lines(x: dict[str, Any]) -> list[str]:
     """PART_FITMENT / PART_ORIGIN: one part's approved machines, or its recorded manufacturer, catalogue record and approved sources."""
     lines = []
+    if x["lookup"] == "PART_STOCK":
+        st = x.get("stock") or {}
+        lines.append(f"Stock: {str(st.get('state')).replace('_', ' ').lower()}" + (f", {st['total_available']} units recorded" if st.get("total_available") is not None else "") + " (synthetic demonstration inventory).")
+        lines += [f"  {d['location_id']}: {str(d['status']).replace('_', ' ').lower()}" + (f", {d['available_quantity']} available" if d.get("available_quantity") is not None else "") for d in (st.get("depots") or [])]
+        lines.append("Stock does not establish that the part fits a machine; ask with the machine model to check fitment.")
+        return lines
     if x["lookup"] == "PART_FITMENT":
         lines += [f"Approved for {m['name']} ({m['model']}), fitment {m['fitment_rule'] or 'rule not stated'}." for m in x.get("machines", [])]
         if x.get("other_fitments"):
@@ -118,7 +124,16 @@ def logistics_lines(x: dict[str, Any], focus: list[str]) -> list[str]:
         return lines
     s = x.get("shipment")
     if not s:
-        return [f"Order {x['order']['order_id']}: status {x['order'].get('status')}."] if x.get("order") else []
+        if not x.get("order"):
+            return []
+        out = [f"Order {x['order']['order_id']}: status {x['order'].get('status')}."]
+        ol = x.get("order_lines") or []
+        if ol:
+            out.append(f"This order has {len(ol)} order line{'s' if len(ol) != 1 else ''}:")
+            for ln in ol:
+                qty = f" × {ln['quantity']}" if ln.get("quantity") is not None else ""
+                out.append(f"  {ln['order_line_id']}: {ln.get('part_number') or 'part not recorded'}{(' ' + ln['name']) if ln.get('name') else ''}{qty}")
+        return out
     lines.append(f"Status: {str(x.get('current_status') or s.get('status')).replace('_', ' ').lower()} (shipment {s['shipment_id']}, recorded as {str(s.get('status')).lower()}).")
     sl = x.get("shipment_lines") or []
     if x.get("shipment_kind") == "MULTI_LINE":

@@ -586,6 +586,8 @@ def test_multi_domain_part_request_with_a_destination_gets_the_part_and_the_pote
     ("hello", False, []),
     ("How long does shipping to Atlantis take?", False, []),  # no recorded lane and no shipment or order named: nothing to look up
     ("Show me the status of my order.", False, ["LOGISTICS"]),
+    ("Show me my order.", False, ["LOGISTICS"]),
+    ("Find a compatible pump for my machine, compare delivery options, and tell me whether my existing order has shipped.", True, ["LOGISTICS"]),  # the order question beside a part search
 ])
 def test_commerce_domains_names_only_what_agentic_shopping_does_not_answer(message, parts_answered, expected):
     from app.commerce_agent.agent import commerce_domains
@@ -595,3 +597,45 @@ def test_commerce_domains_names_only_what_agentic_shopping_does_not_answer(messa
 def test_shipment_contents_questions_are_logistics_not_a_part_search():
     r = ask("Which parts are included in my shipment?", customer("CUS-001"))
     assert r["intent"] == "LOGISTICS" and "DISCOVERY" not in r["understanding"]["domains"]
+
+
+def test_an_order_with_no_shipment_lists_its_recorded_lines_in_the_answer():
+    from app.commerce_agent.answer import logistics_lines
+    x = {"decision": {"facts": {}}, "shipment": None, "order": {"order_id": "O-1", "status": "ALLOCATED"},
+         "order_lines": [{"order_line_id": "OL-1", "part_number": "P-1", "name": "Part one", "quantity": 2}, {"order_line_id": "OL-2", "part_number": None, "name": None, "quantity": None}]}
+    assert logistics_lines(x, []) == ["Order O-1: status ALLOCATED.", "This order has 2 order lines:", "  OL-1: P-1 Part one × 2", "  OL-2: part not recorded"]
+
+
+def test_stock_of_a_named_part_comes_from_its_recorded_inventory_and_asks_for_no_machine():
+    r = ask("Do you have NVM-1050-HY in stock?", customer("CUS-001"))
+    s = sections(r)["DISCOVERY"]
+    x = r["contexts"]["DISCOVERY"]
+    assert s["decision"] == "PART_STOCK" and "not a machine model" not in " ".join(s["lines"]) and x["stock"]["state"] == "AVAILABLE"
+    assert x["stock"]["total_available"] == sum(i["available_quantity"] or 0 for i in ENGINE.discovery.inventory("PRT-006") if (i["available_quantity"] or 0) > 0)
+    assert x["stock"]["depots"] is None and "stock.depots" in x["visibility"]["hidden_fields"]  # a customer sees the total, not the depots
+    assert ask("Do you have NVM-1050-HY in stock?")["contexts"]["DISCOVERY"]["stock"]["depots"]  # the OEM sees them
+    assert any("does not establish that the part fits" in ln for ln in s["lines"])
+
+
+def test_an_order_question_beside_a_part_search_is_looked_up_not_answered_as_an_unordered_part():
+    r = ask("Find a compatible pump for my machine, compare delivery options, and tell me whether my existing order has shipped.", customer("CUS-001"))
+    assert sections(r)["LOGISTICS"]["decision"] != "NO_SHIPMENT_FOR_UNORDERED_PART"
+
+
+def test_without_the_language_service_the_screen_still_answers_order_and_warranty_questions():
+    from app.api.dependencies import get_agent
+
+    class Down:
+        def recommend(self, request):
+            raise LLMUnavailable("rate limited")
+
+    app.dependency_overrides[get_agent] = lambda: Down()
+    app.dependency_overrides[get_commerce_engine] = lambda: ENGINE
+    try:
+        c = TestClient(app)
+        r = c.post("/api/v1/agent/recommend", json={"request": "Where is my shipment?"})
+        assert r.status_code == 200 and r.json()["commerce_domains"] == ["LOGISTICS"] and r.json()["state"] == "out_of_scope" and "not responding" in r.json()["notes"][0]
+        assert c.post("/api/v1/agent/recommend", json={"request": "hello"}).status_code == 503  # nothing the records can answer: the outage is reported
+    finally:
+        app.dependency_overrides.pop(get_agent, None)
+        app.dependency_overrides.pop(get_commerce_engine, None)

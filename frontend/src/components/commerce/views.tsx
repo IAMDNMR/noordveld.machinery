@@ -124,9 +124,22 @@ export function DiscoveryView({ ctx, onPick, bare }: { ctx: DiscoveryContext; on
 export function LookupView({ ctx }: { ctx: PartLookupContext }) {
   const cat = ctx.catalogue
   return (
-    <section className="cw-view" aria-label={ctx.lookup === 'PART_FITMENT' ? 'Machines this part is approved for' : 'Recorded origin of this part'}>
+    <section className="cw-view" aria-label={ctx.lookup === 'PART_FITMENT' ? 'Machines this part is approved for' : ctx.lookup === 'PART_STOCK' ? 'Recorded stock of this part' : 'Recorded origin of this part'}>
       {ctx.part && <p className="cw-meta"><span className="cw-mono">{ctx.part.part_number}</span> {ctx.part.name}</p>}
-      {ctx.lookup === 'PART_FITMENT' ? (
+      {ctx.lookup === 'PART_STOCK' ? (
+        <>
+          <dl className="cw-facts">
+            <dt>Stock</dt><dd>{label(ctx.stock?.state)}{ctx.stock?.total_available != null ? ` · ${ctx.stock.total_available} units recorded` : ''}</dd>
+          </dl>
+          {ctx.stock?.depots?.length ? (
+            <table className="cw-table" aria-label="Stock by depot">
+              <thead><tr><th>Depot</th><th>Status</th><th>Available</th></tr></thead>
+              <tbody>{ctx.stock.depots.map((d) => <tr key={d.location_id}><td className="cw-mono">{d.location_id}</td><td>{label(d.status)}</td><td>{d.available_quantity ?? 'not recorded'}</td></tr>)}</tbody>
+            </table>
+          ) : null}
+          <p className="cw-meta">Stock does not establish that the part fits a machine. Add the machine model to check fitment.</p>
+        </>
+      ) : ctx.lookup === 'PART_FITMENT' ? (
         <>
           {ctx.machines.length > 0 ? (
             <table className="cw-table" aria-label="Approved machines">

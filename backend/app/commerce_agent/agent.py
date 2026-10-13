@@ -24,7 +24,7 @@ from app.commerce.discovery import STOPWORDS
 from app.commerce.engine import CommerceContextEngine
 from app.commerce.intent import DISCOVERY, LOGISTICS, WARRANTY
 from app.commerce.intent import score as base_score
-from app.commerce.part_lookup import part_fitment, part_origin
+from app.commerce.part_lookup import part_fitment, part_origin, part_stock
 from app.commerce.route_options import find_destinations, route_options
 from app.commerce_agent import answer as ans
 from app.llm.base import LLMError
@@ -45,6 +45,7 @@ EXTRA_CUES: dict[str, tuple[tuple[str, int], ...]] = {
                 (r"\btaking so long\b|\bdelay\w*|\bwhy is it (late|slow)\b", 2), (r"\bwhat (parts|items|products)\b.{0,30}\b(in|on|inside)\b|\bparts? (are )?in (this|the|my|that)\b|\b(parts?|items?)\b.{0,25}\bincluded in (this|the|my|that)\b", 3),
                 (r"\b(what is|what's|whats) the status\b", 2),
                 (r"\b(orders?|shipments?)\b.{0,30}\b(status|shipped|allocated|dispatched|arrived?|delivered|lines?|included|in it|contain\w*)\b|\b(has|have|is|was) (my|the|this|our) (order|shipment)\b|\bstatus of (my|the|this|our|an?) (order|shipment)\b", 2),
+                (r"\b(show|see|view|track|check|find|list|open)\b.{0,20}\b(my|our) (orders?|shipments?|deliver(y|ies)|parcels?)\b", 2),
                 (r"\b(compare|comparison|versus)\b.{0,40}\b(sea|air|ocean|road|rail|route|transport)\b|\b(sea|ocean)\b.{0,12}\b(or|and|vs\.?|versus)\b.{0,12}\bair\b|\bair\b.{0,12}\b(or|and|vs\.?|versus)\b.{0,12}\b(sea|ocean)\b", 3),
                 (r"\b(is|are|was) (it|this|that|the shipment|the order) (late|overdue|delayed|on time|behind schedule)\b|\boverdue\b|\bbehind schedule\b", 2),
                 (r"\b(ship\w*|deliver\w*|send|sent|freight|transit|transport|get (it|there|one))\b.{0,30}\b(to|into|in)\b|\bhow long\b.{0,25}\bto\b|\b(sea|air)\b.{0,20}\b(to|for)\b", 2)),
@@ -232,6 +233,11 @@ class CommerceAgent:
         notes: list[str] = []
         if {"which_machines", "origin"} & set(u.focus):
             return self._part_question(req, u, state, ctx, notes)
+        if "availability" in u.focus and u.references.get("part_id") and not _mentions_model(req.message, self.engine):
+            # “do you have <part number> in stock?”: the part's recorded stock; a part number is not a machine model, so no machine is asked for
+            context = part_stock(self.engine, u.references["part_id"], show_depots=req.principal.role is not CommerceRole.END_CUSTOMER)
+            ctx[DISCOVERY] = context
+            return Step(DISCOVERY, context.decision.status, context.decision.decision, context.decision.summary, notes, context.to_dict(), None)
         text = discovery_text(req.message, lambda clause: _mentions_model(clause, self.engine)) if len(u.domains) > 1 else req.message
         if len(u.domains) > 1:  # “… delivered to Lagos” is the delivery journey's question, not part of the part's name
             text = DELIVERY_TAIL.sub("", text).strip() or text
@@ -356,7 +362,7 @@ class CommerceAgent:
     def _logistics(self, req: AgentRequest, u: Understanding, state: dict[str, Any], ctx: dict[str, Any], multi: bool) -> Step:
         shipment_id = u.references.get("shipment_id") or (None if u.references.get("order_id") else state.get("shipment_id"))
         order_id = u.references.get("order_id") or (None if shipment_id else state.get("order_id"))
-        if multi and not shipment_id and not order_id and DISCOVERY in ctx and not find_destinations(self.engine, req.message):
+        if multi and not shipment_id and not order_id and DISCOVERY in ctx and not find_destinations(self.engine, req.message) and not TRACKED.search(req.message):
             # a replacement that has not been ordered has no shipment: the commerce logistics context tracks shipments and orders, it does not quote delivery for a part nobody has ordered
             summary = ("No shipment or order exists for the replacement yet, so there is no tracked delivery to report. The logistics context follows shipments and orders; "
                        "it does not estimate delivery for a part that has not been ordered.")
@@ -430,10 +436,9 @@ def commerce_domains(message: str, engine: CommerceContextEngine, parts_answered
         if d == DISCOVERY and parts_answered:
             continue
         if d == LOGISTICS and not ({"shipment_id", "order_id"} & set(u.references)) and not find_destinations(engine, message):
-            if parts_answered:
-                continue  # how fast the recommended part can arrive is Agentic Shopping's own delivery answer
             if not TRACKED.search(message):
-                continue  # “shipping to <a place with no recorded lane>” is not about a recorded shipment or order: nothing to look up
+                # how fast the recommended part can arrive is Agentic Shopping's own delivery answer; “shipping to <a place with no recorded lane>” names no shipment or order
+                continue
         out.append(d)
     return out
 

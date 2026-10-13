@@ -6,7 +6,8 @@ from fastapi import APIRouter
 from app.agent.service import LABELS
 from app.api.dependencies import Agents, CommerceEngine
 from app.commerce_agent.agent import commerce_domains
-from app.schemas.agent import AgentRequest, AgentResponse, AgentSuggestion
+from app.llm import LLMError
+from app.schemas.agent import AgentRequest, AgentResponse, AgentSuggestion, Interpretation
 
 router = APIRouter(prefix="/agent", tags=["agentic shopping"])
 
@@ -15,9 +16,21 @@ router = APIRouter(prefix="/agent", tags=["agentic shopping"])
 def recommend(body: AgentRequest, service: Agents, engine: CommerceEngine) -> AgentResponse:
     """Find the right part for a request. Read-only: the user adds it to the cart; no order is placed. `commerce_domains` names the order, shipment and warranty
     questions the request also contains; they are answered by POST /commerce/agent, which requires a signed-in user (nothing about them is read here)."""
-    response = service.recommend(body.request)
+    try:
+        response = service.recommend(body.request)
+    except LLMError:
+        # the shopping agent reads requests with the language model; without it, the questions the commerce assistant answers by its own rules (orders, shipments,
+        # warranty, and part searches) are still answered on the same screen. With nothing to answer, the language model's outage is reported as before (503).
+        domains = commerce_domains(body.request, engine, parts_answered=False)
+        if not domains:
+            raise
+        return AgentResponse(request=body.request, state="out_of_scope", interpretation=Interpretation(), steps=[], commerce_domains=domains,
+                             question=UNAVAILABLE, notes=[UNAVAILABLE])
     response.commerce_domains = commerce_domains(body.request, engine, parts_answered=response.state != "out_of_scope")
     return response
+
+
+UNAVAILABLE = "The shopping agent's language service is not responding right now, so price and delivery comparison is unavailable. The answers below come from the records."
 
 
 @router.get("/pipeline")

@@ -114,12 +114,14 @@ export interface DiscoveryContext extends CommerceContext {
 
 /** "Which machine uses this part?" and "Where did this part come from?": one part, read from the fitment and approved-source records. */
 export interface PartLookupContext extends CommerceContext {
-  lookup: 'PART_FITMENT' | 'PART_ORIGIN'
+  lookup: 'PART_FITMENT' | 'PART_ORIGIN' | 'PART_STOCK'
   part: { part_id: string; part_number: string; name: string } | null
   machines: { machine_id: string; model: string; name: string; fitment_id: string; fitment_rule: string | null }[]
   other_fitments: { model: string; approval_status: string }[]
   sources: { approved_source_id: string; source_id: string; source_kind: string }[]
   catalogue: { manufacturer: string | null; oem_status: string | null; catalogue_status: string | null; data_status: string | null } | null
+  /** PART_STOCK: the part's recorded inventory; depot detail only for roles that may see it */
+  stock?: { state: string; total_available: number | null; depots: { location_id: string; available_quantity: number | null; status: string }[] | null } | null
 }
 
 export const isLookup = (c: DiscoveryContext | PartLookupContext): c is PartLookupContext => 'lookup' in c

@@ -300,6 +300,7 @@ function CommerceSection({ r }: { r: AgentResponse }) {
   return (
     <section className="ag-commerce card card-pad" aria-label={title}>
       <p className="eyebrow">{r.state === 'out_of_scope' ? title : `Also in your request · ${title}`}</p>
+      {r.state === 'out_of_scope' ? r.notes.map((n) => <p key={n} className="small muted">{n}</p>) : null}
       <CommerceAnswerPanel question={r.request} domains={r.commerce_domains} />
     </section>
   )

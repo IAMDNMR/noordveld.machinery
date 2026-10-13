@@ -14,9 +14,10 @@ from typing import Any
 
 from app.commerce import contract as c
 from app.commerce.engine import CommerceContextEngine
+from app.commerce.discovery import validate_availability
 from app.lifecycle.rules import APPROVED
 
-PART_FITMENT, PART_ORIGIN = "PART_FITMENT", "PART_ORIGIN"
+PART_FITMENT, PART_ORIGIN, PART_STOCK = "PART_FITMENT", "PART_ORIGIN", "PART_STOCK"
 
 
 @dataclass(kw_only=True)
@@ -27,6 +28,7 @@ class PartLookupContext(c.CommerceContext):
     other_fitments: list[dict[str, Any]] = field(default_factory=list)
     sources: list[dict[str, Any]] = field(default_factory=list)  # PART_ORIGIN: approved sources
     catalogue: dict[str, Any] | None = None
+    stock: dict[str, Any] | None = None  # PART_STOCK: state, total, depots (depot detail only where the role may see it)
 
 
 def _context(engine: CommerceContextEngine, kind: str, inputs: dict[str, Any], decision: c.CommerceDecision, records: list[dict[str, Any]], evidence: list[dict[str, Any]],
@@ -85,3 +87,27 @@ def part_origin(engine: CommerceContextEngine, part_id: str) -> PartLookupContex
                            facts={"part_id": part_id, "manufacturer": part.get("manufacturer"), "approved_source_count": len(approved), "approved_sources": [s["source_id"] for s in approved], "data_status": part.get("data_status")},
                            reasons=["read from the part's catalogue record and its approved-source records"], warnings=([] if approved else ["no approved source is recorded for this part"]))
     return _context(engine, PART_ORIGIN, {"part_id": part_id}, d, records, evidence, path, part=part, sources=approved, catalogue=catalogue)
+
+
+def part_stock(engine: CommerceContextEngine, part_id: str, show_depots: bool) -> PartLookupContext:
+    """“Do you have this part in stock?” for one named part, with no machine: the recorded inventory, summarised by the discovery engine's own rule
+    (`validate_availability`): AVAILABLE with the units recorded, UNAVAILABLE, or UNKNOWN (never read as zero). Fitment is not part of this answer and is not implied."""
+    part = engine.discovery.part(part_id)
+    if part is None:
+        return _not_found(engine, PART_STOCK, part_id)
+    rows = engine.discovery.inventory(part_id)
+    avail = validate_availability(rows, {}, None)
+    label = f"{part['name']} ({part['part_number']})"
+    summary = {"AVAILABLE": f"{label}: {avail['total_available']} units recorded in stock across {sum(1 for r in rows if (r['available_quantity'] or 0) > 0)} depot(s).",
+               "UNAVAILABLE": f"{label}: no depot has stock recorded ({', '.join(sorted({r['status'] for r in rows}))})." if rows else f"{label}: no inventory record exists, so stock is not known.",
+               "UNKNOWN": f"{label}: stock is recorded as unknown, which is not read as available."}[avail["state"]]
+    records = [c.record("Part", part_id, part)] + [c.record("Inventory", r["inventory_id"], r) for r in rows]
+    evidence = [c.evidence_item(f"{part['part_number']} at {r['location_id']}: {r['status'].lower()}" + (f", {r['available_quantity']} available" if r["available_quantity"] is not None else ""), "Inventory", r["inventory_id"], r) for r in rows]
+    path = [c.path_step(1, "Part", part_id, "AVAILABLE_AT" if rows else None, part)] + [c.path_step(i + 2, "Inventory", r["inventory_id"], None, r) for i, r in enumerate(rows)]
+    d = c.CommerceDecision(status=c.SUCCESS, decision=PART_STOCK, summary=summary, facts={"part_id": part_id, "availability": avail["state"], "total_available": avail["total_available"]},
+                           reasons=["read from the part's recorded inventory; stock does not establish fitment for any machine"], warnings=["inventory is synthetic demonstration data"])
+    stock = {"state": avail["state"], "total_available": avail["total_available"], "depots": avail["warehouses"] if show_depots else None}
+    ctx = _context(engine, PART_STOCK, {"part_id": part_id}, d, records, evidence, path, part=part, stock=stock)
+    if not show_depots:
+        ctx.visibility = {"role": "END_CUSTOMER", "hidden_fields": ["stock.depots"]}
+    return ctx
