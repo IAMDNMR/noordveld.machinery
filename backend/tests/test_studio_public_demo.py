@@ -89,3 +89,13 @@ def test_requests_that_cost_money_are_bounded_per_visitor_and_per_instance():
         raise AssertionError("the 41st request in the hour should be refused")
     check_rate(visitor, now=1000.0 + 3601)  # the window has passed
     assert INSTANCE_PER_HOUR > VISITOR_PER_HOUR
+
+
+def test_the_switch_reads_the_usual_ways_of_writing_on_and_nothing_else(monkeypatch):
+    from app.core.demo_access import public_studio_enabled
+
+    for value, expected in [("1", True), ("true", True), ('"True"', True), (" yes ", True), ("on", True), ("0", False), ("false", False), ("", False), ("enabled?", False)]:
+        monkeypatch.setenv("DESIGN_STUDIO_PUBLIC_DEMO", value)
+        assert public_studio_enabled() is expected, value
+    monkeypatch.delenv("DESIGN_STUDIO_PUBLIC_DEMO")
+    assert public_studio_enabled() is False

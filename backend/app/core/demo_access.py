@@ -30,7 +30,8 @@ VISITOR_PREFIX = "visitor-"
 
 
 def public_studio_enabled() -> bool:
-    return os.environ.get(PUBLIC_STUDIO_ENV) == "1"
+    """On when the variable is 1, true, yes or on (any case, quotes ignored); anything else, or unset, is off."""
+    return os.environ.get(PUBLIC_STUDIO_ENV, "").strip().strip("\"'").lower() in {"1", "true", "yes", "on"}
 
 
 def studio_demo_request(request: Request) -> bool:
