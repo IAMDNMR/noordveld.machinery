@@ -23,6 +23,7 @@ from app.api.routes import (
     design_studio,
     domain_knowledge,
     intelligence,
+    studio_demo,
     orders,
     parts,
     site,
@@ -143,6 +144,7 @@ def create_app() -> FastAPI:
     app.include_router(orders.router, prefix="/api/v1")
     app.include_router(checkout.router, prefix="/api/v1")
     app.include_router(design_studio.router, prefix="/api/v1")
+    app.include_router(studio_demo.router, prefix="/api/v1")
     app.include_router(domain_knowledge.router, prefix="/api/v1")
     app.include_router(workspace.router, prefix="/api/v1")
     app.include_router(assistant.router, prefix="/api/v1")

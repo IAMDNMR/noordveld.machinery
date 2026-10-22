@@ -75,6 +75,33 @@ def test_each_visitor_gets_a_private_workspace_with_no_sign_in_and_cannot_reach_
         assert launch.status_code == 409 and launch.json()["error"]["code"] == "runtime_local_only"
 
 
+def test_a_signed_link_opens_the_live_demo_for_anyone_until_it_expires_and_only_for_that_project(monkeypatch, tmp_path):
+    from app.design_studio.demo_links import TTL_SECONDS, make_token, read_token
+
+    app = deployed_app(monkeypatch, tmp_path, public=True)
+    with TestClient(app, base_url=SITE) as owner, TestClient(app, base_url=SITE) as other, TestClient(app, base_url=SITE) as stranger:
+        owner.post("/api/v1/studio-session/demo")
+        other.post("/api/v1/studio-session/demo")
+        project = f"app_{new_visitor_id()[-12:]}"
+        assert owner.post("/api/v1/design-studio/projects", json={**blank_definition().model_dump(mode="json"), "id": project}).status_code == 200
+
+        link = owner.post(f"/api/v1/design-studio/projects/{project}/demo-link")
+        assert link.status_code == 200 and link.json()["path"].startswith("/api/v1/demo/") and link.json()["expires_in_days"] == 7
+        assert other.post(f"/api/v1/design-studio/projects/{project}/demo-link").status_code in (403, 404), "not someone else's project"
+
+        page = stranger.get(link.json()["path"])  # no cookie, no sign-in
+        assert page.status_code == 200 and "text/html" in page.headers["content-type"] and "live demo" in page.text
+        assert page.headers["cache-control"] == "no-store" and "noindex" in page.headers["x-robots-tag"]
+        tampered = link.json()["path"][:-3] + ("AAA" if not link.json()["path"].endswith("AAA") else "BBB")
+        assert stranger.get(tampered).status_code == 404 and "no longer available" in stranger.get(tampered).text
+
+    secret = get_settings().session_secret
+    token = make_token("visitor-x", "app_1", secret, now=1000.0)
+    assert read_token(token, secret, now=1000.0 + TTL_SECONDS - 1) == ("visitor-x", "app_1")
+    assert read_token(token, secret, now=1000.0 + TTL_SECONDS + 1) is None, "expired"
+    assert read_token(token, "another secret", now=1000.0) is None, "signed with a different secret"
+
+
 def test_requests_that_cost_money_are_bounded_per_visitor_and_per_instance():
     from fastapi import HTTPException
 

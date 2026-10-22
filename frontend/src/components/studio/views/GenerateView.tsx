@@ -21,6 +21,7 @@ import {
 import {
   launchRuntime,
   stopRuntime,
+  studioDemoLink,
   testRuntime,
   retainRelease,
   type RuntimeTest,
@@ -186,6 +187,22 @@ export function GenerateView({ studio, access, busy, refresh, say, autorun = 0 }
       setWorking(null)
     }
   }
+  const openLiveDemo = () => {
+    // Open the tab now, while the click still counts for the browser, then point it at the signed link.
+    const tab = window.open('', '_blank')
+    setError(null)
+    studioDemoLink(projectId).then(
+      (link) => {
+        const url = new URL(link.path, window.location.origin).href
+        if (tab) tab.location.href = url
+        else window.open(url, '_blank')
+      },
+      (cause) => {
+        tab?.close()
+        setError(message(cause, 'The live demo could not be opened.'))
+      },
+    )
+  }
   const stop = async () => {
     setWorking('stop')
     try {
@@ -248,7 +265,9 @@ export function GenerateView({ studio, access, busy, refresh, say, autorun = 0 }
           </span>
         </div>
         <p className="sw-muted">
-          Explore the application’s screens and navigation. The demo preview needs no hosting setup.
+          Explore the application’s screens and navigation. The demo preview needs no hosting setup;
+          “Open live demo” shows it with sample data in its own tab, with a link you can share for a
+          week.
         </p>
         <div className="sw-actions">
           {generated ? (
@@ -259,6 +278,11 @@ export function GenerateView({ studio, access, busy, refresh, say, autorun = 0 }
               onClick={() => setShowDemo((value) => !value)}
             >
               <Eye size={14} /> {showDemo ? 'Close demo preview' : 'View demo'}
+            </button>
+          ) : null}
+          {generated ? (
+            <button type="button" className="sw-button" onClick={openLiveDemo}>
+              <ExternalLink size={14} /> Open live demo
             </button>
           ) : null}
           {runtime.running && runtime.url ? (

@@ -519,7 +519,9 @@ def preview_document(definition, provider=None) -> str:
     outer = "default-src 'none'; frame-src data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'"
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
         f'<meta http-equiv="Content-Security-Policy" content="{html.escape(outer, quote=True)}">'
+        f"<title>{html.escape(definition.metadata.name)} · live demo</title>"
         "<style>html,body{margin:0;height:100%}iframe{display:block;border:0;width:100%;height:100%}</style>"
         '</head><body><iframe sandbox="allow-scripts" title="Application workspace" '
         f'src="data:text/html;base64,{encoded}"></iframe>'

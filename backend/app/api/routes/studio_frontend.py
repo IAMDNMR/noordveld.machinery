@@ -149,6 +149,26 @@ def progress(project_id: str, user: ProjectUser, projects: Projects):
         return {"progress": _progress.get(project_id), "result": _outcomes.get(project_id)}
 
 
+def preview_html(current, knowledge) -> str:
+    """The application's preview page: the generated interface when there is one, otherwise the schema-driven client."""
+    if current.generated_frontend:
+        return preview_document(current)
+    from app.design_studio.runtime_generation import preview_document as baseline
+
+    return baseline(current, knowledge)
+
+
+@router.post("/projects/{project_id}/demo-link")
+def demo_link(project_id: str, user: ProjectUser, projects: Projects):
+    """A signed link that opens this project's live demo (the application with sample data) in its own tab, for 7 days."""
+    from app.core.config import get_settings
+    from app.design_studio.demo_links import TTL_SECONDS, make_token
+
+    _store_call(projects.current, user.id, project_id)  # the project must exist and be the caller's
+    token = make_token(user.id, project_id, get_settings().session_secret)
+    return {"path": f"/api/v1/demo/{token}", "expires_in_days": TTL_SECONDS // 86400}
+
+
 @router.get("/projects/{project_id}/frontend/preview")
 def preview(project_id: str, user: ProjectUser, projects: Projects, knowledge: Knowledge):
     current = _store_call(projects.current, user.id, project_id)

@@ -163,7 +163,9 @@ function linkSummary(instance) {
   for (const [entityId, recordId] of Object.entries(instance.links || {})) {
     const entity = application.entities.find(e => e.id === entityId)
     const row = cache.get(entityId)?.find(r => r.id === recordId)
-    parts.push((entity?.name || entityId) + ' ' + (row ? recordLabel(entity, row) : recordId.slice(0, 6)))
+    // A record this role cannot open (or has not loaded) is named by its type only; an internal id is never shown.
+    const name = entity?.name || application.entity_names?.[entityId] || 'Record'
+    parts.push(row ? name + ' ' + recordLabel(entity, row) : name)
   }
   return parts.join(' · ') || 'No records linked yet'
 }
@@ -201,8 +203,8 @@ async function signIn() {
   root.replaceChildren()
   const users = await api('/demo-users')
   const card = el('section', null, { class: 'login' })
-  append(card, el('p', 'LOCAL APPLICATION', { class: 'eyebrow' }), el('h1', 'Who are you working as?'),
-    el('p', 'Choose a demonstration identity. Each one is a role in one organization; the server decides what that role may see and do.', { class: 'muted' }))
+  append(card, el('p', preview ? 'LIVE DEMO' : 'LOCAL APPLICATION', { class: 'eyebrow' }), el('h1', 'Who are you working as?'),
+    el('p', preview ? 'Choose a role to see the application the way that person would. Everything here is sample data.' : 'Choose a demonstration identity. Each one is a role in one organization; the server decides what that role may see and do.', { class: 'muted' }))
   const list = el('ul', null, { class: 'identities', 'aria-label': 'Demonstration identities' })
   // Roles that perform process steps first; a role with no steps only sees the shared pages, so it says so.
   for (const user of [...users].sort((a, b) => (b.primary !== false) - (a.primary !== false))) {
@@ -211,7 +213,7 @@ async function signIn() {
     append(item, el('strong', role), el('span', user.primary === false ? 'No process steps yet' : organization))
     list.append(append(el('li'), item))
   }
-  append(card, list, el('p', 'Synthetic local identities only. Production identity is not connected.', { class: 'muted small' }), el('p', '', { id: 'notification', class: 'notice' }))
+  append(card, list, el('p', preview ? 'Nothing you do in this demo is saved.' : 'Synthetic local identities only. Production identity is not connected.', { class: 'muted small' }), el('p', '', { id: 'notification', class: 'notice' }))
   root.append(card)
 }
 
@@ -289,7 +291,7 @@ async function render() {
   }
   section = ''
   link({ page: 'catalog' }, 'All records')
-  append(rail, brand, menu, nav, el('p', preview ? 'Studio preview · sample data, kept in this page only · processes run in the launched application' : 'Local application · isolated SQLite storage · no external integrations', { class: 'rail-footer' }))
+  append(rail, brand, menu, nav, el('p', preview ? 'Live demo · sample data, nothing is saved · starting a process needs the launched application' : 'Local application · isolated SQLite storage · no external integrations', { class: 'rail-footer' }))
   const header = el('header', null, { class: 'topbar' })
   append(header, el('span', application.presentation?.description || '', { class: 'topbar__about' }), preview ? pill('Preview', 'waiting') : null,
     append(el('span', null, { class: 'whoami' }), el('span', roleName(application.user.role), { class: 'whoami__role' }), el('span', application.user.tenant.replace('demo_', '').replaceAll('_', ' '))),
@@ -510,7 +512,8 @@ async function lane(step, number, here) {
     el('span', here.length ? `${here.length} waiting` : 'Nothing waiting', { class: 'pill pill--' + (here.some(i => i.can_act) ? 'action' : here.length ? 'waiting' : 'neutral') })))
   if (writes.length || reads.length) item.append(el('p', [writes.length ? 'Changes ' + writes.map(entityName).join(', ') : null, reads.length ? 'Uses ' + reads.map(entityName).join(', ') : null].filter(Boolean).join(' · '), { class: 'muted small' }))
   for (const instance of here) item.append(instanceRow(instance))
-  if (step.kind === 'search' && reads.length) item.append(await lookup(application.entities.find(e => e.id === reads[0])))
+  // lookup() has nothing to show for a record this role cannot open; Element.append(null) would print the word "null".
+  if (step.kind === 'search' && reads.length) append(item, await lookup(application.entities.find(e => e.id === reads[0])))
   return item
 }
 /* A quick search over the records a search step looks at. */
@@ -555,15 +558,15 @@ async function instanceDetail(body, instance) {
   const entityIds = [...new Set([...(instance.step.reads_entity_ids || []), ...(instance.step.writes_entity_ids || [])])]
   for (const entityId of entityIds) {
     const entity = application.entities.find(e => e.id === entityId)
-    const select = el('select', null, { 'aria-label': 'Link ' + (entity?.name || entityId) })
-    select.append(el('option', 'Select ' + (entity?.name || entityId).toLowerCase(), { value: '' }))
+    const select = el('select', null, { 'aria-label': 'Link ' + entityName(entityId) })
+    select.append(el('option', 'Select ' + entityName(entityId).toLowerCase(), { value: '' }))
     try { for (const row of await records(entityId)) select.append(el('option', recordLabel(entity, row), { value: row.id })) }
     catch { select.append(el('option', 'Not visible to your role', { value: '' })) }
     select.value = instance.links[entityId] || ''
     select.disabled = !instance.can_act
     links[entityId] = select
     const writes = (instance.step.writes_entity_ids || []).includes(entityId)
-    action.append(labelled(entity?.name || entityId, select, writes ? 'This step changes this record.' : 'This step reads this record.'))
+    action.append(labelled(entityName(entityId), select, writes ? 'This step changes this record.' : 'This step reads this record.'))
   }
   if (instance.can_act) {
     action.append(button('Complete “' + instance.step.label + '”', async () => {
