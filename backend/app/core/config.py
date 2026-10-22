@@ -25,6 +25,16 @@ def _load_env_file(path: Path) -> None:
             os.environ.setdefault(key.strip(), value.strip())
 
 
+def _number(name: str, default: float, kind=float):
+    """A numeric setting that never stops the application from starting: stray quotes or a trailing comment (common when a whole
+    .env file is imported into a host's settings) are ignored, and an unreadable value falls back to the default."""
+    raw = os.environ.get(name, "").split("#", 1)[0].strip().strip("\"'").strip()
+    try:
+        return kind(raw) if raw else default
+    except ValueError:
+        return default
+
+
 @dataclass(frozen=True)
 class Settings:
     neo4j_uri: str = ""
@@ -74,7 +84,7 @@ def get_settings() -> Settings:
         neo4j_username=os.environ.get("NEO4J_USERNAME", ""),
         neo4j_password=os.environ.get("NEO4J_PASSWORD", ""),
         neo4j_database=os.environ.get("NEO4J_DATABASE", "neo4j"),
-        neo4j_query_timeout=float(os.environ.get("NEO4J_QUERY_TIMEOUT", "15")),
+        neo4j_query_timeout=_number("NEO4J_QUERY_TIMEOUT", 15.0),
         cors_origins=tuple(
             o.strip()
             for o in os.environ.get("CORS_ORIGINS", "http://localhost:5180").split(",")
@@ -90,8 +100,8 @@ def get_settings() -> Settings:
         nvidia_api_key=os.environ.get("NVIDIA_API_KEY", ""),
         nvidia_planner_model=os.environ.get("NVIDIA_PLANNER_MODEL", "").strip(),
         nvidia_fast_model=os.environ.get("NVIDIA_FAST_MODEL", "").strip(),
-        llm_requests_per_minute=int(os.environ.get("LLM_REQUESTS_PER_MINUTE", "25")),
-        llm_timeout=float(os.environ.get("LLM_TIMEOUT", "20")),
+        llm_requests_per_minute=_number("LLM_REQUESTS_PER_MINUTE", 25, int),
+        llm_timeout=_number("LLM_TIMEOUT", 20.0),
         session_secret=os.environ.get("SESSION_SECRET", "") or secrets.token_urlsafe(32),
         session_cookie_secure=os.environ.get("SESSION_COOKIE_SECURE", "").lower() == "true",
     )
