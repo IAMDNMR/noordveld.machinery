@@ -60,6 +60,18 @@ def test_a_drafted_role_that_is_a_shorter_name_for_a_verified_one_is_merged_but_
     assert any("Merged the role Technician into Service technician" in line for line in changes)
 
 
+def test_a_workflow_of_only_look_up_and_check_steps_is_a_dashboard_not_a_process_to_start():
+    from types import SimpleNamespace as Step
+
+    from app.design_studio.runtime_generation import is_view, work_areas
+
+    flow = lambda *kinds: Step(states=[Step(kind=kind) for kind in ("start", *kinds, "end")])  # noqa: E731
+    assert is_view(flow("search", "search", "review"))
+    assert not is_view(flow("search", "form")) and not is_view(flow())
+    definition = build(SCENARIOS["warehouse (WMS)"])
+    assert all(area["id"] != "views" for area in work_areas(definition))
+
+
 def test_an_application_gets_a_visual_layer_without_a_template_choice_and_a_side_menu_when_large():
     definition = build(SCENARIOS["multi-domain (warehouse + procurement + transport)"])
     assert definition.template is None and automatic(definition) is not None

@@ -82,8 +82,17 @@ def work_areas(definition, provider=None) -> list[dict]:
             ]
             area = max(set(touched), key=touched.count) if touched else "other"
         name = names.get(area, "Other processes")
+        if area == "other" and is_view(workflow):
+            area, name = "views", "Dashboards and views"
         areas.setdefault(area, {"id": area, "name": name, "workflow_ids": []})["workflow_ids"].append(workflow.id)
     return list(areas.values())
+
+
+def is_view(workflow) -> bool:
+    """A dashboard, directory or tracking view: it is looked at, never started, because every step only looks something up or checks it.
+    The application client applies the same rule (runtime_app.js isView)."""
+    steps = [step for step in workflow.states if step.kind not in ("start", "end")]
+    return bool(steps) and all(step.kind in ("search", "review") for step in steps)
 
 
 def presentation(definition, provider=None) -> dict:
