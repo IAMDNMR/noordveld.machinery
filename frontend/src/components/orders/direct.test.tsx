@@ -6,7 +6,6 @@ import type { Me, OrderDetail } from '../../api/orders'
 import OrderDetailPage from '../../pages/OrderDetailPage'
 import { SessionProvider } from '../../store/session'
 
-
 const jane: Me = {
   id: 'U-JANE',
   name: 'Jane (demo)',
@@ -286,12 +285,4 @@ describe('direct order lifecycle screen', () => {
     expect(await screen.findByRole('button', { name: 'Begin picking and packing' })).toBeTruthy() // the screen now shows what the server returned
     expect(screen.queryByRole('button', { name: 'Start fulfilment' })).toBeNull()
   })
-
-  
-
-  
-
-  
-
-  
 })

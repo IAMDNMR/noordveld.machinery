@@ -1,4 +1,5 @@
 import { apiGet, apiPost } from './client'
+import type { CatalogGroup } from './types'
 import type {
   AssemblyItem,
   ComplianceItem,
@@ -26,6 +27,8 @@ export const askQuestion = (
 ): Promise<QueryResponse> =>
   apiPost<QueryResponse>('/intelligence/query', { question, selected, limit }, signal)
 
+export const getIntelligenceCatalog = (signal?: AbortSignal): Promise<CatalogGroup[]> =>
+  apiGet<CatalogGroup[]>('/intelligence/catalog', {}, signal)
 export const getSuggestions = (signal?: AbortSignal): Promise<Suggestion[]> =>
   apiGet<Suggestion[]>('/intelligence/suggestions', {}, signal)
 

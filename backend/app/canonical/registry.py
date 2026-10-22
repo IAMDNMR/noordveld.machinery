@@ -232,9 +232,8 @@ SHIPMENT_RELS = (
     RelDef("DISPATCHED_FROM", "origin_location_id", "location"),
     RelDef("DELIVERS_TO_LOCATION", "destination_location_id", "location"),
     RelDef("HAS_SHIPMENT", "order_id", "order", reverse=True),
-    RelDef("SHIPS_LINE", "order_line_id", "order_line"),
     RelDef("CARRIED_BY", "carrier_id", "carrier"),
-)
+)  # the lines are the shipment_lines datasets
 TRACKING_FIELDS = {
     "tracking_event_id": "tracking_event_id",
     "timestamp": "event_date",
@@ -681,6 +680,23 @@ SPECS: tuple[DatasetSpec, ...] = (
         group_check=tracking_group_check,
         targets=(_t("TrackingEvent", "tracking_event_id", TRACKING_FIELDS, rels=TRACKING_RELS),),
     ),
+    # which order lines travel on a shipment: a relationship dataset, like route_legs. The graph owns the seeded shipments' SHIPS_LINE relationships (verify); the network's are merged.
+    DatasetSpec(
+        "shipment_lines",
+        "logistics/shipment_lines.csv",
+        m.ShipmentLine,
+        domain="logistics",
+        depends=("shipments", "order_lines"),
+        rel=RelTarget(
+            "SHIPS_LINE",
+            "shipment_id",
+            "shipment",
+            "order_line_id",
+            "order_line",
+            "SHIPS_LINE:{id}",
+            mode="verify",
+        ),
+    ),
     # ── lifecycle ────────────────────────────────────────────────────────────────────────────────
     DatasetSpec(
         "machine_instances",
@@ -1064,6 +1080,21 @@ SPECS: tuple[DatasetSpec, ...] = (
         refs=(("shipment_id", "shipment"), ("location_id", "location")),
         group_check=tracking_group_check,
         targets=(_t("TrackingEvent", "tracking_event_id", TRACKING_FIELDS, rels=TRACKING_RELS),),
+    ),
+    DatasetSpec(
+        "network_shipment_lines",
+        "logistics/network_shipment_lines.csv",
+        m.ShipmentLine,
+        domain="network",
+        depends=("network_shipments", "network_order_lines"),
+        rel=RelTarget(
+            "SHIPS_LINE",
+            "shipment_id",
+            "shipment",
+            "order_line_id",
+            "order_line",
+            "SHIPS_LINE:{id}",
+        ),
     ),
     # ── scenarios (data only: nothing reads these yet) ───────────────────────────────────────────
     *[

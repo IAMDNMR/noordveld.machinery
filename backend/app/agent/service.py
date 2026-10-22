@@ -38,8 +38,8 @@ from app.schemas.agent import (
     AgentResponse,
     AgentSuggestion,
     Candidate,
-    Delivery,
     DecisionView,
+    Delivery,
     EvidenceItem,
     Excluded,
     Interpretation,
@@ -150,19 +150,30 @@ class AgentService:
             ),
             (
                 f"Find {a(thing(0))} for the {machine(0)}. I need 2 units, preferably in stock.",
-                thing(0), machine(0), "Order two parts",
+                thing(0),
+                machine(0),
+                "Order two parts",
             ),
             (
                 f"Compare the available {thing(2)} options for the {machine(2)}. Prioritize the lowest price.",
-                thing(2), machine(2), "Compare options",
+                thing(2),
+                machine(2),
+                "Compare options",
             ),
             (
-                f"Find {a(thing(1))} for the {machine(1)}" + (f" under €{budget}." if budget else ".") + " Show the available supply options.",
-                thing(1), machine(1), "Stay within budget" if budget else "Explore supply options",
+                f"Find {a(thing(1))} for the {machine(1)}"
+                + (f" under €{budget}." if budget else ".")
+                + " Show the available supply options.",
+                thing(1),
+                machine(1),
+                "Stay within budget" if budget else "Explore supply options",
             ),
             (
-                f"My {machine(3)} needs {a(thing(3))}. Prioritize the fastest available delivery" + (f" to {city}." if city else "."),
-                thing(3), machine(3), "Reduce downtime",
+                f"My {machine(3)} needs {a(thing(3))}. Prioritize the fastest available delivery"
+                + (f" to {city}." if city else "."),
+                thing(3),
+                machine(3),
+                "Reduce downtime",
             ),
         ]
         seen: set[str] = set()

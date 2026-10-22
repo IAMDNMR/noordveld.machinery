@@ -13,7 +13,7 @@ from app.schemas.intelligence import Subject
 _WITH_DIGIT = re.compile(r"[A-Za-z0-9][A-Za-z0-9\-]*\d[A-Za-z0-9\-]*")
 _CLAIM_WORDS = re.compile(
     r"interchangeab|replacement|alternative|equivalent|substitut|compatible with all|guarantee|certified|in stock|out of stock|zero|no stock",
-    re.I,
+    re.IGNORECASE,
 )
 MAX_WORDS = 70
 MAX_IDENTIFIERS = 4  # the cards list the items; a sentence that recites them all is rejected
@@ -104,15 +104,18 @@ def grounding_records(
 
 # ── post-generation validation: wording must never deny what the deterministic result holds ───────────────────────
 _DENIAL = re.compile(
-    r"\b(no|not|none|neither|cannot|unavailable|unknown|missing|without|lacks?|lacking)\b|n't", re.I
+    r"\b(no|not|none|neither|cannot|unavailable|unknown|missing|without|lacks?|lacking)\b|n't",
+    re.IGNORECASE,
 )
 _QUANTITY_LABELS = {"Units recorded", "Warehouse units recorded", "Quantity"}
 _CONCEPTS = (  # (fact labels that prove the value is in the result, the words a sentence uses to name it)
     (
         _QUANTITY_LABELS,
-        re.compile(r"\b(units?|quantit\w*|unit counts?|how many|stock levels?|on[- ]hand)\b", re.I),
+        re.compile(
+            r"\b(units?|quantit\w*|unit counts?|how many|stock levels?|on[- ]hand)\b", re.IGNORECASE
+        ),
     ),
-    ({"Lead time"}, re.compile(r"\blead[- ]times?\b", re.I)),
+    ({"Lead time"}, re.compile(r"\blead[- ]times?\b", re.IGNORECASE)),
 )
 _NOUNS = {
     "supplier": r"suppliers?",
@@ -146,7 +149,7 @@ def contradicts(text: str, outcome: Outcome) -> str | None:
             return f"denies {sorted(labels & have)[0].lower()}"
     if any(
         f.label == "Primary supplier" and f.value == "Yes" for i in outcome.results for f in i.facts
-    ) and _denies(text, re.compile(r"\bprimary\b", re.I)):
+    ) and _denies(text, re.compile(r"\bprimary\b", re.IGNORECASE)):
         return "denies the primary supplier"
     for kind in {i.kind for i in outcome.results}:
         noun = _NOUNS.get(kind)
@@ -154,13 +157,15 @@ def contradicts(text: str, outcome: Outcome) -> str | None:
         if noun and re.search(
             rf"\b(no|not any)\s+{noun}\b[^.;]{{0,30}}\b(recorded|connected|found|listed|available|exist\w*|linked|associated|stock\w*|hold\w*)\b",
             text,
-            re.I,
+            re.IGNORECASE,
         ):
             return f"denies the listed {kind}s"
     compliance = [i for i in outcome.results if i.kind == "compliance"]
     if compliance and all(i.data_class == "SYNTHETIC_DEMO" for i in compliance):
-        if re.search(r"certif", text, re.I) and not re.search(
-            r"demo|synthetic|not (?:established|real)|does not establish|no real", text, re.I
+        if re.search(r"certif", text, re.IGNORECASE) and not re.search(
+            r"demo|synthetic|not (?:established|real)|does not establish|no real",
+            text,
+            re.IGNORECASE,
         ):
             return "presents synthetic compliance data as established"
     return None

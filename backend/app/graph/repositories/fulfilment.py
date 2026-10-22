@@ -137,4 +137,4 @@ class GraphFulfilmentRepository:
         self._g.write(q.CART_REMOVE_LINES, cart_id=cart_id, keys=keys)
 
 
-__all__ = ["GraphFulfilmentRepository", "Stale", "ReservationFailed", "GraphConflictError"]
+__all__ = ["GraphConflictError", "GraphFulfilmentRepository", "ReservationFailed", "Stale"]

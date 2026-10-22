@@ -31,7 +31,7 @@ export default defineConfig({
   },
   // Export verification has its own root and runner. Never discover its
   // temporary files as part of the Studio's component suite.
-  test: { include: ['src/**/*.{test,spec}.{ts,tsx}'] },
+  test: { exclude: ['**/node_modules/**', '**/.export-check-*/**'] },
   preview: { proxy: { '/api': 'http://localhost:8000' } },
   build: {
     target: 'es2022',

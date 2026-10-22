@@ -62,5 +62,3 @@ it('keeps the commerce navigation separate even when Studio is available', async
   await waitFor(() => expect(labels()).toContain('Workspace'))
   expect(labels()).not.toContain('Design Studio')
 })
-
-

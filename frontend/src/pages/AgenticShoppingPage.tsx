@@ -13,6 +13,7 @@ import {
   askAgent,
   getAgentPipeline,
   getAgentSuggestions,
+  getShoppingCatalog,
   type AgentCandidate,
   type AgentInterpretation,
   type AgentResponse,
@@ -26,7 +27,9 @@ import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { formatMoney } from '../lib/format'
 import { CHECKOUT_ROUTE, partPath } from '../lib/storeQuery'
+import { CommerceAnswerPanel } from '../components/commerce/CommerceWorkspace'
 import { CartProvider, useCart } from '../store/CartContext'
+import { QuestionCatalog } from '../components/catalog/QuestionCatalog'
 import '../styles/wf.css'
 import '../components/store/store.css'
 import '../components/agent/agent.css'
@@ -86,6 +89,7 @@ function CartButton() {
 // ── compose ─────────────────────────────────────────────────────────────────────────────────────
 function Compose({ onRun }: { onRun: (q: string) => void }) {
   const suggestions = useApi((s) => getAgentSuggestions(s), 'agent-suggestions')
+  const catalog = useApi((s) => getShoppingCatalog(s), 'shopping-catalog')
   return (
     <section className="ag-compose" aria-labelledby="ag-title">
       <div className="wf-container">
@@ -111,28 +115,8 @@ function Compose({ onRun }: { onRun: (q: string) => void }) {
               suggestions.data?.[0]?.request ? `e.g. ${suggestions.data[0].request}` : undefined
             }
           />
-          {suggestions.data?.length ? (
-            <div className="ag-examples">
-              <div className="ag-examples__head">
-                <p className="eyebrow">Start with a real example</p>
-                <span>Built from the demonstration catalogue</span>
-              </div>
-              <ul className="ag-pills" aria-label="Example requests">
-                {suggestions.data.map((s) => (
-                  <li key={s.request}>
-                    <button type="button" aria-label={s.request} onClick={() => onRun(s.request)}>
-                      <span className="ag-example__intent">{s.action}</span>
-                      <strong>{s.need}</strong>
-                      <span>{s.context}</span>
-                      <span className="ag-example__request">
-                        {s.request}
-                        <ArrowRight size={16} aria-hidden="true" />
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {catalog.data?.length ? (
+            <QuestionCatalog groups={catalog.data} onAsk={onRun} align="center" />
           ) : null}
         </div>
       </div>
@@ -380,15 +364,43 @@ function ServiceState({ error, onRetry }: { error: ApiError; onRetry: () => void
   )
 }
 
+/** Orders, shipments, warranty and part questions in the same request: the commerce assistant's answer, on this screen. */
+function CommerceSection({ r }: { r: AgentResponse }) {
+  const title = r.commerce_domains
+    .map(
+      (d) =>
+        ({ DISCOVERY: 'This part', LOGISTICS: 'Orders and shipments', WARRANTY: 'Warranty' })[d],
+    )
+    .join(' · ')
+  return (
+    <section className="ag-commerce card card-pad" aria-label={title}>
+      <p className="eyebrow">
+        {r.state === 'out_of_scope' ? title : `Also in your request · ${title}`}
+      </p>
+      {r.state === 'out_of_scope'
+        ? r.notes.map((n) => (
+            <p key={n} className="small muted">
+              {n}
+            </p>
+          ))
+        : null}
+      <CommerceAnswerPanel question={r.request} domains={r.commerce_domains} />
+    </section>
+  )
+}
+
 // ── results ─────────────────────────────────────────────────────────────────────────────────────
 function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) => void }) {
   const i = r.interpretation
   const best = r.candidates.find((c) => c.recommended)
 
   if (r.state === 'out_of_scope') {
-    return (
+    // not a parts request: orders, shipments, warranty and claims are answered by the commerce assistant, here, with the same question (it needs a signed-in user)
+    return r.commerce_domains.length ? (
+      <CommerceSection r={r} />
+    ) : (
       <div className="ag-note card card-pad">
-        <h2>That isn't a parts request.</h2>
+        <h2>That isn't a parts, order, shipment or warranty request.</h2>
         <p className="muted">{r.question}</p>
         <Link className="btn btn-secondary btn-sm" to={PI}>
           Open Parts Intelligence
@@ -461,6 +473,7 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
           ) : null}
         </>
       ) : null}
+      {r.commerce_domains.length ? <CommerceSection r={r} /> : null}
       <p className="disclaimer">{r.disclaimer}</p>
     </div>
   )

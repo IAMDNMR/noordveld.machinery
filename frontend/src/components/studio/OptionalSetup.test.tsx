@@ -31,7 +31,6 @@ const intake: IntakeState = {
 }
 
 describe('optional setup', () => {
-  
   it('skips both questions explicitly and never blocks continuing with shared knowledge', () => {
     const act = vi.fn()
     const view = render(<OptionalSetup intake={intake} busy={false} act={act} />)

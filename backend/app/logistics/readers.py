@@ -12,6 +12,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Protocol
 
+from app.canonical.graph_rows import LOCATION_KIND_BY_LABEL, graph_row
 from app.canonical.io import CANON_DIR, load_rows
 from app.canonical.registry import BY_NAME, KINDS
 from app.graph.client import GraphClient
@@ -31,12 +32,17 @@ LOCATION_TYPE_BY_LABEL = {
 class LogisticsReader(Protocol):
     def shipment(self, shipment_id: str) -> dict[str, Any] | None: ...
     def events(self, shipment_id: str) -> list[dict[str, Any]]: ...
+    def shipment_lines(self, shipment_id: str) -> list[str]: ...
     def route(self, route_id: str) -> dict[str, Any] | None: ...
     def legs(self, route_id: str) -> list[dict[str, Any]]: ...
     def routes_between(self, origin: str, destination: str) -> list[dict[str, Any]]: ...
+    def network_routes(self) -> list[dict[str, Any]]: ...
     def location(self, location_id: str) -> dict[str, Any] | None: ...
     def order(self, order_id: str) -> dict[str, Any] | None: ...
     def order_part(self, order_line_id: str) -> dict[str, Any] | None: ...
+    def order_lines(self, order_id: str) -> list[dict[str, Any]]: ...
+    def shipments_of_order(self, order_id: str) -> list[dict[str, Any]]: ...
+    def orders_of_customer(self, customer_id: str) -> list[str]: ...
 
 
 def _clean(row: dict[str, Any]) -> dict[str, Any]:
@@ -85,6 +91,15 @@ class FileReader:
             key=lambda e: (e["sequence"] if e["sequence"] is not None else 0, e["timestamp"]),
         )  # type: ignore[union-attr]
 
+    def shipment_lines(self, shipment_id):
+        key = "shipment_lines"
+        if key not in self._cache:
+            grouped: dict[str, list[str]] = defaultdict(list)
+            for r in self._rows("shipment_lines", "network_shipment_lines"):
+                grouped[r["shipment_id"]].append(r["order_line_id"])
+            self._cache[key] = grouped  # type: ignore[assignment]
+        return sorted(self._cache[key].get(shipment_id, []))  # type: ignore[union-attr]
+
     def route(self, route_id):
         return self._index("route", "route_id", "routes", "network_routes").get(route_id)
 
@@ -105,6 +120,9 @@ class FileReader:
                 grouped[(r["origin_location_id"], r["destination_location_id"])].append(r)
             self._cache[key] = grouped  # type: ignore[assignment]
         return sorted(self._cache[key].get((origin, destination), []), key=lambda r: r["route_id"])  # type: ignore[union-attr]
+
+    def network_routes(self):
+        return sorted(self._rows("network_routes"), key=lambda r: r["route_id"])
 
     def location(self, location_id):
         return self._index("location", "location_id", "locations", "network_locations").get(
@@ -128,6 +146,43 @@ class FileReader:
             "quantity": line["quantity"],
         }
 
+    def order_lines(self, order_id):
+        lines = [
+            r for r in self._rows("order_lines", "network_order_lines") if r["order_id"] == order_id
+        ]
+        parts = self._index("part", "part_id", "parts")
+        return [
+            {
+                "order_line_id": r["order_line_id"],
+                "part_id": r["part_id"],
+                "part_number": (parts.get(r["part_id"]) or {}).get("part_number"),
+                "name": (parts.get(r["part_id"]) or {}).get("name"),
+                "quantity": r["quantity"],
+                "unit_price": r.get("unit_price"),
+                "data_status": r.get("data_status"),
+                "source_type": r.get("source_type"),
+                "source_record_id": r.get("source_record_id"),
+            }
+            for r in sorted(lines, key=lambda x: x["order_line_id"])
+        ]
+
+    def shipments_of_order(self, order_id):
+        return sorted(
+            (
+                r
+                for r in self._rows("shipments", "network_shipments")
+                if r.get("order_id") == order_id
+            ),
+            key=lambda r: r["shipment_id"],
+        )
+
+    def orders_of_customer(self, customer_id):
+        return sorted(
+            r["order_id"]
+            for r in self._rows("orders", "network_orders")
+            if r.get("customer_id") == customer_id
+        )
+
 
 # ── the graph ────────────────────────────────────────────────────────────────────────────────────
 class GraphReader:
@@ -138,107 +193,98 @@ class GraphReader:
         rows = self._g.read(query, **params)
         return rows[0] if rows else None
 
-    @staticmethod
-    def _prov(p: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "data_status": p.get("data_status"),
-            "source_type": p.get("source_type")
-            or ("SYNTHETIC_DEMO" if p.get("data_status") == "SYNTHETIC_DEMO" else None),
-            "source_record_id": p.get("source_record_id"),
-        }
-
     def shipment(self, shipment_id):
         r = self._one(q.SHIPMENT, id=shipment_id)
         if not r:
             return None
         p = r["p"]
         route_id = p.get("route_id") or r["route_rel"]
-        flags = p.get("remediation_flags") or []
-        return {
-            "shipment_id": p["shipment_id"],
-            "order_id": r["order_id"],
-            "order_line_id": r["order_line_id"],
-            "carrier": r["carrier"],
-            "carrier_id": None,
-            "route_id": route_id,
-            "origin_location_id": r["origin"],
-            "destination_location_id": r["destination"],
-            "transport_mode": p.get("transport_mode"),
-            "status": p.get("shipment_status"),
-            "departure_date": p.get("departure_date"),
-            "planned_eta": p.get("planned_eta"),
-            "actual_eta": p.get("actual_eta"),
-            "tracking_ref": p.get("tracking_ref"),
-            "remediation_flags": list(flags),
-            "route_resolution_status": p.get("route_resolution_status")
+        return graph_row(
+            "shipments",
+            p,
+            order_id=r["order_id"],
+            carrier=r["carrier"],
+            carrier_id=r["carrier_id"],
+            route_id=route_id,
+            origin_location_id=r["origin"],
+            destination_location_id=r["destination"],
+            route_resolution_status=p.get("route_resolution_status")
             or ("LINKED" if route_id else "ROUTE_NOT_DETERMINABLE"),
-            **self._prov(p),
-        }
+        )
+
+    def shipment_lines(self, shipment_id):
+        return [r["id"] for r in self._g.read(q.SHIPMENT_LINES, id=shipment_id)]
 
     def events(self, shipment_id):
-        out = []
-        for r in self._g.read(q.EVENTS, id=shipment_id):
-            p = r["p"]
-            out.append(
-                {
-                    "tracking_event_id": p["tracking_event_id"],
-                    "shipment_id": shipment_id,
-                    "timestamp": p.get("event_date"),
-                    "location_id": r["location_id"],
-                    "location_text": p.get("event_location"),
-                    "status": p.get("event_status"),
-                    "event_type": p.get("event_type") or p.get("event_status"),
-                    "description": p.get("description"),
-                    "sequence": p.get("event_seq"),
-                    **self._prov(p),
-                }
+        return [
+            graph_row(
+                "tracking_events",
+                r["p"],
+                shipment_id=shipment_id,
+                location_id=r["location_id"],
+                event_type=r["p"].get("event_type") or r["p"].get("event_status"),
             )
-        return out
+            for r in self._g.read(q.EVENTS, id=shipment_id)
+        ]
 
     @staticmethod
     def _route_row(r: dict[str, Any]) -> dict[str, Any]:
         p = r["p"]
-        return {
-            "route_id": p["route_id"],
-            "origin_location_id": p.get("origin_location_id") or p.get("origin_depot_id"),
-            "destination_location_id": p.get("destination_location_id")
+        return graph_row(
+            "routes",
+            p,
+            origin_location_id=p.get("origin_location_id") or p.get("origin_depot_id"),
+            destination_location_id=p.get("destination_location_id")
             or p.get("destination_shipto_id"),
-            "transport_mode": p.get("transport_mode"),
-            "planned_transit_days": p.get("total_estimated_days"),
-            "estimated_cost": p.get("estimated_cost")
+            estimated_cost=p.get("estimated_cost")
             if p.get("estimated_cost") is not None
             else r["cost"],
-            "currency": p.get("currency") or r["currency"],
-            "service_level": p.get("service_level"),
-            "status": p.get("route_status"),
-            "data_status": p.get("data_status"),
-            "source_type": p.get("source_type")
-            or ("SYNTHETIC_DEMO" if p.get("data_status") == "SYNTHETIC_DEMO" else None),
-            "source_record_id": p.get("source_record_id"),
-        }
+            currency=p.get("currency") or r["currency"],
+        )
 
     def route(self, route_id):
         r = self._one(q.ROUTE, id=route_id)
         return self._route_row(r) if r else None
 
+    @staticmethod
+    def _leg_id(h: dict[str, Any], route_id: str, leg_id: str) -> str:
+        """The canonical route_leg_id. Seeded legs: the HAS_LEG relationship id without its prefix. Network legs are linked by the engine's generic edge, whose id is
+        'HAS_LEG:<route>:<leg>' while the canonical record id is '<route>><leg>': the same pair, written with the separator the canonical dataset uses."""
+        rid = str(h.get("rel_id", "")).removeprefix("HAS_LEG:")
+        return f"{route_id}>{leg_id}" if rid == f"{route_id}:{leg_id}" else rid
+
     def legs(self, route_id):
         out = []
         for r in self._g.read(q.LEGS, id=route_id):
-            p = r["p"]
-            out.append(
+            p, h = r["p"], r["hp"]
+            # the leg record is the HAS_LEG relationship (its id, provenance and sequence) joined to the leg node (route, places, mode, status)
+            row = graph_row(
+                "route_legs",
                 {
-                    "route_id": route_id,
-                    "leg_id": p["leg_id"],
-                    "sequence": r["sequence"],
-                    "origin_location_id": p.get("origin_location_id") or p.get("from_id"),
-                    "destination_location_id": p.get("destination_location_id") or p.get("to_id"),
-                    "transport_mode": p.get("mode"),
-                    "planned_transit_days": p.get("planned_transit_days"),
-                    "estimated_cost": p.get("estimated_cost"),
-                    "status": p.get("leg_status"),
-                    "distance_km": p.get("distance_km"),
-                }
+                    **p,
+                    **{
+                        k: v
+                        for k, v in h.items()
+                        if k
+                        in (
+                            "data_status",
+                            "source_type",
+                            "source_record_id",
+                            "effective_from",
+                            "effective_to",
+                        )
+                    },
+                },
+                route_id=route_id,
+                route_leg_id=self._leg_id(h, route_id, p["leg_id"]),
+                leg_id=p["leg_id"],
+                sequence=r["sequence"],
+                origin_location_id=p.get("origin_location_id") or p.get("from_id"),
+                destination_location_id=p.get("destination_location_id") or p.get("to_id"),
+                transport_mode=p.get("mode") or p.get("transport_mode"),
+                status=p.get("leg_status"),
             )
+            out.append(row)
         return out
 
     def routes_between(self, origin, destination):
@@ -247,41 +293,67 @@ class GraphReader:
             for r in self._g.read(q.ROUTES_BETWEEN, origin=origin, destination=destination)
         ]
 
+    def network_routes(self):
+        return [self._route_row(r) for r in self._g.read(q.ROUTES_NETWORK)]
+
     def location(self, location_id):
         for label, key in KINDS["location"]:
             r = self._one(q.LOCATION.format(label=label, key=key), id=location_id)
             if r:
                 p = r["p"]
-                return {
-                    "location_id": location_id,
-                    "name": p.get("name"),
-                    "graph_label": label,
-                    "location_type": p.get("logistics_type") or LOCATION_TYPE_BY_LABEL.get(label),
-                    "country_code": p.get("country_code"),
-                    "country": p.get("country"),
-                    "region": p.get("region"),
-                    "latitude": p.get("latitude"),
-                    "longitude": p.get("longitude"),
-                    "timezone": p.get("timezone"),
-                    "city": p.get("city"),
-                    **self._prov(p),
-                }
+                location_type = p.get("logistics_type") or LOCATION_TYPE_BY_LABEL.get(label)
+                kind = (
+                    LOCATION_KIND_BY_LABEL.get(label) or location_type
+                )  # a plain Location node is its own logistics type; the other labels name the kind
+                return graph_row(
+                    "locations",
+                    p,
+                    location_id=location_id,
+                    graph_label=label,
+                    location_kind=kind,
+                    location_type=location_type,
+                )
         return None
 
     def order(self, order_id):
         r = self._one(q.ORDER, id=order_id)
         if not r:
             return None
-        p = r["p"]
-        return {
-            "order_id": order_id,
-            "status": p.get("order_status"),
-            "order_date": p.get("order_date"),
-            "channel": p.get("channel"),
-            "customer_id": r["customer_id"],
-            "dealer_id": r["dealer_id"],
-            **self._prov(p),
-        }
+        return graph_row(
+            "orders",
+            r["p"],
+            order_id=order_id,
+            customer_id=r["customer_id"],
+            dealer_id=r["dealer_id"],
+        )
 
     def order_part(self, order_line_id):
         return self._one(q.ORDER_PART, id=order_line_id)
+
+    def order_lines(self, order_id):
+        return [
+            {
+                "order_line_id": r["order_line_id"],
+                "part_id": r["part_id"],
+                "part_number": r["part_number"],
+                "name": r["name"],
+                "quantity": r["quantity"],
+                "unit_price": r["unit_price"],
+                "data_status": r["data_status"],
+                "source_type": r["data_status"] if r["data_status"] == "SYNTHETIC_DEMO" else None,
+                "source_record_id": r["source_record_id"],
+            }
+            for r in self._g.read(q.ORDER_LINES, id=order_id)
+        ]
+
+    def shipments_of_order(self, order_id):
+        return [
+            s
+            for s in (
+                self.shipment(r["id"]) for r in self._g.read(q.SHIPMENT_IDS_OF_ORDER, id=order_id)
+            )
+            if s
+        ]
+
+    def orders_of_customer(self, customer_id):
+        return [r["id"] for r in self._g.read(q.ORDER_IDS_OF_CUSTOMER, id=customer_id)]

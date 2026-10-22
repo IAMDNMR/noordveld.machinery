@@ -109,7 +109,6 @@ afterEach(() => {
   vi.resetAllMocks()
 })
 
-
 it('renames using the displayed revision and refreshes the dashboard', async () => {
   mount()
   fireEvent.click(await screen.findByLabelText('Actions for Transport Hub'))
@@ -125,8 +124,6 @@ it('renames using the displayed revision and refreshes the dashboard', async () 
   )
   await waitFor(() => expect(getProjectDashboard).toHaveBeenCalledTimes(2))
 })
-
-
 
 it('requires the exact project name before permanently deleting a trashed project', async () => {
   const data = overview()
@@ -156,5 +153,3 @@ it('requires the exact project name before permanently deleting a trashed projec
     ),
   )
 })
-
-

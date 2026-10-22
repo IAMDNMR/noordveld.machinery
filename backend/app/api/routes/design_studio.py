@@ -1086,7 +1086,7 @@ from app.api.routes.studio_releases import router as _releases_router  # noqa: E
 
 router.include_router(_releases_router)
 
-from app.api.routes.studio_frontend import router as _frontend_router
+from app.api.routes.studio_frontend import router as _frontend_router  # noqa: E402
 
 router.include_router(_frontend_router)
 

@@ -14,7 +14,14 @@ from typing import Any
 
 from app.core.exceptions import GraphConflictError
 from app.services import order_flow as flow
-from app.services.fulfilment import cost_block, depot_plan, option_view, money_amount, part_subtotal, route_cost
+from app.services.fulfilment import (
+    cost_block,
+    depot_plan,
+    option_view,
+    money_amount,
+    part_subtotal,
+    route_cost,
+)
 from decimal import Decimal
 from app.services.orders import (
     SYSTEM,
@@ -109,7 +116,9 @@ class CheckoutService:
             if not is_orderable(status, orderable):
                 rejected.append(f"{p.part_number} ({rejection_reason(status, orderable)})")
                 continue
-            unit_price = money_amount(p.price.amount) if p.price and p.price.currency == 'EUR' else None
+            unit_price = (
+                money_amount(p.price.amount) if p.price and p.price.currency == "EUR" else None
+            )
             lines.append(
                 {
                     "line_no": n,
@@ -119,7 +128,9 @@ class CheckoutService:
                     "quantity": qty,
                     "machine": machine,
                     "unit_price_eur": unit_price,
-                    "line_total_eur": money_amount(Decimal(str(unit_price)) * qty) if unit_price is not None else None,
+                    "line_total_eur": money_amount(Decimal(str(unit_price)) * qty)
+                    if unit_price is not None
+                    else None,
                 }
             )
         if rejected:
@@ -163,8 +174,8 @@ class CheckoutService:
         dest = self._destination(shipto_id)
         plan = self._plan(lines, shipto_id)
         for depot in plan:
-            for option in depot['options']:
-                option['cost'] = route_cost(lines, option)
+            for option in depot["options"]:
+                option["cost"] = route_cost(lines, option)
         return {
             "lines": [
                 {

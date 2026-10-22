@@ -57,5 +57,3 @@ it('restores tests only for the exact compiled package, not a different generati
     screen.getByRole('link', { name: 'Download saved release', hidden: true }).getAttribute('href'),
   ).toBe('/retained.zip')
 })
-
-

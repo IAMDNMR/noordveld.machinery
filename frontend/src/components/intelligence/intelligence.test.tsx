@@ -4,20 +4,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  ApiError,
-  
-  
-  type PartOverview,
-  type QueryResponse,
-  type ResultItem,
-} from '../../api/index'
-import {  errorMessage } from './Notices'
-
+import { ApiError, type PartOverview, type QueryResponse, type ResultItem } from '../../api/index'
+import { errorMessage } from './Notices'
 
 import { ResultCard } from './ResultCard'
 import { ResultView } from './ResultView'
-
 
 import { ActionTab } from './tabs/InsightTabs'
 
@@ -58,11 +49,7 @@ describe('result card', () => {
     expect(screen.getByText('Not available')).toBeTruthy()
     expect(screen.getAllByRole('listitem').map((l) => l.textContent)).toEqual(['M-1', 'M-2'])
   })
-  
-  
 })
-
-
 
 describe('errors', () => {
   it('names the language model as the problem when it is unavailable, never the database', () => {
@@ -73,13 +60,9 @@ describe('errors', () => {
     expect(errorMessage(new ApiError(503, 'graph_unavailable', 'x'))).toMatch(/Neo4j/)
     expect(errorMessage(new ApiError(500, 'error', 'x'))).toMatch(/Check that the API is running/)
   })
-
-  
 })
 
 describe('part workspace', () => {
-  
-
   const overview = (over: Partial<PartOverview>): PartOverview => ({
     part_id: 'P',
     part_number: 'KEY-1',
@@ -99,7 +82,7 @@ describe('part workspace', () => {
     actions: [],
     ...over,
   })
-  
+
   const action = (
     kind: 'parts_store' | 'identify' | 'request_identification',
     label: string,
@@ -118,12 +101,6 @@ describe('part workspace', () => {
       '/parts-store/KEY-1',
     )
   })
-
-  
-
-  
-
-  
 })
 
 describe('answers and recent questions (QA fixes 5 and 6)', () => {
@@ -183,19 +160,7 @@ describe('answers and recent questions (QA fixes 5 and 6)', () => {
     view(false)
     expect(screen.queryByText(/Demo data\./)).toBeNull()
   })
-
-  
-
-  
-
-  
-
-  
-
-  
 })
-
-
 
 /** Hard-code audit: Parts Intelligence source holds no catalogue data; real results come only from the API. */
 describe('parts intelligence source holds no catalogue data', () => {

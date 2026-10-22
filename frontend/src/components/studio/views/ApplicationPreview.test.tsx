@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, expect, it,  } from 'vitest'
+import { afterEach, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { emptyDefinition } from '../model/applicationDefinition'
 import { ApplicationPreview } from './ApplicationPreview'
@@ -22,5 +22,3 @@ it('browses saved screens and returns home without mutating the definition', () 
   expect(screen.getByRole('heading', { name: 'Application overview' })).toBeTruthy()
   expect(JSON.stringify(definition)).toBe(original)
 })
-
-

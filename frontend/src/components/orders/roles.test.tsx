@@ -188,21 +188,51 @@ describe('roles', () => {
     mount('/orders', anna, { '/orders': () => new Response(JSON.stringify([row('O-1', 'NEW')])) })
     await waitFor(() =>
       expect(navLabels()).toEqual([
-        'Aftersales',
-        'Parts Portal',
+        'Parts & Services',
+        'Parts Store',
         'Parts Intelligence',
-        'Agentic Shopping',
+        'Agentic E-Commerce',
         'My Orders',
       ]),
     )
     expect(document.querySelector('.nav__bar .nav__role')?.textContent).toBe('End User')
   })
 
-  
+  it('shows the Order Processor navigation', async () => {
+    mount('/orders', jane, { '/orders': () => new Response(JSON.stringify([])) })
+    await waitFor(() =>
+      expect(navLabels()).toEqual([
+        'Orders',
+        'Parts Intelligence',
+        'Parts Store',
+        'Commerce Assistant',
+        'Fulfilment',
+        'Shipments',
+      ]),
+    )
+    expect(document.querySelector('.nav__bar .nav__role')?.textContent).toBe('Order Processor')
+  })
 
-  
+  it('asks a signed-out visitor to sign in instead of showing orders', async () => {
+    mount('/orders', null, {})
+    expect(await screen.findByText('Sign in to continue')).toBeTruthy()
+    expect(document.querySelector('.ord-restricted a')?.getAttribute('href')).toBe(
+      '/sign-in?next=%2Forders',
+    )
+    expect(navLabels()).toContain('Agentic E-Commerce') // the public navigation
+  })
 
-  
+  it('lists the End User’s own orders without customer or queue columns', async () => {
+    mount('/orders', anna, {
+      '/orders': () => new Response(JSON.stringify([row('O-1', 'NEW'), row('O-4', 'DELIVERED')])),
+    })
+    expect(await screen.findByRole('heading', { name: 'My orders' })).toBeTruthy()
+    await screen.findByRole('link', { name: 'O-1' })
+    const head = [...document.querySelectorAll('thead th')].map((t) => t.textContent)
+    expect(head).not.toContain('Customer')
+    expect(screen.getByRole('link', { name: 'O-1' }).getAttribute('href')).toBe('/orders/O-1')
+    expect(document.querySelector('.ord-queues')).toBeNull()
+  })
 
   it('gives the Order Processor a queue in sections', async () => {
     mount('/orders?queue=shipped', jane, {
@@ -260,6 +290,4 @@ describe('roles', () => {
       (screen.getByRole('button', { name: 'Mark as processing' }) as HTMLButtonElement).disabled,
     ).toBe(true)
   })
-
-  
 })

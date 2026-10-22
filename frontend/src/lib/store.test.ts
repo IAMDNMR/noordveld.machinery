@@ -1,12 +1,10 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, getPart,   } from '../api/index'
+import { ApiError, getPart } from '../api/index'
 
-import {  formatMoney,  } from './format'
-import {  PAGE_SIZE, parseQuery,  toParams } from './storeQuery'
-
-
+import { formatMoney } from './format'
+import { PAGE_SIZE, parseQuery, toParams } from './storeQuery'
 
 describe('store query <-> URL', () => {
   it('round-trips every filter', () => {
@@ -22,23 +20,16 @@ describe('store query <-> URL', () => {
     const parsed = parseQuery(toParams({ ...query, page }))
     expect(parsed).toMatchObject({ ...query, offset: 2 * PAGE_SIZE, limit: PAGE_SIZE })
   })
-  
-  
 })
 
 describe('formatting', () => {
-  
   it('formats money in its own currency', () =>
     expect(formatMoney({ amount: 1234.5, currency: 'EUR' })).toContain('1,234.50'))
-  
 })
-
-
 
 describe('api client', () => {
   afterEach(() => vi.unstubAllGlobals())
 
-  
   it('maps structured API errors', async () => {
     vi.stubGlobal(
       'fetch',
@@ -52,7 +43,6 @@ describe('api client', () => {
     expect(error).toBeInstanceOf(ApiError)
     expect(error).toMatchObject({ status: 404, code: 'not_found', notFound: true })
   })
-  
 })
 
 /** Hard-code audit: the catalogue lives in the graph. No store source file may contain part numbers, part ids or machine models. */

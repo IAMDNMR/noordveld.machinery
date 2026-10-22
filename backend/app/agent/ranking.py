@@ -147,10 +147,18 @@ def decide(candidates: list[Facts], c: Constraints) -> Decision:
             d.not_available.append(f)
     pool = admitted
 
-    price = lambda f: f.price if f.price is not None else UNKNOWN  # noqa: E731
-    avail = lambda f: AVAILABILITY_RANK.get(f.availability or "", 5)  # noqa: E731
-    days = lambda f: f.fulfilment_days if f.fulfilment_days is not None else UNKNOWN  # noqa: E731
-    now = lambda f: 0 if f.available_now else 1  # noqa: E731
+    def price(f):
+        return f.price if f.price is not None else UNKNOWN
+
+    def avail(f):
+        return AVAILABILITY_RANK.get(f.availability or "", 5)
+
+    def days(f):
+        return f.fulfilment_days if f.fulfilment_days is not None else UNKNOWN
+
+    def now(f):
+        return 0 if f.available_now else 1
+
     if c.preference == "cheapest":
         key, d.basis = (
             (lambda f: (now(f), price(f), days(f), f.part_number)),

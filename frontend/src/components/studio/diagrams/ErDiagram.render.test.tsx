@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen,  } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ErDiagram } from './ErDiagram'
 
 import type { BusinessEntity } from '../../../api/applicationDefinition'
-
 
 afterEach(cleanup)
 const entity = (id: string, name: string, target?: string): BusinessEntity => ({
@@ -62,5 +61,3 @@ it('renders every saved connector before any entity is selected and keeps focus 
   )
   expect(view.container.querySelectorAll('.sw-er__edge > path')).toHaveLength(1)
 })
-
-

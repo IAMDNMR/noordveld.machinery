@@ -4,10 +4,8 @@ import {
   normalizeStoredDefinition,
   validateEditorDefinition,
 } from './applicationDefinition'
-import {  removeBusinessItem } from './businessDefinition'
+import { removeBusinessItem } from './businessDefinition'
 import { businessDefinition, generatedDefinition } from './__fixtures__/businessDefinition'
-
-
 
 const valid = (definition: unknown) =>
   validateEditorDefinition(normalizeStoredDefinition(definition)).value !== null
@@ -23,15 +21,6 @@ it('accepts a business design and legacy definitions without one, and rejects un
     }),
   ).toBe(false)
 })
-
-
-
-
-
-
-
-
-
 
 it('removes an item together with every reference to it', () => {
   const removed = removeBusinessItem(generatedDefinition(), 'requirements', 'req_order')

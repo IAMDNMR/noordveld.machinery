@@ -1,6 +1,6 @@
 {
  "canonical_schema_version": "1.0",
- "generated_at": "2026-10-08T06:22:26Z",
+ "generated_at": "2026-10-08T12:27:54Z",
  "datasets": {
   "approved_sources": {
    "path": "relationships/approved_sources.csv",
@@ -66,7 +66,7 @@
    "path": "master/locations.json",
    "dataset_version": "v1",
    "records": 581,
-   "checksum": "fbac5abc3829084cfe6702f3c7060e9c82981a521af33631a8af18e89c62fd3c"
+   "checksum": "7c4e5cd1b32d12bbec03b2aa675013d86b5b727ce1885fa5f90d0bd0c5d5c441"
   },
   "machine_instances": {
    "path": "lifecycle/machine_instances.csv",
@@ -116,11 +116,17 @@
    "records": 27,
    "checksum": "53d1b58d559e91e13efb35a681c52b7ccc9bd6101242c322ad6ccda8a2d40600"
   },
+  "network_shipment_lines": {
+   "path": "logistics/network_shipment_lines.csv",
+   "dataset_version": "v1",
+   "records": 4,
+   "checksum": "09a2b93e4c46ea00d0abd7fffaba78a7b908bf483a5e9f29d1e588ecc820ccdc"
+  },
   "network_shipments": {
    "path": "logistics/network_shipments.csv",
    "dataset_version": "v1",
    "records": 4,
-   "checksum": "8a233331e7c2afe2ad2fb3258d6c2e3409282d070fe5c648e8714f51eab2cc9b"
+   "checksum": "1807adcbd79a7c96d64fa3cc54ac36b47ca27d463b83749287a5f9f15c9a7d48"
   },
   "network_suppliers": {
    "path": "master/network_suppliers.json",
@@ -200,11 +206,17 @@
    "records": 9,
    "checksum": "cfd5d40e95bebfc05cacc8521b9bfc18a3f9d469d7728cba1d95bacf1bdc075f"
   },
+  "shipment_lines": {
+   "path": "logistics/shipment_lines.csv",
+   "dataset_version": "v1",
+   "records": 14,
+   "checksum": "e61ace8f4e9cd8f2d0d3115ab9eeb4a6ed81c617f8f684549aa59ec289743cd7"
+  },
   "shipments": {
    "path": "logistics/shipments.csv",
    "dataset_version": "v1",
    "records": 11,
-   "checksum": "2f1f7328ad41b608e2f9d8cb0ae33af4b4985e844e692ccc4a13839bf18ab9e5"
+   "checksum": "854e28f5337d53426cb934aa2176f47a29a457e802b2fbe9582a7417d800c133"
   },
   "specifications": {
    "path": "master/specifications.json",

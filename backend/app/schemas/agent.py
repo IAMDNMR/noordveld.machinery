@@ -188,6 +188,8 @@ class AgentResponse(BaseModel):
     why: list[WhyItem] = []
     how_we_know: list[ProvenanceRow] = []
     notes: list[str] = []
+    # the commerce journeys the request also asks about (orders, shipments, warranty): answered by the Commerce Agent for a signed-in user, on the same screen
+    commerce_domains: list[str] = []
     disclaimer: str = "Recommendation built from the Noordveld demo graph: fitment comes from the catalogue; status, price, stock, suppliers and delivery estimates are synthetic demo data. No order is placed until you check out, and order placement is not connected in this demo."
 
 

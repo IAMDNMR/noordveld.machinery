@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AgentResponse } from '../../api/agent'
 import type { PartSummary } from '../../api/index'
 import AgenticShoppingPage from '../../pages/AgenticShoppingPage'
+import { SessionProvider } from '../../store/session'
 
 const part = (
   id: string,
@@ -49,6 +50,7 @@ const steps = (blockedAt = -1): AgentResponse['steps'] =>
   }))
 const base: Omit<AgentResponse, 'state' | 'steps'> = {
   request: 'r',
+  commerce_domains: [],
   interpretation: {
     machine: 'M-1',
     part_type: 'Hose',
@@ -174,16 +176,88 @@ const SUGGESTIONS = [
     action: 'Prefer in stock',
   },
 ]
+const CATALOG = [
+  { category: 'Find a part', note: null, questions: ['I need a hose for my M-1.'] },
+  { category: 'Orders', note: 'Sign in for these.', questions: ['Where is my order?'] },
+]
 
+// the commerce assistant's answer for the same request, as the Commerce Agent API returns it (only what the panel reads)
+const commerceAnswer = (domain: 'LOGISTICS' | 'WARRANTY', headline: string) => ({
+  intent: domain,
+  status: 'ANSWERED',
+  steps: [],
+  clarification: null,
+  evidence: [],
+  evidence_paths: {},
+  source_records: [],
+  data_status: 'SYNTHETIC_DEMO',
+  confidence: {},
+  visibility: {},
+  warnings: [],
+  missing: [],
+  state: {},
+  understanding: {
+    intent: domain,
+    domains: [domain],
+    source: 'RULES',
+    focus: [],
+    references: {},
+    reasons: [],
+  },
+  contexts: {},
+  answer: {
+    text: `Part answer. ${headline}`,
+    lead: `Part answer. ${headline}`,
+    synthetic_notice: null,
+    grounding: { mode: 'TEMPLATE', validated: true },
+    sections: [
+      {
+        domain: 'DISCOVERY',
+        title: 'Part discovery',
+        status: 'SUCCESS',
+        decision: 'RECOMMEND',
+        headline: 'Part answer.',
+        lines: [],
+        notes: [],
+      },
+      { domain, title: domain, status: 'SUCCESS', decision: 'X', headline, lines: [], notes: [] },
+    ],
+  },
+})
+
+let commerceCalls: string[] = []
 function mount(
   response: ((request: string) => AgentResponse) | { status: number; code: string },
   q: string | null = 'I need a hose',
+  session: { signedIn?: boolean; commerce?: unknown } = {},
 ) {
   const calls: string[] = []
+  commerceCalls = []
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith('/me'))
+        return session.signedIn
+          ? new Response(
+              JSON.stringify({
+                id: 'U1',
+                name: 'U',
+                email: 'u@x',
+                role: 'END_USER',
+                customer: 'C',
+                permissions: [],
+              }),
+            )
+          : new Response(JSON.stringify({ error: { code: 'not_signed_in', message: 'x' } }), {
+              status: 401,
+            })
+      if (url.endsWith('/me/cart')) return new Response(JSON.stringify([]))
+      if (url.endsWith('/commerce/agent')) {
+        commerceCalls.push(JSON.parse(String(init?.body)).message)
+        return new Response(JSON.stringify(session.commerce))
+      }
       if (url.endsWith('/agent/suggestions')) return new Response(JSON.stringify(SUGGESTIONS))
+      if (url.endsWith('/agent/catalog')) return new Response(JSON.stringify(CATALOG))
       if (url.endsWith('/cart/quote'))
         return new Response(
           JSON.stringify({
@@ -210,7 +284,9 @@ function mount(
     <MemoryRouter
       initialEntries={[q ? `/agentic-shopping?q=${encodeURIComponent(q)}` : '/agentic-shopping']}
     >
-      <AgenticShoppingPage />
+      <SessionProvider>
+        <AgenticShoppingPage />
+      </SessionProvider>
     </MemoryRouter>,
   )
   return calls
@@ -227,7 +303,7 @@ describe('agentic shopping', () => {
     vi.unstubAllGlobals()
   })
 
-  it('starts as a request to an agent, with example requests from the API, not a search box', async () => {
+  it('starts as a request to an agent, with the question catalog from the API, not a search box', async () => {
     mount(() => recommendation, null)
     expect(
       screen.getByRole('heading', { name: 'Your next part. A smarter way to find it.' }),
@@ -235,9 +311,17 @@ describe('agentic shopping', () => {
     expect(screen.getByText(/checks the right part against your requirements/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Find the right part' })).toBeTruthy()
     expect(screen.queryByPlaceholderText(/search parts/i)).toBeNull()
-    expect(
-      await screen.findByRole('button', { name: 'I need a hose for my M-1, preferably in stock.' }),
-    ).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Question catalog' })).toBeTruthy()
+    expect(screen.getByRole('list', { name: 'Find a part questions' })).toBeTruthy()
+    expect(screen.getByText('Sign in for these.')).toBeTruthy()
+    expect(document.querySelector('.ag-pills')).toBeNull() // the earlier example pills are replaced by the catalog
+  })
+
+  it('runs a catalog question directly when it is chosen', async () => {
+    const calls = mount(() => recommendation, null)
+    fireEvent.click(await screen.findByRole('button', { name: 'I need a hose for my M-1.' }))
+    expect(await screen.findByText(/I need a hose for my M-1\./, { selector: 'h1' })).toBeTruthy()
+    await waitFor(() => expect(calls).toEqual(['I need a hose for my M-1.']))
   })
 
   it('shows how the request was read, with only the fields that were understood', async () => {
@@ -319,5 +403,125 @@ describe('agentic shopping', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'M-2 Wheel Loader' }))
     await screen.findByText('msg recommend')
     expect(calls).toEqual(['I need a hose', 'I need a hose for my M-2'])
+  })
+
+  it('asks for the destination when the fastest option needs one, then re-runs with the chosen recorded place', async () => {
+    const calls = mount((request) =>
+      request.includes('delivered to Hamburg')
+        ? recommendation
+        : {
+            ...base,
+            state: 'need_detail',
+            steps: steps(6),
+            question: 'Fastest depends on where the part is going. Where should it be delivered?',
+            options: [{ label: 'Hamburg', refine: 'delivered to Hamburg' }],
+          },
+    )
+    expect(await screen.findByText(/Where should it be delivered/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Hamburg' }))
+    await screen.findByText('msg recommend')
+    expect(calls).toEqual(['I need a hose', 'I need a hose delivered to Hamburg'])
+  })
+
+  it('shows the recorded route, the transport option and dealer service as labelled evidence, and on-order stock as its own state', async () => {
+    const withRoute: AgentResponse = {
+      ...recommendation,
+      interpretation: { ...base.interpretation, delivery_place: 'Hamburg', availability: 'future' },
+      evidence: [
+        {
+          key: 'transport',
+          ok: true,
+          label: 'Premium Road · road',
+          detail:
+            'Route R-1, 400 km; freight context 120 EUR (synthetic demo estimate, not a price)',
+          data_class: 'SYNTHETIC_DEMO',
+        },
+        {
+          key: 'dealer',
+          ok: true,
+          label: 'Dealers in DE that install this part',
+          detail: 'Dealer One (Hamburg). Service evidence only.',
+          data_class: 'SYNTHETIC_DEMO',
+        },
+      ],
+    }
+    mount(() => withRoute)
+    fireEvent.click(await screen.findByRole('button', { name: /view recommendation/i }))
+    const ev = (await screen.findByText('Premium Road · road')).closest('ul')!
+    expect(ev.textContent).toMatch(/not a price/)
+    expect(ev.textContent).toMatch(/Dealers in DE that install this part/)
+    expect(document.querySelector('.ag-req')?.textContent).toMatch(/Accepts on-order stock/)
+  })
+
+  it('shows a compact service state without provider or transport details', async () => {
+    mount({ status: 503, code: 'llm_unavailable' })
+    const state = await screen.findByText('Agent temporarily unavailable')
+    const box = state.closest('.ag-service')?.textContent ?? ''
+    expect(box).toMatch(/Please try again/)
+    expect(box).not.toMatch(/Gemini|API|quota|HTTP|503|internal detail/i)
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy()
+  })
+
+  it('keeps a request that is neither a part nor an order, shipment or warranty question out of the shopping flow and points to Parts Intelligence', async () => {
+    mount(
+      () => ({
+        ...base,
+        state: 'out_of_scope',
+        steps: steps(0),
+        question: 'I find and help order Noordveld machine parts.',
+      }),
+      'tell me a joke',
+    )
+    await screen.findByText('I find and help order Noordveld machine parts.')
+    expect(document.querySelector('.ag-note a')?.getAttribute('href')).toBe('/parts-intelligence')
+    expect(document.querySelectorAll('.reco-card')).toHaveLength(0)
+  })
+
+  it('answers an order or shipment question on the same screen through the commerce assistant, with no second input box', async () => {
+    mount(
+      () => ({
+        ...base,
+        state: 'out_of_scope',
+        steps: steps(0),
+        question: 'not a part',
+        commerce_domains: ['LOGISTICS'],
+      }),
+      'Where is my shipment?',
+      { signedIn: true, commerce: commerceAnswer('LOGISTICS', 'Shipment S-1 is in transit.') },
+    )
+    expect((await screen.findAllByText('Shipment S-1 is in transit.')).length).toBeGreaterThan(0)
+    expect(commerceCalls).toEqual(['Where is my shipment?'])
+    expect(screen.queryByText('Part answer.')).toBeNull() // only the journeys the request asked about
+    expect(screen.queryByRole('textbox', { name: 'What can I help you with?' })).toBeNull()
+  })
+
+  it('asks a signed-out visitor to sign in for order, shipment and warranty answers and comes back to the same request', async () => {
+    mount(
+      () => ({
+        ...base,
+        state: 'out_of_scope',
+        steps: steps(0),
+        question: 'not a part',
+        commerce_domains: ['WARRANTY'],
+      }),
+      'Is this failed part covered by warranty?',
+    )
+    const link = await screen.findByRole('link', { name: 'Sign in' })
+    expect(link.getAttribute('href')).toBe(
+      `/sign-in?${new URLSearchParams({ next: `/agentic-shopping?q=${encodeURIComponent('Is this failed part covered by warranty?')}` })}`,
+    )
+    expect(commerceCalls).toEqual([]) // nothing is asked for a visitor
+  })
+
+  it('shows the warranty answer of a combined request under the part recommendation', async () => {
+    mount(
+      () => ({ ...recommendation, commerce_domains: ['WARRANTY'] }),
+      'I need a hose. Is the failed one covered?',
+      { signedIn: true, commerce: commerceAnswer('WARRANTY', 'Claim C-1 is eligible.') },
+    )
+    fireEvent.click(await screen.findByRole('button', { name: /View recommendation/ }))
+    expect((await screen.findAllByText('Claim C-1 is eligible.')).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Also in your request · Warranty/)).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /Add to cart/ }).length).toBeGreaterThan(0) // the shopping recommendation and its cart action are unchanged
   })
 })

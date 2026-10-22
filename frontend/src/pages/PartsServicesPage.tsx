@@ -15,20 +15,19 @@ import {
   QuickAccess,
 } from '../sections/aftersales/Discover'
 import { AftersalesHero } from '../sections/aftersales/Hero'
-import { AftersalesLandscape } from '../sections/aftersales/Landscape'
 import { useCatalogue } from '../sections/aftersales/data'
 import '../sections/aftersales/aftersales.css'
 
 /**
  * After-sales Parts & Services: machine → component → part → compatibility → Parts Intelligence → ordering → delivery → dealer → service.
- * Every section is an entry into an existing capability (Parts Portal, Parts Intelligence, Agentic Shopping, checkout, orders, Commerce Assistant); none re-implements one.
+ * Every section is an entry into an existing capability (Parts Store, Parts Intelligence, Agentic Shopping, checkout, orders, Commerce Assistant); none re-implements one.
  */
 export default function PartsServicesPage() {
   usePageMeta({
-    title: 'Aftersales | Noordveld Machinery',
+    title: 'Parts & Services',
     description:
       'Find the right part, verify machine compatibility, explore recorded relationships and follow every order into service.',
-    path: '/aftersales',
+    path: '/parts-services',
   })
   const catalogue = useCatalogue()
   const parts = catalogue.data?.parts ?? null
@@ -36,7 +35,6 @@ export default function PartsServicesPage() {
   return (
     <div className="as-page">
       <AftersalesHero parts={parts} />
-      <AftersalesLandscape />
       <QuickAccess parts={parts} filters={filters} />
       <PartSearch filters={filters} />
       <Categories parts={parts} filters={filters} />

@@ -22,6 +22,4 @@ describe('spoken confirmations', () => {
     expect(localIntent('yes', 0)).toBeNull()
     expect(localIntent('apply it', 2)).toBeNull()
   })
-  
-  
 })

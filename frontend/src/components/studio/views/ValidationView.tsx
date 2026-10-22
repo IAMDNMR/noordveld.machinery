@@ -36,7 +36,12 @@ const GROUPS = [
   ],
 ] as const
 // Findings the Studio settles by itself (backend design_studio/auto_resolve.py): recorded facts only; rules, roles and authority stay with a person.
-const OPTIONAL_QUESTIONS = new Set(['q_security', 'q_accessibility', 'q_performance', 'q_constraints'])
+const OPTIONAL_QUESTIONS = new Set([
+  'q_security',
+  'q_accessibility',
+  'q_performance',
+  'q_constraints',
+])
 
 function Approval({
   scope,
@@ -154,7 +159,16 @@ function Approval({
 }
 
 /** Every finding the checks produce, sorted by what the person has to do about it, with the two approvals that gate generation. */
-export function ValidationView({ studio, access, busy, say, go, act, approve, resolve }: ViewProps) {
+export function ValidationView({
+  studio,
+  access,
+  busy,
+  say,
+  go,
+  act,
+  approve,
+  resolve,
+}: ViewProps) {
   const { design, process } = studio.analysis
   const { questions, requirements } = studio.definition.business
   const servedIds = new Set(
@@ -170,7 +184,9 @@ export function ValidationView({ studio, access, busy, say, go, act, approve, re
     questions.some((item) => item.status === 'open' && OPTIONAL_QUESTIONS.has(item.id))
   const canResolve = !!resolve && !!access?.can.edit
   // A drafted process that a verified one already covers: [duplicate, verified], merged as a reviewed change.
-  const overlaps = design.findings.filter((item) => item.code === 'PROCESS_OVERLAP' && item.artefacts.length === 2)
+  const overlaps = design.findings.filter(
+    (item) => item.code === 'PROCESS_OVERLAP' && item.artefacts.length === 2,
+  )
   const mergeAction = (item: Finding) => ({
     type: 'merge_process',
     duplicate: item.artefacts[0],
@@ -293,8 +309,9 @@ export function ValidationView({ studio, access, busy, say, go, act, approve, re
               <h3>{busy ? 'Resolving issues…' : 'Issues the Studio can resolve'}</h3>
               <p className="sw-muted">
                 Agrees requirements a process step already implements, records optional details as
-                not specified, and merges steps repeated back to back, and gives records others depend
-                on (items, warehouses) a maintaining role. Rules and roles are never changed or removed for you.
+                not specified, and merges steps repeated back to back, and gives records others
+                depend on (items, warehouses) a maintaining role. Rules and roles are never changed
+                or removed for you.
               </p>
             </div>
             <button
@@ -313,8 +330,8 @@ export function ValidationView({ studio, access, busy, say, go, act, approve, re
           <div className="sw-card__head">
             <div>
               <h3>
-                {overlaps.length} drafted process{overlaps.length === 1 ? '' : 'es'} repeat a verified
-                one
+                {overlaps.length} drafted process{overlaps.length === 1 ? '' : 'es'} repeat a
+                verified one
               </h3>
               <p className="sw-muted">
                 The verified process already covers the same business activity. Merging moves the
@@ -421,7 +438,10 @@ export function ValidationView({ studio, access, busy, say, go, act, approve, re
                           type="button"
                           className="sw-button"
                           onClick={() =>
-                            act([mergeAction(item)], 'Review this process merge before applying it.')
+                            act(
+                              [mergeAction(item)],
+                              'Review this process merge before applying it.',
+                            )
                           }
                           disabled={busy}
                         >

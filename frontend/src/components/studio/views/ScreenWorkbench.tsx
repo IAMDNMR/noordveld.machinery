@@ -72,7 +72,9 @@ export function ScreenWorkbench({
         const was = remembered.current
         if (
           was &&
-          (was.role !== next.role || was.route.page !== next.route.page || was.route.id !== next.route.id)
+          (was.role !== next.role ||
+            was.route.page !== next.route.page ||
+            was.route.id !== next.route.id)
         )
           send({ type: 'studio:go', role: was.role, route: was.route })
         else remembered.current = { role: next.role, route: next.route }
@@ -158,7 +160,9 @@ export function ScreenWorkbench({
           <button
             type="button"
             className="sw-button sw-explorer__ask"
-            onClick={() => ask(`Change the “${state.title || 'this'}” screen for ${state.roleName}: `)}
+            onClick={() =>
+              ask(`Change the “${state.title || 'this'}” screen for ${state.roleName}: `)
+            }
           >
             <MessageSquarePlus size={14} aria-hidden="true" /> Ask the assistant about this screen
           </button>

@@ -54,8 +54,6 @@ const open = (token = TOKEN) =>
     </MemoryRouter>,
   )
 
-
-
 it('accepting applies it on the server and lands on the workspace welcome', async () => {
   session.user = { id: 'studio-frank', name: 'Frank' }
   vi.mocked(previewInvitation).mockResolvedValue(offer)
@@ -71,8 +69,6 @@ it('accepting applies it on the server and lands on the workspace welcome', asyn
   expect((await screen.findByTestId('where')).textContent).toBe('/workspace?welcome=1&org=org_a')
 })
 
-
-
 it('an expired, used or unknown invitation reveals nothing and says what to do', async () => {
   vi.mocked(previewInvitation).mockRejectedValue(
     new ApiError(404, 'not_found', 'This invitation is invalid, expired or already used'),
@@ -83,5 +79,3 @@ it('an expired, used or unknown invitation reveals nothing and says what to do',
   )
   expect(screen.queryByRole('button', { name: 'Accept invitation' })).toBeNull()
 })
-
-

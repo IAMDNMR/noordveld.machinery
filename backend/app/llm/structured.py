@@ -16,11 +16,13 @@ import time
 from collections import OrderedDict, deque
 from typing import Any
 
-from app.llm.base import LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
+from app.llm.base import CommerceParse, LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
 from app.llm.prompts import (
+    COMMERCE_RULES,
     GROUNDING_RULES,
     SHOPPING_RULES,
     UNDERSTAND_RULES,
+    commerce_prompt,
     question_prompt,
     shopping_prompt,
 )
@@ -30,6 +32,7 @@ log = logging.getLogger("app.llm")
 # Token budget: replies are short structures or two sentences, and only the evidence the wording needs is sent.
 # "question_retry" is the single second attempt after an unusable reply: temperature is 0, so the same cap would truncate the same way
 MAX_OUTPUT_TOKENS = {
+    "commerce": 120,
     "question": 320,
     "question_retry": 480,
     "shopping": 150,
@@ -115,10 +118,38 @@ SHOPPING_SCHEMA = _obj(
 )
 
 
+COMMERCE_DOMAINS = ("DISCOVERY", "WARRANTY", "LOGISTICS")
+COMMERCE_SCHEMA = _obj(
+    {
+        "in_scope": {"type": "boolean"},
+        "domains": {"type": "array", "items": {"type": "string", "enum": list(COMMERCE_DOMAINS)}},
+        "clarification_question": _STR,
+    }
+)
+
+
+def to_commerce_parse(text: str) -> CommerceParse:
+    """The model's routing of a message, validated: a journey outside the three is rejected, so the model cannot invent one."""
+    data = _load(text)
+    try:
+        if not isinstance(data["in_scope"], bool) or not isinstance(data["domains"], list):
+            raise LLMInvalidResponse("not valid structured output")
+        domains = tuple(d for d in COMMERCE_DOMAINS if d in data["domains"])
+        if any(d not in COMMERCE_DOMAINS for d in data["domains"]):
+            raise LLMInvalidResponse("journey outside the approved list")
+        return CommerceParse(
+            in_scope=data["in_scope"],
+            domains=domains if data["in_scope"] else (),
+            clarification_question=_text(data.get("clarification_question")),
+        )
+    except (KeyError, TypeError) as exc:
+        raise LLMInvalidResponse("not valid structured output") from exc
+
+
 # ── validation ───────────────────────────────────────────────────────────────────────────────────
 def _load(text: str) -> dict[str, Any]:
     text = re.sub(
-        r"<think>.*?</think>", "", text, flags=re.S
+        r"<think>.*?</think>", "", text, flags=re.DOTALL
     ).strip()  # reasoning models may prepend their thinking
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
@@ -126,7 +157,9 @@ def _load(text: str) -> dict[str, Any]:
         data = json.loads(text)
     except ValueError as exc:
         # The end of the text shows whether the reply was cut off at the output cap or simply not JSON.
-        log.warning("llm reply is not valid JSON: %d characters, ends with %r", len(text), text[-120:])
+        log.warning(
+            "llm reply is not valid JSON: %d characters, ends with %r", len(text), text[-120:]
+        )
         raise LLMInvalidResponse("not valid JSON") from exc
     if not isinstance(data, dict):
         raise LLMInvalidResponse("not a JSON object")
@@ -191,7 +224,9 @@ def to_shopping_parse(text: str) -> ShoppingParse:
         if not isinstance(data["in_scope"], bool):
             raise LLMInvalidResponse("scope verdict is not a boolean")
         qty, budget = data.get("quantity"), data.get("budget_max")
-        number = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)  # noqa: E731
+        def number(v):
+            return isinstance(v, (int, float)) and not isinstance(v, bool)
+
         return ShoppingParse(
             in_scope=data["in_scope"],
             machine=_text(data.get("machine")),
@@ -281,7 +316,9 @@ class StructuredLLM:
         raise NotImplementedError
 
     def _guarded(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
-        if kind.startswith("studio_frontend"):  # one generation makes many calls: wait for room instead of failing it
+        if kind.startswith(
+            "studio_frontend"
+        ):  # one generation makes many calls: wait for room instead of failing it
             for _ in range(60):
                 if self._limit.allow():
                     return self._complete(kind, system, prompt, schema)
@@ -323,6 +360,15 @@ class StructuredLLM:
 
     def resolve_entities(self, question: str, intents: dict[str, str]) -> tuple[str, ...]:
         return self.parse_question(question, intents).mentions
+
+    def parse_commerce_request(self, message: str) -> CommerceParse:
+        return self._cached(
+            "commerce",
+            message,
+            lambda: to_commerce_parse(
+                self._guarded("commerce", COMMERCE_RULES, commerce_prompt(message), COMMERCE_SCHEMA)
+            ),
+        )
 
     def parse_shopping_request(self, request: str) -> ShoppingParse:
         return self._cached(
@@ -371,4 +417,4 @@ class StructuredLLM:
             separators=(",", ":"),
         )
         text = self._guarded("grounded_answer", GROUNDING_RULES, payload, None)
-        return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
+        return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()

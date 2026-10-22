@@ -21,35 +21,45 @@ export const AGENTIC_ROUTE = '/agentic-commerce/'
 
 export const nav: readonly NavItem[] = [
   { label: 'Machines', to: '/machines' },
-  { label: 'Aftersales', to: '/aftersales' },
-  { label: 'Parts Portal', to: '/parts-store' },
+  { label: 'Parts & Services', to: '/parts-services' },
+  { label: 'Parts Store', to: '/parts-store' },
   { label: 'Parts Intelligence', to: '/parts-intelligence' },
   { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true }, // its "See it work" step opens Agentic Shopping
   { label: 'Design Studio', to: '/studio' },
   { label: 'Contact', to: `mailto:${company.email}`, external: true },
 ]
 
+/** The top navigation bar: the site menu without Machines and Contact (both stay in the footer). */
+/** The one Agentic E-Commerce experience, signed in or not: the Agentic Shopping screen (it hands order, shipment and warranty questions to the commerce assistant). */
+export const AGENTIC_SHOPPING_ROUTE = '/agentic-shopping'
+
+export const primaryNav: readonly NavItem[] = nav
+  .filter((item) => item.label !== 'Machines' && item.label !== 'Contact')
+  .map((item) =>
+    item.to === AGENTIC_ROUTE ? { label: item.label, to: AGENTIC_SHOPPING_ROUTE } : item,
+  )
+
 /** What each signed-in role works with. Hiding a link is presentation only: the backend checks every request. */
 export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly NavItem[] =>
   role === 'END_USER'
     ? [
-        { label: 'Machines', to: '/machines' },
-        { label: 'Aftersales', to: '/aftersales' },
-        { label: 'Parts Portal', to: '/parts-store' },
+        { label: 'Parts & Services', to: '/parts-services' },
+        { label: 'Parts Store', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
-        { label: 'Agentic Shopping', to: '/agentic-shopping' },
+        // one conversational entry: discovery, recommendation, cart hand-off, orders, shipments and warranty (Agentic Shopping stays reachable from its answers)
+        { label: 'Agentic E-Commerce', to: AGENTIC_SHOPPING_ROUTE },
         { label: 'My Orders', to: '/orders' },
       ]
     : role === 'ORDER_PROCESSOR'
       ? [
           { label: 'Orders', to: '/orders' },
-          { label: 'Aftersales', to: '/aftersales' },
           { label: 'Parts Intelligence', to: '/parts-intelligence' },
-          { label: 'Parts Portal', to: '/parts-store' },
+          { label: 'Parts Store', to: '/parts-store' },
+          { label: 'Commerce Assistant', to: '/commerce' },
           { label: 'Fulfilment', to: '/orders?queue=needs_fulfilment' },
           { label: 'Shipments', to: '/orders?queue=shipped' },
         ]
-      : nav
+      : primaryNav
 
 export interface Industry {
   name: string

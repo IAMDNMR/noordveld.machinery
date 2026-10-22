@@ -39,7 +39,8 @@ export function ApplicationStructure({
   const gaps = blueprint?.requirements.filter((item) => item.status === 'needs_design') ?? []
   const decisions = business.decisions.filter((item) => item.status === 'open').length
   const unconfirmed = business.rules.filter((rule) => rule.status !== 'confirmed').length
-  const plural = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`
+  const plural = (count: number, one: string, many = `${one}s`) =>
+    `${count} ${count === 1 ? one : many}`
   const todo = [
     gaps.length ? `${plural(gaps.length, 'requirement')} still need a screen design` : '',
     decisions ? `${plural(decisions, 'open business decision')}` : '',

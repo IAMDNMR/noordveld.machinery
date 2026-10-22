@@ -1,6 +1,6 @@
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { nav, type NavItem } from '../../data/content'
+import { primaryNav, type NavItem } from '../../data/content'
 import { Logo } from '../Logo'
 import './chrome-tokens.css'
 import './chrome.css'
@@ -23,6 +23,13 @@ const isCurrent = (item: NavItem, pathname: string): boolean => {
   const [path] = pathname.split('?')
   if (item.to === '/agentic-commerce/')
     return path.startsWith('/agentic-commerce') || path.startsWith('/agentic-shopping')
+  // Agentic E-Commerce: the Agentic Shopping screen, the commerce assistant it hands over to, and the introduction page
+  if (item.to === '/agentic-shopping')
+    return (
+      path.startsWith('/agentic-shopping') ||
+      path.startsWith('/commerce') ||
+      path.startsWith('/agentic-commerce')
+    )
   if (item.to.includes('?')) return pathname === item.to // a queue of the order list
   if (item.to === '/orders') return path.startsWith('/orders') && !pathname.includes('queue=')
   if (item.to === '/studio') return path === '/studio'
@@ -38,7 +45,7 @@ const isCurrent = (item: NavItem, pathname: string): boolean => {
   )
 }
 
-export function SiteNav({ pathname, heroTone, Link, items = nav, account }: SiteNavProps) {
+export function SiteNav({ pathname, heroTone, Link, items = primaryNav, account }: SiteNavProps) {
   const navigation = items.filter(
     (item) => item.to !== '/machines' && !item.to.startsWith('mailto:'),
   )

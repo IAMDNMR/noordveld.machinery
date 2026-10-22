@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import type { BusinessEntity } from '../../../api/applicationDefinition'
-import { layoutEntities,  } from './ErDiagram'
+import { layoutEntities } from './ErDiagram'
 
 const entity = (id: string, attributes: number, targets: string[] = []): BusinessEntity => ({
   id,
@@ -41,7 +41,3 @@ it('places every entity once, without overlap, at any width, and draws one line 
     expect(edges).toHaveLength(5) // the relationship to an entity that does not exist is not drawn
   }
 })
-
-
-
-

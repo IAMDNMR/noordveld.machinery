@@ -9,13 +9,14 @@ from app.core.exceptions import NotFoundError
 from app.graph.repositories.intelligence import IntelligenceRepository
 from app.intelligence.handlers import INTELLIGENCE_ROUTE, humanize
 from app.intelligence.provenance import data_class
-from app.services.part_status import STATUS_LABELS, is_orderable, status_label
 from app.schemas.intelligence import (
     Action,
     AssemblyItem,
-    Component,
     ComplianceItem,
+    Component,
     DealerItem,
+    EntityDetail,
+    Fact,
     FitmentItem,
     GraphEdge,
     GraphNode,
@@ -24,6 +25,7 @@ from app.schemas.intelligence import (
     Insight,
     InventoryView,
     Kpis,
+    Link,
     PartOverview,
     PartStatus,
     ProvenanceReport,
@@ -31,10 +33,8 @@ from app.schemas.intelligence import (
     RelationshipSource,
     SupplierItem,
     WarehouseItem,
-    EntityDetail,
-    Fact,
-    Link,
 )
+from app.services.part_status import STATUS_LABELS, is_orderable, status_label
 
 STORE_ROUTE = "/parts-store"
 RELATION_LABEL = {
@@ -480,7 +480,10 @@ class Overview:
             {"category": "Part Discovery", "question": f"Find {part}"},
             {"category": "Part Discovery", "question": f"Which category does {part} belong to?"},
             {"category": "Part Discovery", "question": f"Show parts that fit the {machine}."},
-            {"category": "Part Discovery", "question": "What parts are used across multiple machines?"},
+            {
+                "category": "Part Discovery",
+                "question": "What parts are used across multiple machines?",
+            },
             {"category": "Part Discovery", "question": "Which parts are low on stock?"},
             {"category": "Machine & Fitment", "question": f"Which parts fit the {machine}?"},
             {"category": "Machine & Fitment", "question": f"Which machines use {part}?"},

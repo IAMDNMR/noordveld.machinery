@@ -100,8 +100,6 @@ it('shows commerce systems and keeps Studio projects in the separate Studio entr
   expect(screen.queryByRole('region', { name: 'Needs your attention' })).toBeNull()
 })
 
-
-
 it('gives a dealer only the systems they were granted and no Design Studio', async () => {
   vi.mocked(getWorkspace).mockResolvedValue({
     ...base,
@@ -156,7 +154,3 @@ it('guides a person without an organization and switches organizations', async (
   fireEvent.change(await screen.findByLabelText('Organization'), { target: { value: 'org_b' } })
   await waitFor(() => expect(getWorkspace).toHaveBeenLastCalledWith('org_b', expect.anything()))
 })
-
-
-
-

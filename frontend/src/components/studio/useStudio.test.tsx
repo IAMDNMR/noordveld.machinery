@@ -50,5 +50,3 @@ it('keeps the newer project when an earlier open request finishes late', async (
   expect(result.current.projectId).toBe('second')
   expect(result.current.studio?.definition.id).toBe('second')
 })
-
-

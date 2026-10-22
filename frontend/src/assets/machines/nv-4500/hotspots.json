@@ -3,7 +3,7 @@
   "machine": "NV-4500",
   "focus": "lift",
   "hotspots": [
-    { "id": "bucket", "x": 0.43, "y": 0.70, "part": "NVM-1010-AT" },
+    { "id": "bucket", "x": 0.43, "y": 0.7, "part": "NVM-1010-AT" },
     { "id": "lift", "x": 0.555, "y": 0.47, "part": "NVM-1030-HY" },
     { "id": "wheel", "x": 0.665, "y": 0.68, "part": "NVM-1130-DT" },
     { "id": "cab", "x": 0.71, "y": 0.27, "part": "NVM-1010-CB" },

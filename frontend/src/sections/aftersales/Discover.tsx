@@ -24,7 +24,7 @@ export function QuickAccess({
   const firstMachine = filters?.machines.find((m) => m.part_count > 0)
   const items = [
     {
-      title: 'Parts Portal',
+      title: 'Parts Store',
       text: 'Browse parts and continue into the ordering workflow.',
       to: STORE_ROUTE,
       img: pic(0),
@@ -198,7 +198,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
                 className="as-inline"
                 onClick={() => navigate(`/parts-intelligence?${new URLSearchParams({ q })}`)}
               >
-                ask Spark
+                ask Parts Intelligence
               </button>
               , which answers from the recorded relationships.
             </p>
@@ -226,7 +226,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
             <p className="as-note">
               No catalogue part matches “{q}”. Check the spelling or the part number, or{' '}
               <Link to={`/agentic-shopping?${new URLSearchParams({ q })}`}>
-                describe the problem to Agentic Shopping
+                describe the problem in Agentic E-Commerce
               </Link>
               . Nothing is suggested without a match.
             </p>
@@ -257,7 +257,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
               {live.data && live.data.total > results.length ? (
                 <li className="as-hits__more">
                   <Link to={`${STORE_ROUTE}?${new URLSearchParams({ q })}`}>
-                    All {live.data.total} results in the Parts Portal →
+                    All {live.data.total} results in the Parts Store →
                   </Link>
                 </li>
               ) : null}
@@ -419,8 +419,8 @@ export function MachineFinder() {
           ) : null}
           {model && fits.data && fits.data.total === 0 ? (
             <p className="as-note">
-              No part has a recorded fitment for {model}. Ask Spark in Parts Intelligence or
-              describe the problem in Agentic Shopping rather than guessing.
+              No part has a recorded fitment for {model}. Ask Parts Intelligence or describe the
+              problem in Agentic E-Commerce rather than guessing.
             </p>
           ) : null}
           {fits.data && fits.data.items.length > 0 ? (
@@ -442,7 +442,7 @@ export function MachineFinder() {
                 })}
               </ul>
               <Link className="as-finder__all" to={machinePath(model)}>
-                All {fits.data.total} parts for {model} in the Parts Portal →
+                All {fits.data.total} parts for {model} in the Parts Store →
               </Link>
             </>
           ) : null}
@@ -501,7 +501,7 @@ export function FeaturedParts({ parts }: { parts: PartSummary[] | null }) {
                     to={`${STORE_ROUTE}?${new URLSearchParams({ q: p.part_number })}`}
                     className="as-inline-link"
                   >
-                    Find in Parts Portal
+                    Find in Parts Store
                   </Link>
                 </span>
               </div>

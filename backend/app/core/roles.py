@@ -27,6 +27,7 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "orders.read_own",
             "orders.place",
             "orders.cancel_own",
+            "commerce.context",
         }
     ),
     Role.ORDER_PROCESSOR: frozenset(
@@ -41,6 +42,7 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "inventory.read",
             "shipment.read",
             "tracking.read",
+            "commerce.context",
         }
     ),
 }

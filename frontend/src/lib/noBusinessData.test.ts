@@ -42,6 +42,4 @@ describe('frontend source holds no business data', () => {
     }
     expect(found).toEqual([])
   })
-
-  
 })

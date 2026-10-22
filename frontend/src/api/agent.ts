@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from './client'
-import type { PartSummary } from './types'
+import type { CatalogGroup, PartSummary } from './types'
 
 /** Response shapes of the Agentic Shopping API (backend/app/schemas/agent.py). Every value comes from the graph. */
 export type AgentStepKey =
@@ -83,6 +83,8 @@ export interface AgentInterpretation {
 
 export interface AgentResponse {
   request: string
+  /** the order, shipment, warranty or part questions the request also asks: answered by the commerce assistant (signed-in) on the same screen */
+  commerce_domains: ('DISCOVERY' | 'LOGISTICS' | 'WARRANTY')[]
   state: AgentState
   interpretation: AgentInterpretation
   steps: AgentStep[]
@@ -132,5 +134,7 @@ export interface AgentSuggestion {
   action: string
 }
 
+export const getShoppingCatalog = (signal?: AbortSignal): Promise<CatalogGroup[]> =>
+  apiGet<CatalogGroup[]>('/agent/catalog', {}, signal)
 export const getAgentSuggestions = (signal?: AbortSignal): Promise<AgentSuggestion[]> =>
   apiGet<AgentSuggestion[]>('/agent/suggestions', {}, signal)

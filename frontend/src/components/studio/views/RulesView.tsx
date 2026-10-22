@@ -12,7 +12,10 @@ const TYPE_LABEL = {
 
 // Outcomes are stored as codes (RAISE_EXC_PACKING_QUANTITY_MISMATCH); people read them as words.
 const outcomeText = (outcome: string) => {
-  const words = outcome.replaceAll('_', ' ').toLowerCase().replace(/\bexc\b/g, 'exception')
+  const words = outcome
+    .replaceAll('_', ' ')
+    .toLowerCase()
+    .replace(/\bexc\b/g, 'exception')
   return words.charAt(0).toUpperCase() + words.slice(1)
 }
 
@@ -58,7 +61,8 @@ export function RulesView({ studio, recent, ask, go, act, busy, access }: ViewPr
         </div>
         {assumptions ? (
           <p className="sw-callout-inline">
-            {assumptions} rules need review. Confirm only policies you have checked against a real source.
+            {assumptions} rules need review. Confirm only policies you have checked against a real
+            source.
           </p>
         ) : null}
         <ul className="sw-rules">

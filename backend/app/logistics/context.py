@@ -30,7 +30,9 @@ def _prov(kind: str, row: dict[str, Any] | None, id_field: str) -> dict[str, Any
 class ShipmentContext:
     shipment: dict[str, Any]
     order: dict[str, Any] | None
-    part: dict[str, Any] | None
+    part: (
+        dict[str, Any] | None
+    )  # the part when the shipment carries exactly one order line; None otherwise (see `parts`)
     origin: dict[str, Any] | None
     destination: dict[str, Any] | None
     current_location: dict[str, Any] | None
@@ -43,6 +45,15 @@ class ShipmentContext:
     alternative_routes: list[dict[str, Any]]
     transport_comparison: dict[str, Any] | None
     route_resolution_status: str
+    shipment_lines: list[dict[str, Any]] = field(
+        default_factory=list
+    )  # every order line travelling on THIS shipment, each with its part
+    parts: list[dict[str, Any]] = field(default_factory=list)  # the distinct parts of those lines
+    shipment_kind: str = "NO_LINE_RECORDED"  # SINGLE_LINE | MULTI_LINE | NO_LINE_RECORDED: several lines in one shipment
+    order_shipments: list[str] = field(
+        default_factory=list
+    )  # every shipment of the order, this one included
+    order_split: bool = False  # the ORDER was split over several shipments (a different thing from a shipment with several lines)
     provenance: list[dict[str, Any]] = field(default_factory=list)
     synthetic: bool = True
     notes: list[str] = field(default_factory=list)
@@ -64,7 +75,32 @@ class ShipmentContextBuilder:
         today = as_of or self._today or date.today()  # noqa: DTZ011 - a calendar date; callers that need a fixed day pass as_of
         events = r.events(shipment_id)
         order = r.order(shipment["order_id"]) if shipment.get("order_id") else None
-        part = r.order_part(shipment["order_line_id"]) if shipment.get("order_line_id") else None
+        lines = []
+        for line_id in r.shipment_lines(shipment_id):
+            part = r.order_part(line_id)
+            lines.append(
+                {
+                    "order_line_id": line_id,
+                    "part_id": None,
+                    "part_number": None,
+                    "name": None,
+                    "quantity": None,
+                    **(part or {}),
+                }
+            )
+        parts, seen = [], set()
+        for ln in lines:  # distinct parts in line order; a line whose part is unrecorded adds none
+            if ln["part_id"] and ln["part_id"] not in seen:
+                seen.add(ln["part_id"])
+                parts.append({k: ln[k] for k in ("part_id", "part_number", "name")})
+        part = (
+            r.order_part(lines[0]["order_line_id"]) if len(lines) == 1 else None
+        )  # one line: the part as before; several lines: no single part is chosen
+        order_shipments = (
+            [s["shipment_id"] for s in r.shipments_of_order(shipment["order_id"])]
+            if shipment.get("order_id")
+            else []
+        )
         route = r.route(shipment["route_id"]) if shipment.get("route_id") else None
         legs = r.legs(route["route_id"]) if route else []
         origin_id = shipment.get("origin_location_id") or (route or {}).get("origin_location_id")
@@ -118,6 +154,15 @@ class ShipmentContextBuilder:
             alternative_routes=alternatives,
             transport_comparison=comparison,
             route_resolution_status=shipment["route_resolution_status"],
+            shipment_lines=lines,
+            parts=parts,
+            shipment_kind="MULTI_LINE"
+            if len(lines) > 1
+            else "SINGLE_LINE"
+            if lines
+            else "NO_LINE_RECORDED",
+            order_shipments=order_shipments,
+            order_split=len(order_shipments) > 1,
             provenance=self._provenance(shipment, order, route, events, origin, destination),
             synthetic=all(
                 p["data_status"] == "SYNTHETIC_DEMO"

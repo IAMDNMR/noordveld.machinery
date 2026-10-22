@@ -66,18 +66,18 @@ export function RolesView({ studio, recent, ask }: ViewProps) {
                   ) : null}
                 </div>
                 <details>
-                <summary>Technical permissions · {role.permissions.length}</summary>
-                <ul className="sw-tags sw-tags--code" aria-label={`${role.name} permissions`}>
-                  {role.permissions.length ? (
-                    role.permissions.map((permission) => (
-                      <li key={permission}>
-                        <code>{permission}</code>
-                      </li>
-                    ))
-                  ) : (
-                    <li>no permissions</li>
-                  )}
-                </ul>
+                  <summary>Technical permissions · {role.permissions.length}</summary>
+                  <ul className="sw-tags sw-tags--code" aria-label={`${role.name} permissions`}>
+                    {role.permissions.length ? (
+                      role.permissions.map((permission) => (
+                        <li key={permission}>
+                          <code>{permission}</code>
+                        </li>
+                      ))
+                    ) : (
+                      <li>no permissions</li>
+                    )}
+                  </ul>
                 </details>
               </li>
             )

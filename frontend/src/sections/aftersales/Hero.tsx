@@ -7,7 +7,6 @@ import { useInView } from '../../hooks/useInView'
 import { useMediaQuery, useReducedMotion } from '../../hooks/useMediaQuery'
 import { filmPosterUrl, machineImageUrl, partImageUrl, videoUrl } from '../../lib/assets'
 import { partPath } from '../../lib/storeQuery'
-import annotation from '../../assets/machines/nv-4500/hotspots.json'
 import { label, sentence } from './data'
 
 /*
@@ -22,7 +21,17 @@ import { label, sentence } from './data'
 */
 const END = 12.2
 
-const slug = 'nv-4500'
+interface HotspotFile {
+  machine: string
+  focus: string
+  hotspots: { id: string; x: number; y: number; part: string }[]
+}
+const files = import.meta.glob<HotspotFile>('../../assets/machines/*/hotspots.json', {
+  eager: true,
+  import: 'default',
+})
+const [annotationPath, annotation] = Object.entries(files)[0] ?? [null, null]
+const slug = annotationPath?.match(/machines\/([^/]+)\//)?.[1] ?? null
 const IMAGE_RATIO = 1376 / 768
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
@@ -49,7 +58,13 @@ function useSequence(start: boolean, reduced: boolean): [number, () => void] {
     return () => cancelAnimationFrame(raf)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `run` restarts the sequence (replay)
   }, [start, reduced, run])
-  return [reduced ? END : t, () => { setT(0); setRun((n) => n + 1) }]
+  return [
+    reduced ? END : t,
+    () => {
+      setT(0)
+      setRun((n) => n + 1)
+    },
+  ]
 }
 
 export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
@@ -63,7 +78,13 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
   const spots = useMemo(() => {
     if (!annotation || !parts) return []
     return annotation.hotspots
-      .map((h) => ({ ...h, record: parts.find((p) => p.part_number === h.part && p.fitment.some((f) => f.model_code === annotation.machine)) }))
+      .map((h) => ({
+        ...h,
+        record: parts.find(
+          (p) =>
+            p.part_number === h.part && p.fitment.some((f) => f.model_code === annotation.machine),
+        ),
+      }))
       .filter((h): h is typeof h & { record: PartSummary } => Boolean(h.record))
   }, [parts])
   const focus = spots.find((s) => s.id === annotation?.focus) ?? spots[0]
@@ -82,7 +103,17 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
   return (
     <section ref={root} className="as-hero on-dark" aria-labelledby="as-hero-title">
       {film && !reduced ? (
-        <video className="as-hero__film" src={film} poster={poster} autoPlay muted loop playsInline aria-hidden="true" style={{ opacity: 1 - filmOut, transform: `scale(${1.04 + 0.06 * clamp01(t / 4.6)})` }} />
+        <video
+          className="as-hero__film"
+          src={film}
+          poster={poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          style={{ opacity: 1 - filmOut, transform: `scale(${1.04 + 0.06 * clamp01(t / 4.6)})` }}
+        />
       ) : null}
       <div className="as-hero__grid" aria-hidden="true" style={{ opacity: 0.25 + 0.5 * filmOut }} />
       <div className="as-hero__shade" aria-hidden="true" />
@@ -90,9 +121,15 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
       <div className="container as-hero__copy">
         <p className="label as-hero__eyebrow">After-sales · Parts &amp; Services</p>
         <h1 id="as-hero-title" className="as-hero__title">
-          <span style={{ animationDelay: '80ms' }}>Every Machine Has a Story.</span> <span className="accent" style={{ animationDelay: '380ms' }}>Keep It Moving.</span>
+          <span style={{ animationDelay: '80ms' }}>Every Machine Has a Story.</span>{' '}
+          <span className="accent" style={{ animationDelay: '380ms' }}>
+            Keep It Moving.
+          </span>
         </h1>
-        <p className="lead as-hero__lead">Find the right parts, understand machine compatibility, explore technical relationships, and connect every order to the service journey.</p>
+        <p className="lead as-hero__lead">
+          Find the right parts, understand machine compatibility, explore technical relationships,
+          and connect every order to the service journey.
+        </p>
         <div className="as-hero__actions">
           <ButtonLink to="/parts-store">Explore Parts</ButtonLink>
           <ButtonLink to="#find-parts" variant="secondary" arrow={false} external>
@@ -107,11 +144,34 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
       </div>
 
       {still && annotation ? (
-        <div className="as-stage" style={{ '--ratio': IMAGE_RATIO, opacity: reduced ? 1 : filmOut } as CSSProperties} aria-label={`Components of the ${annotation.machine} with their catalogue records`} role="img">
-          <img className="as-stage__machine" src={still} alt="" style={{ transform: `scale(${push})`, filter: `brightness(${0.78 - 0.3 * explode}) saturate(${0.85 - 0.3 * explode})` }} />
+        <div
+          className="as-stage"
+          style={{ '--ratio': IMAGE_RATIO, opacity: reduced ? 1 : filmOut } as CSSProperties}
+          aria-label={`Components of the ${annotation.machine} with their catalogue records`}
+          role="img"
+        >
+          <img
+            className="as-stage__machine"
+            src={still}
+            alt=""
+            style={{
+              transform: `scale(${push})`,
+              filter: `brightness(${0.78 - 0.3 * explode}) saturate(${0.85 - 0.3 * explode})`,
+            }}
+          />
           {/* the scan */}
-          {scan > 0 && scan < 1.08 ? <i className="as-stage__scan" style={{ left: `${Math.min(1, scan) * 100}%`, opacity: 1 - seg(t, 6.2, 6.6) }} /> : null}
-          <svg className="as-stage__lines" viewBox="0 0 1000 558" preserveAspectRatio="none" aria-hidden="true">
+          {scan > 0 && scan < 1.08 ? (
+            <i
+              className="as-stage__scan"
+              style={{ left: `${Math.min(1, scan) * 100}%`, opacity: 1 - seg(t, 6.2, 6.6) }}
+            />
+          ) : null}
+          <svg
+            className="as-stage__lines"
+            viewBox="0 0 1000 558"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
             {spots.map((s, i) => {
               const target = plateCentre(i, plateSlots, compact)
               const p = clamp01((explode - i * 0.08) / 0.7)
@@ -120,18 +180,43 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
               const y1 = s.y * 558
               const x2 = x1 + (target.x * 1000 - x1) * p
               const y2 = y1 + (target.y * 558 - y1) * p
-              return <line key={s.id} x1={x1} y1={y1} x2={x2} y2={y2} className={s.id === focus?.id && focusIn > 0 ? 'is-focus' : ''} />
+              return (
+                <line
+                  key={s.id}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  className={s.id === focus?.id && focusIn > 0 ? 'is-focus' : ''}
+                />
+              )
             })}
             {/* measurement ticks along the scan path */}
-            {Array.from({ length: 21 }, (_, i) => <line key={`tick-${i}`} x1={i * 50} y1={548} x2={i * 50} y2={i % 5 === 0 ? 532 : 540} className="tick" style={{ opacity: seg(t, 4.6 + i * 0.05, 5.0 + i * 0.05) * 0.6 }} />)}
+            {Array.from({ length: 21 }, (_, i) => (
+              <line
+                key={`tick-${i}`}
+                x1={i * 50}
+                y1={548}
+                x2={i * 50}
+                y2={i % 5 === 0 ? 532 : 540}
+                className="tick"
+                style={{ opacity: seg(t, 4.6 + i * 0.05, 5.0 + i * 0.05) * 0.6 }}
+              />
+            ))}
           </svg>
 
           {spots.map((s) => {
             const on = seg(t, 4.6 + s.x * 1.8, 5.0 + s.x * 1.8)
             return (
-              <div key={s.id} className={`as-spot ${s.id === focus?.id && focusIn > 0 ? 'is-focus' : ''}`} style={{ left: `${s.x * 100}%`, top: `${s.y * 100}%`, opacity: on }}>
+              <div
+                key={s.id}
+                className={`as-spot ${s.id === focus?.id && focusIn > 0 ? 'is-focus' : ''}`}
+                style={{ left: `${s.x * 100}%`, top: `${s.y * 100}%`, opacity: on }}
+              >
                 <i />
-                <span className="as-spot__label" style={{ opacity: on * (1 - explode * 0.85) }}>{s.record.category ?? s.record.subcategory}</span>
+                <span className="as-spot__label" style={{ opacity: on * (1 - explode * 0.85) }}>
+                  {s.record.category ?? s.record.subcategory}
+                </span>
               </div>
             )
           })}
@@ -146,8 +231,19 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
               const y = s.y + (target.y - s.y) * p
               const dim = focusIn > 0 && !isFocus ? 1 - 0.45 * focusIn : 1
               return (
-                <Link key={s.id} to={partPath(s.record.part_number)} className={`as-plate ${isFocus && focusIn > 0 ? 'is-focus' : ''}`} tabIndex={p > 0.9 ? 0 : -1} aria-hidden={p < 0.9}
-                  style={{ left: `${x * 100}%`, top: `${y * 100}%`, opacity: Math.min(1, p * 1.6) * dim, transform: `translate(-50%, -50%) scale(${0.35 + 0.65 * p + (isFocus ? 0.12 * focusIn : 0)})` }}>
+                <Link
+                  key={s.id}
+                  to={partPath(s.record.part_number)}
+                  className={`as-plate ${isFocus && focusIn > 0 ? 'is-focus' : ''}`}
+                  tabIndex={p > 0.9 ? 0 : -1}
+                  aria-hidden={p < 0.9}
+                  style={{
+                    left: `${x * 100}%`,
+                    top: `${y * 100}%`,
+                    opacity: Math.min(1, p * 1.6) * dim,
+                    transform: `translate(-50%, -50%) scale(${0.35 + 0.65 * p + (isFocus ? 0.12 * focusIn : 0)})`,
+                  }}
+                >
                   {img ? <img src={img} alt="" loading="lazy" /> : null}
                   <span className="as-plate__no">{s.record.part_number}</span>
                 </Link>
@@ -155,15 +251,44 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
             })}
 
           {focus ? (
-            <aside className="as-ident" style={{ opacity: focusIn, transform: `translateY(${(1 - focusIn) * 16}px)` }} aria-hidden={focusIn < 0.5}>
+            <aside
+              className="as-ident"
+              style={{ opacity: focusIn, transform: `translateY(${(1 - focusIn) * 16}px)` }}
+              aria-hidden={focusIn < 0.5}
+            >
               <p className="as-ident__eyebrow">Component identified</p>
               <p className="as-ident__name">{focus.record.name}</p>
               <dl>
-                <div><dt>Part number</dt><dd className="as-mono">{focus.record.part_number}</dd></div>
-                <div><dt>Category</dt><dd>{focus.record.category}{focus.record.subcategory ? ` · ${focus.record.subcategory}` : ''}</dd></div>
-                <div><dt>Recorded fitment</dt><dd>{focus.record.fitment.map((f) => `${f.model_code}${f.fitment_status ? ` (${label(f.fitment_status)})` : ''}`).join(', ')}</dd></div>
+                <div>
+                  <dt>Part number</dt>
+                  <dd className="as-mono">{focus.record.part_number}</dd>
+                </div>
+                <div>
+                  <dt>Category</dt>
+                  <dd>
+                    {focus.record.category}
+                    {focus.record.subcategory ? ` · ${focus.record.subcategory}` : ''}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Recorded fitment</dt>
+                  <dd>
+                    {focus.record.fitment
+                      .map(
+                        (f) =>
+                          `${f.model_code}${f.fitment_status ? ` (${label(f.fitment_status)})` : ''}`,
+                      )
+                      .join(', ')}
+                  </dd>
+                </div>
               </dl>
-              <Link className="as-ident__link" to={partPath(focus.record.part_number)} tabIndex={focusIn > 0.5 ? 0 : -1}>View the part →</Link>
+              <Link
+                className="as-ident__link"
+                to={partPath(focus.record.part_number)}
+                tabIndex={focusIn > 0.5 ? 0 : -1}
+              >
+                View the part →
+              </Link>
             </aside>
           ) : null}
 
@@ -171,7 +296,18 @@ export function AftersalesHero({ parts }: { parts: PartSummary[] | null }) {
             {['Machine', 'Part', 'Fitment', 'Parts Intelligence'].map((n, i) => (
               <li key={n} style={{ opacity: seg(t, 10.4 + i * 0.3, 10.9 + i * 0.3) }}>
                 <span>{n}</span>
-                <em>{i === 0 ? annotation.machine : i === 1 ? focus?.record.part_number : i === 2 ? sentence(focus?.record.fitment.find((f) => f.model_code === annotation.machine)?.fitment_status) : 'evidence-led answers'}</em>
+                <em>
+                  {i === 0
+                    ? annotation.machine
+                    : i === 1
+                      ? focus?.record.part_number
+                      : i === 2
+                        ? sentence(
+                            focus?.record.fitment.find((f) => f.model_code === annotation.machine)
+                              ?.fitment_status,
+                          )
+                        : 'evidence-led answers'}
+                </em>
               </li>
             ))}
           </ol>

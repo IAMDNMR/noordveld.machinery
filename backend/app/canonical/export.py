@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from app.canonical.engine import APP_SESSION, normalise
+from app.canonical.geography import country_profile, reference
 from app.canonical.io import CANON_DIR, dump_rows
 from app.canonical.registry import BY_NAME, DatasetSpec
 from app.core.config import get_settings
@@ -52,27 +53,28 @@ SOURCE_TYPE = {
 
 
 class Exporter:
-    def __init__(self, vocab: dict[str, Any] | None = None) -> None:
-        s = get_settings()
-        self.g = GraphClient(dataclasses.replace(s, neo4j_query_timeout=180.0))
+    def __init__(
+        self, vocab: dict[str, Any] | None = None, graph: GraphClient | None = None
+    ) -> None:
+        # `graph`: reuse a client that someone else owns (a read-only consumer such as the commerce context engine); it is then never closed here
+        self._owns_graph = graph is None
+        self.g = graph or GraphClient(
+            dataclasses.replace(get_settings(), neo4j_query_timeout=180.0)
+        )
         self.vocab = vocab or json.loads(
             (CANON_DIR / "reference" / "discovery_vocabulary.json").read_text(encoding="utf-8")
         )
-        self.geo = json.loads(
-            (CANON_DIR / "reference" / "geography.json").read_text(encoding="utf-8")
-        )
+        self.geo = reference()
 
     def where(self, cc: str | None) -> dict[str, Any]:
         """country, region and timezone of a country code, from the geography reference (never guessed: an unknown code gives nothing)."""
-        c = self.geo["countries"].get(cc or "")
-        return (
-            {"country": c["name"], "region": c["region"], "timezone": c["timezone"]}
-            if c
-            else {"country": None, "region": None, "timezone": None}
-        )
+        return country_profile(
+            cc
+        )  # the one geography reference reader (app/canonical/geography.py)
 
     def close(self) -> None:
-        self.g.close()
+        if self._owns_graph:
+            self.g.close()
 
     # ── helpers ──────────────────────────────────────────────────────────────────────────────────
     def rd(self, q: str, **p: Any) -> list[dict[str, Any]]:
@@ -86,6 +88,13 @@ class Exporter:
             "source_type": SOURCE_TYPE.get(ds, "SYNTHETIC_DEMO"),
             "source_record_id": p.get("source_record_id"),
         }
+
+    @staticmethod
+    def protected(p: dict[str, Any]) -> bool:
+        """A supplied record the integrity checksum covers (or any non-app USER_PROVIDED one): the canonical files must not assert more about it than the graph holds."""
+        return p.get("data_status") in ("SOURCE_DERIVED", "DERIVED", "REAL") or (
+            p.get("data_status") == "USER_PROVIDED" and p.get("source_id") != "APP-SESSION"
+        )
 
     @staticmethod
     def strip(rel_id: str, prefix: str) -> str:
@@ -110,6 +119,13 @@ class Exporter:
         out = []
         for r in self.rd("MATCH (p:Plant) RETURN properties(p) AS p"):
             p = r["p"]
+            # a supplied (protected) plant asserts only what the graph holds: country, region, timezone and the PLANT logistics type are derived geography, resolved from the
+            # reference layer by app.canonical.geography.resolve_location_context(), never copied onto the supplied record
+            derived = (
+                {}
+                if self.protected(p)
+                else {"location_type": "PLANT", **self.where(p.get("country_code"))}
+            )
             out.append(
                 {
                     "location_id": p["plant_id"],
@@ -118,8 +134,8 @@ class Exporter:
                     "graph_label": "Plant",
                     "country_code": p.get("country_code"),
                     "city": p.get("city"),
-                    "location_type": "PLANT",
-                    **self.where(p.get("country_code")),
+                    "location_type": p.get("logistics_type"),
+                    **derived,
                     **self.prov(p),
                 }
             )
@@ -165,11 +181,13 @@ class Exporter:
             "MATCH (l:Location) WHERE " + NOT_NET.format(v="l") + " RETURN properties(l) AS p"
         ):
             p = r["p"]
-            lat, lon = (
-                (coords.get(p.get("name") or "") or (None, None))
-                if p.get("location_type") == "CITY"
-                else (None, None)
-            )
+            # the node's own coordinates are the source of truth; only a city the graph holds no coordinates for takes the reference city centre (the supplied SRC-001 cities)
+            lat, lon, basis = p.get("latitude"), p.get("longitude"), p.get("geo_basis")
+            if (
+                lat is None and p.get("location_type") == "CITY" and not self.protected(p)
+            ):  # a supplied city's reference centre is overlay geography, not part of the record
+                lat, lon = coords.get(p.get("name") or "") or (None, None)
+                basis = "REFERENCE_CITY_CENTRE" if lat is not None else None
             out.append(
                 {
                     "location_id": p["location_id"],
@@ -180,7 +198,7 @@ class Exporter:
                     "city": None,
                     "latitude": lat,
                     "longitude": lon,
-                    "geo_basis": "REFERENCE_CITY_CENTRE" if lat is not None else None,
+                    "geo_basis": basis,
                     **self.prov(p),
                 }
             )
@@ -637,11 +655,27 @@ class Exporter:
                     "remediation_flags": flags,
                     "route_resolution_status": "LINKED" if route else "ROUTE_NOT_DETERMINABLE",
                     "carrier_id": r["carrier_id"],
-                    "order_line_id": r["lines"][0] if len(r["lines"]) == 1 else None,
                     **self.prov(p),
                 }
             )
         return out
+
+    def shipment_lines(self):
+        """Every order line the graph says a seeded shipment ships: none is chosen, none is dropped."""
+        return [
+            {
+                "shipment_line_id": f"{r['shipment']}>{r['line']}",
+                "shipment_id": r["shipment"],
+                "order_line_id": r["line"],
+                "data_status": "SYNTHETIC_DEMO",
+                "source_type": "SYNTHETIC_DEMO",
+                "source_record_id": r["x"].get("rel_id") or f"{r['shipment']}>{r['line']}",
+            }
+            for r in self.rd(
+                f"MATCH (s:Shipment)-[x:SHIPS_LINE]->(l:OrderLine) WHERE {NOT_APP.format(v='s')} AND {NOT_NET.format(v='s')} "
+                "RETURN s.shipment_id AS shipment, l.order_line_id AS line, properties(x) AS x ORDER BY shipment, line"
+            )
+        ]
 
     def tracking_events(self):
         return [
@@ -711,6 +745,7 @@ EXPORTS = [
     "routes",
     "route_legs",
     "shipments",
+    "shipment_lines",
     "tracking_events",
     "warranty_policies",
 ]

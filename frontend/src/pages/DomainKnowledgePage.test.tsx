@@ -303,13 +303,10 @@ vi.mock('../api/domainKnowledge', () => ({
 }))
 import {
   getImpact,
-  
   getProposalImpact,
   importApply,
   importDryRun,
-  
   transitionVersion,
-  
 } from '../api/domainKnowledge'
 import DomainKnowledgePage from './DomainKnowledgePage'
 
@@ -344,8 +341,6 @@ it('explores an entity through the graph and the accessible relationship tables,
   fireEvent.keyDown(screen.getByRole('button', { name: 'Open Part' }), { key: 'Enter' })
   expect(await screen.findByRole('article', { name: 'Entity Part' })).toBeTruthy()
 })
-
-
 
 it('requires a dry run, a reason and another approver; the proposer cannot approve their own version', async () => {
   page()
@@ -394,5 +389,3 @@ it('requires a dry run, a reason and another approver; the proposer cannot appro
   fireEvent.change(screen.getByLabelText('Content'), { target: { value: '{"id":"y"}' } })
   expect(screen.queryByRole('region', { name: 'Dry-run report' })).toBeNull()
 })
-
-

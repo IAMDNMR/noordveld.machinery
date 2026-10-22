@@ -61,10 +61,4 @@ describe('cart lines carry the machine they were chosen for', () => {
     expect(api().count).toBe(7)
     await waitFor(() => expect(JSON.parse(localStorage.getItem(KEY) ?? '[]')).toEqual(lines())) // persisted as it is, machine included
   })
-
-  
-
-  
-
-  
 })

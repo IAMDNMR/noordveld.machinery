@@ -19,6 +19,7 @@ from app.api.routes import (
     catalogue,
     assistant,
     checkout,
+    commerce,
     design_studio,
     domain_knowledge,
     intelligence,
@@ -145,6 +146,7 @@ def create_app() -> FastAPI:
     app.include_router(domain_knowledge.router, prefix="/api/v1")
     app.include_router(workspace.router, prefix="/api/v1")
     app.include_router(assistant.router, prefix="/api/v1")
+    app.include_router(commerce.router, prefix="/api/v1")
     return app
 
 

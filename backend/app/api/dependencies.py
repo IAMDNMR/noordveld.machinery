@@ -11,8 +11,8 @@ from app.agent.service import AgentService
 from app.core.config import get_settings
 from app.graph.client import GraphClient
 from app.graph.repositories.catalogue import CatalogueRepository
-from app.graph.repositories.parts import PartRepository
 from app.graph.repositories.intelligence import IntelligenceRepository
+from app.graph.repositories.parts import PartRepository
 from app.intelligence.service import IntelligenceService
 from app.intelligence.workspace import Entities, Overview, PartWorkspace
 from app.llm import LLMClient, create_llm
@@ -97,7 +97,12 @@ from fastapi import Cookie, HTTPException, Request  # noqa: E402
 
 from app.core.session import COOKIE, verify  # noqa: E402
 from app.services.checkout import CheckoutService  # noqa: E402
-from app.services.orders import GraphOrdersRepository, OrdersRepository, OrdersService, User  # noqa: E402
+from app.services.orders import (  # noqa: E402
+    GraphOrdersRepository,
+    OrdersRepository,
+    OrdersService,
+    User,
+)
 
 
 def get_orders_repository(graph: Graph) -> OrdersRepository:
@@ -171,3 +176,36 @@ def require(permission: str):
         return user
 
     return guard
+
+
+# ── the commerce context engine ───────────────────────────────────────────────────────────────────
+from app.commerce.engine import CommerceContextEngine  # noqa: E402
+from app.commerce.service import AgenticCommerceService  # noqa: E402
+
+
+def get_commerce_engine(graph: Graph) -> CommerceContextEngine:
+    """One engine per request over the shared read-only graph client. Tests override this with an engine over the canonical files."""
+    return CommerceContextEngine.from_graph(graph)
+
+
+CommerceEngine = Annotated[CommerceContextEngine, Depends(get_commerce_engine)]
+
+
+def get_commerce_service(engine: CommerceEngine) -> AgenticCommerceService:
+    return AgenticCommerceService(engine)
+
+
+CommerceService = Annotated[AgenticCommerceService, Depends(get_commerce_service)]
+
+
+from app.commerce_agent.agent import CommerceAgent  # noqa: E402
+
+
+def get_commerce_agent(
+    engine: CommerceEngine, llm: Annotated[LLMClient | None, Depends(get_llm)]
+) -> CommerceAgent:
+    """The Commerce Agent over the same engine; the language model is optional (routing an unclear message, rewording the lead) and the agent works without it."""
+    return CommerceAgent(engine, llm)
+
+
+CommerceAgentDep = Annotated[CommerceAgent, Depends(get_commerce_agent)]
