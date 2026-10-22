@@ -498,7 +498,11 @@ def preview_document(definition, provider=None) -> str:
         "unsupported": [item["text"] for item in unsupported_items(definition)],
         "presentation": presentation(definition, provider),
     }
-    bootstrap = json.dumps({"mode": "preview", "app": app, "preview_role": preview_role(definition)}).replace("<", "\\u003c")
+    from app.design_studio.runtime_samples import sample_data
+
+    bootstrap = json.dumps(
+        {"mode": "preview", "app": app, "preview_role": preview_role(definition), "samples": sample_data(definition)}
+    ).replace("<", "\\u003c")
     client = client_files()
     policy = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'"
     page = (

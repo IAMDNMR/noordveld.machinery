@@ -11,7 +11,15 @@ const PREVIEW_PROCESS = 'Run the application to execute its server-validated pro
 
 /* The Studio preview's stand-in for the runtime API: the same responses, no persistence, no process execution. */
 const previewRole = preview ? bootstrap.preview_role || Object.keys(bootstrap.app?.roles || {})[0] : null
-const previewState = { user: previewRole ? { id: previewRole, role: previewRole, tenant: 'preview' } : null, records: {} }
+// The preview opens with illustrative sample records and cases (runtime_samples.py), so it does not look empty. They live in this page only.
+const previewState = { user: previewRole ? { id: previewRole, role: previewRole, tenant: 'preview' } : null, records: structuredClone(bootstrap.samples?.records ?? {}) }
+function previewInstances(view) {
+  const role = previewState.user.role, permissions = bootstrap.app.role_permissions?.[role] ?? []
+  return (bootstrap.samples?.instances ?? []).flatMap(sample => {
+    const step = view.workflows.find(w => w.id === sample.workflow)?.states.find(s => s.id === sample.state)
+    return step ? [{ id: sample.id, workflow: sample.workflow, state: sample.state, step, revision: 1, links: sample.links, can_act: step.kind !== 'end' && step.role_id === role && !!step.permission && permissions.includes(step.permission) }] : []
+  })
+}
 function previewView() {
   const app = bootstrap.app, role = previewState.user?.role
   const permissions = app.role_permissions?.[role] ?? []
@@ -37,7 +45,9 @@ function previewApi(path, body) {
   if (!previewState.user) fail(401, 'Choose who you are working as.')
   const view = previewView()
   if (path === '/application') return view
-  if (path === '/instances' && body === undefined) return []
+  if (path === '/instances' && body === undefined) return previewInstances(view)
+  const history = path.match(/^\/instances\/([^/]+)\/history$/)
+  if (history && body === undefined) return (bootstrap.samples?.instances ?? []).find(i => i.id === history[1])?.events ?? []
   if (path.startsWith('/instances')) fail(409, PREVIEW_PROCESS)
   const [, , entityId, recordId] = path.split('/')
   const entity = view.entities.find(e => e.id === entityId)
@@ -279,7 +289,7 @@ async function render() {
   }
   section = ''
   link({ page: 'catalog' }, 'All records')
-  append(rail, brand, menu, nav, el('p', preview ? 'Studio preview · records stay in this page · processes run in the launched application' : 'Local application · isolated SQLite storage · no external integrations', { class: 'rail-footer' }))
+  append(rail, brand, menu, nav, el('p', preview ? 'Studio preview · sample data, kept in this page only · processes run in the launched application' : 'Local application · isolated SQLite storage · no external integrations', { class: 'rail-footer' }))
   const header = el('header', null, { class: 'topbar' })
   append(header, el('span', application.presentation?.description || '', { class: 'topbar__about' }), preview ? pill('Preview', 'waiting') : null,
     append(el('span', null, { class: 'whoami' }), el('span', roleName(application.user.role), { class: 'whoami__role' }), el('span', application.user.tenant.replace('demo_', '').replaceAll('_', ' '))),

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from app.design_studio.auto_resolve import resolve
+from app.design_studio.compiler import references
 from app.design_studio.evaluation import SCENARIOS, build, run
 from app.design_studio.templates import automatic, navigation_for
 
@@ -70,6 +71,34 @@ def test_a_workflow_of_only_look_up_and_check_steps_is_a_dashboard_not_a_process
     assert not is_view(flow("search", "form")) and not is_view(flow())
     definition = build(SCENARIOS["warehouse (WMS)"])
     assert all(area["id"] != "views" for area in work_areas(definition))
+
+
+def test_the_preview_opens_with_consistent_sample_records_and_running_cases_for_every_scenario():
+    from app.design_studio.runtime_generation import preview_document
+    from app.design_studio.runtime_samples import sample_data
+
+    for name, scenario in SCENARIOS.items():
+        definition = build(scenario)
+        samples = sample_data(definition)
+        rows = {entity_id: {row["id"]: row for row in entity_rows} for entity_id, entity_rows in samples["records"].items()}
+        for entity in definition.business.entities:
+            assert rows[entity.id], f"{name}: {entity.name} has no sample records"
+            attribute_ids = {a.id for a in entity.attributes}
+            for row in rows[entity.id].values():
+                assert set(row["data"]) - attribute_ids <= {r.field for r in references(definition)[0] if r.source == entity.id}, name
+        workflows = {w.id: w for w in definition.workflow_definitions}
+        assert samples["instances"], name
+        for case in samples["instances"]:
+            workflow = workflows[case["workflow"]]
+            assert case["state"] in {s.id for s in workflow.states}
+            assert all(record_id in rows[entity_id] for entity_id, record_id in case["links"].items()), name
+            assert case["events"][0]["action"] == "process.start"
+    import base64
+    import re
+
+    outer = preview_document(build(SCENARIOS["after-sales"]))
+    inner = base64.b64decode(re.search(r"base64,([^\"]+)\"", outer).group(1)).decode()
+    assert '"samples"' in inner and "sample-" in inner
 
 
 def test_an_application_gets_a_visual_layer_without_a_template_choice_and_a_side_menu_when_large():
