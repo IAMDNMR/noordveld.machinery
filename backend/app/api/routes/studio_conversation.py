@@ -1096,13 +1096,28 @@ def _open_defects(saved, key, knowledge):
     return defects, analysis
 
 
+def _settle_first(saved, project_id, user, actor, projects, knowledge):
+    """Record the findings that follow from the design itself (merged duplicate roles, repeated steps, unowned records) as one
+    revision, with no model call, so the slower model repair is only asked about what is genuinely open."""
+    from app.design_studio.auto_resolve import resolve
+
+    if saved.studio_flow is None or guided.active(saved) == "brief":
+        return saved  # the first stage is where the person answers the optional questions
+    resolved, changes = resolve(saved)
+    if not changes:
+        return saved
+    return _store_call(
+        projects.update, user.id, project_id, saved.revision, _refresh(resolved, knowledge), "studio:resolve", actor.id
+    )
+
+
 def _repair_own_draft(result, key, project_id, user, actor, projects, knowledge, domain):
     """Repair the stage's own defects, preserving honest blockers if bounded
     repair cannot implement them. Business choices still belong to the owner.
     """
     if key in ("export", "checks"):
         return result
-    saved = _store_call(projects.current, user.id, project_id)
+    saved = _settle_first(_store_call(projects.current, user.id, project_id), project_id, user, actor, projects, knowledge)
     for _ in range(MAX_REPAIR_ROUNDS):
         defects, analysis = _open_defects(saved, key, knowledge)
         refused = result["turn"].get("rejected") or []
@@ -1125,7 +1140,7 @@ def _repair_own_draft(result, key, project_id, user, actor, projects, knowledge,
             None,
         )
         result = _execute(plan, saved, saved, project_id, "text", user, actor, projects, knowledge, domain)
-        saved = _store_call(projects.current, user.id, project_id)
+        saved = _settle_first(_store_call(projects.current, user.id, project_id), project_id, user, actor, projects, knowledge)
     defects, _ = _open_defects(saved, key, knowledge)
     _, notes = settle(saved, defects)
     if not notes:

@@ -23,7 +23,8 @@ function previewView() {
     const readable = writable || steps.some(step => (step.reads_entity_ids ?? []).includes(entity.id))
     return readable ? [{ ...entity, writable, creatable: writable && (!entity.owner_role_id || owner) }] : []
   })
-  return { ...app, user: previewState.user, entities, workflows: app.workflows.filter(workflow => workflow.states.some(permits)) }
+  const entity_names = Object.fromEntries(app.entities.map(entity => [entity.id, entity.name]))
+  return { ...app, user: previewState.user, entities, entity_names, workflows: app.workflows.filter(workflow => workflow.states.some(permits)) }
 }
 function previewApi(path, body) {
   const app = bootstrap.app
@@ -173,15 +174,17 @@ function areas() {
   const visible = new Set(application.workflows.map(w => w.id))
   const declared = (application.presentation?.areas || []).map(a => ({ ...a, workflows: a.workflow_ids.filter(id => visible.has(id)).map(id => application.workflows.find(w => w.id === id)) })).filter(a => a.workflows.length)
   const placed = new Set(declared.flatMap(a => a.workflows.map(w => w.id)))
-  const rest = application.workflows.filter(w => !placed.has(w.id))
-  return rest.length ? [...declared, { id: 'other', name: declared.length ? 'Other processes' : 'Processes', workflows: rest }] : declared
+  const rest = application.workflows.filter(w => !placed.has(w.id) && !isView(w)), views = application.workflows.filter(w => !placed.has(w.id) && isView(w))
+  return [...declared, ...(rest.length ? [{ id: 'other', name: declared.length ? 'Other processes' : 'Processes', workflows: rest }] : []), ...(views.length ? [{ id: 'views', name: 'Dashboards and views', workflows: views }] : [])]
 }
+// A dashboard, directory or tracking view is looked at, not started: every step of it only looks something up or checks it.
+const isView = workflow => { const steps = workflow.states.filter(s => s.kind !== 'start' && s.kind !== 'end'); return steps.length > 0 && steps.every(s => s.kind === 'search' || s.kind === 'review') }
 const areaOfWorkflow = workflow => areas().find(a => a.workflows.includes(workflow))
 const areaOfEntity = entity => isDocument(entity) ? areaOfWorkflow(writers(entity.id)[0])?.name : 'Reference data'
 const referenceData = () => application.entities.filter(e => !isDocument(e) && !parentOf(e))
 const firstStep = workflow => { const start = workflow.states.find(s => s.kind === 'start'); const edge = workflow.transitions.find(e => e.source === start?.id); return workflow.states.find(s => s.id === edge?.target) }
 const KIND = { form: 'Enter', action: 'Do', review: 'Check', approval: 'Approve', search: 'Look up', exception: 'Needs attention' }
-const entityName = id => application.entities.find(e => e.id === id)?.name || id
+const entityName = id => application.entities.find(e => e.id === id)?.name || application.entity_names?.[id] || 'a record you cannot open'
 
 /* ── sign in ─────────────────────────────────────────────────────────── */
 async function signIn() {
@@ -264,7 +267,9 @@ async function render() {
     const documents = application.entities.filter(e => own.has(e.id) && isDocument(e) && !own.has(parentOf(e)?.id) && areaOfWorkflow(writers(e.id)[0])?.id === area.id)
     const items = group('area:' + area.id, area.name, area.workflows.length + documents.length)
     for (const workflow of area.workflows) link({ page: 'workflow', id: workflow.id }, workflow.name, instances.filter(i => i.workflow === workflow.id && i.step.kind !== 'end').length, items)
-    for (const entity of documents) link({ page: 'records', id: entity.id }, entity.name, null, items)
+    // A record that shares its name with a process of the group ("Warranty claim") would read as the same menu line twice.
+    const processNames = new Set(area.workflows.map(w => w.name.trim().toLowerCase()))
+    for (const entity of documents) link({ page: 'records', id: entity.id }, processNames.has(entity.name.trim().toLowerCase()) ? entity.name + ' records' : entity.name, null, items)
   }
   const reference = referenceData()
   section = 'Reference data'
@@ -356,6 +361,7 @@ async function home(body) {
   if (application.unsupported.length) body.append(gaps())
 }
 function canStart(workflow) {
+  if (isView(workflow)) return false
   const start = workflow.states.find(s => s.kind === 'start')
   const first = workflow.transitions.find(e => e.source === start?.id)
   const step = workflow.states.find(s => s.id === first?.target)

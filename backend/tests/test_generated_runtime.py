@@ -118,6 +118,10 @@ def test_real_transport_lifecycle_persists_and_enforces_permissions(generated):
     with pytest.raises(module.Fault):
         restarted.instance(user('dispatcher', 'demo_harbor'), instance['id'])
     assert restarted.records(user('dispatcher', 'demo_harbor'), 'ent_shipment') == []
+    # A step may use a record the role cannot open; every record is still named, so the screen never shows an id.
+    view = restarted.view(partner)
+    assert set(view['entity_names']) == set(restarted.entities)
+    assert len(view['entities']) < len(view['entity_names']), 'the carrier should not open every record type'
 
 
 

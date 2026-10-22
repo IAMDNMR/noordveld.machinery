@@ -8,11 +8,14 @@ confirmed stays visible for a person. What this settles:
 * a record that others must point at (an item, a warehouse) and that nobody maintains is given to the role whose steps use it most,
   because without a maintainer the records that need it can never be created. The assignment is reported and can be changed;
 * a step repeated directly after itself (same name, kind and role; a model drafting artefact) is folded into the first, keeping
-  every record it reads or writes and every rule and exception it handles.
+  every record it reads or writes and every rule and exception it handles;
+* a role the model drafted whose name is only a shorter way of saying a verified role ("Technician" beside "Service technician")
+  is merged into the verified one, keeping its permissions and responsibilities and every step and record that pointed at it.
 """
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 
 from app.design_studio import guided
@@ -51,6 +54,48 @@ def assign_owners(raw: dict, definition: ApplicationDefinition) -> list[str]:
     return changes
 
 
+def _words(name: str) -> frozenset[str]:
+    return frozenset(re.findall(r"[a-z0-9]+", name.lower()))
+
+
+def merge_duplicate_roles(raw: dict) -> list[str]:
+    """Merge a model-drafted role into the one verified role whose name contains all of its words. Edits `raw`; returns the changes.
+
+    Two roles that only share a last word ("Workshop manager", "Warranty manager") are different jobs and stay as they are, as does
+    any match that is not unique. Permissions and responsibilities are added to the verified role, never dropped.
+    """
+    business, changes = raw["business"], []
+    for drafted in [role for role in business["roles"] if not role.get("origin")]:
+        words = _words(drafted["name"])
+        matches = [
+            role for role in business["roles"]
+            if role.get("origin") and words and words <= _words(role["name"])
+        ]
+        if len(matches) != 1:
+            continue
+        kept = matches[0]
+        merged = {
+            key: list(dict.fromkeys([*kept.get(key, []), *drafted.get(key, [])]))
+            for key in ("permissions", "responsibilities", "approval_authority")
+        }
+        if len(merged["permissions"]) > 50 or len(merged["responsibilities"]) > 30 or len(merged["approval_authority"]) > 20:
+            continue  # more than one role can hold: leave both for a person to decide
+        kept.update(merged)
+        for workflow in raw["workflow_definitions"]:
+            for state in workflow["states"]:
+                if state.get("role_id") == drafted["id"]:
+                    state["role_id"] = kept["id"]
+        for entity in business["entities"]:
+            if entity.get("owner_role_id") == drafted["id"]:
+                entity["owner_role_id"] = kept["id"]
+            for attribute in entity["attributes"]:
+                if attribute.get("owner_role_id") == drafted["id"]:
+                    attribute["owner_role_id"] = kept["id"]
+        business["roles"] = [role for role in business["roles"] if role["id"] != drafted["id"]]
+        changes.append(f"Merged the role {drafted['name']} into {kept['name']} (the same job; nothing was dropped)")
+    return changes
+
+
 def resolve(definition: ApplicationDefinition) -> tuple[ApplicationDefinition, list[str]]:
     """Return the definition with every safe fact recorded, and one plain sentence per change."""
     raw = definition.model_dump(mode="json")
@@ -70,6 +115,7 @@ def resolve(definition: ApplicationDefinition) -> tuple[ApplicationDefinition, l
         if question["status"] == "open" and question["id"] in OPTIONAL_QUESTIONS:
             question["status"], question["answer"] = "not_applicable", NOT_SPECIFIED
             changes.append(f"Recorded as not specified for this version: {question['text']}")
+    changes.extend(merge_duplicate_roles(raw))
     changes.extend(assign_owners(raw, definition))
     for workflow in raw["workflow_definitions"]:
         changes.extend(f"Merged a repeated step: {workflow['name']} · {label}" for label in _fold_repeats(workflow))

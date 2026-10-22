@@ -34,9 +34,30 @@ def test_resolving_findings_never_removes_a_rule_a_role_or_a_requirement():
 
     seeded = ApplicationDefinition.model_validate(raw)
     resolved, _ = resolve(seeded)
-    counts = lambda d: (len(d.business.rules), len(d.business.roles), len(d.business.requirements))
+    def counts(d):
+        return len(d.business.rules), len(d.business.roles), len(d.business.requirements)
+
     assert counts(resolved) == counts(seeded)
     assert "rule_unused" in {r.id for r in resolved.business.rules} and "role_idle" in {r.id for r in resolved.business.roles}
+
+
+def test_a_drafted_role_that_is_a_shorter_name_for_a_verified_one_is_merged_but_a_different_job_stays():
+    from app.schemas.application_definition import ApplicationDefinition
+
+    raw = build(SCENARIOS["warehouse (WMS)"]).model_dump(mode="json")
+    verified = next(role for role in raw["business"]["roles"] if role["origin"])
+    verified["name"] = "Service technician"
+    drafted = {**verified, "id": "role_drafted_tech", "name": "Technician", "origin": None, "permissions": [], "responsibilities": ["Carry out visits"]}
+    other = {**verified, "id": "role_drafted_lead", "name": "Workshop technician lead", "origin": None, "permissions": []}
+    raw["business"]["roles"] += [drafted, other]
+    raw["workflow_definitions"][0]["states"][1]["role_id"] = "role_drafted_tech"
+    raw["workflow_definitions"][0]["states"][1]["permission"] = None
+    resolved, changes = resolve(ApplicationDefinition.model_validate(raw))
+    names = {role.name for role in resolved.business.roles}
+    assert "Technician" not in names and "Workshop technician lead" in names
+    assert resolved.workflow_definitions[0].states[1].role_id == verified["id"]
+    assert "Carry out visits" in next(r for r in resolved.business.roles if r.id == verified["id"]).responsibilities
+    assert any("Merged the role Technician into Service technician" in line for line in changes)
 
 
 def test_an_application_gets_a_visual_layer_without_a_template_choice_and_a_side_menu_when_large():

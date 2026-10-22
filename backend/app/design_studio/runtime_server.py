@@ -745,6 +745,8 @@ class Runtime:
             "name": self.schema["name"],
             "user": user,
             "entities": entities,
+            # A step can use a record this role may not open; its name must still read as a name, not an id.
+            "entity_names": {e["id"]: e["name"] for e in self.entities.values()},
             "references": self.schema["references"],
             "workflows": [
                 w
