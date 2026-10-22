@@ -7,12 +7,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import CurrentUser
-from app.api.routes.design_studio import require_studio_identity
+from app.api.routes.design_studio import limit_visitors, require_studio_identity
 from app.assistant.contracts import SpeechProvider
 from app.assistant.providers import get_speech, studio_assistant_status
 
 router = APIRouter(
-    prefix="/assistant", tags=["assistant"], dependencies=[Depends(require_studio_identity)]
+    prefix="/assistant",
+    tags=["assistant"],
+    dependencies=[Depends(require_studio_identity), Depends(limit_visitors)],
 )
 
 

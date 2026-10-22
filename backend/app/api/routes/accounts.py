@@ -3,20 +3,27 @@ backend keeps the user id in a signed, httpOnly cookie. The role is always read 
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from typing import Annotated
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from app.api.dependencies import CurrentUser, OrdersSvc
 from app.core.config import get_settings
-from app.core.demo_access import local_demo_request
+from app.core.demo_access import local_demo_request, public_studio_enabled, studio_demo_request
 from app.core.roles import PERMISSIONS
-from app.core.session import COOKIE, MAX_AGE, sign
+from app.core.session import COOKIE, MAX_AGE, sign, verify
 
 router = APIRouter(tags=["accounts"])
 
 
 def require_demo_context(request: Request) -> None:
     if not local_demo_request(request):
+        raise HTTPException(status_code=404, detail={"code": "not_found", "message": "Not found."})
+
+
+def require_studio_demo_context(request: Request) -> None:
+    if not studio_demo_request(request):
         raise HTTPException(status_code=404, detail={"code": "not_found", "message": "Not found."})
 
 
@@ -75,10 +82,32 @@ def me(user: CurrentUser) -> dict:
     return _me(user)
 
 
-@router.post("/studio-session/demo", dependencies=[Depends(require_demo_context)])
-def studio_demo(response: Response, orders: OrdersSvc) -> dict:
-    """Single local Studio preview identity, independent of the commerce session."""
+@router.post("/studio-session/demo", dependencies=[Depends(require_studio_demo_context)])
+def studio_demo(
+    request: Request,
+    response: Response,
+    orders: OrdersSvc,
+    nv_studio_session: Annotated[str | None, Cookie(alias="nv_studio_session")] = None,
+) -> dict:
+    """Local: the single Studio preview identity. Public demo: this browser's own anonymous workspace. Independent of the commerce session."""
     from app.design_studio.preview_identity import cached, remember
+
+    if public_studio_enabled() and not local_demo_request(request):
+        from app.design_studio.visitors import is_visitor, new_visitor_id, visitor_user
+
+        settings = get_settings()
+        existing = verify(nv_studio_session, "studio:" + settings.session_secret)
+        visitor_id = existing if is_visitor(existing) else new_visitor_id()
+        response.set_cookie(
+            "nv_studio_session",
+            sign(visitor_id, "studio:" + settings.session_secret),
+            max_age=MAX_AGE,
+            httponly=True,
+            samesite="lax",
+            secure=settings.session_cookie_secure,
+            path="/api/v1",
+        )
+        return _me(visitor_user(visitor_id))
 
     user = cached()
     if user is None:
@@ -106,7 +135,7 @@ def studio_demo(response: Response, orders: OrdersSvc) -> dict:
     return _me(user)
 
 
-@router.get("/studio-session/me", dependencies=[Depends(require_demo_context)])
+@router.get("/studio-session/me", dependencies=[Depends(require_studio_demo_context)])
 def studio_me(user: CurrentUser) -> dict:
     return _me(user)
 

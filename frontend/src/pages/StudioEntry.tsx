@@ -29,7 +29,7 @@ function Preview({ createNew = false }: { createNew?: boolean }) {
       <h1>{error ? 'The preview is unavailable' : 'Opening your creative workspace…'}</h1>
       <p>
         {error
-          ? 'This preview is available in the local development environment. Your customer account is separate.'
+          ? 'The Design Studio could not open just now. Please try again in a moment, or explore the demo while we sort it out.'
           : 'A dedicated demo workspace. No new account needed.'}
       </p>
       {error ? (

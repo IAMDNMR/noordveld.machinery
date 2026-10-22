@@ -19,3 +19,20 @@ def local_demo_request(request: Request) -> bool:
     return (
         host in {"localhost", "127.0.0.1", "::1"} and peer in {"localhost", "127.0.0.1", "::1"}
     ) or (host == "testserver" and peer == "testclient")
+
+
+# ── public Design Studio demo ───────────────────────────────────────────────────────────────────────
+# An explicit, opt-in switch for a deployed site where anyone may open the Studio without signing in. Each browser gets its own
+# anonymous workspace (visitor identity, see app/design_studio/visitors.py); nobody can reach another visitor's or a real account's
+# projects, and shared knowledge stays read-only. It never opens the commerce demo sign-in.
+PUBLIC_STUDIO_ENV = "DESIGN_STUDIO_PUBLIC_DEMO"
+VISITOR_PREFIX = "visitor-"
+
+
+def public_studio_enabled() -> bool:
+    return os.environ.get(PUBLIC_STUDIO_ENV) == "1"
+
+
+def studio_demo_request(request: Request) -> bool:
+    """May this request use the Studio without a verified sign-in: a local undeployed request, or the public demo switch is on."""
+    return public_studio_enabled() or local_demo_request(request)

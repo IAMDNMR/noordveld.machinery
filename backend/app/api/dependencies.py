@@ -141,6 +141,11 @@ def current_user(
     secret = ("studio:" if use_studio else "") + get_settings().session_secret
     user_id = verify(token, secret)
     user = None
+    from app.core.demo_access import public_studio_enabled
+    from app.design_studio.visitors import is_visitor, visitor_user
+
+    if use_studio and public_studio_enabled() and is_visitor(user_id):
+        return visitor_user(user_id)  # an anonymous demo visitor: not an account, never looked up in the commerce graph
     # The local demo account is already resolved by studio-session/demo. Reuse
     # that server-owned record briefly so each Studio request need not contact
     # the commerce graph. Deployed and commerce sessions always resolve normally.

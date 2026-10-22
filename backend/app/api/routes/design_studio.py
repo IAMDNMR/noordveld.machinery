@@ -7,11 +7,13 @@ from datetime import datetime, timezone
 import json
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 
 from app.api.dependencies import CurrentUser
-from app.core.demo_access import local_demo_request
+from app.core.config import get_settings
+from app.core.demo_access import studio_demo_request
+from app.core.session import verify
 from app.design_studio import approval
 from app.design_studio.completeness import analyze
 from app.design_studio.discovery import blank_definition, discover
@@ -64,8 +66,8 @@ from pydantic import BaseModel, Field
 
 
 def require_studio_identity(request: Request) -> None:
-    """Until an approved IdP is integrated, demo identity is local-only."""
-    if not local_demo_request(request):
+    """Until an approved IdP is integrated, demo identity is local-only, or the explicit public demo switch (anonymous visitors)."""
+    if not studio_demo_request(request):
         raise HTTPException(
             503,
             detail={
@@ -267,10 +269,41 @@ def project_user(
 ProjectUser = Annotated[User, Depends(project_user)]
 
 
+def limit_visitors(
+    request: Request, nv_studio_session: Annotated[str | None, Cookie(alias="nv_studio_session")] = None
+) -> None:
+    """Public demo only: bound the requests that cost money (language model, speech, code generation) per visitor and per instance."""
+    from app.core.demo_access import public_studio_enabled
+
+    if not public_studio_enabled() or request.method != "POST":
+        return
+    from app.design_studio.visitors import EXPENSIVE_SUFFIXES, check_rate, is_visitor
+
+    visitor = verify(nv_studio_session, "studio:" + get_settings().session_secret)
+    if is_visitor(visitor) and request.url.path.endswith(EXPENSIVE_SUFFIXES):
+        check_rate(visitor)
+
+
+def deployed_without_processes(request: Request) -> None:
+    """Launching or testing a generated application starts local processes, which a serverless deployment cannot do."""
+    import os
+
+    if os.environ.get("VERCEL") and request.method == "POST" and request.url.path.endswith(("/runtime/launch", "/runtime/test", "/runtime/stop")):
+        raise HTTPException(
+            409,
+            detail={"code": "runtime_local_only", "message": "Running a generated application is available when the Studio runs locally. Download the application to run it."},
+        )
+
+
 router = APIRouter(
     prefix="/design-studio",
     tags=["design-studio"],
-    dependencies=[Depends(require_studio_identity), Depends(studio_gate)],
+    dependencies=[
+        Depends(require_studio_identity),
+        Depends(studio_gate),
+        Depends(limit_visitors),
+        Depends(deployed_without_processes),
+    ],
     route_class=AuditedRoute,
 )
 
@@ -292,6 +325,12 @@ def get_project_store() -> ProjectStore:
 
     stores = configured_stores()
     if stores is not None:
+        from app.core.demo_access import public_studio_enabled
+
+        if public_studio_enabled():
+            from app.design_studio.visitors import LimitedProjects
+
+            return LimitedProjects(stores[1])
         return stores[1]
     return DisabledProjectStore()
 
