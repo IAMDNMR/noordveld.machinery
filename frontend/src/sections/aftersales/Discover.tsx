@@ -24,7 +24,7 @@ export function QuickAccess({
   const firstMachine = filters?.machines.find((m) => m.part_count > 0)
   const items = [
     {
-      title: 'Parts Store',
+      title: 'Parts Portal',
       text: 'Browse parts and continue into the ordering workflow.',
       to: STORE_ROUTE,
       img: pic(0),
@@ -72,15 +72,15 @@ export function QuickAccess({
   return (
     <section className="section as-quick" aria-labelledby="as-quick-title">
       <div className="container">
-        <Reveal>
+        <header>
           <p className="label">Quick access</p>
           <h2 id="as-quick-title" className="h1">
             Everything aftermarket in one place.
           </h2>
-        </Reveal>
+        </header>
         <ul className="as-quick__grid">
-          {items.map((it, i) => (
-            <Reveal as="li" key={it.title} delay={i * 70} className={`as-tile as-tile--${it.kind}`}>
+          {items.map((it) => (
+            <li key={it.title} className={`as-tile as-tile--${it.kind}`}>
               {it.anchor ? (
                 <a href={it.to} className="as-tile__link">
                   <TileBody {...it} />
@@ -90,7 +90,7 @@ export function QuickAccess({
                   <TileBody {...it} />
                 </Link>
               )}
-            </Reveal>
+            </li>
           ))}
         </ul>
       </div>
@@ -257,7 +257,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
               {live.data && live.data.total > results.length ? (
                 <li className="as-hits__more">
                   <Link to={`${STORE_ROUTE}?${new URLSearchParams({ q })}`}>
-                    All {live.data.total} results in the Parts Store →
+                    All {live.data.total} results in the Parts Portal →
                   </Link>
                 </li>
               ) : null}
@@ -442,7 +442,7 @@ export function MachineFinder() {
                 })}
               </ul>
               <Link className="as-finder__all" to={machinePath(model)}>
-                All {fits.data.total} parts for {model} in the Parts Store →
+                All {fits.data.total} parts for {model} in the Parts Portal →
               </Link>
             </>
           ) : null}
@@ -501,7 +501,7 @@ export function FeaturedParts({ parts }: { parts: PartSummary[] | null }) {
                     to={`${STORE_ROUTE}?${new URLSearchParams({ q: p.part_number })}`}
                     className="as-inline-link"
                   >
-                    Find in Parts Store
+                    Find in Parts Portal
                   </Link>
                 </span>
               </div>

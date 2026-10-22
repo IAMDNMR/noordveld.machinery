@@ -313,6 +313,7 @@ describe('agentic shopping', () => {
     expect(screen.queryByPlaceholderText(/search parts/i)).toBeNull()
     expect(await screen.findByRole('heading', { name: 'Question catalog' })).toBeTruthy()
     expect(screen.getByRole('list', { name: 'Find a part questions' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Orders' }))
     expect(screen.getByText('Sign in for these.')).toBeTruthy()
     expect(document.querySelector('.ag-pills')).toBeNull() // the earlier example pills are replaced by the catalog
   })

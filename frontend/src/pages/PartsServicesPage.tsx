@@ -24,7 +24,7 @@ import '../sections/aftersales/aftersales.css'
  */
 export default function PartsServicesPage() {
   usePageMeta({
-    title: 'Parts & Services',
+    title: 'Aftersales',
     description:
       'Find the right part, verify machine compatibility, explore recorded relationships and follow every order into service.',
     path: '/parts-services',
@@ -34,13 +34,21 @@ export default function PartsServicesPage() {
   const filters = catalogue.data?.filters ?? null
   return (
     <div className="as-page">
-      <AftersalesHero parts={parts} />
-      <QuickAccess parts={parts} filters={filters} />
+      <AftersalesHero />
       <PartSearch filters={filters} />
-      <Categories parts={parts} filters={filters} />
+      <QuickAccess parts={parts} filters={filters} />
       <MachineFinder />
+      <div className="container as-catalogue-browser">
+        <details>
+          <summary>Explore parts by category</summary>
+          <Categories parts={parts} filters={filters} />
+        </details>
+        <details>
+          <summary>Featured parts</summary>
+          <FeaturedParts parts={parts} />
+        </details>
+      </div>
       <IntelligenceMap parts={parts} />
-      <FeaturedParts parts={parts} />
       <OrderJourney />
       <DealerLocator />
       <ServiceJourney />

@@ -20,7 +20,8 @@ export function QuestionCatalog({
   title = 'Question catalog',
   align = 'start',
 }: QuestionCatalogProps) {
-  const [category, setCategory] = useState(ALL)
+  const [category, setCategory] = useState(groups[0]?.category ?? ALL)
+  const [expanded, setExpanded] = useState(false)
   const headingId = useId()
   const shown = category === ALL ? groups : groups.filter((g) => g.category === category)
   const total = groups.reduce((n, g) => n + g.questions.length, 0)
@@ -39,19 +40,22 @@ export function QuestionCatalog({
             type="button"
             aria-pressed={category === c}
             className={category === c ? 'is-on' : ''}
-            onClick={() => setCategory(c)}
+            onClick={() => {
+              setCategory(c)
+              setExpanded(false)
+            }}
           >
             {c}
           </button>
         ))}
       </div>
-      <div className="qc__groups">
+      <div className={`qc__groups${category !== ALL ? ' qc__groups--focused' : ''}`}>
         {shown.map((g) => (
           <div key={g.category} className="qc__group">
             <h3 className="qc__cat">{g.category}</h3>
             {g.note ? <p className="qc__note">{g.note}</p> : null}
             <ul className="qc__list" aria-label={`${g.category} questions`}>
-              {g.questions.map((q) => (
+              {g.questions.slice(0, expanded ? undefined : 4).map((q) => (
                 <li key={q}>
                   <button type="button" className="qc__q" onClick={() => onAsk(q)}>
                     <span>{q}</span>
@@ -63,6 +67,16 @@ export function QuestionCatalog({
           </div>
         ))}
       </div>
+      {shown.some((group) => group.questions.length > 4) ? (
+        <button
+          type="button"
+          className="qc__expand"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? 'Show fewer questions' : 'Show all questions in this view'}
+        </button>
+      ) : null}
     </section>
   )
 }

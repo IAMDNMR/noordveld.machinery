@@ -37,6 +37,7 @@ const isCurrent = (item: NavItem, pathname: string): boolean => {
   return (
     [
       '/aftersales',
+      '/parts-services',
       '/parts-store',
       '/parts-intelligence',
       '/machines',

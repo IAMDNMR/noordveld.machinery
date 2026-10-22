@@ -21,8 +21,8 @@ export const AGENTIC_ROUTE = '/agentic-commerce/'
 
 export const nav: readonly NavItem[] = [
   { label: 'Machines', to: '/machines' },
-  { label: 'Parts & Services', to: '/parts-services' },
-  { label: 'Parts Store', to: '/parts-store' },
+  { label: 'Aftersales', to: '/parts-services' },
+  { label: 'Parts Portal', to: '/parts-store' },
   { label: 'Parts Intelligence', to: '/parts-intelligence' },
   { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true }, // its "See it work" step opens Agentic Shopping
   { label: 'Design Studio', to: '/studio' },
@@ -43,8 +43,8 @@ export const primaryNav: readonly NavItem[] = nav
 export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly NavItem[] =>
   role === 'END_USER'
     ? [
-        { label: 'Parts & Services', to: '/parts-services' },
-        { label: 'Parts Store', to: '/parts-store' },
+        { label: 'Aftersales', to: '/parts-services' },
+        { label: 'Parts Portal', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
         // one conversational entry: discovery, recommendation, cart hand-off, orders, shipments and warranty (Agentic Shopping stays reachable from its answers)
         { label: 'Agentic E-Commerce', to: AGENTIC_SHOPPING_ROUTE },
@@ -54,7 +54,7 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
       ? [
           { label: 'Orders', to: '/orders' },
           { label: 'Parts Intelligence', to: '/parts-intelligence' },
-          { label: 'Parts Store', to: '/parts-store' },
+          { label: 'Parts Portal', to: '/parts-store' },
           { label: 'Commerce Assistant', to: '/commerce' },
           { label: 'Fulfilment', to: '/orders?queue=needs_fulfilment' },
           { label: 'Shipments', to: '/orders?queue=shipped' },

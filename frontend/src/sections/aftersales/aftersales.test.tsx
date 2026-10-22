@@ -166,13 +166,14 @@ describe('Parts & Services page', () => {
     )
   })
 
-  it('marks a component on the machine only when the catalogue confirms its fitment for that machine', async () => {
+  it('reserves a video frame without the old component overlays or a fake play button', () => {
     const { container } = mount()
-    await waitFor(() => expect(container.querySelectorAll('.as-spot').length).toBe(1))
-    expect(container.querySelector('.as-ident')?.textContent).toContain(confirmed)
-    expect([...container.querySelectorAll('.as-plate')].map((p) => p.textContent)).toEqual([
-      confirmed,
-    ])
+    expect(
+      screen.getByRole('img', { name: 'Aftersales, explained — video coming soon' }),
+    ).toBeTruthy()
+    expect(container.querySelector('.as-spot')).toBeNull()
+    expect(container.querySelector('.as-ident')).toBeNull()
+    expect(screen.queryByRole('button', { name: /Replay/ })).toBeNull()
   })
 
   it('every quick-access destination is a real route or a section on the page', async () => {
@@ -197,6 +198,11 @@ describe('Parts & Services page', () => {
 
   it('lists only categories the catalogue holds, linked to the filtered store view', async () => {
     mount()
+    const summary = screen.getByText('Explore parts by category', { selector: 'summary' })
+    const disclosure = summary.closest('details')!
+    expect(disclosure.open).toBe(false)
+    fireEvent.click(summary)
+    expect(disclosure.open).toBe(true)
     const cats = within(
       await screen
         .findByRole('heading', { name: 'Every system of the machine.' })

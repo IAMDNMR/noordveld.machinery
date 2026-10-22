@@ -1,0 +1,52 @@
+.overview-video-slot {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid rgb(0 117 106 / 0.24);
+  border-radius: var(--radius-m);
+  background: linear-gradient(145deg, #eef5f1, #e1eeea);
+  color: #00756a;
+  text-align: center;
+}
+.overview-video-slot__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(0 117 106 / 0.22);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.5);
+}
+.overview-video-slot p {
+  font-size: clamp(17px, 1.8vw, 23px);
+  font-weight: 550;
+  letter-spacing: var(--tracking-heading);
+}
+.overview-video-slot__status {
+  font-size: 12px;
+  color: var(--graphite-3);
+}
+.store-hero__media {
+  min-width: 0;
+}
+.site-premium .store-hero {
+  align-items: start;
+}
+.store-hero__help {
+  margin-top: var(--space-3);
+}
+.store-hero__help > summary {
+  cursor: pointer;
+  color: #00756a;
+  font-size: var(--text-small);
+  padding-block: var(--space-2);
+}
+.store-hero__help .store-assistance {
+  margin-top: var(--space-2);
+}

@@ -6,6 +6,7 @@ import { FilterPanel } from '../components/store/FilterPanel'
 import { PartCard } from '../components/store/PartCard'
 import { EmptyView, ErrorView, LoadingView } from '../components/store/StateViews'
 import { StoreSearch } from '../components/store/StoreSearch'
+import { OverviewVideoSlot } from '../components/media/OverviewVideoSlot'
 import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { humanize } from '../lib/format'
@@ -102,28 +103,34 @@ export default function PartsStorePage() {
           </div>
           <p className="store-hero__hint">Search by part number, description or machine model.</p>
         </div>
-        <aside className="store-assistance" aria-label="Help finding a part">
-          <p className="eyebrow">A better way to find it</p>
-          <Link to="/agentic-shopping">
-            <Boxes size={22} strokeWidth={1.5} aria-hidden="true" />
-            <span>
-              <strong>Describe what you need</strong>
-              <small>Compare suitable parts and supply options.</small>
-            </span>
-            <ArrowUpRight size={18} aria-hidden="true" />
-          </Link>
-          <Link to="/parts-intelligence">
-            <ScanLine size={22} strokeWidth={1.5} aria-hidden="true" />
-            <span>
-              <strong>Ask Spark before you order</strong>
-              <small>Explore fitment, suppliers and source evidence.</small>
-            </span>
-            <ArrowUpRight size={18} aria-hidden="true" />
-          </Link>
-          <p className="store-assistance__note">
-            Demonstration catalogue · prices and stock are synthetic.
-          </p>
-        </aside>
+        <div className="store-hero__media">
+          <OverviewVideoSlot title="Parts Portal, explained" />
+          <details className="store-hero__help">
+            <summary>Help finding a part</summary>
+            <aside className="store-assistance" aria-label="Help finding a part">
+              <p className="eyebrow">A better way to find it</p>
+              <Link to="/agentic-shopping">
+                <Boxes size={22} strokeWidth={1.5} aria-hidden="true" />
+                <span>
+                  <strong>Describe what you need</strong>
+                  <small>Compare suitable parts and supply options.</small>
+                </span>
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </Link>
+              <Link to="/parts-intelligence">
+                <ScanLine size={22} strokeWidth={1.5} aria-hidden="true" />
+                <span>
+                  <strong>Ask Spark before you order</strong>
+                  <small>Explore fitment, suppliers and source evidence.</small>
+                </span>
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </Link>
+              <p className="store-assistance__note">
+                Demonstration catalogue · prices and stock are synthetic.
+              </p>
+            </aside>
+          </details>
+        </div>
       </header>
 
       <section id="results" className="store-layout" aria-labelledby="results-title">

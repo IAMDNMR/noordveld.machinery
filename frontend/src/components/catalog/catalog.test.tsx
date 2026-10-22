@@ -13,6 +13,7 @@ describe('question catalog', () => {
 
   it('shows every question by category, as selectable options', () => {
     render(<QuestionCatalog groups={GROUPS} onAsk={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'All' }))
     expect(screen.getByText('3 questions · choose one to run it')).toBeTruthy()
     expect(
       within(screen.getByRole('list', { name: 'Parts questions' }))
@@ -41,8 +42,23 @@ describe('question catalog', () => {
 
   it('runs the chosen question as it is written', () => {
     const asked: string[] = []
-    render(<QuestionCatalog groups={GROUPS} onAsk={(q) => asked.push(q)} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Find part B' }))
-    expect(asked).toEqual(['Find part B'])
+    render(
+      <QuestionCatalog
+        groups={[
+          {
+            ...GROUPS[0],
+            questions: ['Find part A', 'Find part B', 'Find part C', 'Find part D', 'Find part E'],
+          },
+          GROUPS[1],
+        ]}
+        onAsk={(q) => asked.push(q)}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: 'Find part E' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Show all questions in this view' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Find part E' }))
+    expect(asked).toEqual(['Find part E'])
+    fireEvent.click(screen.getByRole('button', { name: 'Orders' }))
+    expect(screen.queryByRole('button', { name: 'Show fewer questions' })).toBeNull()
   })
 })

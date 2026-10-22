@@ -52,7 +52,7 @@ export function IntelligenceMap({ parts }: { parts: PartSummary[] | null }) {
     [
       {
         name: 'Machine',
-        rel: 'FITS',
+        rel: 'Fits',
         icon: Tractor,
         to: no ? PI(`Which machines use ${no}?`) : null,
         note: 'fitment records',
@@ -66,42 +66,42 @@ export function IntelligenceMap({ parts }: { parts: PartSummary[] | null }) {
       },
       {
         name: 'Supplier',
-        rel: 'SUPPLIED_BY',
+        rel: 'Supplied by',
         icon: Building2,
         to: no ? PI(`Who supplies ${no}?`) : null,
         note: 'sourcing records',
       },
       {
         name: 'Dealer',
-        rel: 'STOCKED_BY',
+        rel: 'Stocked by',
         icon: Store,
         to: no ? PI(`Which dealers stock ${no}?`) : null,
         note: 'dealer stock records',
       },
       {
         name: 'Depot',
-        rel: 'AVAILABLE_AT',
+        rel: 'Available at',
         icon: Boxes,
         to: no ? PI(`Which warehouses have ${no}?`) : null,
         note: 'depot inventory',
       },
       {
         name: 'Order',
-        rel: 'REFERENCES_PART',
+        rel: 'Includes part',
         icon: PackageCheck,
         to: '/orders',
         note: 'your orders (sign-in)',
       },
       {
         name: 'Shipment',
-        rel: 'HAS_SHIPMENT',
+        rel: 'Has shipment',
         icon: Ship,
         to: ASK('Where is my shipment and what parts are in it?'),
         note: 'shipment tracking (sign-in)',
       },
       {
         name: 'Service',
-        rel: 'INSTALLED_PART',
+        rel: 'Installed part',
         icon: Wrench,
         to: ASK('Is this failed part covered by warranty?'),
         note: 'installation and warranty records (sign-in)',
@@ -235,12 +235,12 @@ export function OrderJourney() {
     <section className="section as-journey" aria-labelledby="as-journey-title">
       <div className="container">
         <Reveal>
-          <p className="label">Parts Store · from selection to delivery</p>
+          <p className="label">Parts Portal · from selection to delivery</p>
           <h2 id="as-journey-title" className="h1">
             One checkout, every step recorded.
           </h2>
           <p className="lead">
-            This is the Parts Store’s own checkout. Availability, delivery options and transport
+            This is the Parts Portal’s own checkout. Availability, delivery options and transport
             come from the recorded stock, routes and dealers; where nothing is recorded the checkout
             says so.
           </p>
@@ -253,7 +253,7 @@ export function OrderJourney() {
             </li>
           ))}
         </ol>
-        <ButtonLink to={STORE_ROUTE}>Open Parts Store</ButtonLink>
+        <ButtonLink to={STORE_ROUTE}>Open Parts Portal</ButtonLink>
       </div>
     </section>
   )
@@ -381,12 +381,12 @@ export function ServiceJourney() {
       state: 'available',
       text: 'Verify the part and its recorded fitment.',
       to: STORE_ROUTE,
-      cta: 'Parts Store',
+      cta: 'Parts Portal',
     },
     {
       name: 'Order',
       state: 'available',
-      text: 'Check out through the Parts Store (sign-in).',
+      text: 'Check out through the Parts Portal (sign-in).',
       to: `${STORE_ROUTE}/checkout`,
       cta: 'Checkout',
     },

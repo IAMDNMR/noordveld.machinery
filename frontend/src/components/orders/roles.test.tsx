@@ -188,8 +188,8 @@ describe('roles', () => {
     mount('/orders', anna, { '/orders': () => new Response(JSON.stringify([row('O-1', 'NEW')])) })
     await waitFor(() =>
       expect(navLabels()).toEqual([
-        'Parts & Services',
-        'Parts Store',
+        'Aftersales',
+        'Parts Portal',
         'Parts Intelligence',
         'Agentic E-Commerce',
         'My Orders',
@@ -204,7 +204,7 @@ describe('roles', () => {
       expect(navLabels()).toEqual([
         'Orders',
         'Parts Intelligence',
-        'Parts Store',
+        'Parts Portal',
         'Commerce Assistant',
         'Fulfilment',
         'Shipments',
