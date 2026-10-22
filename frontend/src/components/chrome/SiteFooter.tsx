@@ -4,7 +4,13 @@ import './chrome-tokens.css'
 import './chrome.css'
 import type { ChromeLink } from './links'
 
-export function SiteFooter({ Link }: { Link: ChromeLink }) {
+export function SiteFooter({
+  Link,
+  showStudio = true,
+}: {
+  Link: ChromeLink
+  showStudio?: boolean
+}) {
   return (
     <footer className="footer nvx-chrome">
       <div className="nvx-container footer__grid">
@@ -15,13 +21,15 @@ export function SiteFooter({ Link }: { Link: ChromeLink }) {
         <nav aria-label="Footer" className="footer__col">
           <h2 className="footer__heading">Explore</h2>
           <ul>
-            {nav.map((item) => (
-              <li key={item.label}>
-                <Link to={item.to} external={item.external}>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {nav
+              .filter((item) => showStudio || item.to !== '/studio')
+              .map((item) => (
+                <li key={item.label}>
+                  <Link to={item.to} external={item.external}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
           </ul>
         </nav>
         <div className="footer__col">

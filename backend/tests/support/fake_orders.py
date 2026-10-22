@@ -94,7 +94,7 @@ class FakeRepo:
                 continue
             p = o.get("props", {})
             out.append({"order_id": k, "order_date": "2026-10-01", "status": o["status"], "currency": "EUR", "subtotal_ex_vat": None if o["channel"] == "DIRECT_ORDER" else 50.0,
-                        "total_incl_vat": None, "channel": o["channel"], "data_status": "USER_PROVIDED" if o["channel"] == "DIRECT_ORDER" else "SYNTHETIC_DEMO",
+                        "total_incl_vat": None, "order_total": p.get("order_total"), "channel": o["channel"], "data_status": "USER_PROVIDED" if o["channel"] == "DIRECT_ORDER" else "SYNTHETIC_DEMO",
                         "customer_id": o.get("customer"), "customer_name": o.get("customer") or p.get("requester_company"), "requester_name": p.get("requester_name"),
                         "lines": [{"part_number": l["part_number"], "name": l["name"], "quantity": l["quantity"], "machine": l.get("machine_model"), "stock": 10, "stock_unknown": 0,
                                    "allocated": bool(l.get("allocated_from")) or l.get("allocation_status") in ("RESERVED", "SHIPPED"), "fits": ["M-1"]} for l in o["lines"]],
@@ -195,11 +195,11 @@ class FakeRepo:
         return self.keys.get(key)
 
     # ── place order ────────────────────────────────────────────────────────────────────────────
-    def create_order(self, *, key, user_id, actor, at, today, requester, receiver, shipto_id, dealer_id, depot_id, route_id, service_required, freight, lines):
+    def create_order(self, *, key, user_id, actor, at, today, requester, receiver, shipto_id, dealer_id, depot_id, route_id, service_required, freight, cost, lines):
         if key in self.keys:
             raise GraphConflictError(key)
         self.seq += 1
-        order_id = f"HCME-ORD-{self.seq:06d}"
+        order_id = f"NM-ORD{self.seq:03d}"
         r = self.route(route_id)
         self.orders_[order_id] = {
             "channel": "DIRECT_ORDER", "customer": None, "user": user_id, "status": "NEW", "shipments": [], "service": None, "history": [],
@@ -210,9 +210,9 @@ class FakeRepo:
                       "transport_route_id": route_id, "transport_option_code": r["option_code"], "transport_mode": r["mode"], "transport_distance_km": r["distance_km"],
                       "transport_estimated_days": r["days"], "transport_estimate_basis": "ESTIMATED", "transport_data_status": "SYNTHETIC_DEMO",
                       "freight_estimate_amount": freight["amount"], "freight_estimate_currency": freight["currency"], "freight_estimate_status": "SYNTHETIC_DEMO_ESTIMATE",
-                      "part_cost": None, "transport_cost": None, "order_total": None, "cost_status": "NOT_AVAILABLE"},
+                      "part_cost": cost["part_cost"], "transport_cost": cost["transport_cost"], "order_total": cost["total"], "cost_status": cost["status"]},
             "lines": [{"line_no": ln["line_no"], "order_line_id": f"{order_id}-L{ln['line_no']}", "quantity": ln["quantity"], "machine_model": ln["machine"], "part_id": ln["part_id"],
-                       "part_number": self.parts_[ln["part_id"]].part_number, "name": self.parts_[ln["part_id"]].name, "unit_price_eur": None, "line_total_eur": None,
+                       "part_number": self.parts_[ln["part_id"]].part_number, "name": self.parts_[ln["part_id"]].name, "unit_price_eur": ln["unit_price_eur"], "line_total_eur": ln["line_total_eur"],
                        "allocation_status": "NOT_YET_ALLOCATED", "data_status": "USER_PROVIDED", "fitment": [], "warehouses": [], "suppliers": [], "allocated_from": [], "planned_from": []}
                       for ln in lines]}
         self.keys[key] = order_id

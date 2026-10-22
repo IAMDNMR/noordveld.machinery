@@ -1,0 +1,169 @@
+.process-journey {
+  color: #243b37;
+}
+.process-journey__intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  background: #173e35;
+  border-radius: 12px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.process-journey__intro span {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #99d9c7;
+}
+.process-journey__intro h3 {
+  margin: 8px 0;
+  font-size: 23px;
+}
+.process-journey__intro p {
+  font-size: 12px;
+  color: #c6ddd5;
+  max-width: 600px;
+  margin: 0;
+}
+.process-journey__intro > small {
+  font-size: 10px;
+  max-width: 240px;
+  color: #c6ddd5;
+  overflow-wrap: anywhere;
+}
+.process-journey__activities {
+  display: grid;
+  gap: 20px;
+}
+.process-journey__activity {
+  border: 1px solid #dce6e0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.process-journey__activity > header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+}
+.process-journey__activity > header > div {
+  flex: 1;
+}
+.process-journey__activity > header small {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a8f85;
+}
+.process-journey__activity h3 {
+  font-size: 17px;
+  margin: 5px 0 0;
+}
+.process-journey__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: #eaf5ef;
+  color: #087e67;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.process-journey__activity[data-kind='exception'] .process-journey__icon {
+  background: #fff1df;
+  color: #a3610c;
+}
+.process-journey__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 10px 20px;
+  border-block: 1px solid #eef1ef;
+  background: #fafcfb;
+  font-size: 11px;
+  color: #667f74;
+}
+.process-journey__facts span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.process-journey__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  padding: 20px;
+}
+.process-journey__columns h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  margin: 0 0 10px;
+}
+.process-journey__activity p {
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  color: #62786e;
+}
+.process-journey__columns p small {
+  display: block;
+  color: #8a998e;
+  font-size: 10px;
+}
+.process-journey__activity details {
+  margin: 0 20px 14px;
+  font-size: 11px;
+  color: #62786e;
+}
+.process-journey__activity > footer {
+  padding: 14px 20px;
+  background: #f5f8f6;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.process-journey__activity > footer button {
+  font: inherit;
+  background: white;
+  border: 1px solid #dce6e0;
+  border-radius: 7px;
+  padding: 10px 13px;
+  text-align: left;
+  cursor: pointer;
+  flex: 1;
+  min-width: 160px;
+  color: #126b56;
+}
+.process-journey__activity > footer button span {
+  display: block;
+  font-size: 10px;
+  color: #7b8f84;
+  line-height: 1.6;
+}
+.process-journey__activity > footer button strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+.process-journey__activity > footer button:focus-visible {
+  outline: 2px solid #087e67;
+  outline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .process-journey__intro {
+    flex-direction: column;
+  }
+  .process-journey__columns {
+    grid-template-columns: 1fr;
+  }
+  .process-journey__activity > header {
+    padding: 15px;
+  }
+}

@@ -1,0 +1,851 @@
+{
+ "id": "cat_warehouse",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "Warehouse management",
+ "description": "Allocating, picking, packing and handing off customer orders from a warehouse.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_inventory",
+  "cat_ecommerce"
+ ],
+ "uses_capabilities": [
+  "audit_history",
+  "search_filter",
+  "reporting_dashboards",
+  "notifications"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_wms_fulfil",
+    "statement": "Ordered goods are allocated, picked, packed and handed off.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_wms_fulfil_1",
+      "statement": "Stock is allocated before picking starts."
+     },
+     {
+      "id": "ac_wms_fulfil_2",
+      "statement": "The picked quantity is checked against the order."
+     },
+     {
+      "id": "ac_wms_fulfil_3",
+      "statement": "A packed order has a weight and package count."
+     }
+    ]
+   },
+   {
+    "id": "req_wms_shortage",
+    "statement": "Shortages and partial picks are visible and resolved, not hidden.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_wms_shortage_1",
+      "statement": "A short allocation or partial pick is handled as an exception."
+     }
+    ]
+   },
+   {
+    "id": "req_wms_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_wms_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_wms_lead",
+    "name": "Warehouse lead",
+    "responsibilities": [
+     "Allocates stock, resolves shortages and releases packed orders"
+    ],
+    "permissions": [
+     "wms.fulfilment_allocate",
+     "wms.fulfilment_shortage",
+     "wms.fulfilment_short_pick",
+     "wms.fulfilment_handoff"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_wms_picker",
+    "name": "Picker",
+    "responsibilities": [
+     "Picks the goods for an order"
+    ],
+    "permissions": [
+     "wms.fulfilment_pick"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_wms_packer",
+    "name": "Packer",
+    "responsibilities": [
+     "Packs and weighs picked goods"
+    ],
+    "permissions": [
+     "wms.fulfilment_pack"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_wms_pick_list",
+    "name": "Pick list",
+    "description": "The work of picking one customer order from one warehouse location.",
+    "attributes": [
+     {
+      "id": "pick_list_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "OPEN",
+       "PICKING",
+       "PICKED",
+       "PACKED",
+       "HANDED_OFF"
+      ]
+     },
+     {
+      "id": "created_on",
+      "name": "Created on",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_wms_pick_list_order",
+      "name": "Order",
+      "target": "ent_eco_order",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_wms_pick_list_location",
+      "name": "Warehouse location",
+      "target": "ent_core_location",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_wms_pick_line",
+    "name": "Pick line",
+    "description": "The quantity actually picked for one order line.",
+    "attributes": [
+     {
+      "id": "pick_line_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "quantity_picked",
+      "name": "Quantity picked",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_wms_pick_line_pick_list",
+      "name": "Pick list",
+      "target": "ent_wms_pick_list",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_wms_pick_line_order_line",
+      "name": "Order line",
+      "target": "ent_eco_order_line",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_wms_pick_line_stock_level",
+      "name": "Stock level",
+      "target": "ent_inv_stock_level",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_wms_pack_unit",
+    "name": "Pack unit",
+    "description": "A parcel, carton or pallet packed for one pick list.",
+    "attributes": [
+     {
+      "id": "pack_unit_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "packages",
+      "name": "Number of packages",
+      "type": "integer",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 1
+     },
+     {
+      "id": "gross_weight_kg",
+      "name": "Gross weight (kg)",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "packed_on",
+      "name": "Packed on",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_wms_pack_unit_pick_list",
+      "name": "Pick list",
+      "target": "ent_wms_pick_list",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_wms_allocation",
+    "description": "Stock can be allocated to an order line only if on-hand stock covers the quantity.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "ALLOCATED",
+     "SHORT"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_inv_stock_level.on_hand",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_eco_order_line.quantity",
+     "pass_outcome": "ALLOCATED",
+     "fail_outcome": "SHORT"
+    }
+   },
+   {
+    "id": "rule_wms_pick_complete",
+    "description": "A pick is complete when the quantity picked covers the ordered quantity.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "COMPLETE",
+     "PARTIAL"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_wms_pick_line.quantity_picked",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_eco_order_line.quantity",
+     "pass_outcome": "COMPLETE",
+     "fail_outcome": "PARTIAL"
+    }
+   },
+   {
+    "id": "rule_wms_weight",
+    "description": "A pack unit has a recorded weight before handoff.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_wms_pack_unit.gross_weight_kg",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_wms_shortage",
+    "name": "Allocation is short",
+    "trigger": "On-hand stock does not cover an order line.",
+    "recovery": "The lead resolves the shortage and allocation is checked again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_wms_fulfilment_allocate"
+   },
+   {
+    "id": "exc_wms_short_pick",
+    "name": "Pick is partial",
+    "trigger": "The picker found less than ordered.",
+    "recovery": "The lead decides how to continue and the pick is repeated.",
+    "resolution": "recover",
+    "resolution_state_id": "st_wms_fulfilment_pick"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_wms_partial",
+    "question": "May an order ship in parts when stock is short, and is each part picked and handed off separately?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_wms_allocation"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_wms_pick",
+    "term": "Pick list",
+    "definition": "The work of picking one order."
+   },
+   {
+    "id": "term_wms_pack",
+    "term": "Pack unit",
+    "definition": "A parcel, carton or pallet packed for shipping."
+   },
+   {
+    "id": "term_wms_handoff",
+    "term": "Handoff",
+    "definition": "The point where packed goods are released to transport."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_wms_fulfilment",
+   "name": "Order fulfilment",
+   "states": [
+    {
+     "id": "st_wms_fulfilment_start",
+     "label": "Order ready for fulfilment",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wms_fulfilment_allocate",
+     "label": "Allocate stock",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wms_lead",
+     "permission": "wms.fulfilment_allocate",
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_eco_order",
+      "ent_eco_order_line",
+      "ent_inv_stock_level",
+      "ent_core_location"
+     ],
+     "writes_entity_ids": [
+      "ent_wms_pick_list"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wms_pick_list": [
+       "status",
+       "created_on"
+      ]
+     },
+     "input_relationships": {
+      "ent_wms_pick_list": [
+       "rel_wms_pick_list_order",
+       "rel_wms_pick_list_location"
+      ]
+     }
+    },
+    {
+     "id": "st_wms_fulfilment_alloc_check",
+     "label": "Is the stock allocated?",
+     "kind": "branch",
+     "outputs": [
+      "rule_wms_allocation"
+     ],
+     "outcome": null,
+     "role_id": "role_wms_lead",
+     "permission": null,
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_wms_allocation"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wms_fulfilment_shortage",
+     "label": "Resolve the shortage",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wms_lead",
+     "permission": "wms.fulfilment_shortage",
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_wms_pick_list"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_wms_shortage"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wms_pick_list": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_wms_pick_list": []
+     }
+    },
+    {
+     "id": "st_wms_fulfilment_pick",
+     "label": "Pick the goods",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wms_picker",
+     "permission": "wms.fulfilment_pick",
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_eco_order_line",
+      "ent_inv_stock_level",
+      "ent_wms_pick_list"
+     ],
+     "writes_entity_ids": [
+      "ent_wms_pick_line"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wms_pick_line": [
+       "quantity_picked"
+      ]
+     },
+     "input_relationships": {
+      "ent_wms_pick_line": [
+       "rel_wms_pick_line_pick_list",
+       "rel_wms_pick_line_order_line",
+       "rel_wms_pick_line_stock_level"
+      ]
+     }
+    },
+    {
+     "id": "st_wms_fulfilment_pick_check",
+     "label": "Is the pick complete?",
+     "kind": "branch",
+     "outputs": [
+      "rule_wms_pick_complete"
+     ],
+     "outcome": null,
+     "role_id": "role_wms_picker",
+     "permission": null,
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_wms_pick_complete"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wms_fulfilment_short_pick",
+     "label": "Resolve the partial pick",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wms_lead",
+     "permission": "wms.fulfilment_short_pick",
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_wms_pick_line"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_wms_short_pick"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wms_pick_line": [
+       "quantity_picked"
+      ]
+     },
+     "input_relationships": {
+      "ent_wms_pick_line": []
+     }
+    },
+    {
+     "id": "st_wms_fulfilment_pack",
+     "label": "Pack and weigh",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wms_packer",
+     "permission": "wms.fulfilment_pack",
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_wms_pick_list"
+     ],
+     "writes_entity_ids": [
+      "ent_wms_pack_unit"
+     ],
+     "rule_ids": [
+      "rule_wms_weight"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wms_pack_unit": [
+       "packages",
+       "gross_weight_kg",
+       "packed_on"
+      ]
+     },
+     "input_relationships": {
+      "ent_wms_pack_unit": [
+       "rel_wms_pack_unit_pick_list"
+      ]
+     }
+    },
+    {
+     "id": "st_wms_fulfilment_handoff",
+     "label": "Hand off for shipping",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wms_lead",
+     "permission": "wms.fulfilment_handoff",
+     "requirement_ids": [
+      "req_wms_fulfil",
+      "req_wms_shortage",
+      "req_wms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_wms_pick_list"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wms_pick_list": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_wms_pick_list": []
+     }
+    },
+    {
+     "id": "st_wms_fulfilment_done",
+     "label": "Handed off",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_wms_fulfilment_1",
+     "source": "st_wms_fulfilment_start",
+     "target": "st_wms_fulfilment_allocate",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_2",
+     "source": "st_wms_fulfilment_allocate",
+     "target": "st_wms_fulfilment_alloc_check",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_3",
+     "source": "st_wms_fulfilment_alloc_check",
+     "target": "st_wms_fulfilment_pick",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wms_allocation",
+      "value": "ALLOCATED"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_4",
+     "source": "st_wms_fulfilment_alloc_check",
+     "target": "st_wms_fulfilment_shortage",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wms_allocation",
+      "value": "SHORT"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_5",
+     "source": "st_wms_fulfilment_shortage",
+     "target": "st_wms_fulfilment_allocate",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_6",
+     "source": "st_wms_fulfilment_pick",
+     "target": "st_wms_fulfilment_pick_check",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_7",
+     "source": "st_wms_fulfilment_pick_check",
+     "target": "st_wms_fulfilment_pack",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wms_pick_complete",
+      "value": "COMPLETE"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_8",
+     "source": "st_wms_fulfilment_pick_check",
+     "target": "st_wms_fulfilment_short_pick",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wms_pick_complete",
+      "value": "PARTIAL"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_9",
+     "source": "st_wms_fulfilment_short_pick",
+     "target": "st_wms_fulfilment_pick",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_10",
+     "source": "st_wms_fulfilment_pack",
+     "target": "st_wms_fulfilment_handoff",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wms_fulfilment_11",
+     "source": "st_wms_fulfilment_handoff",
+     "target": "st_wms_fulfilment_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Pick list",
+   "definition": "The work of picking one order.",
+   "synonyms": [
+    "picking list",
+    "pick ticket",
+    "picking order"
+   ],
+   "refers_to": "ent_wms_pick_list"
+  },
+  {
+   "term": "Pack unit",
+   "definition": "A parcel, carton or pallet packed for shipping.",
+   "synonyms": [
+    "parcel",
+    "carton",
+    "package",
+    "colli"
+   ],
+   "refers_to": "ent_wms_pack_unit"
+  },
+  {
+   "term": "Handoff",
+   "definition": "The point where packed goods are released to transport.",
+   "synonyms": [
+    "release",
+    "goods out",
+    "dispatch release"
+   ]
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "warehouse_management",
+   "name": "Warehouse management",
+   "subdomains": [
+    "Allocation",
+    "Picking",
+    "Packing",
+    "Handoff"
+   ],
+   "keywords": [
+    "warehouse",
+    "wms",
+    "picking",
+    "pick list",
+    "packing",
+    "fulfilment",
+    "fulfillment",
+    "put-away",
+    "putaway",
+    "dispatch area",
+    "goods out",
+    "bin",
+    "pallet"
+   ],
+   "description": "Getting ordered goods out of the building correctly."
+  }
+ ],
+ "domain_id": "warehouse_management",
+ "capability": {
+  "id": "warehouse_management",
+  "name": "Order fulfilment"
+ }
+}

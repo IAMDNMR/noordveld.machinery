@@ -1,4 +1,5 @@
 """API models for Parts Intelligence. Optional means the graph holds no value; nothing is defaulted or inferred."""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -6,8 +7,20 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 # Where a value comes from. NOT_CONNECTED means the graph has no such data at all (unknown, never zero).
-DataClass = Literal["REAL", "SOURCE_DERIVED", "DERIVED", "SYNTHETIC_DEMO", "USER_PROVIDED", "TEST_DATA", "INTERNAL_REFERENCE_ONLY", "UNKNOWN", "NOT_CONNECTED"]
-EntityKind = Literal["PART", "MACHINE", "SUPPLIER", "DEALER", "ASSEMBLY", "CATEGORY", "ORDER", "WAREHOUSE"]
+DataClass = Literal[
+    "REAL",
+    "SOURCE_DERIVED",
+    "DERIVED",
+    "SYNTHETIC_DEMO",
+    "USER_PROVIDED",
+    "TEST_DATA",
+    "INTERNAL_REFERENCE_ONLY",
+    "UNKNOWN",
+    "NOT_CONNECTED",
+]
+EntityKind = Literal[
+    "PART", "MACHINE", "SUPPLIER", "DEALER", "ASSEMBLY", "CATEGORY", "ORDER", "WAREHOUSE"
+]
 
 
 class Fact(BaseModel):
@@ -21,7 +34,9 @@ class FactGroup(BaseModel):
 
 
 class Action(BaseModel):
-    kind: Literal["view_part", "parts_store", "investigate", "identify", "request_identification", "ask"]
+    kind: Literal[
+        "view_part", "parts_store", "investigate", "identify", "request_identification", "ask"
+    ]
     label: str
     href: str | None = None
     question: str | None = None
@@ -30,7 +45,22 @@ class Action(BaseModel):
 class ResultItem(BaseModel):
     """One thing in an answer, shaped for display: a primary key, a title, and separate labelled facts (never one long line)."""
 
-    kind: Literal["part", "machine", "supplier", "dealer", "assembly", "category", "relationship", "compliance", "warehouse", "order", "shipment", "service_plan", "metric", "path"]
+    kind: Literal[
+        "part",
+        "machine",
+        "supplier",
+        "dealer",
+        "assembly",
+        "category",
+        "relationship",
+        "compliance",
+        "warehouse",
+        "order",
+        "shipment",
+        "service_plan",
+        "metric",
+        "path",
+    ]
     key: str
     title: str
     subtitle: str | None = None
@@ -85,14 +115,18 @@ class Candidate(BaseModel):
 
 class Clarification(BaseModel):
     question: str
-    code: str | None = None  # PART_NOT_FOUND, MACHINE_NOT_FOUND, ... when a named entity is not in the graph; AMBIGUOUS when several match
+    code: str | None = (
+        None  # PART_NOT_FOUND, MACHINE_NOT_FOUND, ... when a named entity is not in the graph; AMBIGUOUS when several match
+    )
     candidates: list[Candidate] = []
     suggestions: list[str] = []
 
 
 class Answer(BaseModel):
     summary: str
-    grounded: bool  # true when every statement comes from graph evidence returned with this response
+    grounded: (
+        bool  # true when every statement comes from graph evidence returned with this response
+    )
     source: Literal["template", "llm"]
     demo: bool = False  # true when any result or evidence is synthetic demo data; the UI shows a "Demo data" notice
 
@@ -104,7 +138,9 @@ class SelectedEntity(BaseModel):
 
 class QueryRequest(BaseModel):
     question: str = Field(min_length=2, max_length=300)
-    selected: list[SelectedEntity] = Field(default=[], max_length=4)  # entities the user picked after a clarification
+    selected: list[SelectedEntity] = Field(
+        default=[], max_length=4
+    )  # entities the user picked after a clarification
     limit: int = Field(default=12, ge=1, le=40)
 
 
@@ -324,7 +360,9 @@ class Kpis(BaseModel):
     relationships: int
     nodes: int
     synthetic_nodes: int
-    provenance_coverage_pct: float  # nodes + relationships carrying data_status / all, computed deterministically
+    provenance_coverage_pct: (
+        float  # nodes + relationships carrying data_status / all, computed deterministically
+    )
 
 
 class Link(BaseModel):
@@ -336,7 +374,9 @@ class Link(BaseModel):
 class EntityDetail(BaseModel):
     """What the graph inspector shows for a node that is not a part."""
 
-    kind: Literal["MACHINE", "SUPPLIER", "DEALER", "WAREHOUSE", "ASSEMBLY", "COMPLIANCE", "CATEGORY"]
+    kind: Literal[
+        "MACHINE", "SUPPLIER", "DEALER", "WAREHOUSE", "ASSEMBLY", "COMPLIANCE", "CATEGORY"
+    ]
     id: str
     title: str
     subtitle: str | None = None

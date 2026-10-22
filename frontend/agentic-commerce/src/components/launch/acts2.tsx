@@ -1,4 +1,18 @@
-import { Boxes, Check, Cog, Droplets, Factory, History, MapPin, Package, Ruler, Store, Tractor, Warehouse, Zap } from 'lucide-react'
+import {
+  Boxes,
+  Check,
+  Cog,
+  Droplets,
+  Factory,
+  History,
+  MapPin,
+  Package,
+  Ruler,
+  Store,
+  Tractor,
+  Warehouse,
+  Zap,
+} from 'lucide-react'
 import { filmData as D } from './launchData'
 import { box, easeInOut, enter, fall, lerp, lerpRect, rise, seg, type Rect } from './motion'
 import { P } from './timeline'
@@ -9,10 +23,16 @@ import { Bubble, Draw, Surface } from './ui'
 /** The dealer in the customer's own city that holds the part (pickup allowed), if the dataset has one */
 export const PICKUP = D.stock.find((s) => s.id === D.pickupDealer)
 
-export const arrival = (days: number): string => (days <= 1 ? 'Arrives tomorrow' : `Arrives in ${days} days`)
+export const arrival = (days: number): string =>
+  days <= 1 ? 'Arrives tomorrow' : `Arrives in ${days} days`
 
 const LIST = D.siblings.slice(0, 3)
-const listRect = (i: number): Rect => ({ x: P.listCard.x(i), y: P.listCard.y, w: P.listCard.w, h: P.listCard.h })
+const listRect = (i: number): Rect => ({
+  x: P.listCard.x(i),
+  y: P.listCard.y,
+  w: P.listCard.w,
+  h: P.listCard.h,
+})
 
 const CHAIN = [
   { icon: Tractor, label: 'Machine', value: D.machine.model },
@@ -33,13 +53,25 @@ export function ActPart({ t }: { t: number }) {
   const detail = lerpRect(listRect(0), P.detail, grow)
 
   return (
-    <div style={{ opacity: out, transform: `scale(${lerp(0.96, 1, out)})`, transformOrigin: '800px 450px' }}>
+    <div
+      style={{
+        opacity: out,
+        transform: `scale(${lerp(0.96, 1, out)})`,
+        transformOrigin: '800px 450px',
+      }}
+    >
       {LIST.map((p, i) => {
         if (i > 0 && others < 0.01) return null
         const e = enter(t, 12.9 + i * 0.18, 0.8, 30)
         if (i === 0) {
           return (
-            <Surface key={p.no} rect={detail} lift={hover * (1 - grow)} radius={lerp(16, 22, grow)} style={{ ...e, transform: `${e.transform} scale(${1 - 0.025 * press})` }}>
+            <Surface
+              key={p.no}
+              rect={detail}
+              lift={hover * (1 - grow)}
+              radius={lerp(16, 22, grow)}
+              style={{ ...e, transform: `${e.transform} scale(${1 - 0.025 * press})` }}
+            >
               <div style={{ opacity: fall(t, click + 0.05, click + 0.3) }}>
                 <PartListBody no={p.no} name={p.name} />
               </div>
@@ -48,7 +80,16 @@ export function ActPart({ t }: { t: number }) {
           )
         }
         return (
-          <Surface key={p.no} rect={listRect(i)} radius={16} style={{ ...e, opacity: (e.opacity as number) * others, transform: `${e.transform} translateX(${(1 - others) * 40}px)` }}>
+          <Surface
+            key={p.no}
+            rect={listRect(i)}
+            radius={16}
+            style={{
+              ...e,
+              opacity: (e.opacity as number) * others,
+              transform: `${e.transform} translateX(${(1 - others) * 40}px)`,
+            }}
+          >
             <PartListBody no={p.no} name={p.name} />
           </Surface>
         )
@@ -56,15 +97,29 @@ export function ActPart({ t }: { t: number }) {
 
       {/* Relationship lines grow outward from the part, then the chain forms */}
       <svg className="lf-svg" viewBox="0 0 1600 900" aria-hidden="true">
-        <Draw d={`M800 ${P.detail.y + P.detail.h} L800 ${P.chainY - 40}`} p={rise(t, 16.1, 16.7, easeInOut)} width={2} opacity={0.75} />
+        <Draw
+          d={`M800 ${P.detail.y + P.detail.h} L800 ${P.chainY - 40}`}
+          p={rise(t, 16.1, 16.7, easeInOut)}
+          width={2}
+          opacity={0.75}
+        />
         {CHAIN.slice(0, -1).map((_, i) => (
-          <Draw key={i} d={`M${P.chainX(i) + 46} ${P.chainY} L${P.chainX(i + 1) - 46} ${P.chainY}`} p={rise(t, 16.6 + i * 0.32, 17.1 + i * 0.32, easeInOut)} width={2.5} />
+          <Draw
+            key={i}
+            d={`M${P.chainX(i) + 46} ${P.chainY} L${P.chainX(i + 1) - 46} ${P.chainY}`}
+            p={rise(t, 16.6 + i * 0.32, 17.1 + i * 0.32, easeInOut)}
+            width={2.5}
+          />
         ))}
       </svg>
       {CHAIN.map((n, i) => {
         const e = enter(t, 16.4 + i * 0.32, 0.7, 20)
         return (
-          <div key={n.label} className="lf-node" style={{ left: P.chainX(i) - 140, top: P.chainY - 38, ...e }}>
+          <div
+            key={n.label}
+            className="lf-node"
+            style={{ left: P.chainX(i) - 140, top: P.chainY - 38, ...e }}
+          >
             <Bubble icon={n.icon} size={76} on />
             <p className="lf-eyebrow">{n.label}</p>
             <p className="lf-node__value">{n.value}</p>
@@ -91,7 +146,10 @@ function PartDetail({ t }: { t: number }) {
     ['Unified part number', D.part.no],
     ['Category', `${D.part.category} · ${D.part.subcategory}`],
     ['Fitment', D.part.fits.join(' · ')],
-    ['Legacy code', `${D.part.legacyNo}${D.part.legacyBusiness ? ` (${D.part.legacyBusiness})` : ''}`],
+    [
+      'Legacy code',
+      `${D.part.legacyNo}${D.part.legacyBusiness ? ` (${D.part.legacyBusiness})` : ''}`,
+    ],
   ]
   return (
     <div className="lf-detail" style={{ opacity: rise(t, 15.0, 15.35) }}>
@@ -118,7 +176,6 @@ function PartDetail({ t }: { t: number }) {
   )
 }
 
-
 /* ───────── Sourcing + fulfilment on one map ───────── */
 
 type Kind = 'supplier' | 'warehouse' | 'dealer' | 'customer'
@@ -136,7 +193,12 @@ interface Place {
   members: Member[]
 }
 
-const ICON: Record<Kind, typeof Warehouse> = { supplier: Factory, warehouse: Warehouse, dealer: Store, customer: MapPin }
+const ICON: Record<Kind, typeof Warehouse> = {
+  supplier: Factory,
+  warehouse: Warehouse,
+  dealer: Store,
+  customer: MapPin,
+}
 const BUBBLE = 40
 const STEP = 48
 
@@ -146,27 +208,77 @@ const STEP = 48
  */
 const PLACES: Place[] = (() => {
   const raw: (Member & { city: string; lat: number; lon: number; at: number })[] = [
-    { id: D.supplier.id, kind: 'supplier', name: D.supplier.name, city: D.supplier.city, lat: D.supplier.lat, lon: D.supplier.lon, at: 18.7 },
-    ...D.stock.filter((s) => s.kind === 'warehouse' && s.lat !== null && s.lon !== null).map((s, i) => ({ id: s.id, kind: 'warehouse' as const, name: s.name, city: s.city, lat: s.lat as number, lon: s.lon as number, at: 19.2 + i * 0.14, available: s.available })),
-    ...D.stock.filter((s) => s.kind === 'dealer' && s.lat !== null && s.lon !== null).map((s, i) => ({ id: s.id, kind: 'dealer' as const, name: s.name, city: s.city, lat: s.lat as number, lon: s.lon as number, at: 19.85 + i * 0.14, available: s.available })),
-    { id: D.customer.id, kind: 'customer', name: D.customer.name, city: D.customer.city, lat: D.customer.lat, lon: D.customer.lon, at: 20.5 },
+    {
+      id: D.supplier.id,
+      kind: 'supplier',
+      name: D.supplier.name,
+      city: D.supplier.city,
+      lat: D.supplier.lat,
+      lon: D.supplier.lon,
+      at: 18.7,
+    },
+    ...D.stock
+      .filter((s) => s.kind === 'warehouse' && s.lat !== null && s.lon !== null)
+      .map((s, i) => ({
+        id: s.id,
+        kind: 'warehouse' as const,
+        name: s.name,
+        city: s.city,
+        lat: s.lat as number,
+        lon: s.lon as number,
+        at: 19.2 + i * 0.14,
+        available: s.available,
+      })),
+    ...D.stock
+      .filter((s) => s.kind === 'dealer' && s.lat !== null && s.lon !== null)
+      .map((s, i) => ({
+        id: s.id,
+        kind: 'dealer' as const,
+        name: s.name,
+        city: s.city,
+        lat: s.lat as number,
+        lon: s.lon as number,
+        at: 19.85 + i * 0.14,
+        available: s.available,
+      })),
+    {
+      id: D.customer.id,
+      kind: 'customer',
+      name: D.customer.name,
+      city: D.customer.city,
+      lat: D.customer.lat,
+      lon: D.customer.lon,
+      at: 20.5,
+    },
   ]
   const lats = raw.map((r) => r.lat)
   const lons = raw.map((r) => r.lon)
-  const [la0, la1, lo0, lo1] = [Math.min(...lats), Math.max(...lats), Math.min(...lons), Math.max(...lons)]
+  const [la0, la1, lo0, lo1] = [
+    Math.min(...lats),
+    Math.max(...lats),
+    Math.min(...lons),
+    Math.max(...lons),
+  ]
   const pad = { l: 60, r: 230, t: 70, b: 90 }
   const ky = (P.map.h - pad.t - pad.b) / ((la1 - la0) * 111)
   const kx = Math.min(ky * 1.7, (P.map.w - pad.l - pad.r) / ((lo1 - lo0) * 68))
   const groups = new Map<string, Place>()
   for (const r of raw) {
     const key = `${r.lat},${r.lon}`
-    const place = groups.get(key) ?? { city: r.city, x: pad.l + (r.lon - lo0) * 68 * kx, y: pad.t + (la1 - r.lat) * 111 * ky, at: r.at, members: [] }
+    const place = groups.get(key) ?? {
+      city: r.city,
+      x: pad.l + (r.lon - lo0) * 68 * kx,
+      y: pad.t + (la1 - r.lat) * 111 * ky,
+      at: r.at,
+      members: [],
+    }
     place.members.push({ id: r.id, kind: r.kind, name: r.name, available: r.available })
     place.at = Math.min(place.at, r.at)
     groups.set(key, place)
   }
   // The customer always reads first in its place
-  for (const p of groups.values()) p.members.sort((a, b) => Number(b.kind === 'customer') - Number(a.kind === 'customer'))
+  for (const p of groups.values())
+    p.members.sort((a, b) => Number(b.kind === 'customer') - Number(a.kind === 'customer'))
   return [...groups.values()]
 })()
 
@@ -188,25 +300,67 @@ const CTRL = (() => {
   return { x: (FROM.x + TO.x) / 2 + dy * 0.28, y: (FROM.y + TO.y) / 2 - dx * 0.28 }
 })()
 const ROUTE = `M${FROM.x} ${FROM.y} Q${CTRL.x} ${CTRL.y} ${TO.x} ${TO.y}`
-const onRoute = (u: number) => ({ x: (1 - u) ** 2 * FROM.x + 2 * (1 - u) * u * CTRL.x + u * u * TO.x, y: (1 - u) ** 2 * FROM.y + 2 * (1 - u) * u * CTRL.y + u * u * TO.y })
+const onRoute = (u: number) => ({
+  x: (1 - u) ** 2 * FROM.x + 2 * (1 - u) * u * CTRL.x + u * u * TO.x,
+  y: (1 - u) ** 2 * FROM.y + 2 * (1 - u) * u * CTRL.y + u * u * TO.y,
+})
 const MID = onRoute(0.5)
 
-const warehouseTotal = D.stock.filter((s) => s.kind === 'warehouse').reduce((n, s) => n + s.available, 0)
+const warehouseTotal = D.stock
+  .filter((s) => s.kind === 'warehouse')
+  .reduce((n, s) => n + s.available, 0)
 const dealersWithStock = D.stock.filter((s) => s.kind === 'dealer' && s.available > 0)
 const faster = D.delivery.standard.days - D.delivery.express.days
 
 const FACTS = [
-  { icon: Factory, label: 'Supplier', value: D.supplier.name, sub: `${D.supplier.city} · primary · ${D.supplier.leadDays} days lead time` },
-  { icon: Store, label: 'Dealers', value: `${dealersWithStock.length} hold stock`, sub: PICKUP ? `${PICKUP.name}, ${PICKUP.city} · ${PICKUP.available}` : 'None in your city' },
-  { icon: MapPin, label: 'Location', value: `${D.customer.city}, NL`, sub: `${D.customer.name} · from account` },
-  { icon: Boxes, label: 'Availability', value: `${warehouseTotal} in warehouses`, sub: `${FROM_STOCK?.available ?? 0} at ${FROM_PLACE.city}, the nearest` },
-  { icon: Ruler, label: 'Distance', value: `${D.delivery.km} km`, sub: `${FROM_PLACE.city} to ${D.customer.city}, road estimate` },
+  {
+    icon: Factory,
+    label: 'Supplier',
+    value: D.supplier.name,
+    sub: `${D.supplier.city} · primary · ${D.supplier.leadDays} days lead time`,
+  },
+  {
+    icon: Store,
+    label: 'Dealers',
+    value: `${dealersWithStock.length} hold stock`,
+    sub: PICKUP ? `${PICKUP.name}, ${PICKUP.city} · ${PICKUP.available}` : 'None in your city',
+  },
+  {
+    icon: MapPin,
+    label: 'Location',
+    value: `${D.customer.city}, NL`,
+    sub: `${D.customer.name} · from account`,
+  },
+  {
+    icon: Boxes,
+    label: 'Availability',
+    value: `${warehouseTotal} in warehouses`,
+    sub: `${FROM_STOCK?.available ?? 0} at ${FROM_PLACE.city}, the nearest`,
+  },
+  {
+    icon: Ruler,
+    label: 'Distance',
+    value: `${D.delivery.km} km`,
+    sub: `${FROM_PLACE.city} to ${D.customer.city}, road estimate`,
+  },
 ] as const
 
 const OPTIONS = [
-  { name: 'Express', price: `€${D.delivery.express.price.toFixed(2)}`, meta: `${D.delivery.express.days} days · from ${FROM_PLACE.city}` },
-  { name: 'Standard', price: `€${D.delivery.standard.price.toFixed(2)}`, meta: `${D.delivery.standard.days} days · from ${FROM_PLACE.city}` },
-  { name: 'Collect', price: 'Not configured', meta: PICKUP ? `${PICKUP.name} · ${PICKUP.available} in stock` : 'No dealer stock in your city' },
+  {
+    name: 'Express',
+    price: `€${D.delivery.express.price.toFixed(2)}`,
+    meta: `${D.delivery.express.days} days · from ${FROM_PLACE.city}`,
+  },
+  {
+    name: 'Standard',
+    price: `€${D.delivery.standard.price.toFixed(2)}`,
+    meta: `${D.delivery.standard.days} days · from ${FROM_PLACE.city}`,
+  },
+  {
+    name: 'Collect',
+    price: 'Not configured',
+    meta: PICKUP ? `${PICKUP.name} · ${PICKUP.available} in stock` : 'No dealer stock in your city',
+  },
 ] as const
 
 const TRACK = [
@@ -238,16 +392,26 @@ export function ActSourcing({ t }: { t: number }) {
   const arrived = rise(t, 28.55, 29.0)
 
   const hover = rise(t, 25.0, 25.4) * (t < CLICK_EXPRESS ? 1 : 0)
-  const press = seg(t, CLICK_EXPRESS - 0.05, CLICK_EXPRESS) * fall(t, CLICK_EXPRESS, CLICK_EXPRESS + 0.2)
+  const press =
+    seg(t, CLICK_EXPRESS - 0.05, CLICK_EXPRESS) * fall(t, CLICK_EXPRESS, CLICK_EXPRESS + 0.2)
   const chosen = rise(t, CLICK_EXPRESS, CLICK_EXPRESS + 0.35)
   const collapse = seg(t, 25.95, 26.45, easeInOut)
   const expand = Math.max(hover, chosen * (1 - collapse))
 
   return (
-    <div style={{ opacity: panelIn * panelOut, transform: `scale(${0.97 + 0.03 * panelIn})`, transformOrigin: '800px 450px' }}>
+    <div
+      style={{
+        opacity: panelIn * panelOut,
+        transform: `scale(${0.97 + 0.03 * panelIn})`,
+        transformOrigin: '800px 450px',
+      }}
+    >
       <Surface rect={P.panel} radius={26} />
 
-      <div className="lf-tabs" style={{ left: P.tabs.sourcing.x, top: P.tabs.y, opacity: rise(t, 18.6, 19.1) }}>
+      <div
+        className="lf-tabs"
+        style={{ left: P.tabs.sourcing.x, top: P.tabs.y, opacity: rise(t, 18.6, 19.1) }}
+      >
         <i style={{ left: tabX - P.tabs.sourcing.x, width: tabW }} />
         <span className={toFulfil < 0.5 ? 'is-on' : ''} style={{ width: P.tabs.sourcing.w }}>
           Sourcing
@@ -260,7 +424,11 @@ export function ActSourcing({ t }: { t: number }) {
       {/* Sourcing: what the system found */}
       <div style={{ opacity: fall(t, 24.2, 24.55), transform: `translateX(${-24 * toFulfil}px)` }}>
         {FACTS.map((f, i) => (
-          <div key={f.label} className="lf-fact" style={{ left: 130, top: 188 + i * 118, ...enter(t, 18.5 + i * 0.2, 0.7, 18) }}>
+          <div
+            key={f.label}
+            className="lf-fact"
+            style={{ left: 130, top: 188 + i * 118, ...enter(t, 18.5 + i * 0.2, 0.7, 18) }}
+          >
             <Bubble icon={f.icon} size={52} on />
             <div>
               <p className="lf-eyebrow">{f.label}</p>
@@ -289,38 +457,79 @@ export function ActSourcing({ t }: { t: number }) {
                 rect={{ x: P.opt.x, y, w: P.opt.w, h }}
                 lift={isExpress ? hover : 0}
                 radius={16}
-                style={{ ...e, opacity: (e.opacity as number) * dim * gone, transform: `${e.transform} translateY(${(1 - gone) * -12}px) scale(${1 - 0.025 * (isExpress ? press : 0)})`, background: on ? 'var(--accent-soft)' : undefined, borderColor: on ? 'rgb(0 191 165 / 0.5)' : undefined }}
+                style={{
+                  ...e,
+                  opacity: (e.opacity as number) * dim * gone,
+                  transform: `${e.transform} translateY(${(1 - gone) * -12}px) scale(${1 - 0.025 * (isExpress ? press : 0)})`,
+                  background: on ? 'var(--accent-soft)' : undefined,
+                  borderColor: on ? 'rgb(0 191 165 / 0.5)' : undefined,
+                }}
               >
                 <div className="lf-opt">
-                  <span className={`lf-radio ${on ? 'is-on' : ''}`}>{on ? <Check size={16} strokeWidth={3} aria-hidden="true" /> : null}</span>
+                  <span className={`lf-radio ${on ? 'is-on' : ''}`}>
+                    {on ? <Check size={16} strokeWidth={3} aria-hidden="true" /> : null}
+                  </span>
                   <div className="lf-opt__main">
                     <p className="lf-opt__name">{o.name}</p>
-                    <p className="lf-opt__sub" style={isExpress ? { opacity: 1 - collapse } : undefined}>
+                    <p
+                      className="lf-opt__sub"
+                      style={isExpress ? { opacity: 1 - collapse } : undefined}
+                    >
                       {o.meta}
                     </p>
                     {isExpress && faster > 0 ? (
-                      <p className="lf-opt__gain" style={{ opacity: Math.max(0, expand - 2 * collapse), transform: `translateY(${(1 - expand) * 6}px)` }}>
+                      <p
+                        className="lf-opt__gain"
+                        style={{
+                          opacity: Math.max(0, expand - 2 * collapse),
+                          transform: `translateY(${(1 - expand) * 6}px)`,
+                        }}
+                      >
                         <Zap size={15} strokeWidth={2} aria-hidden="true" />
                         {faster} {faster === 1 ? 'day' : 'days'} faster than Standard
                       </p>
                     ) : null}
                   </div>
-                  <p className={`lf-opt__price ${o.price === 'Not configured' ? 'is-muted' : ''}`}>{o.price}</p>
+                  <p className={`lf-opt__price ${o.price === 'Not configured' ? 'is-muted' : ''}`}>
+                    {o.price}
+                  </p>
                 </div>
               </Surface>
             )
           })}
 
-          <div className="lf-track-list" style={{ left: P.opt.x + 6, top: P.opt.y(0) + 120, opacity: rise(t, 26.3, 26.7) }}>
+          <div
+            className="lf-track-list"
+            style={{ left: P.opt.x + 6, top: P.opt.y(0) + 120, opacity: rise(t, 26.3, 26.7) }}
+          >
             <i className="lf-track-list__rail" />
-            <i className="lf-track-list__fill" style={{ height: `${Math.min(1, Math.max(0, seg(t, 26.35, 28.55, (u) => u))) * 100}%` }} />
+            <i
+              className="lf-track-list__fill"
+              style={{
+                height: `${
+                  Math.min(
+                    1,
+                    Math.max(
+                      0,
+                      seg(t, 26.35, 28.55, (u) => u),
+                    ),
+                  ) * 100
+                }%`,
+              }}
+            />
             {TRACK.map((s, i) => {
               const active = t >= s.at
               const done = i < TRACK.length - 1 ? t >= TRACK[i + 1].at : t >= s.at + 0.3
               const e = enter(t, 26.3 + i * 0.1, 0.6, 10)
               return (
-                <div key={s.text} className={`lf-step ${active ? 'is-active' : ''} ${done ? 'is-done' : ''} ${i === TRACK.length - 1 ? 'is-last' : ''}`} style={e}>
-                  <span className="lf-step__dot">{done ? <Check size={14} strokeWidth={3} aria-hidden="true" /> : null}</span>
+                <div
+                  key={s.text}
+                  className={`lf-step ${active ? 'is-active' : ''} ${done ? 'is-done' : ''} ${i === TRACK.length - 1 ? 'is-last' : ''}`}
+                  style={e}
+                >
+                  <span className="lf-step__dot">
+                    {done ? <Check size={14} strokeWidth={3} aria-hidden="true" /> : null}
+                  </span>
                   <div>
                     <p className="lf-step__text">{s.text}</p>
                     <p className="lf-step__sub">{s.sub}</p>
@@ -334,15 +543,36 @@ export function ActSourcing({ t }: { t: number }) {
 
       {/* The map */}
       <div className="lf-map" style={box(P.map)}>
-        <div className="lf-map__world" style={{ transform: `translate(${tx}px, ${ty}px) scale(${zoom})` }}>
-          <svg viewBox={`0 0 ${P.map.w} ${P.map.h}`} width={P.map.w} height={P.map.h} aria-hidden="true">
+        <div
+          className="lf-map__world"
+          style={{ transform: `translate(${tx}px, ${ty}px) scale(${zoom})` }}
+        >
+          <svg
+            viewBox={`0 0 ${P.map.w} ${P.map.h}`}
+            width={P.map.w}
+            height={P.map.h}
+            aria-hidden="true"
+          >
             <defs>
               <pattern id="lf-grid" width="36" height="36" patternUnits="userSpaceOnUse">
                 <circle cx="2" cy="2" r="1.2" fill="rgb(10 50 44 / 0.16)" />
               </pattern>
             </defs>
-            <rect width={P.map.w} height={P.map.h} fill="url(#lf-grid)" opacity={rise(t, 18.5, 19.2)} />
-            <path d={ROUTE} fill="none" stroke="var(--line-strong)" strokeWidth={2} strokeDasharray="2 9" strokeLinecap="round" opacity={route} />
+            <rect
+              width={P.map.w}
+              height={P.map.h}
+              fill="url(#lf-grid)"
+              opacity={rise(t, 18.5, 19.2)}
+            />
+            <path
+              d={ROUTE}
+              fill="none"
+              stroke="var(--line-strong)"
+              strokeWidth={2}
+              strokeDasharray="2 9"
+              strokeLinecap="round"
+              opacity={route}
+            />
             <Draw d={ROUTE} p={route * (1 - focus) + travel * focus} width={lerp(3, 4, focus)} />
           </svg>
 
@@ -352,14 +582,42 @@ export function ActSourcing({ t }: { t: number }) {
             const onRoutePlace = p === FROM_PLACE || p === TO_PLACE
             const dim = onRoutePlace ? 1 : lerp(1, 0.12, focus)
             return (
-              <div key={p.city} className="lf-place" style={{ left: p.x - BUBBLE / 2, top: p.y - BUBBLE / 2, opacity: e * dim, transform: `scale(${(0.8 + 0.2 * e) / zoom ** 0.35})` }}>
+              <div
+                key={p.city}
+                className="lf-place"
+                style={{
+                  left: p.x - BUBBLE / 2,
+                  top: p.y - BUBBLE / 2,
+                  opacity: e * dim,
+                  transform: `scale(${(0.8 + 0.2 * e) / zoom ** 0.35})`,
+                }}
+              >
                 {p.members.map((m) => {
-                  const me = rise(t, m.kind === 'customer' ? 20.5 : p.at, (m.kind === 'customer' ? 20.5 : p.at) + 0.5)
-                  const lit = m.id === D.delivery.from ? rise(t, 21.5, 22.1) : m.kind === 'customer' ? Math.max(rise(t, 21.9, 22.4) * 0.6, arrived) : 0
+                  const me = rise(
+                    t,
+                    m.kind === 'customer' ? 20.5 : p.at,
+                    (m.kind === 'customer' ? 20.5 : p.at) + 0.5,
+                  )
+                  const lit =
+                    m.id === D.delivery.from
+                      ? rise(t, 21.5, 22.1)
+                      : m.kind === 'customer'
+                        ? Math.max(rise(t, 21.9, 22.4) * 0.6, arrived)
+                        : 0
                   const Icon = ICON[m.kind]
                   return (
                     <span key={m.id} className="lf-marker" style={{ opacity: me }}>
-                      <Bubble icon={Icon} size={BUBBLE} on={m.kind === 'customer' || lit > 0.5} style={{ boxShadow: lit > 0.01 ? `0 0 0 ${7 * lit}px rgb(0 191 165 / ${0.18 * lit})` : undefined }} />
+                      <Bubble
+                        icon={Icon}
+                        size={BUBBLE}
+                        on={m.kind === 'customer' || lit > 0.5}
+                        style={{
+                          boxShadow:
+                            lit > 0.01
+                              ? `0 0 0 ${7 * lit}px rgb(0 191 165 / ${0.18 * lit})`
+                              : undefined,
+                        }}
+                      />
                       {m.available !== undefined ? <b>{m.available}</b> : null}
                     </span>
                   )
@@ -370,13 +628,28 @@ export function ActSourcing({ t }: { t: number }) {
           })}
 
           {travel > 0.001 && travel < 0.999 ? (
-            <div className="lf-pkg" style={{ left: pkg.x, top: pkg.y, transform: `translate(-50%, -50%) scale(${1 / zoom ** 0.5})` }}>
+            <div
+              className="lf-pkg"
+              style={{
+                left: pkg.x,
+                top: pkg.y,
+                transform: `translate(-50%, -50%) scale(${1 / zoom ** 0.5})`,
+              }}
+            >
               <Package size={24} strokeWidth={1.7} aria-hidden="true" />
             </div>
           ) : null}
 
           {arrived > 0.01 ? (
-            <p className="lf-eta" style={{ left: TO.x, top: TO.y + 34, opacity: arrived, transform: `translate(-50%, ${(1 - arrived) * 8}px) scale(${1 / zoom})` }}>
+            <p
+              className="lf-eta"
+              style={{
+                left: TO.x,
+                top: TO.y + 34,
+                opacity: arrived,
+                transform: `translate(-50%, ${(1 - arrived) * 8}px) scale(${1 / zoom})`,
+              }}
+            >
               <Check size={18} strokeWidth={2.6} aria-hidden="true" />
               {arrival(D.delivery.express.days)}
             </p>
@@ -384,7 +657,14 @@ export function ActSourcing({ t }: { t: number }) {
         </div>
 
         {t > 21.9 && t < 26.0 ? (
-          <p className="lf-dist" style={{ opacity: rise(t, 22.1, 22.6) * fall(t, 25.6, 25.95), left: MID.x - 160, top: MID.y - 20 }}>
+          <p
+            className="lf-dist"
+            style={{
+              opacity: rise(t, 22.1, 22.6) * fall(t, 25.6, 25.95),
+              left: MID.x - 160,
+              top: MID.y - 20,
+            }}
+          >
             {D.delivery.km} km
           </p>
         ) : null}

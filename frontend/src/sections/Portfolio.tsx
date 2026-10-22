@@ -44,14 +44,23 @@ export function Portfolio() {
             </h2>
           </Reveal>
           <Reveal delay={120} className="portfolio__intro">
-            <p className="lead">Explore the Noordveld range{data?.families.length ? ` across the ${data.families.join(', ')}` : ''}.</p>
-            <TextLink to="/machines">{data ? `View all ${machines.length} machines` : 'View all machines'}</TextLink>
+            <p className="lead">
+              Explore the Noordveld range
+              {data?.families.length ? ` across the ${data.families.join(', ')}` : ''}.
+            </p>
+            <TextLink to="/machines">
+              {data ? `View all ${machines.length} machines` : 'View all machines'}
+            </TextLink>
           </Reveal>
         </div>
 
         {featured ? (
           <Reveal className="featured">
-            <Link className="featured__link" to={`/machines/${featured.slug}`} aria-label={`${featured.model}, ${featured.name}`}>
+            <Link
+              className="featured__link"
+              to={`/machines/${featured.slug}`}
+              aria-label={`${featured.model}, ${featured.name}`}
+            >
               <div className="featured__media">
                 <MachineImage machine={featured} ratio="21 / 9" reveal eager imageType="action" />
               </div>
@@ -68,7 +77,12 @@ export function Portfolio() {
       </div>
 
       <div className="rail">
-        <ul className="rail__track" ref={railRef} onScroll={update} aria-label="All Noordveld machines">
+        <ul
+          className="rail__track"
+          ref={railRef}
+          onScroll={update}
+          aria-label="All Noordveld machines"
+        >
           {machines.map((m, i) => (
             <li key={m.model} className="rail__item">
               <MachineCard machine={m} index={i} ratio="4 / 3" />

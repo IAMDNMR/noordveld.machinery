@@ -8,7 +8,14 @@ import { Glyph } from '../components/scenes/primitives'
 import { QuickScene } from '../components/scenes/QuickScene'
 import { clamp01, easeInOut, easeOut, lerp, linear, seg } from '../lib/math'
 import type { StageId } from '../data/stages'
-import { CROSSFADE, FILM_SECONDS, OUTCOME_START, acts, layoutFor, type FilmFormat } from './timeline'
+import {
+  CROSSFADE,
+  FILM_SECONDS,
+  OUTCOME_START,
+  acts,
+  layoutFor,
+  type FilmFormat,
+} from './timeline'
 
 const scenes: Record<StageId, ComponentType<{ p: number }>> = {
   commerce: CommerceScene,
@@ -27,7 +34,8 @@ interface EvolutionFilmProps {
 }
 
 /** In-and-out visibility of a window [start, end] with soft edges. */
-const window01 = (t: number, start: number, end: number, fade = CROSSFADE): number => Math.min(seg(t, start, start + fade, linear), 1 - seg(t, end - fade, end, linear))
+const window01 = (t: number, start: number, end: number, fade = CROSSFADE): number =>
+  Math.min(seg(t, start, start + fade, linear), 1 - seg(t, end - fade, end, linear))
 
 /** Soft teal light that drifts across the stage as the story moves from the physical to the intelligent. */
 function Light({ t, width, height }: { t: number; width: number; height: number }) {
@@ -42,8 +50,20 @@ function Light({ t, width, height }: { t: number; width: number; height: number 
           <stop offset="1" stopColor="#00bfa5" stopOpacity={0} />
         </radialGradient>
       </defs>
-      <circle cx={cx} cy={cy} r={Math.max(width, height) * 0.55} fill="url(#film-light)" opacity={1 - seg(t, OUTCOME_START - 1, OUTCOME_START + 0.5, linear)} />
-      <circle cx={width / 2} cy={height * 0.42} r={Math.max(width, height) * 0.5} fill="url(#film-light)" opacity={seg(t, OUTCOME_START + 0.2, OUTCOME_START + 2.4, linear)} />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={Math.max(width, height) * 0.55}
+        fill="url(#film-light)"
+        opacity={1 - seg(t, OUTCOME_START - 1, OUTCOME_START + 0.5, linear)}
+      />
+      <circle
+        cx={width / 2}
+        cy={height * 0.42}
+        r={Math.max(width, height) * 0.5}
+        fill="url(#film-light)"
+        opacity={seg(t, OUTCOME_START + 0.2, OUTCOME_START + 2.4, linear)}
+      />
     </>
   )
 }
@@ -54,7 +74,14 @@ export function EvolutionFilm({ time, format = 'landscape' }: EvolutionFilmProps
 
   return (
     <AbsoluteFill style={{ background: 'var(--paper)', overflow: 'hidden' }}>
-      <svg viewBox={`0 0 ${L.width} ${L.height}`} width="100%" height="100%" role="img" aria-label="Motion film: commerce, e-commerce, quick commerce and agentic e-commerce." style={{ display: 'block' }}>
+      <svg
+        viewBox={`0 0 ${L.width} ${L.height}`}
+        width="100%"
+        height="100%"
+        role="img"
+        aria-label="Motion film: commerce, e-commerce, quick commerce and agentic e-commerce."
+        style={{ display: 'block' }}
+      >
         <Light t={t} width={L.width} height={L.height} />
 
         {acts.map((act) => {
@@ -71,18 +98,47 @@ export function EvolutionFilm({ time, format = 'landscape' }: EvolutionFilmProps
             <g key={act.id}>
               {a > 0.002 ? (
                 <g transform={`translate(${cx} ${cy}) scale(${zoom}) translate(${-cx} ${-cy})`}>
-                  <svg x={L.scene.x} y={L.scene.y} width={L.scene.w} height={L.scene.h} viewBox="0 0 800 500" opacity={a} style={{ overflow: 'visible' }}>
+                  <svg
+                    x={L.scene.x}
+                    y={L.scene.y}
+                    width={L.scene.w}
+                    height={L.scene.h}
+                    viewBox="0 0 800 500"
+                    opacity={a}
+                    style={{ overflow: 'visible' }}
+                  >
                     <Scene p={sceneP} />
                   </svg>
                 </g>
               ) : null}
               {textA > 0.002 ? (
                 <g opacity={textA} transform={`translate(0 ${rise})`}>
-                  <text x={L.text.x} y={L.text.y - L.text.leading * 0.95} style={{ fontFamily: font, fontSize: L.text.kicker, fontWeight: 600, letterSpacing: '0.18em', fill: 'var(--accent-ink)' }}>
+                  <text
+                    x={L.text.x}
+                    y={L.text.y - L.text.leading * 0.95}
+                    style={{
+                      fontFamily: font,
+                      fontSize: L.text.kicker,
+                      fontWeight: 600,
+                      letterSpacing: '0.18em',
+                      fill: 'var(--accent-ink)',
+                    }}
+                  >
                     {act.kicker}
                   </text>
                   {act.lines.map((line, i) => (
-                    <text key={line} x={L.text.x} y={L.text.y + i * L.text.leading} style={{ fontFamily: font, fontSize: L.text.line, fontWeight: 600, letterSpacing: '-0.04em', fill: 'var(--ink)' }}>
+                    <text
+                      key={line}
+                      x={L.text.x}
+                      y={L.text.y + i * L.text.leading}
+                      style={{
+                        fontFamily: font,
+                        fontSize: L.text.line,
+                        fontWeight: 600,
+                        letterSpacing: '-0.04em',
+                        fill: 'var(--ink)',
+                      }}
+                    >
                       {line}
                     </text>
                   ))}
@@ -93,14 +149,38 @@ export function EvolutionFilm({ time, format = 'landscape' }: EvolutionFilmProps
         })}
 
         <g opacity={1 - seg(t, OUTCOME_START - 0.6, OUTCOME_START, linear)}>
-          <line x1={L.rail.x} x2={L.rail.x + L.rail.w} y1={L.rail.y - 34} y2={L.rail.y - 34} stroke="var(--line)" strokeWidth={2} />
-          <line x1={L.rail.x} x2={L.rail.x + L.rail.w * clamp01(t / OUTCOME_START)} y1={L.rail.y - 34} y2={L.rail.y - 34} stroke="var(--accent)" strokeWidth={3} />
+          <line
+            x1={L.rail.x}
+            x2={L.rail.x + L.rail.w}
+            y1={L.rail.y - 34}
+            y2={L.rail.y - 34}
+            stroke="var(--line)"
+            strokeWidth={2}
+          />
+          <line
+            x1={L.rail.x}
+            x2={L.rail.x + L.rail.w * clamp01(t / OUTCOME_START)}
+            y1={L.rail.y - 34}
+            y2={L.rail.y - 34}
+            stroke="var(--accent)"
+            strokeWidth={3}
+          />
           {RAIL.map((name, i) => {
             const act = acts[i]
             const on = t >= act.start && t < act.end
             if (format !== 'landscape' && !on) return null
             return (
-              <text key={name} x={L.rail.x + (L.rail.w * act.start) / OUTCOME_START} y={L.rail.y} style={{ fontFamily: font, fontSize: L.rail.font, fontWeight: 600, fill: on ? 'var(--ink)' : 'var(--ink-3)' }}>
+              <text
+                key={name}
+                x={L.rail.x + (L.rail.w * act.start) / OUTCOME_START}
+                y={L.rail.y}
+                style={{
+                  fontFamily: font,
+                  fontSize: L.rail.font,
+                  fontWeight: 600,
+                  fill: on ? 'var(--ink)' : 'var(--ink-3)',
+                }}
+              >
                 {name}
               </text>
             )
@@ -119,17 +199,49 @@ function Outcome({ t, L }: { t: number; L: ReturnType<typeof layoutFor> }) {
   const second = seg(t, OUTCOME_START + 2.0, OUTCOME_START + 3.0, linear)
   const name = seg(t, OUTCOME_START + 3.6, OUTCOME_START + 4.5, linear)
   const { x, y, line, leading } = L.outcome
-  const style = { fontFamily: font, fontSize: line, fontWeight: 600, letterSpacing: '-0.045em', textAnchor: 'middle' } as const
+  const style = {
+    fontFamily: font,
+    fontSize: line,
+    fontWeight: 600,
+    letterSpacing: '-0.045em',
+    textAnchor: 'middle',
+  } as const
   return (
     <g>
-      <Glyph icon={CircleCheck} x={x} y={y - leading * 1.9} size={96} color="var(--accent)" opacity={check} scale={0.7 + 0.3 * check} strokeWidth={1.1} />
+      <Glyph
+        icon={CircleCheck}
+        x={x}
+        y={y - leading * 1.9}
+        size={96}
+        color="var(--accent)"
+        opacity={check}
+        scale={0.7 + 0.3 * check}
+        strokeWidth={1.1}
+      />
       <text x={x} y={y} opacity={first} style={{ ...style, fill: 'var(--ink)' }}>
         From buying what you know
       </text>
-      <text x={x} y={y + leading + (1 - second) * 18} opacity={second} style={{ ...style, fill: 'var(--accent-ink)' }}>
+      <text
+        x={x}
+        y={y + leading + (1 - second) * 18}
+        opacity={second}
+        style={{ ...style, fill: 'var(--accent-ink)' }}
+      >
         to solving what you need.
       </text>
-      <text x={x} y={y + leading * 2.5 + (1 - name) * 14} opacity={name} style={{ fontFamily: font, fontSize: line * 0.38, fontWeight: 600, letterSpacing: '0.18em', textAnchor: 'middle', fill: 'var(--ink)' }}>
+      <text
+        x={x}
+        y={y + leading * 2.5 + (1 - name) * 14}
+        opacity={name}
+        style={{
+          fontFamily: font,
+          fontSize: line * 0.38,
+          fontWeight: 600,
+          letterSpacing: '0.18em',
+          textAnchor: 'middle',
+          fill: 'var(--ink)',
+        }}
+      >
         AGENTIC E-COMMERCE
       </text>
     </g>

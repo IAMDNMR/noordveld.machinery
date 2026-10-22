@@ -5,6 +5,7 @@ A provider only implements `_complete` (transport, retries, error normalisation)
 returns reaches a query before it has passed the validators below: intent against the approved list, entity kinds against
 ENTITY_KEYS, enums against their values, numbers as numbers.
 """
+
 from __future__ import annotations
 
 import json
@@ -16,16 +17,46 @@ from collections import OrderedDict, deque
 from typing import Any
 
 from app.llm.base import LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
-from app.llm.prompts import GROUNDING_RULES, SHOPPING_RULES, UNDERSTAND_RULES, question_prompt, shopping_prompt
+from app.llm.prompts import (
+    GROUNDING_RULES,
+    SHOPPING_RULES,
+    UNDERSTAND_RULES,
+    question_prompt,
+    shopping_prompt,
+)
 
 log = logging.getLogger("app.llm")
 
 # Token budget: replies are short structures or two sentences, and only the evidence the wording needs is sent.
 # "question_retry" is the single second attempt after an unusable reply: temperature is 0, so the same cap would truncate the same way
-MAX_OUTPUT_TOKENS = {"question": 320, "question_retry": 480, "shopping": 150, "grounded_answer": 120}
-MAX_EVIDENCE_ITEMS = 12  # records sent to the wording step: the summary record plus up to 11 results
+MAX_OUTPUT_TOKENS = {
+    "question": 320,
+    "question_retry": 480,
+    "shopping": 150,
+    "grounded_answer": 120,
+    "studio_turn": 10000,
+    "studio_blueprint": 16000,
+    "studio_frontend": 8000,
+    "studio_frontend_file": 6000,
+}
+JSON_KINDS = frozenset(
+    {"studio_turn", "studio_blueprint", "studio_frontend"}
+)  # free-form JSON objects (no schema); the caller validates every field
+MAX_EVIDENCE_ITEMS = (
+    12  # records sent to the wording step: the summary record plus up to 11 results
+)
 
-ENTITY_KEYS = ("part", "second_part", "machine", "supplier", "dealer", "assembly", "category", "order", "warehouse")
+ENTITY_KEYS = (
+    "part",
+    "second_part",
+    "machine",
+    "supplier",
+    "dealer",
+    "assembly",
+    "category",
+    "order",
+    "warehouse",
+)
 FILTER_KEYS = ("place", "place_kind", "proximity", "location", "brand", "target_kind", "single")
 
 # ── schemas (standard JSON Schema; strict-mode compatible: every property required, nullable via type arrays) ─────────
@@ -33,42 +64,69 @@ _STR = {"type": ["string", "null"]}
 
 
 def _obj(props: dict[str, Any]) -> dict[str, Any]:
-    return {"type": "object", "properties": props, "required": list(props), "additionalProperties": False}
+    return {
+        "type": "object",
+        "properties": props,
+        "required": list(props),
+        "additionalProperties": False,
+    }
 
 
 def question_schema(intents: list[str]) -> dict[str, Any]:
-    return _obj({
+    return _obj(
+        {
+            "in_scope": {"type": "boolean"},
+            "intent": {"type": "string", "enum": intents},
+            "entities": _obj({k: _STR for k in ENTITY_KEYS}),
+            "need": _STR,
+            "filters": _obj(
+                {
+                    "place": _STR,
+                    "place_kind": {
+                        "type": ["string", "null"],
+                        "enum": ["DEALER", "SUPPLIER", "WAREHOUSE", None],
+                    },
+                    "proximity": {"type": ["string", "null"], "enum": ["in", "near", None]},
+                    "location": _STR,
+                    "brand": _STR,
+                    "target_kind": _STR,
+                    "single": {"type": ["boolean", "null"]},
+                }
+            ),
+            "requires_clarification": {"type": "boolean"},
+            "clarification_question": _STR,
+        }
+    )
+
+
+SHOPPING_SCHEMA = _obj(
+    {
         "in_scope": {"type": "boolean"},
-        "intent": {"type": "string", "enum": intents},
-        "entities": _obj({k: _STR for k in ENTITY_KEYS}),
-        "need": _STR,
-        "filters": _obj({
-            "place": _STR, "place_kind": {"type": ["string", "null"], "enum": ["DEALER", "SUPPLIER", "WAREHOUSE", None]},
-            "proximity": {"type": ["string", "null"], "enum": ["in", "near", None]}, "location": _STR, "brand": _STR, "target_kind": _STR,
-            "single": {"type": ["boolean", "null"]},
-        }),
-        "requires_clarification": {"type": "boolean"},
+        "machine": _STR,
+        "part_type": _STR,
+        "preference": {"type": "string", "enum": ["cheapest", "fastest", "none"]},
+        "delivery_place": _STR,
+        "quantity": {"type": ["integer", "null"]},
         "clarification_question": _STR,
-    })
-
-
-SHOPPING_SCHEMA = _obj({
-    "in_scope": {"type": "boolean"}, "machine": _STR, "part_type": _STR,
-    "preference": {"type": "string", "enum": ["cheapest", "fastest", "none"]}, "delivery_place": _STR,
-    "quantity": {"type": ["integer", "null"]}, "clarification_question": _STR,
-    "budget_max": {"type": ["number", "null"]}, "budget_currency": _STR,
-    "availability": {"type": "string", "enum": ["require", "prefer", "future", "none"]},
-})
+        "budget_max": {"type": ["number", "null"]},
+        "budget_currency": _STR,
+        "availability": {"type": "string", "enum": ["require", "prefer", "future", "none"]},
+    }
+)
 
 
 # ── validation ───────────────────────────────────────────────────────────────────────────────────
 def _load(text: str) -> dict[str, Any]:
-    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()  # reasoning models may prepend their thinking
+    text = re.sub(
+        r"<think>.*?</think>", "", text, flags=re.S
+    ).strip()  # reasoning models may prepend their thinking
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
     try:
         data = json.loads(text)
     except ValueError as exc:
+        # The end of the text shows whether the reply was cut off at the output cap or simply not JSON.
+        log.warning("llm reply is not valid JSON: %d characters, ends with %r", len(text), text[-120:])
         raise LLMInvalidResponse("not valid JSON") from exc
     if not isinstance(data, dict):
         raise LLMInvalidResponse("not a JSON object")
@@ -86,9 +144,15 @@ def to_llm_parse(text: str, allowed: list[str]) -> LLMParse:
         intent = data["intent"]
         if intent not in allowed:
             raise LLMInvalidResponse("intent outside the approved registry")
-        if not isinstance(data["in_scope"], bool) or not isinstance(data.get("requires_clarification", False), bool):
+        if not isinstance(data["in_scope"], bool) or not isinstance(
+            data.get("requires_clarification", False), bool
+        ):
             raise LLMInvalidResponse("scope verdict is not a boolean")
-        entities = {k: v.strip() for k, v in (data.get("entities") or {}).items() if k in ENTITY_KEYS and isinstance(v, str) and v.strip()}
+        entities = {
+            k: v.strip()
+            for k, v in (data.get("entities") or {}).items()
+            if k in ENTITY_KEYS and isinstance(v, str) and v.strip()
+        }
         filters: dict[str, Any] = {}
         for k, v in (data.get("filters") or {}).items():
             if k not in FILTER_KEYS or v in (None, "", False):
@@ -109,9 +173,12 @@ def to_llm_parse(text: str, allowed: list[str]) -> LLMParse:
             clarification_question=_text(data.get("clarification_question")),
             filters={k: v for k, v in filters.items() if v not in (None, "")},
             entities=entities,
-            in_scope=data["in_scope"] and data.get("domain", "parts_intelligence") == "parts_intelligence",
+            in_scope=data["in_scope"]
+            and data.get("domain", "parts_intelligence") == "parts_intelligence",
             need=_text(data.get("need")),
-            confidence=float(confidence) if isinstance(confidence, (int, float)) and not isinstance(confidence, bool) else None,
+            confidence=float(confidence)
+            if isinstance(confidence, (int, float)) and not isinstance(confidence, bool)
+            else None,
         )
     except (KeyError, TypeError, AttributeError) as exc:
         raise LLMInvalidResponse("not valid structured output") from exc
@@ -126,14 +193,22 @@ def to_shopping_parse(text: str) -> ShoppingParse:
         qty, budget = data.get("quantity"), data.get("budget_max")
         number = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)  # noqa: E731
         return ShoppingParse(
-            in_scope=data["in_scope"], machine=_text(data.get("machine")), part_type=_text(data.get("part_type")),
-            preference=data.get("preference") if data.get("preference") in ("cheapest", "fastest") else "none",
+            in_scope=data["in_scope"],
+            machine=_text(data.get("machine")),
+            part_type=_text(data.get("part_type")),
+            preference=data.get("preference")
+            if data.get("preference") in ("cheapest", "fastest")
+            else "none",
             delivery_place=_text(data.get("delivery_place")),
-            quantity=int(qty) if number(qty) and float(qty).is_integer() and 0 < qty < 1000 else None,
+            quantity=int(qty)
+            if number(qty) and float(qty).is_integer() and 0 < qty < 1000
+            else None,
             clarification_question=_text(data.get("clarification_question")),
             budget_max=float(budget) if number(budget) and budget > 0 else None,
             budget_currency=(_text(data.get("budget_currency")) or "").upper() or None,
-            availability=data.get("availability") if data.get("availability") in ("require", "prefer", "future") else "none",
+            availability=data.get("availability")
+            if data.get("availability") in ("require", "prefer", "future")
+            else "none",
         )
     except (KeyError, TypeError) as exc:
         raise LLMInvalidResponse("not valid structured output") from exc
@@ -141,7 +216,10 @@ def to_shopping_parse(text: str) -> ShoppingParse:
 
 def compact_evidence(evidence: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Only what the wording can use: the first MAX_EVIDENCE_ITEMS records, without empty fields. The draft already carries the totals."""
-    return [{k: v for k, v in item.items() if v not in (None, "", [], {})} for item in evidence[:MAX_EVIDENCE_ITEMS]]
+    return [
+        {k: v for k, v in item.items() if v not in (None, "", [], {})}
+        for item in evidence[:MAX_EVIDENCE_ITEMS]
+    ]
 
 
 # ── rate limiting and metrics ────────────────────────────────────────────────────────────────────
@@ -164,10 +242,26 @@ class RateLimiter:
             return True
 
 
-def record(provider: str, model: str, kind: str, started: float, outcome: str, retries: int = 0, tokens: int | None = None) -> None:
+def record(
+    provider: str,
+    model: str,
+    kind: str,
+    started: float,
+    outcome: str,
+    retries: int = 0,
+    tokens: int | None = None,
+) -> None:
     """One line per model call: provider, model, request type, latency, outcome, retries, tokens. Never a key, header or prompt."""
-    log.info("llm call provider=%s model=%s kind=%s latency_ms=%d outcome=%s retries=%d tokens=%s",
-             provider, model, kind, (time.perf_counter() - started) * 1000, outcome, retries, tokens if tokens is not None else "-")
+    log.info(
+        "llm call provider=%s model=%s kind=%s latency_ms=%d outcome=%s retries=%d tokens=%s",
+        provider,
+        model,
+        kind,
+        (time.perf_counter() - started) * 1000,
+        outcome,
+        retries,
+        tokens if tokens is not None else "-",
+    )
 
 
 # ── the operations, shared by every provider ─────────────────────────────────────────────────────
@@ -187,6 +281,11 @@ class StructuredLLM:
         raise NotImplementedError
 
     def _guarded(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
+        if kind.startswith("studio_frontend"):  # one generation makes many calls: wait for room instead of failing it
+            for _ in range(60):
+                if self._limit.allow():
+                    return self._complete(kind, system, prompt, schema)
+                time.sleep(2)
         if not self._limit.allow():
             log.warning("llm call provider=%s kind=%s outcome=local_rate_limit", self.name, kind)
             raise LLMUnavailable("rate limit reached")
@@ -211,10 +310,14 @@ class StructuredLLM:
         def understand() -> LLMParse:
             prompt, schema = question_prompt(question, intents), question_schema(allowed)
             try:
-                return to_llm_parse(self._guarded("question", UNDERSTAND_RULES, prompt, schema), allowed)
+                return to_llm_parse(
+                    self._guarded("question", UNDERSTAND_RULES, prompt, schema), allowed
+                )
             except LLMInvalidResponse:  # one retry, with a larger output cap: a reply cut off at the cap would be cut off again at the same cap
                 log.info("llm call provider=%s kind=question outcome=invalid_retry", self.name)
-                return to_llm_parse(self._guarded("question_retry", UNDERSTAND_RULES, prompt, schema), allowed)
+                return to_llm_parse(
+                    self._guarded("question_retry", UNDERSTAND_RULES, prompt, schema), allowed
+                )
 
         return self._cached("question", question + "\x00" + ",".join(allowed), understand)
 
@@ -222,10 +325,50 @@ class StructuredLLM:
         return self.parse_question(question, intents).mentions
 
     def parse_shopping_request(self, request: str) -> ShoppingParse:
-        return self._cached("shopping", request, lambda: to_shopping_parse(self._guarded("shopping", SHOPPING_RULES, shopping_prompt(request), SHOPPING_SCHEMA)))
+        return self._cached(
+            "shopping",
+            request,
+            lambda: to_shopping_parse(
+                self._guarded("shopping", SHOPPING_RULES, shopping_prompt(request), SHOPPING_SCHEMA)
+            ),
+        )
 
-    def generate_grounded_response(self, question: str, intent: str, evidence: list[dict[str, Any]], draft: str) -> str:
-        payload = json.dumps({"question": question, "intent": intent, "draft_answer": draft, "evidence": compact_evidence(evidence)},
-                             ensure_ascii=False, separators=(",", ":"))
+    def studio_blueprint(self, system: str, prompt: str) -> dict[str, Any]:
+        """A complete proposed domain needs more output than a conversation turn."""
+        return _load(self._guarded("studio_blueprint", system, prompt, None))
+
+    def studio_json(self, system: str, prompt: str) -> dict[str, Any]:
+        """One Design Studio conversation turn: a JSON object whose every field the caller validates. Never cached (it depends on the project)."""
+        return _load(self._guarded("studio_turn", system, prompt, None))
+
+    def studio_frontend(self, system: str, prompt: str) -> dict[str, Any]:
+        """Fresh application source, validated and built by the caller before storage."""
+        return _load(self._guarded("studio_frontend", system, prompt, None))
+
+    def studio_frontend_suffix(self, system: str, prompt: str) -> str:
+        """The missing end of a cut-off file. Leading spaces are kept: the cut can fall between two words."""
+        value = self._guarded("studio_frontend_file", system, prompt, None)
+        value = re.sub(r"<think>.*?</think>", "", value, flags=re.S)
+        return re.sub(r"^```[^\n]*\n|\n```\s*$", "", value).rstrip()
+
+    def studio_frontend_file(self, system: str, prompt: str) -> str:
+        """One source file per request avoids truncating a whole application in JSON."""
+        value = self._guarded("studio_frontend_file", system, prompt, None)
+        value = re.sub(r"<think>.*?</think>", "", value, flags=re.S).strip()
+        return re.sub(r"^```[^\n]*\n|\n```$", "", value).strip()
+
+    def generate_grounded_response(
+        self, question: str, intent: str, evidence: list[dict[str, Any]], draft: str
+    ) -> str:
+        payload = json.dumps(
+            {
+                "question": question,
+                "intent": intent,
+                "draft_answer": draft,
+                "evidence": compact_evidence(evidence),
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
         text = self._guarded("grounded_answer", GROUNDING_RULES, payload, None)
         return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()

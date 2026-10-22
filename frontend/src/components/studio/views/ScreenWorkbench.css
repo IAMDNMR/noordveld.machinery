@@ -1,0 +1,168 @@
+/* The Screens stage measures its own width, so the explorer stacks above the preview when the assistant takes the space beside it. */
+.sw-screens {
+  container-type: inline-size;
+  container-name: sw-screens;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  /* The Screens stage is a canvas that does not scroll by itself: this column does. */
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 20px 78px;
+}
+.sw-workbench {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  flex: none;
+  height: clamp(560px, calc(100vh - 210px), 940px);
+}
+.sw-workbench > .studio-generated {
+  min-height: 0;
+  height: 100%;
+  border: 1px solid var(--sw-line, #dce5df);
+  border-radius: 14px;
+}
+.sw-explorer {
+  background: #fff;
+  border: 1px solid var(--sw-line, #dce5df);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-width: 0;
+  align-content: start;
+}
+.sw-explorer__role {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--sw-muted, #5d6d7a);
+}
+.sw-explorer__role select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--sw-line, #dce5df);
+  border-radius: 8px;
+  padding: 0 8px;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+}
+.sw-explorer nav {
+  display: grid;
+  gap: 10px;
+}
+.sw-explorer__group {
+  display: grid;
+  gap: 2px;
+}
+.sw-explorer__group small {
+  margin: 6px 4px 2px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sw-muted, #5d6d7a);
+}
+.sw-explorer__group button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+.sw-explorer__group button:hover {
+  background: #f1f6f3;
+}
+.sw-explorer__group button[aria-current='page'] {
+  background: #e3f1ea;
+  font-weight: 600;
+}
+.sw-explorer__group span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sw-explorer__group i,
+.sw-explorer__group em {
+  flex: none;
+  font-style: normal;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #eef0eb;
+  color: #4b5b55;
+}
+.sw-explorer__group em {
+  background: #fff3d6;
+  color: #7a5200;
+  font-weight: 600;
+}
+.sw-explorer__ask {
+  justify-content: center;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
+}
+@container sw-screens (max-width: 760px) {
+  .sw-workbench {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(520px, 1fr);
+    height: auto;
+  }
+  .sw-explorer {
+    max-height: 260px;
+  }
+  .sw-workbench > .studio-generated {
+    height: min(78vh, 760px);
+  }
+}
+.sw-proposal__who summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 12px;
+}
+.sw-proposal__who ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.sw-proposal__who li {
+  display: grid;
+  gap: 2px;
+  font-size: 13.5px;
+}
+.sw-proposal__who li span {
+  color: var(--sw-muted, #5d6d7a);
+  overflow-wrap: anywhere;
+}
+.sw-proposal__todo {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff8e6;
+  color: #6b4b00;
+  font-size: 13.5px;
+}
+.sw-proposal__todo ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

@@ -1,0 +1,69 @@
+{
+  "id": "crm_sales",
+  "version": "1.0.0",
+  "name": "Sales & CRM",
+  "category": "Sales",
+  "summary": "Companies, contacts, pipeline, opportunities, quotes and follow-ups.",
+  "description": "A sales workspace built around the customer: a pipeline board from lead to won, each company's people and history in one place, activities and follow-ups that are never lost, and quotes ready to send.",
+  "status": "preview",
+  "domain_ids": ["sales_crm"],
+  "app_type": "Sales workspace",
+  "users": ["Sales executive", "Sales manager"],
+  "keywords": ["crm", "sales", "lead", "opportunity", "pipeline", "deal", "contact", "company", "account", "quote", "quotation", "follow-up", "activity", "customer"],
+  "theme": {
+    "id": "relationship",
+    "label": "Relationship",
+    "direction": "Soft lavender-grey with a confident violet accent; pipeline columns and activity timelines carry the page.",
+    "colors": {
+      "primary": "#5B3FD9", "primary_text": "#FFFFFF", "accent": "#DB2777",
+      "background": "#F6F5FB", "surface": "#FFFFFF", "surface_alt": "#ECE9F7",
+      "text": "#1B1730", "muted": "#57527A", "border": "#DCD8EC",
+      "nav_background": "#FFFFFF", "nav_text": "#1B1730",
+      "success": "#15803D", "warning": "#B45309", "danger": "#BE123C"
+    },
+    "font_heading": "grotesk", "font_body": "humanist", "density": "comfortable",
+    "radius": 12, "shadow": "soft", "card_style": "elevated", "table_style": "lined"
+  },
+  "nav_style": "sidebar",
+  "entity_roles": [
+    {"id": "opportunity", "label": "Opportunity", "matches": ["opportunity", "deal", "lead"], "fields": ["name", "company", "value", "stage", "close_date", "owner"]},
+    {"id": "company", "label": "Company", "matches": ["company", "account", "customer", "organisation"], "fields": ["name", "industry", "city", "owner"]},
+    {"id": "activity", "label": "Activity", "matches": ["activity", "call", "meeting", "follow-up", "task"], "fields": ["date", "company", "kind", "note"]}
+  ],
+  "pages": [
+    {"id": "pipeline", "title": "Pipeline", "icon": "Columns3", "layout": "board", "purpose": "Every opportunity by stage.", "users": ["Sales executive", "Sales manager"],
+     "components": [
+       {"type": "metric_strip", "title": "Pipeline by stage", "role": "opportunity", "group_by": "stage", "span": 3},
+       {"type": "status_board", "title": "Opportunities", "role": "opportunity", "fields": ["name", "company", "value", "close_date"], "group_by": "stage", "span": 3}
+     ]},
+    {"id": "companies", "title": "Companies", "icon": "Building2", "layout": "table", "purpose": "Customers and prospects.", "users": ["Sales executive"],
+     "components": [
+       {"type": "data_table", "title": "Companies", "role": "company", "fields": ["name", "industry", "city", "owner"], "span": 3}
+     ]},
+    {"id": "activities", "title": "Activities", "icon": "CalendarCheck", "layout": "timeline", "purpose": "Calls, meetings and follow-ups.", "users": ["Sales executive"],
+     "components": [
+       {"type": "timeline", "title": "Recent activity", "role": "activity", "fields": ["date", "company", "kind", "note"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "pipeline", "name": "Pipeline and opportunities", "status": "supported", "keywords": ["pipeline", "opportunity", "deal", "stage"]},
+    {"id": "accounts", "name": "Companies and contacts", "status": "supported", "keywords": ["company", "contact", "account", "customer"]},
+    {"id": "activities", "name": "Activities and follow-ups", "status": "supported", "keywords": ["activity", "follow-up", "call", "meeting", "reminder"]},
+    {"id": "quotes", "name": "Quotations", "status": "configurable", "keywords": ["quote", "quotation", "offer", "proposal"]},
+    {"id": "email_sync", "name": "E-mail and calendar sync", "status": "requires_integration", "keywords": ["email", "calendar", "outlook", "gmail"], "note": "Needs a mail and calendar integration delivered by our partner."}
+  ],
+  "limitations": ["E-mail and calendar sync need an integration from our partner."],
+  "sample": {
+    "opportunity": [
+      {"id": "op1", "name": "Fleet renewal", "company": "Sample Logistics", "value": 240000, "stage": "Proposal", "close_date": "2026-12-15", "owner": "Sales A"},
+      {"id": "op2", "name": "Service contract", "company": "Sample Farms", "value": 36000, "stage": "Qualified", "close_date": "2026-11-30", "owner": "Sales B"},
+      {"id": "op3", "name": "Two telehandlers", "company": "Sample Build", "value": 118000, "stage": "Won", "close_date": "2026-10-10", "owner": "Sales A"}
+    ],
+    "company": [
+      {"id": "co1", "name": "Sample Logistics", "industry": "Logistics", "city": "Rotterdam", "owner": "Sales A"}
+    ],
+    "activity": [
+      {"id": "ac1", "date": "2026-10-20", "company": "Sample Logistics", "kind": "Meeting", "note": "Demo of NF-25 fleet"}
+    ]
+  }
+}

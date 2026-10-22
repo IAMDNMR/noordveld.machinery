@@ -2,6 +2,7 @@
 
 Run (from backend/):  python -m uvicorn app.main:app --reload --port 8000
 """
+
 from __future__ import annotations
 
 import logging
@@ -12,18 +13,33 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.dependencies import Catalogue, get_graph
-from app.api.routes import accounts, agent, catalogue, checkout, intelligence, orders, parts, site
+from app.api.routes import (
+    accounts,
+    agent,
+    catalogue,
+    assistant,
+    checkout,
+    design_studio,
+    domain_knowledge,
+    intelligence,
+    orders,
+    parts,
+    site,
+    workspace,
+)
 from app.core.config import get_settings
 from app.core.exceptions import GraphUnavailableError, NotFoundError
 from app.core.logging import setup_logging
-from app.llm import LLMError, LLMInvalidResponse, LLMUnavailable
+from app.llm import LLMError, LLMUnavailable
 
 log = logging.getLogger(__name__)
 
 
 def _error(status: int, code: str, message: str, details: object = None) -> JSONResponse:
     body: dict = {"code": code, "message": message}
-    if details is not None:  # structured, safe-to-show facts about why a business rule refused (field name, depot reasons)
+    if (
+        details is not None
+    ):  # structured, safe-to-show facts about why a business rule refused (field name, depot reasons)
         body["details"] = details
     return JSONResponse(status_code=status, content={"error": body})
 
@@ -39,7 +55,11 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="Noordveld Parts Intelligence API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(
-        CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "PUT"], allow_headers=["*"], allow_credentials=True
+        CORSMiddleware,
+        allow_origins=list(settings.cors_origins),
+        allow_methods=["GET", "POST", "PUT"],
+        allow_headers=["*"],
+        allow_credentials=True,
     )
 
     @app.exception_handler(NotFoundError)
@@ -47,23 +67,54 @@ def create_app() -> FastAPI:
         return _error(404, "not_found", str(exc))
 
     @app.exception_handler(GraphUnavailableError)
-    async def graph_unavailable(_: Request, __: GraphUnavailableError) -> JSONResponse:
-        return _error(503, "graph_unavailable", "The parts catalogue is temporarily unavailable.")
+    async def graph_unavailable(request: Request, __: GraphUnavailableError) -> JSONResponse:
+        path = request.url.path
+        if path.startswith(("/api/v1/studio-session", "/api/v1/auth", "/api/v1/me")):
+            message = "Your account could not be verified because the account service is unavailable. Please try again shortly."
+        elif path.startswith("/api/v1/design-studio"):
+            message = "Design Studio could not access required account or reference data. Please try again shortly."
+        elif path.startswith("/api/v1/domain-knowledge"):
+            message = "Domain knowledge could not be loaded because the knowledge service is unavailable. Please try again shortly."
+        elif path.startswith(("/api/v1/orders", "/api/v1/cart", "/api/v1/checkout")):
+            message = "Order data is temporarily unavailable. Refresh the order status before submitting again."
+        elif path.startswith(("/api/v1/parts", "/api/v1/catalogue")):
+            message = "The parts catalogue could not be loaded. Please try again shortly."
+        else:
+            message = "Required data is temporarily unavailable. Please try again shortly."
+        log.warning("graph service unavailable for %s", path)
+        return _error(503, "graph_unavailable", message)
 
     @app.exception_handler(LLMUnavailable)
     async def llm_unavailable(_: Request, exc: LLMUnavailable) -> JSONResponse:
         log.warning("question understanding unavailable: %s", exc)
-        return _error(503, "llm_unavailable", "The question-understanding service is not available right now, so the question could not be answered. Please try again in a moment.")
+        return _error(
+            503,
+            "llm_unavailable",
+            "The question-understanding service is not available right now, so the question could not be answered. Please try again in a moment.",
+        )
 
     @app.exception_handler(LLMError)
     async def llm_invalid(_: Request, exc: LLMError) -> JSONResponse:
         log.warning("question understanding failed: %s", type(exc).__name__)
-        return _error(502, "llm_invalid_response", "The question could not be understood reliably. Please rephrase it and try again.")
+        return _error(
+            502,
+            "llm_invalid_response",
+            "The question could not be understood reliably. Please rephrase it and try again.",
+        )
 
     @app.exception_handler(HTTPException)
     async def http_error(_: Request, exc: HTTPException) -> JSONResponse:
-        detail = exc.detail if isinstance(exc.detail, dict) else {"code": "error", "message": str(exc.detail)}
-        return _error(exc.status_code, detail.get("code", "error"), detail.get("message", ""), detail.get("details"))
+        detail = (
+            exc.detail
+            if isinstance(exc.detail, dict)
+            else {"code": "error", "message": str(exc.detail)}
+        )
+        return _error(
+            exc.status_code,
+            detail.get("code", "error"),
+            detail.get("message", ""),
+            detail.get("details"),
+        )
 
     @app.exception_handler(Exception)
     async def unexpected(_: Request, exc: Exception) -> JSONResponse:
@@ -90,6 +141,10 @@ def create_app() -> FastAPI:
     app.include_router(accounts.router, prefix="/api/v1")
     app.include_router(orders.router, prefix="/api/v1")
     app.include_router(checkout.router, prefix="/api/v1")
+    app.include_router(design_studio.router, prefix="/api/v1")
+    app.include_router(domain_knowledge.router, prefix="/api/v1")
+    app.include_router(workspace.router, prefix="/api/v1")
+    app.include_router(assistant.router, prefix="/api/v1")
     return app
 
 

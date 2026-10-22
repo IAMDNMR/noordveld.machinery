@@ -21,14 +21,29 @@ interface SiteNavProps {
 /** Agentic Shopping is the hands-on step of Agentic E-Commerce, so it lights up that item. */
 const isCurrent = (item: NavItem, pathname: string): boolean => {
   const [path] = pathname.split('?')
-  if (item.to === '/agentic-commerce/') return path.startsWith('/agentic-commerce') || path.startsWith('/agentic-shopping')
+  if (item.to === '/agentic-commerce/')
+    return path.startsWith('/agentic-commerce') || path.startsWith('/agentic-shopping')
   if (item.to.includes('?')) return pathname === item.to // a queue of the order list
   if (item.to === '/orders') return path.startsWith('/orders') && !pathname.includes('queue=')
-  return ['/parts-store', '/parts-intelligence', '/machines', '/agentic-shopping'].includes(item.to) && path.startsWith(item.to)
+  if (item.to === '/studio') return path === '/studio'
+  if (item.to === '/workspace') return path === '/workspace'
+  return (
+    [
+      '/aftersales',
+      '/parts-store',
+      '/parts-intelligence',
+      '/machines',
+      '/agentic-shopping',
+    ].includes(item.to) && path.startsWith(item.to)
+  )
 }
 
 export function SiteNav({ pathname, heroTone, Link, items = nav, account }: SiteNavProps) {
-  const [open, setOpen] = useState(false)
+  const navigation = items.filter(
+    (item) => item.to !== '/machines' && !item.to.startsWith('mailto:'),
+  )
+  const [openPath, setOpenPath] = useState<string | null>(null)
+  const open = openPath === pathname
   const [scrolled, setScrolled] = useState(false)
   const overHero = heroTone && !scrolled && !open
 
@@ -41,7 +56,7 @@ export function SiteNav({ pathname, heroTone, Link, items = nav, account }: Site
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpenPath(null)
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
     return () => {
@@ -50,32 +65,61 @@ export function SiteNav({ pathname, heroTone, Link, items = nav, account }: Site
     }
   }, [open])
 
-  const close = () => setOpen(false)
+  useEffect(() => {
+    const resized = () => {
+      if (window.innerWidth >= 900) setOpenPath(null)
+    }
+    window.addEventListener('resize', resized)
+    return () => window.removeEventListener('resize', resized)
+  }, [])
+
+  const close = () => setOpenPath(null)
 
   return (
-    <header className={`nav nvx-chrome ${overHero ? 'nav--hero' : 'nav--solid'} ${open ? 'is-open' : ''}`}>
+    <header
+      className={`nav nvx-chrome ${overHero ? 'nav--hero' : 'nav--solid'} ${open ? 'is-open' : ''}`}
+    >
       <div className="nav__bar nvx-container">
         <Link to="/" className="nav__logo" label="Noordveld Machinery B.V., home" onClick={close}>
           <Logo tone={overHero ? 'light' : 'dark'} height={34} />
         </Link>
         <nav className="nav__links" aria-label="Primary">
-          {items.map((item) => (
-            <Link key={item.label} to={item.to} external={item.external} className="nav__link" current={isCurrent(item, pathname)}>
+          {navigation.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              external={item.external}
+              className="nav__link"
+              current={isCurrent(item, pathname)}
+            >
               {item.label}
               {item.tag ? <span className="nav__tag">{item.tag}</span> : null}
             </Link>
           ))}
         </nav>
         {account ? <div className="nav__account">{account}</div> : null}
-        <button className="nav__toggle" type="button" aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpen((v) => !v)}>
+        <button
+          className="nav__toggle"
+          type="button"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpenPath(open ? null : pathname)}
+        >
           <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
           {open ? <X size={26} aria-hidden="true" /> : <Menu size={26} aria-hidden="true" />}
         </button>
       </div>
       <div id="mobile-menu" className="nav__sheet" hidden={!open}>
+        <span className="nav__sheet-label">EXPLORE NOORDVELD</span>
         <nav aria-label="Mobile">
-          {items.map((item) => (
-            <Link key={item.label} to={item.to} external={item.external} onClick={close} current={isCurrent(item, pathname)}>
+          {navigation.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              external={item.external}
+              onClick={close}
+              current={isCurrent(item, pathname)}
+            >
               {item.label}
               {item.tag ? <span className="nav__tag">{item.tag}</span> : null}
             </Link>

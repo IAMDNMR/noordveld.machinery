@@ -2,8 +2,25 @@ import { apiGet, apiPost } from './client'
 import type { PartSummary } from './types'
 
 /** Response shapes of the Agentic Shopping API (backend/app/schemas/agent.py). Every value comes from the graph. */
-export type AgentStepKey = 'request' | 'understand' | 'machine' | 'part' | 'fitment' | 'availability' | 'fulfilment' | 'compare' | 'recommend'
-export type AgentState = 'recommendation' | 'need_part' | 'need_machine' | 'choose_machine' | 'choose_type' | 'need_detail' | 'no_match' | 'out_of_scope'
+export type AgentStepKey =
+  | 'request'
+  | 'understand'
+  | 'machine'
+  | 'part'
+  | 'fitment'
+  | 'availability'
+  | 'fulfilment'
+  | 'compare'
+  | 'recommend'
+export type AgentState =
+  | 'recommendation'
+  | 'need_part'
+  | 'need_machine'
+  | 'choose_machine'
+  | 'choose_type'
+  | 'need_detail'
+  | 'no_match'
+  | 'out_of_scope'
 
 export interface AgentStep {
   key: AgentStepKey
@@ -13,7 +30,17 @@ export interface AgentStep {
 }
 
 export interface AgentEvidence {
-  key: 'fit' | 'verified' | 'budget' | 'availability' | 'inventory' | 'supplier' | 'delivery' | 'transport' | 'dealer' | 'ranking'
+  key:
+    | 'fit'
+    | 'verified'
+    | 'budget'
+    | 'availability'
+    | 'inventory'
+    | 'supplier'
+    | 'delivery'
+    | 'transport'
+    | 'dealer'
+    | 'ranking'
   ok: boolean
   label: string
   detail: string
@@ -89,10 +116,14 @@ export interface AgentResponse {
   disclaimer: string
 }
 
-export const askAgent = (request: string, signal?: AbortSignal): Promise<AgentResponse> => apiPost<AgentResponse>('/agent/recommend', { request }, signal)
+export const askAgent = (request: string, signal?: AbortSignal): Promise<AgentResponse> =>
+  apiPost<AgentResponse>('/agent/recommend', { request }, signal)
 
 /** The agent's steps in order, defined by the backend so the interface never invents one. */
-export const getAgentPipeline = (signal?: AbortSignal): Promise<{ key: AgentStepKey; label: string }[]> => apiGet<{ key: AgentStepKey; label: string }[]>('/agent/pipeline', {}, signal)
+export const getAgentPipeline = (
+  signal?: AbortSignal,
+): Promise<{ key: AgentStepKey; label: string }[]> =>
+  apiGet<{ key: AgentStepKey; label: string }[]>('/agent/pipeline', {}, signal)
 
 export interface AgentSuggestion {
   request: string
@@ -101,4 +132,5 @@ export interface AgentSuggestion {
   action: string
 }
 
-export const getAgentSuggestions = (signal?: AbortSignal): Promise<AgentSuggestion[]> => apiGet<AgentSuggestion[]>('/agent/suggestions', {}, signal)
+export const getAgentSuggestions = (signal?: AbortSignal): Promise<AgentSuggestion[]> =>
+  apiGet<AgentSuggestion[]>('/agent/suggestions', {}, signal)

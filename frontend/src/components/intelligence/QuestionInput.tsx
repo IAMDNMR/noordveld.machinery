@@ -1,9 +1,23 @@
 import { useId, useMemo, useState, type FormEvent } from 'react'
-import type { Suggestion } from '../../api'
+import type { Suggestion } from '../../api/index'
 import type { RecentQuestion } from '../../store/recentQuestions'
 
 /** Question groups, in the order the topic list shows them. The questions inside are built by the API from the graph itself. */
-export const CATEGORIES = ['Part Discovery', 'Machine & Fitment', 'Part Relationships', 'Supplier Intelligence', 'Dealer Intelligence', 'Assembly Intelligence', 'Geographic Intelligence', 'Compliance', 'Inventory', 'Service', 'Orders', 'Network', 'Provenance'] as const
+export const CATEGORIES = [
+  'Part Discovery',
+  'Machine & Fitment',
+  'Part Relationships',
+  'Supplier Intelligence',
+  'Dealer Intelligence',
+  'Assembly Intelligence',
+  'Geographic Intelligence',
+  'Compliance',
+  'Inventory',
+  'Service',
+  'Orders',
+  'Network',
+  'Provenance',
+] as const
 
 interface QuestionInputProps {
   /** The question currently being answered (from the URL); the box resets when it changes. */
@@ -16,17 +30,49 @@ interface QuestionInputProps {
   recent?: RecentQuestion[]
 }
 
-export function QuestionInput({ value, busy, onAsk, suggestions = null, recent = [] }: QuestionInputProps) {
+export function QuestionInput({
+  value,
+  busy,
+  onAsk,
+  suggestions = null,
+  recent = [],
+}: QuestionInputProps) {
   // Remount on a new submitted question so the box always shows what was asked (back button, suggestion click)
-  return <Box key={value} initial={value} busy={busy} onAsk={onAsk} suggestions={suggestions} recent={recent} />
+  return (
+    <Box
+      key={value}
+      initial={value}
+      busy={busy}
+      onAsk={onAsk}
+      suggestions={suggestions}
+      recent={recent}
+    />
+  )
 }
 
-function Box({ initial, busy, onAsk, suggestions, recent }: { initial: string; busy: boolean; onAsk: (q: string) => void; suggestions: Suggestion[] | null; recent: RecentQuestion[] }) {
+function Box({
+  initial,
+  busy,
+  onAsk,
+  suggestions,
+  recent,
+}: {
+  initial: string
+  busy: boolean
+  onAsk: (q: string) => void
+  suggestions: Suggestion[] | null
+  recent: RecentQuestion[]
+}) {
   const [text, setText] = useState(initial)
-  const topics = useMemo(() => CATEGORIES.filter((c) => (suggestions ?? []).some((s) => s.category === c)), [suggestions])
+  const topics = useMemo(
+    () => CATEGORIES.filter((c) => (suggestions ?? []).some((s) => s.category === c)),
+    [suggestions],
+  )
   const [topic, setTopic] = useState('')
+  const [expanded, setExpanded] = useState(false)
   const current = topic || topics[0] || ''
-  const chips = (suggestions ?? []).filter((s) => s.category === current).slice(0, 4)
+  const matches = (suggestions ?? []).filter((s) => s.category === current)
+  const chips = matches.slice(0, expanded ? undefined : 4)
   const id = useId()
   const topicId = useId()
   const submit = (e: FormEvent) => {
@@ -37,7 +83,7 @@ function Box({ initial, busy, onAsk, suggestions, recent }: { initial: string; b
     <form className="pq" role="search" onSubmit={submit}>
       <div className="pq__row">
         <label className="sr-only" htmlFor={id}>
-          Ask Parts Intelligence a question
+          Ask Spark a question
         </label>
         <input
           id={id}
@@ -46,11 +92,13 @@ function Box({ initial, busy, onAsk, suggestions, recent }: { initial: string; b
           maxLength={300}
           value={text}
           autoComplete="off"
-          placeholder={chips[0] ? `e.g. ${chips[0].question}` : 'Ask about a part, machine, fitment, supplier or relationship'}
+          placeholder={
+            chips[0] ? `e.g. ${chips[0].question}` : 'Ask Spark about a part, machine or supplier'
+          }
           onChange={(e) => setText(e.target.value)}
         />
         <button type="submit" className="pq__ask" disabled={busy || text.trim().length < 2}>
-          {busy ? 'Asking…' : 'Ask'}
+          {busy ? 'Asking Spark…' : 'Ask Spark'}
         </button>
       </div>
 
@@ -59,7 +107,14 @@ function Box({ initial, busy, onAsk, suggestions, recent }: { initial: string; b
           <label className="pq__k" htmlFor={topicId}>
             Topic
           </label>
-          <select id={topicId} value={current} onChange={(e) => setTopic(e.target.value)}>
+          <select
+            id={topicId}
+            value={current}
+            onChange={(e) => {
+              setTopic(e.target.value)
+              setExpanded(false)
+            }}
+          >
             {topics.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -75,6 +130,16 @@ function Box({ initial, busy, onAsk, suggestions, recent }: { initial: string; b
               </li>
             ))}
           </ul>
+          {matches.length > 4 ? (
+            <button
+              type="button"
+              className="pq__more"
+              aria-expanded={expanded}
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? 'Fewer questions' : `See all ${matches.length} questions`}
+            </button>
+          ) : null}
         </div>
       ) : null}
 

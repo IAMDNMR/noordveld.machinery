@@ -1,13 +1,19 @@
 """Agentic Shopping endpoints: read the request with the language model, answer from the graph. Nothing is ordered here."""
+
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.api.app_access import require_app
 from app.agent.service import LABELS
 from app.api.dependencies import Agents
 from app.schemas.agent import AgentRequest, AgentResponse, AgentSuggestion
 
-router = APIRouter(prefix="/agent", tags=["agentic shopping"])
+router = APIRouter(
+    prefix="/agent",
+    tags=["agentic shopping"],
+    dependencies=[Depends(require_app("agentic_shopping"))],
+)
 
 
 @router.post("/recommend", response_model=AgentResponse)

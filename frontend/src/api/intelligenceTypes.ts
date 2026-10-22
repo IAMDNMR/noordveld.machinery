@@ -10,7 +10,8 @@ export type DataClass =
   | 'UNKNOWN'
   | 'NOT_CONNECTED'
 
-export type EntityKind = 'PART' | 'MACHINE' | 'SUPPLIER' | 'DEALER' | 'ASSEMBLY' | 'CATEGORY' | 'ORDER' | 'WAREHOUSE'
+export type EntityKind =
+  'PART' | 'MACHINE' | 'SUPPLIER' | 'DEALER' | 'ASSEMBLY' | 'CATEGORY' | 'ORDER' | 'WAREHOUSE'
 
 export interface Fact {
   label: string
@@ -30,7 +31,21 @@ export interface IntelligenceAction {
 }
 
 export interface ResultItem {
-  kind: 'part' | 'machine' | 'supplier' | 'dealer' | 'assembly' | 'category' | 'relationship' | 'compliance' | 'warehouse' | 'order' | 'shipment' | 'service_plan' | 'metric' | 'path'
+  kind:
+    | 'part'
+    | 'machine'
+    | 'supplier'
+    | 'dealer'
+    | 'assembly'
+    | 'category'
+    | 'relationship'
+    | 'compliance'
+    | 'warehouse'
+    | 'order'
+    | 'shipment'
+    | 'service_plan'
+    | 'metric'
+    | 'path'
   key: string
   title: string
   subtitle: string | null
@@ -127,7 +142,12 @@ export interface PartOverview {
   families: string[]
   manufacturer: string | null
   origin_plant: string | null
-  status: { code: 'VERIFIED' | 'IDENTIFICATION_REQUIRED' | 'AMBIGUOUS' | 'UNVERIFIED'; label: string; reason: string | null; data_class: DataClass }
+  status: {
+    code: 'VERIFIED' | 'IDENTIFICATION_REQUIRED' | 'AMBIGUOUS' | 'UNVERIFIED'
+    label: string
+    reason: string | null
+    data_class: DataClass
+  }
   identification: { model_code: string | null; reason: string | null; needed: string | null }[]
   data_class: DataClass
   source: string | null
@@ -232,7 +252,12 @@ export interface ProvenanceReport {
   confidence: string | null
   authoritative: boolean
   verification: string
-  relationship_sources: { relationship: string; connected_label: string; count: number; data_class: DataClass }[]
+  relationship_sources: {
+    relationship: string
+    connected_label: string
+    count: number
+    data_class: DataClass
+  }[]
   limitations: string[]
   last_updated: string | null
 }
@@ -253,6 +278,7 @@ export interface GraphNode {
 }
 
 export interface GraphEdge {
+  directed?: boolean
   source: string
   target: string
   type: string
@@ -265,7 +291,19 @@ export interface GraphView {
   truncated: boolean
 }
 
-export type PartTab = 'overview' | 'fitment' | 'related' | 'assembly' | 'suppliers' | 'dealers' | 'inventory' | 'compliance' | 'graph' | 'provenance' | 'insights' | 'store'
+export type PartTab =
+  | 'overview'
+  | 'fitment'
+  | 'related'
+  | 'assembly'
+  | 'suppliers'
+  | 'dealers'
+  | 'inventory'
+  | 'compliance'
+  | 'graph'
+  | 'provenance'
+  | 'insights'
+  | 'store'
 
 export interface EntityDetail {
   kind: 'MACHINE' | 'SUPPLIER' | 'DEALER' | 'WAREHOUSE' | 'ASSEMBLY' | 'COMPLIANCE' | 'CATEGORY'

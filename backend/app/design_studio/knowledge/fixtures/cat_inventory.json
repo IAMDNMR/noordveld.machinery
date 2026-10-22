@@ -1,0 +1,111 @@
+{
+ "pack": "cat_inventory",
+ "records": [
+  {
+   "name": "stock1",
+   "entity": "ent_inv_stock_level",
+   "role": "role_inv_clerk",
+   "values": {
+    "on_hand": 50,
+    "reserved": 0,
+    "reorder_point": 10
+   },
+   "refs": {
+    "ent_core_item": "item1",
+    "ent_core_location": "loc1"
+   },
+   "shared": true
+  },
+  {
+   "name": "count_ok",
+   "entity": "ent_inv_stock_count",
+   "role": "role_inv_clerk",
+   "values": {
+    "counted_qty": 48,
+    "counted_on": "2026-10-15",
+    "variance": 2
+   },
+   "refs": {
+    "ent_inv_stock_level": "stock1"
+   },
+   "shared": false
+  },
+  {
+   "name": "count_big",
+   "entity": "ent_inv_stock_count",
+   "role": "role_inv_clerk",
+   "values": {
+    "counted_qty": 36,
+    "counted_on": "2026-10-15",
+    "variance": 14,
+    "reason": "Damaged goods written off"
+   },
+   "refs": {
+    "ent_inv_stock_level": "stock1"
+   },
+   "shared": false
+  },
+  {
+   "name": "move1",
+   "entity": "ent_inv_stock_movement",
+   "role": "role_inv_clerk",
+   "values": {
+    "kind": "ADJUSTMENT",
+    "quantity": 2,
+    "moved_on": "2026-10-15"
+   },
+   "refs": {
+    "ent_core_item": "item1",
+    "ent_core_location": "loc1"
+   },
+   "shared": false
+  },
+  {
+   "name": "move2",
+   "entity": "ent_inv_stock_movement",
+   "role": "role_inv_clerk",
+   "values": {
+    "kind": "ADJUSTMENT",
+    "quantity": 14,
+    "moved_on": "2026-10-15"
+   },
+   "refs": {
+    "ent_core_item": "item1",
+    "ent_core_location": "loc1"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_inv_count",
+   "bind": {
+    "ent_inv_stock_level": "stock1",
+    "ent_inv_stock_count": "count_ok",
+    "ent_inv_stock_movement": "move1"
+   },
+   "set": {},
+   "ends": "done"
+  },
+  {
+   "flow": "wf_inv_count",
+   "bind": {
+    "ent_inv_stock_level": "stock1",
+    "ent_inv_stock_count": "count_big",
+    "ent_inv_stock_movement": "move2"
+   },
+   "set": {
+    "approve": [
+     {
+      "record": "count_big",
+      "role": "role_inv_manager",
+      "values": {
+       "decision": "APPROVED"
+      }
+     }
+    ]
+   },
+   "ends": "done"
+  }
+ ]
+}

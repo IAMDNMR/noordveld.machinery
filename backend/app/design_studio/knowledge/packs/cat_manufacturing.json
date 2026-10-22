@@ -1,0 +1,915 @@
+{
+ "id": "cat_manufacturing",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "Manufacturing, machinery and spare parts",
+ "description": "Machines in service, their parts, and the work orders that build, maintain or repair them.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_inventory"
+ ],
+ "uses_capabilities": [
+  "audit_history",
+  "search_filter",
+  "document_handling",
+  "reporting_dashboards"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_mfg_work",
+    "statement": "Work orders are planned against machines and parts, carried out, inspected and closed.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_mfg_work_1",
+      "statement": "A planner creates a work order for a machine."
+     },
+     {
+      "id": "ac_mfg_work_2",
+      "statement": "Parts availability is checked before work starts."
+     },
+     {
+      "id": "ac_mfg_work_3",
+      "statement": "Work is accepted only after a passing inspection."
+     }
+    ]
+   },
+   {
+    "id": "req_mfg_register",
+    "statement": "The machines in service and the parts they need are on record.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_mfg_register_1",
+      "statement": "A machine has a serial number, model and warranty end date."
+     },
+     {
+      "id": "ac_mfg_register_2",
+      "statement": "A machine's parts list can be maintained."
+     }
+    ]
+   },
+   {
+    "id": "req_mfg_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_mfg_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_mfg_planner",
+    "name": "Maintenance and production planner",
+    "responsibilities": [
+     "Plans work orders and maintains the machine register"
+    ],
+    "permissions": [
+     "mfg.work_order_plan",
+     "mfg.work_order_expedite",
+     "mfg.work_order_close"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_mfg_technician",
+    "name": "Technician",
+    "responsibilities": [
+     "Carries out work orders"
+    ],
+    "permissions": [
+     "mfg.work_order_execute",
+     "mfg.work_order_rework"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_mfg_quality",
+    "name": "Quality inspector",
+    "responsibilities": [
+     "Inspects finished work"
+    ],
+    "permissions": [
+     "mfg.work_order_inspect"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_mfg_machine",
+    "name": "Machine",
+    "description": "A machine the company builds, owns or services.",
+    "attributes": [
+     {
+      "id": "machine_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "serial_no",
+      "name": "Serial number",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 60
+     },
+     {
+      "id": "model",
+      "name": "Model",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 80
+     },
+     {
+      "id": "installed_on",
+      "name": "Installed on",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "IN_SERVICE",
+       "DOWN",
+       "RETIRED"
+      ]
+     },
+     {
+      "id": "warranty_end",
+      "name": "Warranty ends",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_mfg_machine_customer",
+      "name": "Owner",
+      "target": "ent_core_customer",
+      "cardinality": "many_to_one",
+      "required": false
+     }
+    ],
+    "owner_role_id": "role_mfg_planner"
+   },
+   {
+    "id": "ent_mfg_bom_line",
+    "name": "Machine part",
+    "description": "A part a machine needs, and how many (its bill of materials line).",
+    "attributes": [
+     {
+      "id": "bom_line_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "quantity",
+      "name": "Quantity per machine",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_mfg_bom_line_machine",
+      "name": "Machine",
+      "target": "ent_mfg_machine",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_mfg_bom_line_item",
+      "name": "Part",
+      "target": "ent_core_item",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ],
+    "owner_role_id": "role_mfg_planner"
+   },
+   {
+    "id": "ent_mfg_work_order",
+    "name": "Work order",
+    "description": "A job to build, maintain or repair one machine.",
+    "attributes": [
+     {
+      "id": "work_order_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "kind",
+      "name": "Kind",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "PRODUCTION",
+       "MAINTENANCE",
+       "REPAIR"
+      ]
+     },
+     {
+      "id": "description",
+      "name": "Work to do",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 500
+     },
+     {
+      "id": "planned_start",
+      "name": "Planned start",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "planned_hours",
+      "name": "Planned hours",
+      "type": "decimal",
+      "required": false,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "PLANNED",
+       "IN_PROGRESS",
+       "INSPECTION",
+       "DONE"
+      ]
+     },
+     {
+      "id": "inspection_result",
+      "name": "Inspection result",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PASS",
+       "FAIL"
+      ],
+      "owner_role_id": "role_mfg_quality"
+     },
+     {
+      "id": "rework_note",
+      "name": "Rework note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 500
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_mfg_work_order_machine",
+      "name": "Machine",
+      "target": "ent_mfg_machine",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_mfg_scope",
+    "description": "A work order states the work to do.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_mfg_work_order.description",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_mfg_material",
+    "description": "A work order can start only if on-hand stock covers the parts it needs.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "AVAILABLE",
+     "SHORT"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_inv_stock_level.on_hand",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_mfg_bom_line.quantity",
+     "pass_outcome": "AVAILABLE",
+     "fail_outcome": "SHORT"
+    }
+   },
+   {
+    "id": "rule_mfg_inspection",
+    "description": "The inspector's recorded result decides whether work is accepted.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "PASS",
+     "FAIL"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_mfg_work_order.inspection_result",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_mfg_part_shortage",
+    "name": "Part is not available",
+    "trigger": "On-hand stock does not cover a needed part.",
+    "recovery": "The planner expedites the part or re-plans the work.",
+    "resolution": "recover",
+    "resolution_state_id": "st_mfg_work_order_plan"
+   },
+   {
+    "id": "exc_mfg_failed_inspection",
+    "name": "Inspection failed",
+    "trigger": "The inspector records a failing result.",
+    "recovery": "A technician reworks and the work is inspected again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_mfg_work_order_inspect"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_mfg_inspection",
+    "question": "What inspection criteria define a pass for each kind of work?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_mfg_inspection"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_mfg_machine",
+    "term": "Machine",
+    "definition": "A machine the company builds, owns or services."
+   },
+   {
+    "id": "term_mfg_part",
+    "term": "Spare part",
+    "definition": "A part kept to repair or maintain machines."
+   },
+   {
+    "id": "term_mfg_work_order",
+    "term": "Work order",
+    "definition": "A job to build, maintain or repair a machine."
+   },
+   {
+    "id": "term_mfg_bom",
+    "term": "Bill of materials",
+    "definition": "The parts a machine is made of or needs."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_mfg_work_order",
+   "name": "Work order",
+   "states": [
+    {
+     "id": "st_mfg_work_order_start",
+     "label": "Work requested",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_mfg_work_order_plan",
+     "label": "Plan the work order",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_mfg_planner",
+     "permission": "mfg.work_order_plan",
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_mfg_machine",
+      "ent_mfg_bom_line",
+      "ent_inv_stock_level"
+     ],
+     "writes_entity_ids": [
+      "ent_mfg_work_order"
+     ],
+     "rule_ids": [
+      "rule_mfg_scope"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_mfg_work_order": [
+       "kind",
+       "description",
+       "planned_start",
+       "planned_hours",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_mfg_work_order": [
+       "rel_mfg_work_order_machine"
+      ]
+     }
+    },
+    {
+     "id": "st_mfg_work_order_material",
+     "label": "Are the parts available?",
+     "kind": "branch",
+     "outputs": [
+      "rule_mfg_material"
+     ],
+     "outcome": null,
+     "role_id": "role_mfg_planner",
+     "permission": null,
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_mfg_material"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_mfg_work_order_expedite",
+     "label": "Expedite the missing part",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_mfg_planner",
+     "permission": "mfg.work_order_expedite",
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_mfg_work_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_mfg_part_shortage"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_mfg_work_order": [
+       "planned_start",
+       "description"
+      ]
+     },
+     "input_relationships": {
+      "ent_mfg_work_order": []
+     }
+    },
+    {
+     "id": "st_mfg_work_order_execute",
+     "label": "Carry out the work",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_mfg_technician",
+     "permission": "mfg.work_order_execute",
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_mfg_work_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_mfg_work_order": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_mfg_work_order": []
+     }
+    },
+    {
+     "id": "st_mfg_work_order_inspect",
+     "label": "Inspect the work",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_mfg_quality",
+     "permission": "mfg.work_order_inspect",
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_mfg_work_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_mfg_work_order": [
+       "inspection_result"
+      ]
+     },
+     "input_relationships": {
+      "ent_mfg_work_order": []
+     }
+    },
+    {
+     "id": "st_mfg_work_order_verdict",
+     "label": "Inspection result",
+     "kind": "branch",
+     "outputs": [
+      "rule_mfg_inspection"
+     ],
+     "outcome": null,
+     "role_id": "role_mfg_quality",
+     "permission": null,
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_mfg_inspection"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_mfg_work_order_rework",
+     "label": "Rework",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_mfg_technician",
+     "permission": "mfg.work_order_rework",
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_mfg_work_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_mfg_failed_inspection"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_mfg_work_order": [
+       "rework_note",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_mfg_work_order": []
+     }
+    },
+    {
+     "id": "st_mfg_work_order_close",
+     "label": "Close the work order",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_mfg_planner",
+     "permission": "mfg.work_order_close",
+     "requirement_ids": [
+      "req_mfg_work",
+      "req_mfg_register",
+      "req_mfg_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_mfg_work_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_mfg_work_order": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_mfg_work_order": []
+     }
+    },
+    {
+     "id": "st_mfg_work_order_done",
+     "label": "Work completed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_mfg_work_order_1",
+     "source": "st_mfg_work_order_start",
+     "target": "st_mfg_work_order_plan",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_2",
+     "source": "st_mfg_work_order_plan",
+     "target": "st_mfg_work_order_material",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_3",
+     "source": "st_mfg_work_order_material",
+     "target": "st_mfg_work_order_execute",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_mfg_material",
+      "value": "AVAILABLE"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_4",
+     "source": "st_mfg_work_order_material",
+     "target": "st_mfg_work_order_expedite",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_mfg_material",
+      "value": "SHORT"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_5",
+     "source": "st_mfg_work_order_expedite",
+     "target": "st_mfg_work_order_plan",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_6",
+     "source": "st_mfg_work_order_execute",
+     "target": "st_mfg_work_order_inspect",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_7",
+     "source": "st_mfg_work_order_inspect",
+     "target": "st_mfg_work_order_verdict",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_8",
+     "source": "st_mfg_work_order_verdict",
+     "target": "st_mfg_work_order_close",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_mfg_inspection",
+      "value": "PASS"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_9",
+     "source": "st_mfg_work_order_verdict",
+     "target": "st_mfg_work_order_rework",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_mfg_inspection",
+      "value": "FAIL"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_10",
+     "source": "st_mfg_work_order_rework",
+     "target": "st_mfg_work_order_inspect",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_mfg_work_order_11",
+     "source": "st_mfg_work_order_close",
+     "target": "st_mfg_work_order_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Machine",
+   "definition": "A machine the company builds, owns or services.",
+   "synonyms": [
+    "asset",
+    "equipment",
+    "unit",
+    "installed base"
+   ],
+   "refers_to": "ent_mfg_machine"
+  },
+  {
+   "term": "Spare part",
+   "definition": "A part kept to repair or maintain machines.",
+   "synonyms": [
+    "replacement part",
+    "service part",
+    "consumable",
+    "component"
+   ],
+   "refers_to": "ent_mfg_bom_line"
+  },
+  {
+   "term": "Work order",
+   "definition": "A job to build, maintain or repair a machine.",
+   "synonyms": [
+    "job card",
+    "maintenance order",
+    "repair order",
+    "service order"
+   ],
+   "refers_to": "ent_mfg_work_order"
+  },
+  {
+   "term": "Bill of materials",
+   "definition": "The parts a machine is made of or needs.",
+   "synonyms": [
+    "BOM",
+    "parts list"
+   ]
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "manufacturing_machinery",
+   "name": "Manufacturing, machinery and spare parts",
+   "subdomains": [
+    "Machine register",
+    "Bill of materials",
+    "Work orders",
+    "Quality inspection"
+   ],
+   "keywords": [
+    "manufacturing",
+    "machinery",
+    "machine",
+    "machines",
+    "spare part",
+    "spare parts",
+    "work order",
+    "maintenance",
+    "production",
+    "bill of materials",
+    "bom",
+    "equipment",
+    "asset",
+    "inspection",
+    "shop floor"
+   ],
+   "description": "Building, maintaining and repairing machines and keeping the right parts."
+  }
+ ],
+ "domain_id": "manufacturing_machinery",
+ "capability": {
+  "id": "manufacturing_machinery",
+  "name": "Work order management"
+ }
+}

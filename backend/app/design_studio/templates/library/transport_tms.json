@@ -1,0 +1,93 @@
+{
+  "id": "transport_tms",
+  "version": "1.0.0",
+  "name": "Transport Control Tower",
+  "category": "Logistics",
+  "summary": "Transport orders, planning, dispatch, milestones and exceptions.",
+  "description": "An operational control tower for planners and dispatchers. Transport orders flow through a planning board, get a carrier and vehicle, and are followed milestone by milestone to proof of delivery. Delays and exceptions surface in their own queue.",
+  "status": "stable",
+  "domain_ids": ["transport_management", "transport_warehouse"],
+  "app_type": "Operations control tower",
+  "users": ["Transport planner", "Dispatcher", "Carrier", "Customer service"],
+  "keywords": ["transport", "shipment", "delivery", "carrier", "vehicle", "truck", "driver", "dispatch", "route", "planning", "milestone", "tracking", "exception", "delay", "freight", "load"],
+  "theme": {
+    "id": "control_tower",
+    "label": "Control tower",
+    "direction": "Deep navy workspace with crisp light panels; cyan, amber and red status signals; dense but readable tables and timelines.",
+    "colors": {
+      "primary": "#0B5CAD", "primary_text": "#FFFFFF", "accent": "#0EA5B7",
+      "background": "#EEF2F6", "surface": "#FFFFFF", "surface_alt": "#E2E8F0",
+      "text": "#0F172A", "muted": "#475569", "border": "#CBD5E1",
+      "nav_background": "#0E1726", "nav_text": "#CBD5E1",
+      "success": "#15803D", "warning": "#B45309", "danger": "#B91C1C"
+    },
+    "font_heading": "grotesk", "font_body": "system", "density": "compact",
+    "radius": 6, "shadow": "none", "card_style": "outlined", "table_style": "dense"
+  },
+  "nav_style": "dark_sidebar",
+  "profile": "operations",
+  "entity_roles": [
+    {"id": "shipment", "label": "Shipment", "matches": ["shipment", "transport", "order", "load", "consignment"], "fields": ["number", "customer", "origin", "destination", "status", "planned_date", "carrier"]},
+    {"id": "carrier", "label": "Carrier", "matches": ["carrier", "haulier", "vehicle", "truck"], "fields": ["name", "vehicle", "driver", "capacity"]},
+    {"id": "milestone", "label": "Milestone", "matches": ["milestone", "event", "tracking", "status"], "fields": ["time", "shipment", "event", "location"]},
+    {"id": "exception", "label": "Exception", "matches": ["exception", "delay", "incident", "issue"], "fields": ["shipment", "type", "severity", "owner"]}
+  ],
+  "pages": [
+    {"id": "overview", "title": "Overview", "icon": "LayoutDashboard", "layout": "overview", "purpose": "Today's transport at a glance.", "users": ["Transport planner"],
+     "components": [
+       {"type": "metric_strip", "title": "Shipments by status", "role": "shipment", "group_by": "status", "span": 3},
+       {"type": "alert_panel", "title": "Needs attention", "role": "exception", "fields": ["shipment", "type", "owner"], "group_by": "severity", "span": 1},
+       {"type": "data_table", "title": "Today's shipments", "role": "shipment", "fields": ["number", "destination", "status", "carrier"], "span": 2}
+     ]},
+    {"id": "orders", "title": "Transport orders", "icon": "ClipboardList", "layout": "table", "purpose": "Every transport order with filters.", "users": ["Transport planner", "Customer service"],
+     "components": [
+       {"type": "filter_bar", "title": "Filter orders", "span": 3},
+       {"type": "data_table", "title": "Transport orders", "role": "shipment", "fields": ["number", "customer", "origin", "destination", "planned_date", "status"], "span": 3}
+     ]},
+    {"id": "planning", "title": "Planning board", "icon": "Columns3", "layout": "board", "purpose": "Move orders from unplanned to dispatched.", "users": ["Transport planner"],
+     "components": [
+       {"type": "status_board", "title": "Planning", "role": "shipment", "fields": ["number", "destination", "planned_date"], "group_by": "status", "span": 3}
+     ]},
+    {"id": "dispatch", "title": "Dispatch", "icon": "Truck", "layout": "queue", "purpose": "Assign a carrier and vehicle.", "users": ["Dispatcher"],
+     "components": [
+       {"type": "task_queue", "title": "Waiting for a carrier", "role": "shipment", "fields": ["number", "destination", "planned_date"], "span": 2},
+       {"type": "data_table", "title": "Carriers", "role": "carrier", "fields": ["name", "vehicle", "capacity"], "span": 1}
+     ]},
+    {"id": "milestones", "title": "Milestones", "icon": "Milestone", "layout": "timeline", "purpose": "Follow a shipment to proof of delivery.", "users": ["Customer service"],
+     "components": [
+       {"type": "timeline", "title": "Shipment milestones", "role": "milestone", "fields": ["time", "shipment", "event", "location"], "span": 3}
+     ]},
+    {"id": "exceptions", "title": "Exceptions", "icon": "TriangleAlert", "layout": "queue", "purpose": "Delays and incidents with an owner.", "users": ["Transport planner"],
+     "components": [
+       {"type": "alert_panel", "title": "Open exceptions", "role": "exception", "fields": ["shipment", "type", "owner"], "group_by": "severity", "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "orders", "name": "Transport orders", "status": "supported", "keywords": ["order", "request", "shipment", "transport"]},
+    {"id": "planning", "name": "Planning board", "status": "supported", "keywords": ["plan", "planning", "schedule", "board"]},
+    {"id": "dispatch", "name": "Carrier and vehicle assignment", "status": "supported", "keywords": ["assign", "dispatch", "carrier", "vehicle", "driver"]},
+    {"id": "milestones", "name": "Milestones and proof of delivery", "status": "supported", "keywords": ["milestone", "delivery", "proof", "status", "track"]},
+    {"id": "exceptions", "name": "Exceptions and delays", "status": "supported", "keywords": ["exception", "delay", "incident", "problem"]},
+    {"id": "live_tracking", "name": "Live GPS tracking and maps", "status": "requires_integration", "keywords": ["gps", "map", "live", "location"], "note": "Needs a telematics or carrier tracking integration, delivered by our integration partner."}
+  ],
+  "limitations": ["No live map or GPS positions without a telematics integration from our partner.", "Carrier events arrive automatically only with a carrier integration from our partner; otherwise milestones are recorded by users."],
+  "sample": {
+    "shipment": [
+      {"id": "t1", "number": "TR-2201", "customer": "Sample Foods", "origin": "Rotterdam", "destination": "Antwerp", "status": "Unplanned", "planned_date": "2026-10-23", "carrier": "-"},
+      {"id": "t2", "number": "TR-2202", "customer": "Sample Steel", "origin": "Venlo", "destination": "Cologne", "status": "Planned", "planned_date": "2026-10-23", "carrier": "Sample Haulage"},
+      {"id": "t3", "number": "TR-2203", "customer": "Sample Retail", "origin": "Utrecht", "destination": "Lille", "status": "In transit", "planned_date": "2026-10-22", "carrier": "Sample Express"},
+      {"id": "t4", "number": "TR-2204", "customer": "Sample Foods", "origin": "Tilburg", "destination": "Ghent", "status": "Delivered", "planned_date": "2026-10-21", "carrier": "Sample Haulage"}
+    ],
+    "carrier": [
+      {"id": "c1", "name": "Sample Haulage", "vehicle": "Truck 18t", "driver": "Driver A", "capacity": 18},
+      {"id": "c2", "name": "Sample Express", "vehicle": "Van 3.5t", "driver": "Driver B", "capacity": 3.5}
+    ],
+    "milestone": [
+      {"id": "e1", "time": "08:10", "shipment": "TR-2203", "event": "Picked up", "location": "Utrecht"},
+      {"id": "e2", "time": "11:45", "shipment": "TR-2203", "event": "Border crossed", "location": "Belgium"}
+    ],
+    "exception": [
+      {"id": "x1", "shipment": "TR-2203", "type": "Delay at loading", "severity": "Medium", "owner": "Planner"}
+    ]
+  }
+}

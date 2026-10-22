@@ -1,0 +1,423 @@
+{
+ "id": "cat_healthcare_admin",
+ "version": "2026.10.19.2",
+ "layer": "business",
+ "title": "Healthcare administration",
+ "description": "Appointment coordination. Operational starting point; specialist, clinical, statutory and automated eligibility decisions are outside this blueprint.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [],
+ "uses_capabilities": [],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_hca_delivery",
+    "statement": "Appointment coordination is traceable from request to closure.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_hca_delivery_1",
+      "statement": "The responsible role completes each stage."
+     },
+     {
+      "id": "ac_hca_delivery_2",
+      "statement": "Completion evidence is recorded before closure."
+     }
+    ]
+   },
+   {
+    "id": "req_hca_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_hca_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_hca_coordinator",
+    "name": "Healthcare administration coordinator",
+    "responsibilities": [
+     "Register requests and coordinate delivery"
+    ],
+    "permissions": [
+     "hca.delivery_capture",
+     "hca.delivery_close"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_hca_specialist",
+    "name": "Healthcare administration specialist",
+    "responsibilities": [
+     "Plan and deliver assigned work"
+    ],
+    "permissions": [
+     "hca.delivery_plan",
+     "hca.delivery_deliver"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_hca_appointment",
+    "name": "Healthcare administration record",
+    "description": "Appointment coordination",
+    "attributes": [
+     {
+      "id": "appointment_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "summary",
+      "name": "Summary",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "service",
+      "name": "Service requested",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "scheduled_at",
+      "name": "Appointment time",
+      "type": "datetime",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_hca_specialist"
+     },
+     {
+      "id": "attendance",
+      "name": "Attendance",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_hca_specialist"
+     },
+     {
+      "id": "closure_note",
+      "name": "Closure note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_hca_coordinator"
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_hca_coordinator"
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_hca_summary",
+    "description": "A request summary is captured before planning.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_hca_appointment.summary",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_hca_completion",
+    "description": "Completion evidence is recorded before closing.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_hca_appointment.attendance",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_hca_incomplete",
+    "name": "Completion details missing",
+    "trigger": "Required completion evidence is missing.",
+    "recovery": "The specialist adds or corrects completion details.",
+    "resolution": "recover",
+    "resolution_state_id": "st_hca_delivery_deliver"
+   }
+  ],
+  "decisions": [],
+  "integrations": [],
+  "terms": []
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_hca_delivery",
+   "name": "Appointment coordination",
+   "states": [
+    {
+     "id": "st_hca_delivery_start",
+     "label": "Request received",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_hca_delivery_capture",
+     "label": "Register the appointment request",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_hca_coordinator",
+     "permission": "hca.delivery_capture",
+     "requirement_ids": [
+      "req_hca_delivery",
+      "req_hca_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_hca_appointment"
+     ],
+     "rule_ids": [
+      "rule_hca_summary"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_hca_appointment": [
+       "summary",
+       "service"
+      ]
+     },
+     "input_relationships": {
+      "ent_hca_appointment": []
+     }
+    },
+    {
+     "id": "st_hca_delivery_plan",
+     "label": "Schedule the visit",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_hca_specialist",
+     "permission": "hca.delivery_plan",
+     "requirement_ids": [
+      "req_hca_delivery",
+      "req_hca_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_hca_appointment"
+     ],
+     "writes_entity_ids": [
+      "ent_hca_appointment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_hca_appointment": [
+       "scheduled_at"
+      ]
+     },
+     "input_relationships": {
+      "ent_hca_appointment": []
+     }
+    },
+    {
+     "id": "st_hca_delivery_deliver",
+     "label": "Record attendance",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_hca_specialist",
+     "permission": "hca.delivery_deliver",
+     "requirement_ids": [
+      "req_hca_delivery",
+      "req_hca_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_hca_appointment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_hca_incomplete"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_hca_appointment": [
+       "attendance"
+      ]
+     },
+     "input_relationships": {
+      "ent_hca_appointment": []
+     }
+    },
+    {
+     "id": "st_hca_delivery_close",
+     "label": "Close the administrative visit",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_hca_coordinator",
+     "permission": "hca.delivery_close",
+     "requirement_ids": [
+      "req_hca_delivery",
+      "req_hca_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_hca_appointment"
+     ],
+     "writes_entity_ids": [
+      "ent_hca_appointment"
+     ],
+     "rule_ids": [
+      "rule_hca_completion"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_hca_appointment": [
+       "closure_note"
+      ]
+     },
+     "input_relationships": {
+      "ent_hca_appointment": []
+     }
+    },
+    {
+     "id": "st_hca_delivery_done",
+     "label": "Completed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_hca_delivery_1",
+     "source": "st_hca_delivery_start",
+     "target": "st_hca_delivery_capture",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_hca_delivery_2",
+     "source": "st_hca_delivery_capture",
+     "target": "st_hca_delivery_plan",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_hca_delivery_3",
+     "source": "st_hca_delivery_plan",
+     "target": "st_hca_delivery_deliver",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_hca_delivery_4",
+     "source": "st_hca_delivery_deliver",
+     "target": "st_hca_delivery_close",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_hca_delivery_5",
+     "source": "st_hca_delivery_close",
+     "target": "st_hca_delivery_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "healthcare_admin",
+   "name": "Healthcare administration",
+   "keywords": [
+    "clinic",
+    "clinical appointment",
+    "patient scheduling",
+    "hospital administration"
+   ],
+   "subdomains": [
+    "Appointment coordination"
+   ]
+  }
+ ],
+ "domain_id": "healthcare_admin"
+}

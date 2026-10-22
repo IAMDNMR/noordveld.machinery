@@ -1,6 +1,7 @@
 """Exact identifier detection. This is entity assistance only: it finds things that LOOK like part numbers, machine models, order
 numbers or legacy references so they can be looked up in the graph exactly. It never decides what a question means; the
 language model does that (see service.py)."""
+
 from __future__ import annotations
 
 import re

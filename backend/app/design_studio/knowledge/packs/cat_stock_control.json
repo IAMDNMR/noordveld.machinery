@@ -1,0 +1,1340 @@
+{
+  "id": "cat_stock_control",
+  "version": "2026.10.22",
+  "layer": "business",
+  "title": "Reorder, stock count and warehouse transfer",
+  "description": "Automatic reordering from reorder levels, counting physical stock with a stock reconciliation, and moving stock between warehouses, as documented by the ERPNext stock manual.",
+  "synthetic": false,
+  "status": "approved",
+  "provenance": {
+    "kind": "verified_source",
+    "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/auto-creation-of-material-request; docs.frappe.io/erpnext/user/manual/en/material-request; docs.frappe.io/erpnext/user/manual/en/stock-reconciliation; docs.frappe.io/erpnext/user/manual/en/stock-entry",
+    "verification": "verified"
+  },
+  "depends_on": [],
+  "uses_capabilities": [
+    "audit_history",
+    "search_filter"
+  ],
+  "dependency_mode": "full",
+  "includes": [],
+  "business": {
+    "requirements": [
+      {
+        "id": "req_stk_reorder",
+        "statement": "When automatic reordering is enabled and an item's projected stock falls to its reorder level, a purchase material request is created for the item's reorder quantity, marked as auto-created, and the purchase manager is alerted; an item whose projected stock is above the reorder level is left out.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_reorder_1",
+            "statement": "Each item can have a reorder level and a reorder quantity, also per warehouse."
+          },
+          {
+            "id": "ac_stk_reorder_2",
+            "statement": "One request is created for each item below its reorder level."
+          }
+        ]
+      },
+      {
+        "id": "req_stk_reorder_fail",
+        "statement": "When automatic creation of a request fails, the purchase manager is told the error.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_reorder_fail_1",
+            "statement": "The error message reaches the purchase manager."
+          }
+        ]
+      },
+      {
+        "id": "req_stk_count",
+        "statement": "Physical stock is counted periodically and at year end; the counted quantity and the valuation rate are entered per item and warehouse, starting from the quantity and rate the system shows.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_count_1",
+            "statement": "Each count line names an item and warehouse."
+          },
+          {
+            "id": "ac_stk_count_2",
+            "statement": "The system's current quantity and valuation rate are shown."
+          }
+        ]
+      },
+      {
+        "id": "req_stk_adjust",
+        "statement": "A submitted stock reconciliation overwrites the book quantity with the counted quantity; the value difference is posted to a difference account that defaults to stock adjustment, and the result can be checked in the stock ledger.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_adjust_1",
+            "statement": "The difference account is confirmed before submission."
+          },
+          {
+            "id": "ac_stk_adjust_2",
+            "statement": "The updated balance appears in the stock ledger."
+          }
+        ]
+      },
+      {
+        "id": "req_stk_transfer",
+        "statement": "Stock is moved between warehouses with a material transfer stock entry, which deducts it from the source warehouse and adds it to the target warehouse; submitted entries can only be changed by cancelling and amending them.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_transfer_1",
+            "statement": "A transfer names a source and a target warehouse."
+          }
+        ]
+      },
+      {
+        "id": "req_stk_ledger",
+        "statement": "Every stock movement is recorded in the stock ledger, so a count can be checked against the updated balance.",
+        "kind": "non_functional",
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_ledger_1",
+            "statement": "The updated balance can be checked in the stock ledger."
+          }
+        ],
+        "category": "auditability"
+      },
+      {
+        "id": "req_stk_transit",
+        "statement": "A transfer through a transit warehouse is recorded in two entries: goods in transit, then the end of transit at the target warehouse; the transfer status is not started, in transit or completed.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_stk_transit_1",
+            "statement": "The transfer shows its status."
+          }
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "id": "role_stk_manager",
+        "name": "Stock manager",
+        "responsibilities": [
+          "Sets reorder levels",
+          "Transfers stock between warehouses",
+          "Reviews stock counts"
+        ],
+        "permissions": [
+          "stk.reorder_manage",
+          "stk.transfer_record",
+          "stk.count_review"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_stk_purchasing",
+        "name": "Purchase manager",
+        "responsibilities": [
+          "Receives reorder alerts",
+          "Acts on material requests"
+        ],
+        "permissions": [
+          "stk.request_review"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_stk_counter",
+        "name": "Stock counter",
+        "responsibilities": [
+          "Counts physical stock",
+          "Submits the stock reconciliation"
+        ],
+        "permissions": [
+          "stk.count_record",
+          "stk.count_submit"
+        ],
+        "approval_authority": []
+      }
+    ],
+    "entities": [
+      {
+        "id": "ent_stk_item",
+        "name": "Item",
+        "description": "Something that is stored.",
+        "attributes": [
+          {
+            "id": "item_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "item_name",
+            "name": "Item name",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "unit_of_measure",
+            "name": "Unit of measure",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 40
+          },
+          {
+            "id": "reorder_level",
+            "name": "Reorder level",
+            "type": "decimal",
+            "required": false,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "reorder_quantity",
+            "name": "Reorder quantity",
+            "type": "decimal",
+            "required": false,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "projected_quantity",
+            "name": "Projected quantity",
+            "type": "decimal",
+            "required": false,
+            "sensitivity": "internal",
+            "value_source": "calculated",
+            "writable": false
+          },
+          {
+            "id": "level_check",
+            "name": "Level check",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "ABOVE_LEVEL",
+              "AT_OR_BELOW_LEVEL"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ent_stk_warehouse",
+        "name": "Warehouse",
+        "description": "A place where stock is held.",
+        "attributes": [
+          {
+            "id": "warehouse_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "warehouse_name",
+            "name": "Warehouse name",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "warehouse_type",
+            "name": "Type",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "STORAGE",
+              "TRANSIT"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ent_stk_request",
+        "name": "Material request",
+        "description": "A request for items, purchased or moved.",
+        "attributes": [
+          {
+            "id": "request_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "request_type",
+            "name": "Type",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "PURCHASE",
+              "MATERIAL_TRANSFER",
+              "MATERIAL_ISSUE",
+              "MANUFACTURE",
+              "SUBCONTRACTING",
+              "CUSTOMER_PROVIDED"
+            ]
+          },
+          {
+            "id": "status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "DRAFT",
+              "SUBMITTED",
+              "PENDING",
+              "PARTIALLY_ORDERED",
+              "ORDERED",
+              "PARTIALLY_RECEIVED",
+              "RECEIVED",
+              "ISSUED",
+              "TRANSFERRED",
+              "STOPPED",
+              "CANCELLED"
+            ],
+            "default": "DRAFT"
+          },
+          {
+            "id": "auto_created",
+            "name": "Auto created (reorder)",
+            "type": "boolean",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "creation_result",
+            "name": "Automatic creation",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "CREATED",
+              "FAILED"
+            ]
+          },
+          {
+            "id": "quantity",
+            "name": "Quantity",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0.001
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_stk_request_item",
+            "name": "Item",
+            "target": "ent_stk_item",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_stk_request_wh",
+            "name": "Warehouse",
+            "target": "ent_stk_warehouse",
+            "cardinality": "many_to_one",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "ent_stk_count_line",
+        "name": "Count line",
+        "description": "The counted quantity of one item in one warehouse.",
+        "attributes": [
+          {
+            "id": "count_line_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "book_quantity",
+            "name": "Quantity in the system",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "value_source": "calculated",
+            "writable": false
+          },
+          {
+            "id": "counted_quantity",
+            "name": "Counted quantity",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "valuation_rate",
+            "name": "Valuation rate",
+            "type": "decimal",
+            "required": false,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "difference_account",
+            "name": "Difference account",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "default": "Stock Adjustment",
+            "max_length": 140
+          },
+          {
+            "id": "count_result",
+            "name": "Count result",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "MATCHES",
+              "DIFFERENCE"
+            ]
+          },
+          {
+            "id": "counted_on",
+            "name": "Posting date",
+            "type": "date",
+            "required": true,
+            "sensitivity": "internal"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_stk_count_item",
+            "name": "Item",
+            "target": "ent_stk_item",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_stk_count_wh",
+            "name": "Warehouse",
+            "target": "ent_stk_warehouse",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_stk_transfer",
+        "name": "Stock transfer",
+        "description": "A material transfer between warehouses.",
+        "attributes": [
+          {
+            "id": "transfer_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "quantity",
+            "name": "Quantity",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0.001
+          },
+          {
+            "id": "route",
+            "name": "Route",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "DIRECT",
+              "VIA_TRANSIT"
+            ]
+          },
+          {
+            "id": "transfer_status",
+            "name": "Transfer status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "NOT_STARTED",
+              "IN_TRANSIT",
+              "COMPLETED"
+            ],
+            "default": "NOT_STARTED"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_stk_transfer_item",
+            "name": "Item",
+            "target": "ent_stk_item",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_stk_transfer_source",
+            "name": "Source warehouse",
+            "target": "ent_stk_warehouse",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_stk_transfer_target",
+            "name": "Target warehouse",
+            "target": "ent_stk_warehouse",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule_stk_level",
+        "description": "A purchase request is created only when the item's projected quantity is not above its reorder level.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://docs.frappe.io/erpnext/user/manual/en/auto-creation-of-material-request (Projected quantity above the reorder level leaves the item out of the request)"
+        },
+        "condition": "",
+        "outcomes": [
+          "ABOVE_LEVEL",
+          "AT_OR_BELOW_LEVEL"
+        ],
+        "execution": {
+          "kind": "compare",
+          "field": "ent_stk_item.projected_quantity",
+          "operator": "gt",
+          "value": null,
+          "other_field": "ent_stk_item.reorder_level",
+          "pass_outcome": "ABOVE_LEVEL",
+          "fail_outcome": "AT_OR_BELOW_LEVEL"
+        }
+      },
+      {
+        "id": "rule_stk_count",
+        "description": "A counted quantity equal to the quantity in the system needs no adjustment; any difference is posted to the difference account.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://docs.frappe.io/erpnext/user/manual/en/stock-reconciliation (Quantity is overwritten with the counted figure; difference account defaults to Stock Adjustment)"
+        },
+        "condition": "",
+        "outcomes": [
+          "MATCHES",
+          "DIFFERENCE"
+        ],
+        "execution": {
+          "kind": "compare",
+          "field": "ent_stk_count_line.counted_quantity",
+          "operator": "eq",
+          "value": null,
+          "other_field": "ent_stk_count_line.book_quantity",
+          "pass_outcome": "MATCHES",
+          "fail_outcome": "DIFFERENCE"
+        }
+      },
+      {
+        "id": "rule_stk_created",
+        "description": "Automatic creation of the request either succeeds or fails and is reported to the purchase manager.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://docs.frappe.io/erpnext/user/manual/en/auto-creation-of-material-request (If auto creation fails, the Purchase Manager is told the error message)"
+        },
+        "condition": "",
+        "outcomes": [
+          "CREATED",
+          "FAILED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_stk_request.creation_result",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_stk_route",
+        "description": "A transfer goes directly to the target warehouse or through a transit warehouse recorded in two entries.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://docs.frappe.io/erpnext/user/manual/en/stock-entry (Transit: two entries, the second created with End Transit)"
+        },
+        "condition": "",
+        "outcomes": [
+          "DIRECT",
+          "VIA_TRANSIT"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_stk_transfer.route",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      }
+    ],
+    "exceptions": [
+      {
+        "id": "exc_stk_auto_failed",
+        "name": "Automatic request failed",
+        "trigger": "Creating the material request automatically fails, for example because no fiscal year exists for the date.",
+        "recovery": "The purchase manager is told the error message.",
+        "resolution": "escalate",
+        "resolution_state_id": "st_stk_r_attention"
+      }
+    ],
+    "decisions": [],
+    "integrations": [],
+    "terms": [
+      {
+        "id": "term_stk_reorder",
+        "term": "Reorder level",
+        "definition": "The stock level at which a purchase request is created for an item."
+      },
+      {
+        "id": "term_stk_reconciliation",
+        "term": "Stock reconciliation",
+        "definition": "A count of physical stock that corrects the quantity in the system."
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "version": 1,
+      "id": "wf_stk_reorder",
+      "name": "Automatic reorder",
+      "states": [
+        {
+          "id": "st_stk_r_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_check",
+          "label": "Compare projected stock with the reorder level",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": "stk.reorder_manage",
+          "requirement_ids": [
+            "req_stk_reorder"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_item"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_item"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_branch",
+          "label": "Is projected stock above the reorder level?",
+          "kind": "branch",
+          "outputs": [
+            "rule_stk_level"
+          ],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_stk_reorder"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_stk_level"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_request",
+          "label": "Create the purchase material request and alert the purchase manager",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_purchasing",
+          "permission": "stk.request_review",
+          "requirement_ids": [
+            "req_stk_reorder"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_item"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_request"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_created",
+          "label": "Was the request created?",
+          "kind": "branch",
+          "outputs": [
+            "rule_stk_created"
+          ],
+          "outcome": null,
+          "role_id": "role_stk_purchasing",
+          "permission": null,
+          "requirement_ids": [
+            "req_stk_reorder_fail"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_stk_created"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_failed",
+          "label": "Tell the purchase manager the error",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_purchasing",
+          "permission": "stk.request_review",
+          "requirement_ids": [
+            "req_stk_reorder_fail"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_request"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_request"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_stk_auto_failed"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_ok",
+          "label": "Stock sufficient",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_ordered",
+          "label": "Request created",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_r_attention",
+          "label": "Request needs attention",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "failure",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_stk_r_1",
+          "source": "st_stk_r_start",
+          "target": "st_stk_r_check",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_r_2",
+          "source": "st_stk_r_check",
+          "target": "st_stk_r_branch",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_r_3",
+          "source": "st_stk_r_branch",
+          "target": "st_stk_r_ok",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_level",
+            "value": "ABOVE_LEVEL"
+          }
+        },
+        {
+          "id": "tr_stk_r_4",
+          "source": "st_stk_r_branch",
+          "target": "st_stk_r_request",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_level",
+            "value": "AT_OR_BELOW_LEVEL"
+          }
+        },
+        {
+          "id": "tr_stk_r_5",
+          "source": "st_stk_r_request",
+          "target": "st_stk_r_created",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_r_7",
+          "source": "st_stk_r_created",
+          "target": "st_stk_r_ordered",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_created",
+            "value": "CREATED"
+          }
+        },
+        {
+          "id": "tr_stk_r_8",
+          "source": "st_stk_r_created",
+          "target": "st_stk_r_failed",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_created",
+            "value": "FAILED"
+          }
+        },
+        {
+          "id": "tr_stk_r_6",
+          "source": "st_stk_r_failed",
+          "target": "st_stk_r_attention",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_stk_count",
+      "name": "Stock count",
+      "states": [
+        {
+          "id": "st_stk_c_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_c_enter",
+          "label": "Enter the counted quantity",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_counter",
+          "permission": "stk.count_record",
+          "requirement_ids": [
+            "req_stk_count"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_item",
+            "ent_stk_warehouse"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_count_line"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_c_compare",
+          "label": "Does the count match the system?",
+          "kind": "branch",
+          "outputs": [
+            "rule_stk_count"
+          ],
+          "outcome": null,
+          "role_id": "role_stk_counter",
+          "permission": null,
+          "requirement_ids": [
+            "req_stk_count"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_stk_count"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_c_adjust",
+          "label": "Confirm the difference account and submit the reconciliation",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_counter",
+          "permission": "stk.count_submit",
+          "requirement_ids": [
+            "req_stk_adjust"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_count_line"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_count_line",
+            "ent_stk_item"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_c_review",
+          "label": "Check the stock ledger",
+          "kind": "search",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": "stk.count_review",
+          "requirement_ids": [
+            "req_stk_adjust",
+            "req_stk_ledger"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_count_line",
+            "ent_stk_item"
+          ],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_c_done",
+          "label": "Stock count recorded",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_stk_c_1",
+          "source": "st_stk_c_start",
+          "target": "st_stk_c_enter",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_c_2",
+          "source": "st_stk_c_enter",
+          "target": "st_stk_c_compare",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_c_3",
+          "source": "st_stk_c_compare",
+          "target": "st_stk_c_review",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_count",
+            "value": "MATCHES"
+          }
+        },
+        {
+          "id": "tr_stk_c_4",
+          "source": "st_stk_c_compare",
+          "target": "st_stk_c_adjust",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_count",
+            "value": "DIFFERENCE"
+          }
+        },
+        {
+          "id": "tr_stk_c_5",
+          "source": "st_stk_c_adjust",
+          "target": "st_stk_c_review",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_c_6",
+          "source": "st_stk_c_review",
+          "target": "st_stk_c_done",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_stk_transfer",
+      "name": "Stock transfer between warehouses",
+      "states": [
+        {
+          "id": "st_stk_t_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_t_request",
+          "label": "Record the material transfer",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": "stk.transfer_record",
+          "requirement_ids": [
+            "req_stk_transfer"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_item",
+            "ent_stk_warehouse"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_transfer"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_t_route",
+          "label": "Does the transfer go through a transit warehouse?",
+          "kind": "branch",
+          "outputs": [
+            "rule_stk_route"
+          ],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_stk_transit"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_stk_route"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_t_transit",
+          "label": "Record the goods in transit",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": "stk.transfer_record",
+          "requirement_ids": [
+            "req_stk_transit"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_transfer"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_transfer"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_t_end_transit",
+          "label": "End transit at the target warehouse",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_stk_manager",
+          "permission": "stk.transfer_record",
+          "requirement_ids": [
+            "req_stk_transit"
+          ],
+          "reads_entity_ids": [
+            "ent_stk_transfer"
+          ],
+          "writes_entity_ids": [
+            "ent_stk_transfer"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_stk_t_done",
+          "label": "Transfer completed",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_stk_t_1",
+          "source": "st_stk_t_start",
+          "target": "st_stk_t_request",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_t_2",
+          "source": "st_stk_t_request",
+          "target": "st_stk_t_route",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_t_3",
+          "source": "st_stk_t_route",
+          "target": "st_stk_t_done",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_route",
+            "value": "DIRECT"
+          }
+        },
+        {
+          "id": "tr_stk_t_4",
+          "source": "st_stk_t_route",
+          "target": "st_stk_t_transit",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_stk_route",
+            "value": "VIA_TRANSIT"
+          }
+        },
+        {
+          "id": "tr_stk_t_5",
+          "source": "st_stk_t_transit",
+          "target": "st_stk_t_end_transit",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_stk_t_6",
+          "source": "st_stk_t_end_transit",
+          "target": "st_stk_t_done",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    }
+  ],
+  "process_contexts": [
+    {
+      "workflow_id": "wf_stk_reorder",
+      "family_id": "automatic_reorder",
+      "variant": "Reorder level creates a purchase request",
+      "region": "Global",
+      "source_system": "ERPNext",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/auto-creation-of-material-request; docs.frappe.io/erpnext/user/manual/en/material-request",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_stk_count",
+      "family_id": "stock_reconciliation",
+      "variant": "Periodic physical stock count",
+      "region": "Global",
+      "source_system": "ERPNext",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/stock-reconciliation",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_stk_transfer",
+      "family_id": "stock_transfer",
+      "variant": "Material transfer, optionally through transit",
+      "region": "Global",
+      "source_system": "ERPNext",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/stock-entry",
+        "verification": "verified"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Stock count",
+      "definition": "A count of physical stock compared with the system.",
+      "synonyms": [
+        "stocktake",
+        "cycle count",
+        "stock reconciliation"
+      ],
+      "refers_to": "ent_stk_count_line"
+    },
+    {
+      "term": "Reorder level",
+      "definition": "The stock level at which items are reordered.",
+      "synonyms": [
+        "minimum stock"
+      ],
+      "refers_to": "ent_stk_item"
+    }
+  ],
+  "overrides": [],
+  "domain_id": "inventory_supply_chain",
+  "capability": {
+    "id": "stock_control",
+    "name": "Stock control"
+  }
+}

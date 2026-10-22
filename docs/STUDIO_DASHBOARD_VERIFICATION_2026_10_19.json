@@ -1,0 +1,41 @@
+{
+  "dashboard_url": "http://localhost:5180/design-studio",
+  "frontend": {
+    "tests_passed": 399,
+    "dashboard_and_workspace_recheck_passed": 21,
+    "typecheck": "passed",
+    "lint": "passed",
+    "format": "passed",
+    "production_build": "passed"
+  },
+  "backend": {
+    "tests_passed": 640,
+    "tests_skipped": 316,
+    "lint": "passed",
+    "format": "passed"
+  },
+  "browser": {
+    "visible_saved_projects": 4,
+    "verified": [
+      "dashboard",
+      "archive empty state",
+      "project action menu",
+      "rename dialog",
+      "new application route"
+    ],
+    "existing_projects_modified": false
+  },
+  "controls": [
+    "search",
+    "sort",
+    "open",
+    "rename",
+    "archive",
+    "trash",
+    "restore"
+  ],
+  "storage": "Existing migrated Neo4j project namespace retained; lifecycle changes write auditable revisions",
+  "removal": "Recoverable Trash; no automatic expiration or permanent-delete endpoint",
+  "cleanup_manifest": "docs/CODE_CLEANUP_2026_10_19.json",
+  "standards": "docs/CODE_STANDARDS.md"
+}

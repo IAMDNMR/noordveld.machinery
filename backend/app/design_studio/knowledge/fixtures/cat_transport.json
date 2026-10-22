@@ -1,0 +1,79 @@
+{
+ "pack": "cat_transport",
+ "records": [
+  {
+   "name": "carrier1",
+   "entity": "ent_tms_carrier",
+   "role": "role_tms_planner",
+   "values": {
+    "name": "Harbour Haulage (synthetic)",
+    "mode": "ROAD",
+    "status": "ACTIVE"
+   },
+   "refs": {},
+   "shared": true
+  },
+  {
+   "name": "vehicle1",
+   "entity": "ent_tms_vehicle",
+   "role": "role_tms_planner",
+   "values": {
+    "plate": "TX-123-NL",
+    "capacity_kg": 1200
+   },
+   "refs": {
+    "ent_tms_carrier": "carrier1"
+   },
+   "shared": true
+  },
+  {
+   "name": "ship1",
+   "entity": "ent_tms_shipment",
+   "role": "role_tms_planner",
+   "values": {
+    "destination": "Northwind Works, Utrecht",
+    "weight_kg": 640,
+    "status": "PLANNED"
+   },
+   "refs": {
+    "ent_eco_order": "order1",
+    "ent_tms_carrier": "carrier1",
+    "ent_tms_vehicle": "vehicle1"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_tms_shipment",
+   "bind": {
+    "ent_eco_order": "order1",
+    "ent_tms_shipment": "ship1",
+    "ent_tms_carrier": "carrier1",
+    "ent_tms_vehicle": "vehicle1"
+   },
+   "set": {
+    "track": [
+     {
+      "record": "ship1",
+      "role": "role_tms_dispatcher",
+      "values": {
+       "tracking_status": "DELIVERED"
+      }
+     }
+    ],
+    "pod": [
+     {
+      "record": "ship1",
+      "role": "role_tms_driver",
+      "values": {
+       "received_by": "J. de Vries",
+       "pod_reference": "POD-4471"
+      }
+     }
+    ]
+   },
+   "ends": "done"
+  }
+ ]
+}

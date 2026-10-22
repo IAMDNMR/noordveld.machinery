@@ -14,6 +14,7 @@ graph returned for each candidate part. Rules, in order:
    then availability state, then price. Ties end on the part number, so the order is total and repeatable. Unknown values rank last, never as zero.
 7. Nothing is relaxed silently: if every compatible verified part fails a constraint, the result says so and why.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -36,14 +37,22 @@ class Facts:
     part_status: str | None
     orderable: bool | None
     price: float | None
-    availability: str | None  # best depot state: IN_STOCK / LOW_STOCK / ON_ORDER / OUT_OF_STOCK / UNKNOWN
+    availability: (
+        str | None
+    )  # best depot state: IN_STOCK / LOW_STOCK / ON_ORDER / OUT_OF_STOCK / UNKNOWN
     units: int | None  # known depot units; None when nothing is recorded
     supplier: str | None = None
     supplier_lead_days: int | None = None
-    delivery_days: int | None = None  # recorded route days from the chosen depot to the requested destination
+    delivery_days: int | None = (
+        None  # recorded route days from the chosen depot to the requested destination
+    )
     delivery_from: str | None = None  # that depot
-    stock_ok: bool | None = None  # a depot holds known stock >= the quantity; None = derive from availability and units
-    route_ok: bool | None = None  # a recorded route exists from such a depot to the destination; None = no destination asked for
+    stock_ok: bool | None = (
+        None  # a depot holds known stock >= the quantity; None = derive from availability and units
+    )
+    route_ok: bool | None = (
+        None  # a recorded route exists from such a depot to the destination; None = no destination asked for
+    )
 
     @property
     def in_stock(self) -> bool:
@@ -82,9 +91,15 @@ class Decision:
     excluded_unverified: list[Facts] = field(default_factory=list)
     excluded_conditional: list[Facts] = field(default_factory=list)
     over_budget: list[Facts] = field(default_factory=list)
-    unpriced: list[Facts] = field(default_factory=list)  # excluded only because a budget was set and no price is recorded
-    not_available: list[Facts] = field(default_factory=list)  # no depot can supply the quantity now (out of stock, on order, unknown, too few)
-    no_route: list[Facts] = field(default_factory=list)  # stock exists but no recorded route reaches the destination
+    unpriced: list[Facts] = field(
+        default_factory=list
+    )  # excluded only because a budget was set and no price is recorded
+    not_available: list[Facts] = field(
+        default_factory=list
+    )  # no depot can supply the quantity now (out of stock, on order, unknown, too few)
+    no_route: list[Facts] = field(
+        default_factory=list
+    )  # stock exists but no recorded route reaches the destination
     basis: str = ""
 
     @property
@@ -137,11 +152,20 @@ def decide(candidates: list[Facts], c: Constraints) -> Decision:
     days = lambda f: f.fulfilment_days if f.fulfilment_days is not None else UNKNOWN  # noqa: E731
     now = lambda f: 0 if f.available_now else 1  # noqa: E731
     if c.preference == "cheapest":
-        key, d.basis = (lambda f: (now(f), price(f), days(f), f.part_number)), "lowest recorded price, then fulfilment days"
+        key, d.basis = (
+            (lambda f: (now(f), price(f), days(f), f.part_number)),
+            "lowest recorded price, then fulfilment days",
+        )
     elif c.preference == "fastest":
-        key, d.basis = (lambda f: (now(f), days(f), price(f), f.part_number)), "fastest recorded route (available now first), then price"
+        key, d.basis = (
+            (lambda f: (now(f), days(f), price(f), f.part_number)),
+            "fastest recorded route (available now first), then price",
+        )
     else:
-        key, d.basis = (lambda f: (now(f), avail(f), price(f), f.part_number)), "availability, then price"
+        key, d.basis = (
+            (lambda f: (now(f), avail(f), price(f), f.part_number)),
+            "availability, then price",
+        )
     d.ranked = sorted(pool, key=key)
     return d
 
@@ -151,9 +175,20 @@ def tradeoffs(option: Facts, best: Facts) -> list[str]:
     out = []
     if option.price is not None and best.price is not None and option.price != best.price:
         out.append("Lower price" if option.price < best.price else "Higher price")
-    a, b = AVAILABILITY_RANK.get(option.availability or "", 5), AVAILABILITY_RANK.get(best.availability or "", 5)
+    a, b = (
+        AVAILABILITY_RANK.get(option.availability or "", 5),
+        AVAILABILITY_RANK.get(best.availability or "", 5),
+    )
     if a != b and a < 3 and b < 3:
         out.append("Better availability" if a < b else "Lower availability")
-    if option.fulfilment_days is not None and best.fulfilment_days is not None and option.fulfilment_days != best.fulfilment_days:
-        out.append("Faster delivery" if option.fulfilment_days < best.fulfilment_days else "Longer delivery")
+    if (
+        option.fulfilment_days is not None
+        and best.fulfilment_days is not None
+        and option.fulfilment_days != best.fulfilment_days
+    ):
+        out.append(
+            "Faster delivery"
+            if option.fulfilment_days < best.fulfilment_days
+            else "Longer delivery"
+        )
     return out

@@ -5,6 +5,7 @@ B. Parts Intelligence grounded explanation (GROUNDING_RULES)
 C. Agentic Shopping constraint extraction  (SHOPPING_RULES)
 D. Agentic Shopping explanation: built deterministically from graph evidence in app/agent/service.py (no model call, by design).
 """
+
 from __future__ import annotations
 
 JSON_ONLY = " Output only one valid JSON object matching the required schema, with no other text."

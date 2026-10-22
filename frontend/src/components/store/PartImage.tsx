@@ -27,14 +27,25 @@ export function PartImage({ partNumber, category, name, variant = 'card' }: Part
   if (url) {
     return (
       <div className={`pimg pimg--${variant}`}>
-        <img src={url} alt={variant === 'mini' ? '' : name} loading={variant === 'large' ? 'eager' : 'lazy'} decoding="async" />
+        <img
+          src={url}
+          alt={variant === 'mini' ? '' : name}
+          loading={variant === 'large' ? 'eager' : 'lazy'}
+          decoding="async"
+        />
       </div>
     )
   }
   const h = hash(partNumber)
   const style = { '--gx': `${22 + (h % 56)}%`, '--gy': `${18 + ((h >> 8) % 44)}%` } as CSSProperties
   return (
-    <div className={`pvis pvis--${variant}`} style={style} role="img" aria-label={`No photo yet for ${name}`} data-placeholder="true">
+    <div
+      className={`pvis pvis--${variant}`}
+      style={style}
+      role="img"
+      aria-label={`No photo yet for ${name}`}
+      data-placeholder="true"
+    >
       {category ? <span className="pvis__cat">{category}</span> : null}
       <Cog className="pvis__icon" strokeWidth={0.8} aria-hidden="true" />
       <span className="pvis__no">{partNumber}</span>

@@ -1,0 +1,425 @@
+{
+ "id": "cat_education_services",
+ "version": "2026.10.19.1",
+ "layer": "business",
+ "title": "Education services",
+ "description": "Enrolment coordination. Operational starting point; specialist, clinical, statutory and automated eligibility decisions are outside this blueprint.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [],
+ "uses_capabilities": [],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_edu_delivery",
+    "statement": "Enrolment coordination is traceable from request to closure.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_edu_delivery_1",
+      "statement": "The responsible role completes each stage."
+     },
+     {
+      "id": "ac_edu_delivery_2",
+      "statement": "Completion evidence is recorded before closure."
+     }
+    ]
+   },
+   {
+    "id": "req_edu_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_edu_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_edu_coordinator",
+    "name": "Education services coordinator",
+    "responsibilities": [
+     "Register requests and coordinate delivery"
+    ],
+    "permissions": [
+     "edu.delivery_capture",
+     "edu.delivery_close"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_edu_specialist",
+    "name": "Education services specialist",
+    "responsibilities": [
+     "Plan and deliver assigned work"
+    ],
+    "permissions": [
+     "edu.delivery_plan",
+     "edu.delivery_deliver"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_edu_enrolment",
+    "name": "Education services record",
+    "description": "Enrolment coordination",
+    "attributes": [
+     {
+      "id": "enrolment_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "summary",
+      "name": "Summary",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "course",
+      "name": "Course",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "start_date",
+      "name": "Start date",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_edu_specialist"
+     },
+     {
+      "id": "registration_reference",
+      "name": "Registration reference",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_edu_specialist"
+     },
+     {
+      "id": "closure_note",
+      "name": "Closure note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_edu_coordinator"
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_edu_coordinator"
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_edu_summary",
+    "description": "A request summary is captured before planning.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_edu_enrolment.summary",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_edu_completion",
+    "description": "Completion evidence is recorded before closing.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_edu_enrolment.registration_reference",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_edu_incomplete",
+    "name": "Completion details missing",
+    "trigger": "Required completion evidence is missing.",
+    "recovery": "The specialist adds or corrects completion details.",
+    "resolution": "recover",
+    "resolution_state_id": "st_edu_delivery_deliver"
+   }
+  ],
+  "decisions": [],
+  "integrations": [],
+  "terms": []
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_edu_delivery",
+   "name": "Enrolment coordination",
+   "states": [
+    {
+     "id": "st_edu_delivery_start",
+     "label": "Request received",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_edu_delivery_capture",
+     "label": "Capture the enrolment request",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_edu_coordinator",
+     "permission": "edu.delivery_capture",
+     "requirement_ids": [
+      "req_edu_delivery",
+      "req_edu_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_edu_enrolment"
+     ],
+     "rule_ids": [
+      "rule_edu_summary"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_edu_enrolment": [
+       "summary",
+       "course"
+      ]
+     },
+     "input_relationships": {
+      "ent_edu_enrolment": []
+     }
+    },
+    {
+     "id": "st_edu_delivery_plan",
+     "label": "Allocate course placement",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_edu_specialist",
+     "permission": "edu.delivery_plan",
+     "requirement_ids": [
+      "req_edu_delivery",
+      "req_edu_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_edu_enrolment"
+     ],
+     "writes_entity_ids": [
+      "ent_edu_enrolment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_edu_enrolment": [
+       "start_date"
+      ]
+     },
+     "input_relationships": {
+      "ent_edu_enrolment": []
+     }
+    },
+    {
+     "id": "st_edu_delivery_deliver",
+     "label": "Record registration",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_edu_specialist",
+     "permission": "edu.delivery_deliver",
+     "requirement_ids": [
+      "req_edu_delivery",
+      "req_edu_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_edu_enrolment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_edu_incomplete"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_edu_enrolment": [
+       "registration_reference"
+      ]
+     },
+     "input_relationships": {
+      "ent_edu_enrolment": []
+     }
+    },
+    {
+     "id": "st_edu_delivery_close",
+     "label": "Close the enrolment",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_edu_coordinator",
+     "permission": "edu.delivery_close",
+     "requirement_ids": [
+      "req_edu_delivery",
+      "req_edu_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_edu_enrolment"
+     ],
+     "writes_entity_ids": [
+      "ent_edu_enrolment"
+     ],
+     "rule_ids": [
+      "rule_edu_completion"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_edu_enrolment": [
+       "closure_note"
+      ]
+     },
+     "input_relationships": {
+      "ent_edu_enrolment": []
+     }
+    },
+    {
+     "id": "st_edu_delivery_done",
+     "label": "Completed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_edu_delivery_1",
+     "source": "st_edu_delivery_start",
+     "target": "st_edu_delivery_capture",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_edu_delivery_2",
+     "source": "st_edu_delivery_capture",
+     "target": "st_edu_delivery_plan",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_edu_delivery_3",
+     "source": "st_edu_delivery_plan",
+     "target": "st_edu_delivery_deliver",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_edu_delivery_4",
+     "source": "st_edu_delivery_deliver",
+     "target": "st_edu_delivery_close",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_edu_delivery_5",
+     "source": "st_edu_delivery_close",
+     "target": "st_edu_delivery_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "education_services",
+   "name": "Education services",
+   "keywords": [
+    "school",
+    "student",
+    "enrolment",
+    "enrollment",
+    "college",
+    "training course"
+   ],
+   "subdomains": [
+    "Enrolment coordination"
+   ]
+  }
+ ],
+ "domain_id": "education_services"
+}

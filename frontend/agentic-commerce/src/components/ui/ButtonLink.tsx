@@ -12,7 +12,12 @@ export function ButtonLink({ href, variant = 'primary', children }: ButtonLinkPr
   return (
     <a className={`button button--${variant}`} href={href}>
       {children}
-      <Icon className="button__arrow" size={variant === 'primary' ? 18 : 20} strokeWidth={2} aria-hidden="true" />
+      <Icon
+        className="button__arrow"
+        size={variant === 'primary' ? 18 : 20}
+        strokeWidth={2}
+        aria-hidden="true"
+      />
     </a>
   )
 }

@@ -1,0 +1,97 @@
+{
+ "pack": "cat_finance",
+ "records": [
+  {
+   "name": "inv_small",
+   "entity": "ent_fin_invoice",
+   "role": "role_fin_biller",
+   "values": {
+    "amount": 4200,
+    "currency": "EUR",
+    "issue_date": "2026-10-16",
+    "due_date": "2026-11-15",
+    "status": "DRAFT"
+   },
+   "refs": {
+    "ent_core_customer": "cust1"
+   },
+   "shared": false
+  },
+  {
+   "name": "inv_big",
+   "entity": "ent_fin_invoice",
+   "role": "role_fin_biller",
+   "values": {
+    "amount": 15000,
+    "currency": "EUR",
+    "issue_date": "2026-10-17",
+    "due_date": "2026-11-16",
+    "status": "DRAFT"
+   },
+   "refs": {
+    "ent_core_customer": "cust1"
+   },
+   "shared": false
+  },
+  {
+   "name": "pay_small",
+   "entity": "ent_fin_payment",
+   "role": "role_fin_receivables",
+   "values": {
+    "amount_received": 4200,
+    "received_on": "2026-11-01",
+    "method": "TRANSFER"
+   },
+   "refs": {
+    "ent_fin_invoice": "inv_small"
+   },
+   "shared": false
+  },
+  {
+   "name": "pay_big",
+   "entity": "ent_fin_payment",
+   "role": "role_fin_receivables",
+   "values": {
+    "amount_received": 15000,
+    "received_on": "2026-11-05",
+    "method": "TRANSFER"
+   },
+   "refs": {
+    "ent_fin_invoice": "inv_big"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_fin_billing",
+   "bind": {
+    "ent_core_customer": "cust1",
+    "ent_fin_invoice": "inv_small",
+    "ent_fin_payment": "pay_small"
+   },
+   "set": {},
+   "ends": "done"
+  },
+  {
+   "flow": "wf_fin_billing",
+   "bind": {
+    "ent_core_customer": "cust1",
+    "ent_fin_invoice": "inv_big",
+    "ent_fin_payment": "pay_big"
+   },
+   "set": {
+    "approve": [
+     {
+      "record": "inv_big",
+      "role": "role_fin_controller",
+      "values": {
+       "decision": "APPROVED"
+      }
+     }
+    ]
+   },
+   "ends": "done"
+  }
+ ]
+}

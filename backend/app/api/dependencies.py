@@ -1,4 +1,5 @@
 """FastAPI dependencies: one GraphClient per process, services built per request."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -51,7 +52,9 @@ Catalogue = Annotated[CatalogueService, Depends(get_catalogue_service)]
 Cart = Annotated[CartService, Depends(get_cart_service)]
 
 
-def get_question_service(graph: Graph, llm: Annotated[LLMClient | None, Depends(get_llm)]) -> IntelligenceService:
+def get_question_service(
+    graph: Graph, llm: Annotated[LLMClient | None, Depends(get_llm)]
+) -> IntelligenceService:
     return IntelligenceService(IntelligenceRepository(graph), PartRepository(graph), llm)
 
 
@@ -90,7 +93,7 @@ EntityDetails = Annotated[Entities, Depends(get_entities)]
 
 
 # ── accounts and the order workflow ───────────────────────────────────────────────────────────────
-from fastapi import Cookie, HTTPException  # noqa: E402
+from fastapi import Cookie, HTTPException, Request  # noqa: E402
 
 from app.core.session import COOKIE, verify  # noqa: E402
 from app.services.checkout import CheckoutService  # noqa: E402
@@ -108,18 +111,48 @@ def get_orders(repo: Annotated[OrdersRepository, Depends(get_orders_repository)]
 OrdersSvc = Annotated[OrdersService, Depends(get_orders)]
 
 
-def get_checkout(repo: Annotated[OrdersRepository, Depends(get_orders_repository)], orders: OrdersSvc) -> CheckoutService:
+def get_checkout(
+    repo: Annotated[OrdersRepository, Depends(get_orders_repository)], orders: OrdersSvc
+) -> CheckoutService:
     return CheckoutService(repo, orders)
 
 
 CheckoutSvc = Annotated[CheckoutService, Depends(get_checkout)]
 
 
-def current_user(orders: OrdersSvc, nv_session: Annotated[str | None, Cookie(alias=COOKIE)] = None) -> User:
+def current_user(
+    orders: OrdersSvc,
+    request: Request,
+    nv_session: Annotated[str | None, Cookie(alias=COOKIE)] = None,
+    nv_studio_session: Annotated[str | None, Cookie(alias="nv_studio_session")] = None,
+) -> User:
     """The signed-in user, resolved on the backend from the signed cookie and the user record. Never from a role the browser sends."""
-    user = orders.user(verify(nv_session, get_settings().session_secret))
+    studio_only = request.url.path.startswith("/api/v1/studio-session")
+    studio_route = request.url.path.startswith(
+        ("/api/v1/design-studio", "/api/v1/domain-knowledge")
+    ) or (request.url.path == "/api/v1/workspace" and request.query_params.get("studio") == "1")
+    use_studio = studio_only or (studio_route and nv_studio_session is not None)
+    token = nv_studio_session if use_studio else nv_session
+    secret = ("studio:" if use_studio else "") + get_settings().session_secret
+    user_id = verify(token, secret)
+    user = None
+    # The local demo account is already resolved by studio-session/demo. Reuse
+    # that server-owned record briefly so each Studio request need not contact
+    # the commerce graph. Deployed and commerce sessions always resolve normally.
+    from app.core.demo_access import local_demo_request
+    from app.design_studio.preview_identity import cached, remember
+
+    local_studio = use_studio and local_demo_request(request)
+    if local_studio:
+        user = cached(user_id) if user_id else None
     if user is None:
-        raise HTTPException(status_code=401, detail={"code": "not_signed_in", "message": "Sign in to continue."})
+        user = orders.user(user_id)
+        if user is not None and local_studio:
+            remember(user)
+    if user is None:
+        raise HTTPException(
+            status_code=401, detail={"code": "not_signed_in", "message": "Sign in to continue."}
+        )
     return user
 
 
@@ -131,7 +164,10 @@ def require(permission: str):
 
     def guard(user: CurrentUser) -> User:
         if not user.can(permission):
-            raise HTTPException(status_code=403, detail={"code": "forbidden", "message": "Your role does not allow this."})
+            raise HTTPException(
+                status_code=403,
+                detail={"code": "forbidden", "message": "Your role does not allow this."},
+            )
         return user
 
     return guard

@@ -8,10 +8,12 @@ export const STATUS_LABEL: Record<PartStatusCode, string> = {
   UNVERIFIED: 'Unverified',
 }
 
-const isStatus = (value: string | null | undefined): value is PartStatusCode => !!value && value in STATUS_LABEL
+const isStatus = (value: string | null | undefined): value is PartStatusCode =>
+  !!value && value in STATUS_LABEL
 
 /** Any status the catalogue does not define reads as Unverified; a raw code is never shown. */
-export const statusLabel = (code: string | null | undefined): string => (isStatus(code) ? STATUS_LABEL[code] : STATUS_LABEL.UNVERIFIED)
+export const statusLabel = (code: string | null | undefined): string =>
+  isStatus(code) ? STATUS_LABEL[code] : STATUS_LABEL.UNVERIFIED
 
 /** `MACHINE_VARIANT_OR_SERIAL_RANGE` → "Machine variant or serial range". Codes that are statuses use the status label. */
 export const codeLabel = (code: string | null | undefined): string | null => {

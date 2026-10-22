@@ -1,7 +1,20 @@
 import { Boxes, Check, Cog, History, MapPin, Search, Timer, Tractor, Warehouse } from 'lucide-react'
 import { machineImageUrl } from '../../../../src/lib/assets'
 import { filmData as D } from './launchData'
-import { box, clamp01, easeInOut, easeLinear, enter, fall, lerp, lerpRect, rise, seg, spring, type Rect } from './motion'
+import {
+  box,
+  clamp01,
+  easeInOut,
+  easeLinear,
+  enter,
+  fall,
+  lerp,
+  lerpRect,
+  rise,
+  seg,
+  spring,
+  type Rect,
+} from './motion'
 import { P, QUERY } from './timeline'
 import { Bubble, Draw, Surface } from './ui'
 
@@ -43,25 +56,53 @@ export function ActNeed({ t }: { t: number }) {
 
   return (
     <>
-      <div className="lf-head" style={{ left: 0, top: 255, width: 1600, opacity: headOut, transform: `translateY(${(1 - headOut) * -50}px)` }}>
+      <div
+        className="lf-head"
+        style={{
+          left: 0,
+          top: 255,
+          width: 1600,
+          opacity: headOut,
+          transform: `translateY(${(1 - headOut) * -50}px)`,
+        }}
+      >
         {words.map((w, i) => {
           const e = seg(t, 0.35 + i * 0.3, 1.3 + i * 0.3, spring)
           return (
             <span key={w} className="lf-mask">
-              <span style={{ display: 'inline-block', transform: `translateY(${(1 - e) * 110}%)`, opacity: clamp01(e * 2) }}>{w}</span>
+              <span
+                style={{
+                  display: 'inline-block',
+                  transform: `translateY(${(1 - e) * 110}%)`,
+                  opacity: clamp01(e * 2),
+                }}
+              >
+                {w}
+              </span>
             </span>
           )
         })}
       </div>
 
       {/* The interface wakes up around the field */}
-      <svg className="lf-svg" viewBox="0 0 1600 900" aria-hidden="true" style={{ opacity: fall(t, 5.0, 6.2) }}>
+      <svg
+        className="lf-svg"
+        viewBox="0 0 1600 900"
+        aria-hidden="true"
+        style={{ opacity: fall(t, 5.0, 6.2) }}
+      >
         {WAKE_DOTS.map(([x, y], i) => {
           const a = rise(t, 3.35 + i * 0.07, 3.9 + i * 0.07)
           return (
             <g key={i} opacity={a}>
               <circle cx={x} cy={y - 12 * grow} r={4 * a} fill="var(--accent)" opacity={0.6} />
-              <circle cx={x} cy={y - 12 * grow} r={12 + 10 * a} fill="var(--accent)" opacity={0.1 * a} />
+              <circle
+                cx={x}
+                cy={y - 12 * grow}
+                r={12 + 10 * a}
+                fill="var(--accent)"
+                opacity={0.1 * a}
+              />
             </g>
           )
         })}
@@ -81,7 +122,14 @@ export function ActNeed({ t }: { t: number }) {
           {typed > 0 ? QUERY.slice(0, typed) : null}
           {showCaret ? <i className="lf-caret" /> : null}
         </span>
-        <span className="lf-field__go" style={{ opacity: seg(t, 4.5, 5.1), transform: `scale(${pressed ? 0.9 : 1})`, background: pressed ? 'var(--accent-ink)' : undefined }}>
+        <span
+          className="lf-field__go"
+          style={{
+            opacity: seg(t, 4.5, 5.1),
+            transform: `scale(${pressed ? 0.9 : 1})`,
+            background: pressed ? 'var(--accent-ink)' : undefined,
+          }}
+        >
           <Search size={26} strokeWidth={2} aria-hidden="true" />
         </span>
       </div>
@@ -97,14 +145,27 @@ export function ActUnderstand({ t }: { t: number }) {
         {CHIPS.map((_, i) => {
           const cx = P.chipX(i) + P.chipW / 2
           const p = rise(t, 7.1 + i * 0.3, 7.9 + i * 0.3, easeInOut)
-          return <Draw key={i} d={`M800 226 C800 280 ${cx} 270 ${cx} ${P.chipY}`} p={p} width={2} opacity={exit * 0.8} />
+          return (
+            <Draw
+              key={i}
+              d={`M800 226 C800 280 ${cx} 270 ${cx} ${P.chipY}`}
+              p={p}
+              width={2}
+              opacity={exit * 0.8}
+            />
+          )
         })}
       </svg>
       {CHIPS.map((c, i) => {
         if (i === 0) return null
         const e = enter(t, 7.3 + i * 0.3, 0.8)
         return (
-          <Surface key={c.label} rect={{ x: P.chipX(i), y: P.chipY, w: P.chipW, h: P.chipH }} style={{ ...e, opacity: (e.opacity as number) * exit }} radius={16}>
+          <Surface
+            key={c.label}
+            rect={{ x: P.chipX(i), y: P.chipY, w: P.chipW, h: P.chipH }}
+            style={{ ...e, opacity: (e.opacity as number) * exit }}
+            radius={16}
+          >
             <ChipBody icon={c.icon} label={c.label} value={c.value} />
           </Surface>
         )
@@ -113,7 +174,15 @@ export function ActUnderstand({ t }: { t: number }) {
   )
 }
 
-function ChipBody({ icon, label, value }: { icon: (typeof CHIPS)[number]['icon']; label: string; value: string }) {
+function ChipBody({
+  icon,
+  label,
+  value,
+}: {
+  icon: (typeof CHIPS)[number]['icon']
+  label: string
+  value: string
+}) {
   return (
     <div className="lf-chip">
       <Bubble icon={icon} size={52} on />
@@ -140,27 +209,55 @@ export function ActMachine({ t }: { t: number }) {
 
   if (t < 7.2 || t > 17) return null
 
-  const imgRect = lerpRect(MACHINE_IMG, { x: MINI.x + 10, y: MINI.y + 10, w: MINI.w - 20, h: 100 }, shrink)
+  const imgRect = lerpRect(
+    MACHINE_IMG,
+    { x: MINI.x + 10, y: MINI.y + 10, w: MINI.w - 20, h: 100 },
+    shrink,
+  )
   const img = machineImageUrl(D.machine.slug, 'main')
   const reveal = seg(t, 9.5, 10.8, easeInOut)
 
   const tiles = [
     { icon: Cog, label: 'Parts', value: String(D.machine.partsFitted), sub: 'parts fitted' },
     { icon: Check, label: 'Fitment', value: 'In catalogue', sub: 'stated per model' },
-    { icon: History, label: 'Legacy reference', value: `${D.machine.legacyMapped} mapped`, sub: 'old part numbers' },
-    { icon: Boxes, label: 'Availability', value: `${D.machine.inStock} of ${D.machine.partsFitted}`, sub: 'parts in stock' },
+    {
+      icon: History,
+      label: 'Legacy reference',
+      value: `${D.machine.legacyMapped} mapped`,
+      sub: 'old part numbers',
+    },
+    {
+      icon: Boxes,
+      label: 'Availability',
+      value: `${D.machine.inStock} of ${D.machine.partsFitted}`,
+      sub: 'parts in stock',
+    },
     { icon: Warehouse, label: 'Location', value: D.machine.plant, sub: D.machine.country },
   ] as const
-  const tileRect = (i: number): Rect => (i < 4 ? { x: P.tilesX[i % 2], y: P.tilesY[Math.floor(i / 2)], w: P.tile.w, h: P.tile.h } : { x: P.tilesX[0], y: P.tilesY[2], w: 560, h: P.tile.h })
+  const tileRect = (i: number): Rect =>
+    i < 4
+      ? { x: P.tilesX[i % 2], y: P.tilesY[Math.floor(i / 2)], w: P.tile.w, h: P.tile.h }
+      : { x: P.tilesX[0], y: P.tilesY[2], w: 560, h: P.tile.h }
 
   return (
     <>
-      <div className="lf-qtag" style={{ opacity: tag, transform: `translateY(${(1 - tag) * -14}px)` }}>
+      <div
+        className="lf-qtag"
+        style={{ opacity: tag, transform: `translateY(${(1 - tag) * -14}px)` }}
+      >
         <Search size={20} strokeWidth={1.8} aria-hidden="true" />
         {QUERY}
       </div>
 
-      <Surface rect={r} radius={lerp(16, 22, expand)} style={{ ...chipE, opacity: (chipE.opacity as number) * miniOut, transform: `scale(${1 - 0.03 * press})` }}>
+      <Surface
+        rect={r}
+        radius={lerp(16, 22, expand)}
+        style={{
+          ...chipE,
+          opacity: (chipE.opacity as number) * miniOut,
+          transform: `scale(${1 - 0.03 * press})`,
+        }}
+      >
         <div style={{ opacity: chipContent }}>
           <ChipBody icon={CHIPS[0].icon} label={CHIPS[0].label} value={CHIPS[0].value} />
         </div>
@@ -168,10 +265,29 @@ export function ActMachine({ t }: { t: number }) {
 
       {expand > 0.4 ? (
         <>
-          <div className="lf-img" style={{ ...box(imgRect), borderRadius: lerp(14, 10, shrink), clipPath: `inset(0 ${(1 - reveal) * 100}% 0 0 round 14px)`, opacity: miniOut }}>
-            {img ? <img src={img} alt="" style={{ transform: `scale(${lerp(1.14, 1, seg(t, 9.5, 13, easeInOut))})` }} /> : <div className="lf-img__none" />}
+          <div
+            className="lf-img"
+            style={{
+              ...box(imgRect),
+              borderRadius: lerp(14, 10, shrink),
+              clipPath: `inset(0 ${(1 - reveal) * 100}% 0 0 round 14px)`,
+              opacity: miniOut,
+            }}
+          >
+            {img ? (
+              <img
+                src={img}
+                alt=""
+                style={{ transform: `scale(${lerp(1.14, 1, seg(t, 9.5, 13, easeInOut))})` }}
+              />
+            ) : (
+              <div className="lf-img__none" />
+            )}
           </div>
-          <p className="lf-mini" style={{ opacity: rise(t, 12.8, 13.3) * miniOut, left: MINI.x + 14, top: MINI.y + 124 }}>
+          <p
+            className="lf-mini"
+            style={{ opacity: rise(t, 12.8, 13.3) * miniOut, left: MINI.x + 14, top: MINI.y + 124 }}
+          >
             {D.machine.model}
             <small>{D.machine.type}</small>
           </p>
@@ -187,7 +303,17 @@ export function ActMachine({ t }: { t: number }) {
               const hv = isParts ? rise(t, 10.9, 11.4) : 0
               const pr = isParts ? seg(t, 11.7, 11.8) * fall(t, 11.8, 12.0) : 0
               return (
-                <Surface key={tile.label} rect={tileRect(i)} lift={hv} radius={14} style={{ ...e, transform: `${e.transform} scale(${1 - 0.03 * pr})`, background: isParts && t > 11.75 ? 'var(--accent-soft)' : undefined }}>
+                <Surface
+                  key={tile.label}
+                  rect={tileRect(i)}
+                  lift={hv}
+                  radius={14}
+                  style={{
+                    ...e,
+                    transform: `${e.transform} scale(${1 - 0.03 * pr})`,
+                    background: isParts && t > 11.75 ? 'var(--accent-soft)' : undefined,
+                  }}
+                >
                   <div className="lf-tile">
                     <p className="lf-eyebrow">
                       <tile.icon size={18} strokeWidth={1.7} aria-hidden="true" />

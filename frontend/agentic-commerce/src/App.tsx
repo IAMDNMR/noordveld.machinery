@@ -4,6 +4,7 @@ import { AgenticIntro } from './components/sections/AgenticIntro'
 import { Closing } from './components/sections/Closing'
 import { EvolutionVideoSlot } from './components/sections/EvolutionVideoSlot'
 import { LaunchFilm } from './components/launch/LaunchFilm'
+import { DemoRequests } from './components/sections/DemoRequests'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <EvolutionVideoSlot />
         <AgenticIntro />
         <LaunchFilm />
+        <DemoRequests />
         <Agentic />
         <Closing />
       </main>

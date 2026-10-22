@@ -11,7 +11,13 @@ interface ButtonLinkProps {
   arrow?: boolean
 }
 
-export function ButtonLink({ to, variant = 'primary', children, external = false, arrow = true }: ButtonLinkProps) {
+export function ButtonLink({
+  to,
+  variant = 'primary',
+  children,
+  external = false,
+  arrow = true,
+}: ButtonLinkProps) {
   const content = (
     <>
       {children}
@@ -30,7 +36,15 @@ export function ButtonLink({ to, variant = 'primary', children, external = false
   )
 }
 
-export function TextLink({ to, children, external = false }: { to: string; children: ReactNode; external?: boolean }) {
+export function TextLink({
+  to,
+  children,
+  external = false,
+}: {
+  to: string
+  children: ReactNode
+  external?: boolean
+}) {
   const content = (
     <>
       {children}

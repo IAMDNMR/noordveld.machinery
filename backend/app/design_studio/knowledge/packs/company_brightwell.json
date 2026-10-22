@@ -1,0 +1,601 @@
+{
+ "id": "company_brightwell",
+ "version": "2026.10.19",
+ "layer": "company",
+ "title": "Brightwell Machinery Service (synthetic company)",
+ "description": "A synthetic company that sells machinery spare parts, services machines in the field and bills customers. It reuses shared domain knowledge and adds its own service-contract process.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_inventory",
+  "cat_ecommerce",
+  "cat_warehouse",
+  "cat_transport",
+  "cat_manufacturing",
+  "cat_aftersales",
+  "cat_finance",
+  "cap_documents"
+ ],
+ "uses_capabilities": [
+  "approval_workflow",
+  "audit_history",
+  "search_filter",
+  "reporting_dashboards",
+  "document_handling"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [
+  "cat_inventory",
+  "cat_ecommerce",
+  "cat_warehouse",
+  "cat_transport",
+  "cat_manufacturing",
+  "cat_aftersales",
+  "cat_finance",
+  "cap_documents"
+ ],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_bw_contract",
+    "statement": "Service contracts are drafted, approved by the commercial lead and activated.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_bw_contract_1",
+      "statement": "An account manager drafts a contract for a customer."
+     },
+     {
+      "id": "ac_bw_contract_2",
+      "statement": "A different person approves it before it becomes active."
+     }
+    ]
+   },
+   {
+    "id": "req_bw_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_bw_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_bw_account_manager",
+    "name": "Account manager",
+    "responsibilities": [
+     "Drafts and activates service contracts"
+    ],
+    "permissions": [
+     "bw.contract_draft",
+     "bw.contract_revise",
+     "bw.contract_activate"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_bw_commercial_lead",
+    "name": "Commercial lead",
+    "responsibilities": [
+     "Approves service contracts"
+    ],
+    "permissions": [
+     "bw.contract_approve"
+    ],
+    "approval_authority": [
+     "Service contracts"
+    ]
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_bw_service_contract",
+    "name": "Service contract",
+    "description": "An agreement that gives a customer priority service on their machines.",
+    "attributes": [
+     {
+      "id": "service_contract_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "start_date",
+      "name": "Starts",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "end_date",
+      "name": "Ends",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "response_hours",
+      "name": "Response time (hours)",
+      "type": "integer",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 1
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "DRAFT",
+       "ACTIVE",
+       "EXPIRED"
+      ]
+     },
+     {
+      "id": "decision",
+      "name": "Approval decision",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "owner_role_id": "role_bw_commercial_lead"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_bw_service_contract_customer",
+      "name": "Customer",
+      "target": "ent_core_customer",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_bw_dates",
+    "description": "A contract ends on or after the day it starts.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_bw_service_contract.end_date",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_bw_service_contract.start_date",
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_bw_decision",
+    "description": "The commercial lead's recorded decision selects what happens to the contract.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "APPROVED",
+     "REJECTED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_bw_service_contract.decision",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_bw_contract_declined",
+    "name": "Contract declined",
+    "trigger": "The commercial lead declines the contract terms.",
+    "recovery": "The account manager revises the terms and submits again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_bw_contract_draft"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_bw_sla",
+    "question": "What response times may Brightwell offer, and which customers are entitled to them?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_bw_dates"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_bw_contract",
+    "term": "Service contract",
+    "definition": "An agreement that gives a customer priority service on their machines."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_bw_contract",
+   "name": "Service contract onboarding",
+   "states": [
+    {
+     "id": "st_bw_contract_start",
+     "label": "Customer wants a contract",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_bw_contract_draft",
+     "label": "Draft the contract",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_bw_account_manager",
+     "permission": "bw.contract_draft",
+     "requirement_ids": [
+      "req_bw_contract",
+      "req_bw_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_core_customer"
+     ],
+     "writes_entity_ids": [
+      "ent_bw_service_contract"
+     ],
+     "rule_ids": [
+      "rule_bw_dates"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_bw_service_contract": [
+       "start_date",
+       "end_date",
+       "response_hours",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_bw_service_contract": [
+       "rel_bw_service_contract_customer"
+      ]
+     }
+    },
+    {
+     "id": "st_bw_contract_approve",
+     "label": "Approve the contract",
+     "kind": "approval",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_bw_commercial_lead",
+     "permission": "bw.contract_approve",
+     "requirement_ids": [
+      "req_bw_contract",
+      "req_bw_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_bw_service_contract"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_bw_service_contract": [
+       "decision"
+      ]
+     },
+     "input_relationships": {
+      "ent_bw_service_contract": []
+     }
+    },
+    {
+     "id": "st_bw_contract_verdict",
+     "label": "Commercial lead's decision",
+     "kind": "branch",
+     "outputs": [
+      "rule_bw_decision"
+     ],
+     "outcome": null,
+     "role_id": "role_bw_commercial_lead",
+     "permission": null,
+     "requirement_ids": [
+      "req_bw_contract",
+      "req_bw_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_bw_decision"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_bw_contract_revise",
+     "label": "Revise the terms",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_bw_account_manager",
+     "permission": "bw.contract_revise",
+     "requirement_ids": [
+      "req_bw_contract",
+      "req_bw_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_bw_service_contract"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_bw_contract_declined"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_bw_service_contract": [
+       "start_date",
+       "end_date",
+       "response_hours"
+      ]
+     },
+     "input_relationships": {
+      "ent_bw_service_contract": []
+     }
+    },
+    {
+     "id": "st_bw_contract_activate",
+     "label": "Activate the contract",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_bw_account_manager",
+     "permission": "bw.contract_activate",
+     "requirement_ids": [
+      "req_bw_contract",
+      "req_bw_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_bw_service_contract"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_bw_service_contract": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_bw_service_contract": []
+     }
+    },
+    {
+     "id": "st_bw_contract_done",
+     "label": "Contract active",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_bw_contract_1",
+     "source": "st_bw_contract_start",
+     "target": "st_bw_contract_draft",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_bw_contract_2",
+     "source": "st_bw_contract_draft",
+     "target": "st_bw_contract_approve",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_bw_contract_3",
+     "source": "st_bw_contract_approve",
+     "target": "st_bw_contract_verdict",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_bw_contract_4",
+     "source": "st_bw_contract_verdict",
+     "target": "st_bw_contract_activate",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_bw_decision",
+      "value": "APPROVED"
+     }
+    },
+    {
+     "id": "tr_bw_contract_5",
+     "source": "st_bw_contract_verdict",
+     "target": "st_bw_contract_revise",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_bw_decision",
+      "value": "REJECTED"
+     }
+    },
+    {
+     "id": "tr_bw_contract_6",
+     "source": "st_bw_contract_revise",
+     "target": "st_bw_contract_draft",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_bw_contract_7",
+     "source": "st_bw_contract_activate",
+     "target": "st_bw_contract_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Service contract",
+   "definition": "An agreement that gives a customer priority service on their machines.",
+   "synonyms": [
+    "SLA",
+    "maintenance agreement",
+    "support contract",
+    "service agreement"
+   ],
+   "refers_to": "ent_bw_service_contract"
+  }
+ ],
+ "overrides": [
+  {
+   "item_id": "ent_core_customer",
+   "reason": "Brightwell serves customers in three languages and records the preferred one.",
+   "patch": {},
+   "add_attributes": [
+    {
+     "id": "preferred_language",
+     "name": "Preferred language",
+     "type": "string",
+     "required": false,
+     "sensitivity": "internal",
+     "enum": [
+      "EN",
+      "NL",
+      "DE"
+     ]
+    }
+   ],
+   "add_permissions": []
+  },
+  {
+   "item_id": "rule_inv_variance",
+   "reason": "Brightwell's synthetic company setting: a tighter stock count tolerance than the shared default.",
+   "patch": {
+    "description": "A count difference of more than 2 units needs approval before stock is adjusted (Brightwell setting).",
+    "execution": {
+     "kind": "compare",
+     "field": "ent_inv_stock_count.variance",
+     "operator": "lte",
+     "value": 2,
+     "other_field": null,
+     "pass_outcome": "WITHIN_TOLERANCE",
+     "fail_outcome": "NEEDS_APPROVAL"
+    }
+   },
+   "add_attributes": [],
+   "add_permissions": []
+  },
+  {
+   "item_id": "ent_svc_service_case",
+   "reason": "Brightwell tracks whether a case falls under a service contract.",
+   "patch": {},
+   "add_attributes": [
+    {
+     "id": "under_contract",
+     "name": "Under a service contract",
+     "type": "boolean",
+     "required": false,
+     "sensitivity": "internal"
+    }
+   ],
+   "add_permissions": []
+  }
+ ],
+ "capability": {
+  "id": "company_brightwell",
+  "name": "Spare parts and field service"
+ },
+ "company": {
+  "id": "brightwell",
+  "name": "Brightwell Machinery Service (synthetic)",
+  "industry": "Industrial machinery service and spare parts",
+  "operating_context": "Sells spare parts online and by phone, delivers them, services installed machines under warranty and service contracts, and invoices customers. Synthetic: invented for the reference catalog.",
+  "business_units": [
+   "Spare parts sales",
+   "Warehouse and logistics",
+   "Field service",
+   "Finance"
+  ],
+  "systems_of_record": [
+   "ERP (synthetic)",
+   "Warehouse system (synthetic)"
+  ]
+ }
+}

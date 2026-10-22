@@ -1,0 +1,63 @@
+{
+ "pack": "cat_warehouse",
+ "records": [
+  {
+   "name": "pick1",
+   "entity": "ent_wms_pick_list",
+   "role": "role_wms_lead",
+   "values": {
+    "status": "OPEN",
+    "created_on": "2026-10-15"
+   },
+   "refs": {
+    "ent_eco_order": "order1",
+    "ent_core_location": "loc1"
+   },
+   "shared": false
+  },
+  {
+   "name": "pickline1",
+   "entity": "ent_wms_pick_line",
+   "role": "role_wms_picker",
+   "values": {
+    "quantity_picked": 5
+   },
+   "refs": {
+    "ent_wms_pick_list": "pick1",
+    "ent_eco_order_line": "line1",
+    "ent_inv_stock_level": "stock1"
+   },
+   "shared": false
+  },
+  {
+   "name": "pack1",
+   "entity": "ent_wms_pack_unit",
+   "role": "role_wms_packer",
+   "values": {
+    "packages": 1,
+    "gross_weight_kg": 6.4,
+    "packed_on": "2026-10-15"
+   },
+   "refs": {
+    "ent_wms_pick_list": "pick1"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_wms_fulfilment",
+   "bind": {
+    "ent_eco_order": "order1",
+    "ent_eco_order_line": "line1",
+    "ent_inv_stock_level": "stock1",
+    "ent_core_location": "loc1",
+    "ent_wms_pick_list": "pick1",
+    "ent_wms_pick_line": "pickline1",
+    "ent_wms_pack_unit": "pack1"
+   },
+   "set": {},
+   "ends": "done"
+  }
+ ]
+}

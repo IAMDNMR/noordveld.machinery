@@ -30,7 +30,10 @@ export const ACTS = [
 ] as const
 
 /** Chapters in viewer time, for Previous / Next and the progress ticks */
-export const CHAPTERS: readonly { id: string; name: string; start: number }[] = [{ id: 'hook', name: 'Machine down', start: 0 }, ...ACTS.map((a) => ({ ...a, start: a.start + HOOK }))]
+export const CHAPTERS: readonly { id: string; name: string; start: number }[] = [
+  { id: 'hook', name: 'Machine down', start: 0 },
+  ...ACTS.map((a) => ({ ...a, start: a.start + HOOK })),
+]
 
 /** The frame shown for reduced motion and before the film has started: the finished reveal. */
 export const POSTER_TIME = 46.4 + HOOK
@@ -142,8 +145,13 @@ export const cursorAt = (t: number): CursorState => {
     y = lerp(a.y, b.y, u) + (dist > 1 ? (dx / dist) * arc : 0)
   }
   // The cursor rests and then, in the agentic act, steps back and lets the system work
-  const opacity = seg(t, 0.9, 1.5) * (1 - seg(t, 29.7, 30.4)) + seg(t, 34.8, 35.4) * (1 - seg(t, 37.2, 37.8)) * (t > 30.4 ? 1 : 0)
-  const press = CLICKS.reduce((p, c) => Math.min(p, 1 - 0.16 * Math.max(0, 1 - Math.abs(t - c.t) / 0.14)), 1)
+  const opacity =
+    seg(t, 0.9, 1.5) * (1 - seg(t, 29.7, 30.4)) +
+    seg(t, 34.8, 35.4) * (1 - seg(t, 37.2, 37.8)) * (t > 30.4 ? 1 : 0)
+  const press = CLICKS.reduce(
+    (p, c) => Math.min(p, 1 - 0.16 * Math.max(0, 1 - Math.abs(t - c.t) / 0.14)),
+    1,
+  )
   return { x, y, opacity: clamp01(opacity), press }
 }
 
@@ -187,7 +195,10 @@ const PORTRAIT_KEYS: readonly [number, number, number, number][] = [
   [48, 800, 450, 1150],
 ]
 
-export const cameraAt = (t: number, portrait: boolean): { cx: number; cy: number; z: number; w: number } => {
+export const cameraAt = (
+  t: number,
+  portrait: boolean,
+): { cx: number; cy: number; z: number; w: number } => {
   if (portrait) {
     let k = 0
     while (k < PORTRAIT_KEYS.length - 2 && t >= PORTRAIT_KEYS[k + 1][0]) k++
@@ -203,6 +214,10 @@ export const cameraAt = (t: number, portrait: boolean): { cx: number; cy: number
   const u = clamp01((t - start) / (end - start))
   // Alternate the drift direction act by act so the camera never feels like it is stuck on one rail
   const dir = k % 2 === 0 ? 1 : -1
-  return { cx: WORLD_W / 2 + dir * (u - 0.5) * 26, cy: WORLD_H / 2 + (0.5 - u) * 12, z: 1.0 + 0.035 * u, w: WORLD_W }
-
+  return {
+    cx: WORLD_W / 2 + dir * (u - 0.5) * 26,
+    cy: WORLD_H / 2 + (0.5 - u) * 12,
+    z: 1.0 + 0.035 * u,
+    w: WORLD_W,
+  }
 }

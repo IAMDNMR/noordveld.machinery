@@ -1,4 +1,5 @@
 """Entity resolution against Neo4j. Several equally good matches are returned as candidates, never silently chosen between."""
+
 from __future__ import annotations
 
 import difflib
@@ -30,7 +31,14 @@ class Resolution:
 
 
 def _to_resolved(row: dict) -> Resolved:
-    return Resolved(Kind(row["kind"]), row["id"], row["label"], row.get("detail"), row.get("data_status"), int(row["tier"]))
+    return Resolved(
+        Kind(row["kind"]),
+        row["id"],
+        row["label"],
+        row.get("detail"),
+        row.get("data_status"),
+        int(row["tier"]),
+    )
 
 
 class EntityResolver:
@@ -40,7 +48,9 @@ class EntityResolver:
     def _lookup(self, mention: str) -> list[Resolved]:
         words = mention.split()[:6]
         # "NV 4500 loader" -> the whole phrase, then without trailing words; "supplies water pump" -> then without leading words
-        tries = [words[:n] for n in range(len(words), 0, -1)] + [words[n:] for n in range(1, len(words))]
+        tries = [words[:n] for n in range(len(words), 0, -1)] + [
+            words[n:] for n in range(1, len(words))
+        ]
         for attempt in tries:
             rows = self._repo.resolve(" ".join(attempt))
             if rows:
@@ -61,9 +71,13 @@ class EntityResolver:
         r = next(iter(hits.values()))
         return [Resolved(Kind.CATEGORY, r["id"], r["label"], None, r.get("data_status"), 2)]
 
-    def resolve(self, mentions: tuple[str, ...], selected: list[SelectedEntity] | None = None) -> Resolution:
+    def resolve(
+        self, mentions: tuple[str, ...], selected: list[SelectedEntity] | None = None
+    ) -> Resolution:
         picked: dict[Kind, list[Resolved]] = {}
-        for sel in selected or []:  # the user already disambiguated: accept only an exact match of that kind
+        for sel in (
+            selected or []
+        ):  # the user already disambiguated: accept only an exact match of that kind
             exact = [r for r in self._lookup(sel.key) if r.kind == sel.kind and r.tier == 0]
             if len(exact) == 1:
                 picked[Kind(sel.kind)] = exact

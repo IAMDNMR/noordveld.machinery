@@ -1,0 +1,66 @@
+{
+  "id": "finance_reporting",
+  "version": "1.0.0",
+  "name": "Finance & Billing",
+  "category": "Finance",
+  "summary": "Invoices, payment status, receivables, payables and approvals.",
+  "description": "A precise, restrained finance workspace: invoices and their payment status, what is owed to and by the company, transactions and approval queues. Totals come only from recorded figures; nothing is estimated.",
+  "status": "preview",
+  "domain_ids": ["finance_billing"],
+  "app_type": "Finance operations",
+  "users": ["Accounts payable clerk", "Accounts receivable clerk", "Finance manager"],
+  "keywords": ["finance", "invoice", "billing", "payment", "receivable", "payable", "transaction", "ledger", "credit note", "due", "overdue", "approval"],
+  "theme": {
+    "id": "precise_finance",
+    "label": "Precise finance",
+    "direction": "Paper white with deep navy and a muted green; ruled tables, tabular numbers and restrained colour that means something.",
+    "colors": {
+      "primary": "#1B2A41", "primary_text": "#FFFFFF", "accent": "#2F6B47",
+      "background": "#FAFAF7", "surface": "#FFFFFF", "surface_alt": "#F0EFE9",
+      "text": "#141A23", "muted": "#4F5866", "border": "#DAD8CF",
+      "nav_background": "#FFFFFF", "nav_text": "#141A23",
+      "success": "#2F6B47", "warning": "#8A5A00", "danger": "#A12A1F"
+    },
+    "font_heading": "serif", "font_body": "system", "density": "compact",
+    "radius": 2, "shadow": "none", "card_style": "flat", "table_style": "lined"
+  },
+  "nav_style": "topbar",
+  "entity_roles": [
+    {"id": "invoice", "label": "Invoice", "matches": ["invoice", "bill"], "fields": ["number", "party", "amount", "due_date", "status", "direction"]},
+    {"id": "payment", "label": "Payment", "matches": ["payment", "transaction"], "fields": ["date", "party", "amount", "reference"]}
+  ],
+  "pages": [
+    {"id": "overview", "title": "Overview", "icon": "Landmark", "layout": "overview", "purpose": "What is open, due and overdue.", "users": ["Finance manager"],
+     "components": [
+       {"type": "metric_strip", "title": "Invoices by status", "role": "invoice", "group_by": "status", "span": 3},
+       {"type": "data_table", "title": "Due soon", "role": "invoice", "fields": ["number", "party", "amount", "due_date", "status"], "span": 3}
+     ]},
+    {"id": "invoices", "title": "Invoices", "icon": "Receipt", "layout": "table", "purpose": "Receivables and payables.", "users": ["Accounts payable clerk", "Accounts receivable clerk"],
+     "components": [
+       {"type": "filter_bar", "title": "Filter invoices", "span": 3},
+       {"type": "data_table", "title": "Invoices", "role": "invoice", "fields": ["number", "direction", "party", "amount", "due_date", "status"], "span": 3}
+     ]},
+    {"id": "payments", "title": "Payments", "icon": "Banknote", "layout": "table", "purpose": "Recorded payments.", "users": ["Finance manager"],
+     "components": [
+       {"type": "data_table", "title": "Payments", "role": "payment", "fields": ["date", "party", "amount", "reference"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "invoices", "name": "Invoices and billing records", "status": "supported", "keywords": ["invoice", "bill", "billing"]},
+    {"id": "status", "name": "Payment status and overdue tracking", "status": "supported", "keywords": ["payment", "paid", "due", "overdue", "status"]},
+    {"id": "approvals", "name": "Invoice approval queue", "status": "configurable", "keywords": ["approve", "approval", "review"]},
+    {"id": "bank", "name": "Bank feeds and reconciliation", "status": "requires_integration", "keywords": ["bank", "reconcile", "reconciliation", "statement"], "note": "Needs a bank or ERP integration delivered by our partner."},
+    {"id": "ledger", "name": "General ledger and tax reporting", "status": "requires_integration", "keywords": ["ledger", "tax", "vat", "accounting", "balance"], "note": "Accounting and tax figures come from the ERP through our partner's integration; this template does not calculate them."}
+  ],
+  "limitations": ["Balances, tax and ledger figures are not calculated here; they come from the ERP through our partner's integration.", "Bank feeds need an integration from our partner."],
+  "sample": {
+    "invoice": [
+      {"id": "iv1", "number": "INV-2026-114", "party": "Sample Logistics", "amount": 12480, "due_date": "2026-11-05", "status": "Open", "direction": "Receivable"},
+      {"id": "iv2", "number": "BILL-883", "party": "Sample Supplies", "amount": 1450, "due_date": "2026-10-25", "status": "Approved", "direction": "Payable"},
+      {"id": "iv3", "number": "INV-2026-101", "party": "Sample Farms", "amount": 3600, "due_date": "2026-10-10", "status": "Overdue", "direction": "Receivable"}
+    ],
+    "payment": [
+      {"id": "pm1", "date": "2026-10-18", "party": "Sample Build", "amount": 59000, "reference": "INV-2026-097"}
+    ]
+  }
+}

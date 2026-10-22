@@ -1,0 +1,96 @@
+{
+  "id": "machinery_parts",
+  "version": "1.0.0",
+  "name": "Machinery & Spare Parts",
+  "category": "Machinery",
+  "summary": "Machine and spare-parts catalogue with fitment, availability and dealers.",
+  "description": "An image-led technical catalogue for machinery makers and dealers. Buyers find parts by machine or part number, see exactly which machines a part fits, check stock at depots and dealers, and order. Service teams see maintenance information and the history of a part.",
+  "status": "stable",
+  "domain_ids": ["spare_parts_commerce", "manufacturing_machinery", "aftersales_service"],
+  "app_type": "Technical catalogue",
+  "users": ["Parts buyer", "Dealer", "Service technician", "Parts manager"],
+  "keywords": ["machine", "machinery", "equipment", "part", "spare", "fitment", "compatibility", "catalogue", "dealer", "specification", "maintenance", "serial", "model", "variant"],
+  "theme": {
+    "id": "industrial_premium",
+    "label": "Industrial premium",
+    "direction": "Graphite navigation, warm steel surfaces and a signal-amber accent; precise technical panels and strong product imagery.",
+    "colors": {
+      "primary": "#1F2933", "primary_text": "#F7F5F2", "accent": "#E8892B",
+      "background": "#F3F1EC", "surface": "#FFFFFF", "surface_alt": "#E9E5DD",
+      "text": "#1A1F24", "muted": "#59626B", "border": "#D6D1C7",
+      "nav_background": "#1F2933", "nav_text": "#E9E6E0",
+      "success": "#2E7D4F", "warning": "#B7791F", "danger": "#B42318"
+    },
+    "font_heading": "grotesk", "font_body": "humanist", "density": "comfortable",
+    "radius": 4, "shadow": "crisp", "card_style": "outlined", "table_style": "lined"
+  },
+  "nav_style": "topbar",
+  "entity_roles": [
+    {"id": "part", "label": "Part", "matches": ["part", "spare", "component", "item"], "fields": ["part_number", "name", "category", "price", "availability", "image"]},
+    {"id": "machine", "label": "Machine", "matches": ["machine", "equipment", "model", "unit"], "fields": ["model", "name", "family", "year", "image"]},
+    {"id": "fitment", "label": "Fitment", "matches": ["fitment", "compatibility", "fits"], "fields": ["part", "machine", "status", "evidence"]},
+    {"id": "dealer", "label": "Dealer", "matches": ["dealer", "supplier", "distributor"], "fields": ["name", "region", "stock", "lead_time"]},
+    {"id": "service_event", "label": "Service event", "matches": ["service", "maintenance", "history"], "fields": ["date", "machine", "part", "note"]}
+  ],
+  "pages": [
+    {"id": "catalogue", "title": "Parts catalogue", "icon": "LayoutGrid", "layout": "catalogue", "purpose": "Find a part by machine, category or part number.", "users": ["Parts buyer", "Dealer"],
+     "components": [
+       {"type": "filter_bar", "title": "Filter parts", "span": 3},
+       {"type": "product_grid", "title": "Parts", "role": "part", "fields": ["image", "name", "part_number", "price", "availability"], "span": 3}
+     ]},
+    {"id": "part_detail", "title": "Part detail", "icon": "Wrench", "layout": "detail", "purpose": "Specifications, fitment and where the part is available.", "users": ["Parts buyer", "Service technician"],
+     "components": [
+       {"type": "detail_panel", "title": "Specifications", "role": "part", "fields": ["part_number", "name", "category", "price", "availability"], "span": 2},
+       {"type": "data_table", "title": "Fits these machines", "role": "fitment", "fields": ["machine", "status", "evidence"], "span": 1},
+       {"type": "data_table", "title": "Available at", "role": "dealer", "fields": ["name", "region", "stock", "lead_time"], "span": 3}
+     ]},
+    {"id": "machines", "title": "Machines", "icon": "Tractor", "layout": "catalogue", "purpose": "Browse the machine range and open a machine's parts.", "users": ["Dealer", "Service technician"],
+     "components": [
+       {"type": "product_grid", "title": "Machine range", "role": "machine", "fields": ["image", "name", "model", "family", "year"], "span": 3}
+     ]},
+    {"id": "fitment", "title": "Fitment", "icon": "GitCompare", "layout": "table", "purpose": "Which part fits which machine, with its evidence.", "users": ["Parts manager"],
+     "components": [
+       {"type": "metric_strip", "title": "Fitment status", "role": "fitment", "group_by": "status", "span": 3},
+       {"type": "data_table", "title": "Machine to part", "role": "fitment", "fields": ["part", "machine", "status", "evidence"], "span": 3}
+     ]},
+    {"id": "service", "title": "Service history", "icon": "History", "layout": "timeline", "purpose": "Maintenance and replacements per machine.", "users": ["Service technician"],
+     "components": [
+       {"type": "timeline", "title": "Service events", "role": "service_event", "fields": ["date", "machine", "part", "note"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "catalogue", "name": "Parts and machine catalogue", "status": "supported", "keywords": ["catalogue", "search", "find", "browse", "part", "machine"]},
+    {"id": "fitment", "name": "Machine-to-part fitment", "status": "supported", "keywords": ["fit", "fitment", "compatible", "compatibility"]},
+    {"id": "availability", "name": "Stock and dealer availability", "status": "supported", "keywords": ["stock", "availability", "dealer", "depot", "inventory"]},
+    {"id": "ordering", "name": "Parts ordering", "status": "configurable", "keywords": ["order", "buy", "cart", "checkout", "purchase"]},
+    {"id": "service_history", "name": "Service and maintenance history", "status": "supported", "keywords": ["service", "maintenance", "history", "repair"]},
+    {"id": "erp_sync", "name": "ERP price and stock sync", "status": "requires_integration", "keywords": ["erp", "sync", "dynamics", "sap"], "note": "Needs an ERP connection, built and supported by our integration partner."}
+  ],
+  "limitations": ["Live prices and stock from an ERP need an integration delivered by our partner.", "Exploded-view diagrams are shown as images; interactive hotspots are not included."],
+  "sample": {
+    "part": [
+      {"id": "p1", "part_number": "NV-1010-HF", "name": "Hydraulic filter", "category": "Hydraulics", "price": 48.5, "availability": "In stock"},
+      {"id": "p2", "part_number": "NV-2044-BP", "name": "Brake pad set", "category": "Brakes", "price": 112.0, "availability": "2 days"},
+      {"id": "p3", "part_number": "NV-3108-FB", "name": "Fan belt", "category": "Engine", "price": 26.9, "availability": "In stock"},
+      {"id": "p4", "part_number": "NV-4120-LC", "name": "Lift chain", "category": "Mast", "price": 214.0, "availability": "On order"}
+    ],
+    "machine": [
+      {"id": "m1", "model": "NF-25", "name": "Forklift NF-25", "family": "Forklifts", "year": 2023},
+      {"id": "m2", "model": "NL-80", "name": "Wheel loader NL-80", "family": "Loaders", "year": 2022},
+      {"id": "m3", "model": "NT-35", "name": "Telehandler NT-35", "family": "Telehandlers", "year": 2024}
+    ],
+    "fitment": [
+      {"id": "f1", "part": "NV-1010-HF", "machine": "NF-25", "status": "Approved", "evidence": "Parts manual"},
+      {"id": "f2", "part": "NV-1010-HF", "machine": "NT-35", "status": "Approved", "evidence": "Engineering note"},
+      {"id": "f3", "part": "NV-2044-BP", "machine": "NL-80", "status": "Under review", "evidence": "Dealer report"}
+    ],
+    "dealer": [
+      {"id": "d1", "name": "Rotterdam depot", "region": "Benelux", "stock": 42, "lead_time": "Next day"},
+      {"id": "d2", "name": "Hamburg dealer", "region": "Germany", "stock": 7, "lead_time": "2 days"}
+    ],
+    "service_event": [
+      {"id": "s1", "date": "2026-09-12", "machine": "NF-25", "part": "NV-1010-HF", "note": "Filter replaced at 1,000 hours"},
+      {"id": "s2", "date": "2026-08-03", "machine": "NL-80", "part": "NV-2044-BP", "note": "Brake inspection"}
+    ]
+  }
+}

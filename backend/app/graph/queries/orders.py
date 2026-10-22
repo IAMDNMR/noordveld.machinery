@@ -36,7 +36,7 @@ WITH o, c, collect(CASE WHEN l IS NULL THEN null ELSE {
     fits: [(p)-[:FITS]->(m:Machine) | m.model_code]
   } END) AS lines
 RETURN o.order_id AS order_id, o.order_date AS order_date, o.order_status AS status, o.currency AS currency,
-       o.subtotal_ex_vat AS subtotal_ex_vat, o.order_total_incl_vat AS total_incl_vat, o.channel AS channel, o.data_status AS data_status,
+       o.subtotal_ex_vat AS subtotal_ex_vat, o.order_total_incl_vat AS total_incl_vat, o.order_total AS order_total, o.channel AS channel, o.data_status AS data_status,
        c.customer_id AS customer_id, coalesce(c.name, o.requester_company, o.requester_name) AS customer_name, o.requester_name AS requester_name, lines,
        o.allocation_status AS allocation_status, o.dealer_service_required AS service_required,
        head([(o)-[:FOR_DEALER]->(d:Dealer) | d.name]) AS dealer,

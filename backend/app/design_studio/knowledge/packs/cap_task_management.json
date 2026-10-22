@@ -1,0 +1,447 @@
+{
+ "id": "cap_task_management",
+ "version": "2026.10.19",
+ "layer": "reusable",
+ "title": "Task management capability",
+ "description": "Assigning, tracking and completing units of work.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [],
+ "uses_capabilities": [
+  "task_management",
+  "audit_history",
+  "identity_access"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_task_track",
+    "statement": "Work can be created, assigned and tracked as tasks.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_task_track_1",
+      "statement": "A coordinator creates a task with a priority."
+     },
+     {
+      "id": "ac_task_track_2",
+      "statement": "An assignee can see and complete it."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_task_coordinator",
+    "name": "Task coordinator",
+    "responsibilities": [
+     "Creates and assigns tasks"
+    ],
+    "permissions": [
+     "task.lifecycle_create",
+     "task.lifecycle_assign"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_task_worker",
+    "name": "Task assignee",
+    "responsibilities": [
+     "Works on and completes assigned tasks"
+    ],
+    "permissions": [
+     "task.lifecycle_work"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_task_task",
+    "name": "Task",
+    "description": "A unit of work with an owner, a due date and a status.",
+    "attributes": [
+     {
+      "id": "task_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "title",
+      "name": "Title",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 200
+     },
+     {
+      "id": "description",
+      "name": "Description",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 1000
+     },
+     {
+      "id": "priority",
+      "name": "Priority",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "LOW",
+       "NORMAL",
+       "HIGH"
+      ]
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "OPEN",
+       "IN_PROGRESS",
+       "DONE",
+       "CANCELLED"
+      ]
+     },
+     {
+      "id": "due_date",
+      "name": "Due date",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "assignee",
+      "name": "Assigned to",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 120
+     }
+    ],
+    "relationships": []
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_task_due",
+    "description": "A task needs a due date before it is assigned.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_task_task.due_date",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_task_result",
+    "description": "The recorded task status decides how the task ends.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "DONE",
+     "CANCELLED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_task_task.status",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_task_blocked",
+    "name": "Task cannot proceed",
+    "trigger": "The assignee cannot continue because something outside their control is missing.",
+    "recovery": "The coordinator reassigns or cancels the task.",
+    "resolution": "recover",
+    "resolution_state_id": "st_task_lifecycle_work"
+   }
+  ],
+  "decisions": [],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_task_task",
+    "term": "Task",
+    "definition": "A unit of work with an owner, a due date and a status."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_task_lifecycle",
+   "name": "Task lifecycle",
+   "states": [
+    {
+     "id": "st_task_lifecycle_start",
+     "label": "Work identified",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_task_lifecycle_create",
+     "label": "Create the task",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_task_coordinator",
+     "permission": "task.lifecycle_create",
+     "requirement_ids": [
+      "req_task_track"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_task_task"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_task_task": [
+       "title",
+       "description",
+       "priority",
+       "due_date"
+      ]
+     },
+     "input_relationships": {
+      "ent_task_task": []
+     }
+    },
+    {
+     "id": "st_task_lifecycle_assign",
+     "label": "Assign the task",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_task_coordinator",
+     "permission": "task.lifecycle_assign",
+     "requirement_ids": [
+      "req_task_track"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_task_task"
+     ],
+     "rule_ids": [
+      "rule_task_due"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_task_task": [
+       "assignee",
+       "due_date"
+      ]
+     },
+     "input_relationships": {
+      "ent_task_task": []
+     }
+    },
+    {
+     "id": "st_task_lifecycle_work",
+     "label": "Work on the task",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_task_worker",
+     "permission": "task.lifecycle_work",
+     "requirement_ids": [
+      "req_task_track"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_task_task"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_task_task": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_task_task": []
+     }
+    },
+    {
+     "id": "st_task_lifecycle_result",
+     "label": "Task result",
+     "kind": "branch",
+     "outputs": [
+      "rule_task_result"
+     ],
+     "outcome": null,
+     "role_id": "role_task_worker",
+     "permission": null,
+     "requirement_ids": [
+      "req_task_track"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_task_result"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_task_lifecycle_done",
+     "label": "Task completed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_task_lifecycle_cancelled",
+     "label": "Task cancelled",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "cancelled",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_task_lifecycle_1",
+     "source": "st_task_lifecycle_start",
+     "target": "st_task_lifecycle_create",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_task_lifecycle_2",
+     "source": "st_task_lifecycle_create",
+     "target": "st_task_lifecycle_assign",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_task_lifecycle_3",
+     "source": "st_task_lifecycle_assign",
+     "target": "st_task_lifecycle_work",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_task_lifecycle_4",
+     "source": "st_task_lifecycle_work",
+     "target": "st_task_lifecycle_result",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_task_lifecycle_5",
+     "source": "st_task_lifecycle_result",
+     "target": "st_task_lifecycle_done",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_task_result",
+      "value": "DONE"
+     }
+    },
+    {
+     "id": "tr_task_lifecycle_6",
+     "source": "st_task_lifecycle_result",
+     "target": "st_task_lifecycle_cancelled",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_task_result",
+      "value": "CANCELLED"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Task",
+   "definition": "A unit of work with an owner, a due date and a status.",
+   "synonyms": [
+    "to-do",
+    "action item",
+    "assignment",
+    "job"
+   ],
+   "refers_to": "ent_task_task"
+  }
+ ],
+ "overrides": []
+}

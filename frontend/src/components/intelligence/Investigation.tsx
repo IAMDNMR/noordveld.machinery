@@ -1,4 +1,11 @@
-import { getPartFitment, getPartInventory, getPartProvenance, getPartSuppliers, type PartOverview, type PartTab } from '../../api'
+import {
+  getPartFitment,
+  getPartInventory,
+  getPartProvenance,
+  getPartSuppliers,
+  type PartOverview,
+  type PartTab,
+} from '../../api/index'
 import { useApi } from '../../hooks/useApi'
 import { humanize } from '../../lib/format'
 import { DATA_CLASS_LABEL } from './provenance'
@@ -7,13 +14,27 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? o
 const isConfirmed = (status: string | null) => status?.toUpperCase() === 'CONFIRMED'
 
 /** The business relationships the diagram explains, in reading order. Technical edges (aliases, specs, price records) stay in the graph tab. */
-const EXPLAINED = ['SUPPLIED_BY', 'STOCKED_BY', 'AVAILABLE_AT', 'PART_OF', 'HAS_COMPLIANCE', 'RELATED_COMPONENT', 'CO_ORDERED_WITH']
+const EXPLAINED = [
+  'SUPPLIED_BY',
+  'STOCKED_BY',
+  'AVAILABLE_AT',
+  'PART_OF',
+  'HAS_COMPLIANCE',
+  'RELATED_COMPONENT',
+  'CO_ORDERED_WITH',
+]
 
 /**
  * The investigation summary of one part, read as a document: fitment, supply, how it is connected, and why each of those
  * statements can be trusted. Every line comes from the part's own endpoints; nothing missing is filled in.
  */
-export function Investigation({ overview, onTab }: { overview: PartOverview; onTab: (tab: PartTab) => void }) {
+export function Investigation({
+  overview,
+  onTab,
+}: {
+  overview: PartOverview
+  onTab: (tab: PartTab) => void
+}) {
   const key = overview.part_number
   const fitment = useApi((s) => getPartFitment(key, s), `fitment:${key}`)
   const suppliers = useApi((s) => getPartSuppliers(key, s), `suppliers:${key}`)
@@ -27,7 +48,9 @@ export function Investigation({ overview, onTab }: { overview: PartOverview; onT
   const inv = inventory.data
   const stocked = (inv?.warehouses ?? []).filter((w) => (w.available ?? 0) > 0)
   const prov = provenance.data
-  const connected = (prov?.relationship_sources ?? []).filter((r) => r.relationship !== 'FITS' && r.count > 0)
+  const connected = (prov?.relationship_sources ?? []).filter(
+    (r) => r.relationship !== 'FITS' && r.count > 0,
+  )
   const branches = EXPLAINED.flatMap((rel) => connected.filter((r) => r.relationship === rel))
   const others = connected.length - branches.length
 
@@ -36,25 +59,35 @@ export function Investigation({ overview, onTab }: { overview: PartOverview; onT
     {
       ok: confirmed.length > 0,
       title: 'Fitment',
-      detail: confirmed.length ? `Confirmed for ${plural(confirmed.length, 'machine')} · catalogue evidence` : fits.length ? 'Only conditional fitment is recorded' : 'No fitment evidence',
+      detail: confirmed.length
+        ? `Confirmed for ${plural(confirmed.length, 'machine')} · catalogue evidence`
+        : fits.length
+          ? 'Only conditional fitment is recorded'
+          : 'No fitment evidence',
       data: fits[0] ? DATA_CLASS_LABEL[fits[0].data_class] : 'Not connected',
     },
     {
       ok: stocked.length > 0,
       title: 'Availability',
-      detail: inv ? `${inv.availability_label ?? 'Not connected'}${inv.total_available != null ? ` · ${inv.total_available} units in ${plural(stocked.length, 'warehouse')}` : ''} · inventory evidence` : 'Reading inventory…',
+      detail: inv
+        ? `${inv.availability_label ?? 'Not connected'}${inv.total_available != null ? ` · ${inv.total_available} units in ${plural(stocked.length, 'warehouse')}` : ''} · inventory evidence`
+        : 'Reading inventory…',
       data: inv ? DATA_CLASS_LABEL[inv.data_class] : '—',
     },
     {
       ok: sup.length > 0,
       title: 'Supplier',
-      detail: sup.length ? `${plural(sup.length, 'supplier relationship')} · supplier evidence` : 'No supplier relationship recorded',
+      detail: sup.length
+        ? `${plural(sup.length, 'supplier relationship')} · supplier evidence`
+        : 'No supplier relationship recorded',
       data: primary ? DATA_CLASS_LABEL[primary.data_class] : 'Not connected',
     },
     {
       ok: true,
       title: 'Provenance',
-      detail: prov ? [prov.source_name ?? prov.source_file, prov.verification].filter(Boolean).join(' · ') : 'Reading provenance…',
+      detail: prov
+        ? [prov.source_name ?? prov.source_file, prov.verification].filter(Boolean).join(' · ')
+        : 'Reading provenance…',
       data: prov ? DATA_CLASS_LABEL[prov.classification] : '—',
     },
   ]
@@ -78,11 +111,18 @@ export function Investigation({ overview, onTab }: { overview: PartOverview; onT
               {fits.map((f) => (
                 <li key={f.model_code} className="kv-row">
                   <span>
-                    <strong className="inv__model">{f.model_code}</strong> {f.name ?? f.machine_type ?? ''}
+                    <strong className="inv__model">{f.model_code}</strong>{' '}
+                    {f.name ?? f.machine_type ?? ''}
                   </span>
                   <span>
-                    <span className={`tag ${isConfirmed(f.fitment_status) ? 'tag-good' : 'tag-warn'}`}>
-                      {isConfirmed(f.fitment_status) ? 'Confirmed fit' : f.fitment_status ? humanize(f.fitment_status) : 'Status not stated'}
+                    <span
+                      className={`tag ${isConfirmed(f.fitment_status) ? 'tag-good' : 'tag-warn'}`}
+                    >
+                      {isConfirmed(f.fitment_status)
+                        ? 'Confirmed fit'
+                        : f.fitment_status
+                          ? humanize(f.fitment_status)
+                          : 'Status not stated'}
                     </span>
                   </span>
                 </li>
@@ -102,22 +142,44 @@ export function Investigation({ overview, onTab }: { overview: PartOverview; onT
             <div className="kv-row">
               <dt>Supplier</dt>
               <dd>
-                {primary ? primary.name ?? primary.supplier_id : 'No supplier relationship recorded'}
-                {primary ? <small>{[primary.is_primary ? 'Primary' : null, primary.lead_time_days != null ? `lead time ${primary.lead_time_days} days` : null, sup.length > 1 ? `${plural(sup.length, 'supplier')} in total` : null].filter(Boolean).join(' · ')}</small> : null}
+                {primary
+                  ? (primary.name ?? primary.supplier_id)
+                  : 'No supplier relationship recorded'}
+                {primary ? (
+                  <small>
+                    {[
+                      primary.is_primary ? 'Primary' : null,
+                      primary.lead_time_days != null
+                        ? `lead time ${primary.lead_time_days} days`
+                        : null,
+                      sup.length > 1 ? `${plural(sup.length, 'supplier')} in total` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </small>
+                ) : null}
               </dd>
             </div>
             <div className="kv-row">
               <dt>Warehouse</dt>
               <dd>
-                {stocked.length ? stocked.map((w) => w.name ?? w.warehouse_id).join(', ') : inv?.state === 'NOT_CONNECTED' ? 'Not connected' : 'No warehouse holds stock'}
-                {stocked.length ? <small>{plural(stocked.length, 'warehouse')} with stock</small> : null}
+                {stocked.length
+                  ? stocked.map((w) => w.name ?? w.warehouse_id).join(', ')
+                  : inv?.state === 'NOT_CONNECTED'
+                    ? 'Not connected'
+                    : 'No warehouse holds stock'}
+                {stocked.length ? (
+                  <small>{plural(stocked.length, 'warehouse')} with stock</small>
+                ) : null}
               </dd>
             </div>
             <div className="kv-row">
               <dt>Availability</dt>
               <dd>
                 {inv?.availability_label ?? (inv ? 'Not connected' : '—')}
-                {inv?.total_available != null ? <small>{inv.total_available} units recorded</small> : null}
+                {inv?.total_available != null ? (
+                  <small>{inv.total_available} units recorded</small>
+                ) : null}
               </dd>
             </div>
           </dl>
@@ -155,7 +217,11 @@ export function Investigation({ overview, onTab }: { overview: PartOverview; onT
           ) : prov ? (
             <p className="pi-empty">No supply, stock or assembly relationships are recorded.</p>
           ) : null}
-          {others > 0 ? <p className="small muted inv__more">and {plural(others, 'further relationship type')} in the graph</p> : null}
+          {others > 0 ? (
+            <p className="small muted inv__more">
+              and {plural(others, 'further relationship type')} in the graph
+            </p>
+          ) : null}
         </section>
 
         <section className="card card-pad" aria-labelledby="inv-why">

@@ -19,13 +19,39 @@ export function Hook({ t }: { t: number }) {
   const exit = seg(t, 2.45, 3.3, easeInOut)
   const pulse = Math.max(0, Math.sin(Math.PI * seg(t, 1.3, 2.3, (u) => u)))
   return (
-    <div style={{ ...box(FRAME), opacity: appear * (1 - exit), transform: `scale(${lerp(1, 0.9, exit)})`, transformOrigin: '50% 50%' }}>
+    <div
+      style={{
+        ...box(FRAME),
+        opacity: appear * (1 - exit),
+        transform: `scale(${lerp(1, 0.9, exit)})`,
+        transformOrigin: '50% 50%',
+      }}
+    >
       <div className="lf-hook">
-        {img ? <img src={img} alt="" style={{ transform: `scale(${lerp(1.12, 1.02, seg(t, 0, 3.3, (u) => u))})`, filter: `saturate(${lerp(1, 0.25, down)}) brightness(${lerp(1, 0.9, down)})` }} /> : null}
+        {img ? (
+          <img
+            src={img}
+            alt=""
+            style={{
+              transform: `scale(${lerp(
+                1.12,
+                1.02,
+                seg(t, 0, 3.3, (u) => u),
+              )})`,
+              filter: `saturate(${lerp(1, 0.25, down)}) brightness(${lerp(1, 0.9, down)})`,
+            }}
+          />
+        ) : null}
         <i className="lf-hook__veil" style={{ opacity: down * 0.55 }} />
       </div>
-      <div className="lf-hook__chip" style={{ opacity: Math.min(1, chip * 1.5), transform: `translateY(${(1 - chip) * 18}px)` }}>
-        <span className="lf-hook__dot" style={{ boxShadow: `0 0 0 ${8 * pulse}px rgb(217 119 6 / ${0.22 * pulse})` }} />
+      <div
+        className="lf-hook__chip"
+        style={{ opacity: Math.min(1, chip * 1.5), transform: `translateY(${(1 - chip) * 18}px)` }}
+      >
+        <span
+          className="lf-hook__dot"
+          style={{ boxShadow: `0 0 0 ${8 * pulse}px rgb(217 119 6 / ${0.22 * pulse})` }}
+        />
         <strong>{D.machine.model}</strong>
         <span>Machine down</span>
       </div>
@@ -51,7 +77,14 @@ export function Narration({ t }: { t: number }) {
         const o = window01(t, l.a, l.b, 0.45)
         if (o < 0.01) return null
         return (
-          <p key={l.text} className="lf-narration" style={{ opacity: o, transform: `translateY(${(1 - rise(t, l.a, l.a + 0.6)) * 10 + (1 - fall(t, l.b - 0.45, l.b)) * -6}px)` }}>
+          <p
+            key={l.text}
+            className="lf-narration"
+            style={{
+              opacity: o,
+              transform: `translateY(${(1 - rise(t, l.a, l.a + 0.6)) * 10 + (1 - fall(t, l.b - 0.45, l.b)) * -6}px)`,
+            }}
+          >
             {l.text}
           </p>
         )

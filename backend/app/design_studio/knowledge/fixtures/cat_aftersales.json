@@ -1,0 +1,80 @@
+{
+ "pack": "cat_aftersales",
+ "records": [
+  {
+   "name": "case1",
+   "entity": "ent_svc_service_case",
+   "role": "role_svc_agent",
+   "values": {
+    "description": "Hydraulic arm leaks under load",
+    "priority": "URGENT",
+    "status": "OPEN",
+    "opened_on": "2026-10-15",
+    "service_date": "2026-10-20"
+   },
+   "refs": {
+    "ent_core_customer": "cust1",
+    "ent_mfg_machine": "machine1"
+   },
+   "shared": false
+  },
+  {
+   "name": "claim1",
+   "entity": "ent_svc_warranty_claim",
+   "role": "role_svc_warranty",
+   "values": {
+    "claim_amount": 480
+   },
+   "refs": {
+    "ent_svc_service_case": "case1"
+   },
+   "shared": false
+  },
+  {
+   "name": "visit1",
+   "entity": "ent_svc_service_visit",
+   "role": "role_svc_agent",
+   "values": {
+    "scheduled_at": "2026-10-22T08:00:00Z"
+   },
+   "refs": {
+    "ent_svc_service_case": "case1"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_svc_case",
+   "bind": {
+    "ent_core_customer": "cust1",
+    "ent_mfg_machine": "machine1",
+    "ent_svc_service_case": "case1",
+    "ent_svc_warranty_claim": "claim1",
+    "ent_svc_service_visit": "visit1"
+   },
+   "set": {
+    "claim": [
+     {
+      "record": "claim1",
+      "role": "role_svc_warranty",
+      "values": {
+       "decision": "APPROVED"
+      }
+     }
+    ],
+    "visit": [
+     {
+      "record": "visit1",
+      "role": "role_svc_technician",
+      "values": {
+       "outcome": "FIXED",
+       "parts_used": "Hydraulic seal kit"
+      }
+     }
+    ]
+   },
+   "ends": "done"
+  }
+ ]
+}

@@ -14,7 +14,9 @@ export default function MachinesPage() {
   const countries = [...new Set(plants.map((p) => p.country))]
   usePageMeta({
     title: 'Machines',
-    description: data ? `The Noordveld range: ${machines.length} machines across the ${families.join(', ')}, built at ${plants.map((p) => p.city).join(', ')}.` : 'The Noordveld range of machines.',
+    description: data
+      ? `The Noordveld range: ${machines.length} machines across the ${families.join(', ')}, built at ${plants.map((p) => p.city).join(', ')}.`
+      : 'The Noordveld range of machines.',
     path: '/machines',
   })
   return (
@@ -30,7 +32,8 @@ export default function MachinesPage() {
           <Reveal delay={120} className="page-head__side">
             {data ? (
               <p className="lead">
-                {machines.length} machines across the {families.join(', ')}, built at {countWord(plants.length)} plants in {countries.map(inText).join(' and ')}.
+                {machines.length} machines across the {families.join(', ')}, built at{' '}
+                {countWord(plants.length)} plants in {countries.map(inText).join(' and ')}.
               </p>
             ) : (
               <p className="lead">Loading the range…</p>
@@ -48,7 +51,12 @@ export default function MachinesPage() {
       </section>
 
       {families.map((family) => (
-        <section key={family} id={slug(family)} className="family section" aria-labelledby={`${slug(family)}-title`}>
+        <section
+          key={family}
+          id={slug(family)}
+          className="family section"
+          aria-labelledby={`${slug(family)}-title`}
+        >
           <div className="container">
             <Reveal className="family__head">
               <h2 id={`${slug(family)}-title`} className="h2">

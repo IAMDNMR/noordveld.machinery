@@ -1,0 +1,37 @@
+{
+ "pack": "cap_approvals",
+ "records": [
+  {
+   "name": "apr1",
+   "entity": "ent_apr_request",
+   "role": "role_apr_requester",
+   "values": {
+    "subject": "Extra budget for the pilot",
+    "amount": 1800,
+    "requested_on": "2026-10-15"
+   },
+   "refs": {},
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_apr_approval",
+   "bind": {
+    "ent_apr_request": "apr1"
+   },
+   "set": {
+    "decide": [
+     {
+      "record": "apr1",
+      "role": "role_apr_approver",
+      "values": {
+       "decision": "APPROVED"
+      }
+     }
+    ]
+   },
+   "ends": "approved"
+  }
+ ]
+}

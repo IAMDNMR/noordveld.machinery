@@ -1,0 +1,127 @@
+{
+  "fps": 30,
+  "duration": 33,
+  "scenes": {
+    "opening": [
+      0,
+      8
+    ],
+    "yoa": [
+      8,
+      14
+    ],
+    "turn": [
+      14,
+      17
+    ],
+    "gecko": [
+      17,
+      27
+    ],
+    "invite": [
+      27,
+      33
+    ]
+  },
+  "vo": {
+    "vo1": 0.5,
+    "vo2": 3.1,
+    "vo3": 8.2,
+    "vo4": 14.3,
+    "vo5": 17.15,
+    "vo6a": 26.5,
+    "vo6b": 29.25,
+    "vo6c": 31.1
+  },
+  "captions": [
+    [
+      3.3,
+      4.8,
+      "The part number's discontinued,"
+    ],
+    [
+      4.8,
+      7.25,
+      "and the answer is buried in three catalogues."
+    ],
+    [
+      8.4,
+      9.75,
+      "Now ask your own AI."
+    ],
+    [
+      10.45,
+      13.3,
+      "It knows your parts, your suppliers, your history."
+    ],
+    [
+      17.3,
+      18.95,
+      "BlueGecko gets that data right,"
+    ],
+    [
+      18.95,
+      22.0,
+      "from any ERP, CRM or legacy system."
+    ],
+    [
+      26.7,
+      29.3,
+      "See both, live, on 29 October."
+    ],
+    [
+      29.4,
+      31.1,
+      "Ninth floor, B. Amsterdam."
+    ]
+  ],
+  "sfx": {
+    "alarm": [
+      0.95,
+      1.75,
+      2.55
+    ],
+    "stop": [
+      0.85
+    ],
+    "stamp": [
+      3.95
+    ],
+    "nomatch": [
+      5.5,
+      6.0,
+      6.5
+    ],
+    "whoosh": [
+      2.75,
+      7.6,
+      13.75,
+      16.8,
+      20.1,
+      22.75,
+      26.8,
+      29.85
+    ],
+    "type": [
+      8.25,
+      9.4
+    ],
+    "pop": [
+      10.25,
+      10.8,
+      12.55,
+      12.95,
+      17.3,
+      20.3,
+      20.6,
+      20.9
+    ],
+    "shatter": [
+      14.72
+    ],
+    "count": [
+      24.1,
+      25.1
+    ]
+  }
+}

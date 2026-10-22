@@ -1,6 +1,6 @@
 import { PackageSearch, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { ApiError } from '../../api'
+import type { ApiError } from '../../api/index'
 
 export function LoadingView({ label, rows = 6 }: { label: string; rows?: number }) {
   return (
@@ -15,11 +15,21 @@ export function LoadingView({ label, rows = 6 }: { label: string; rows?: number 
   )
 }
 
-export function ErrorView({ error, onRetry, what }: { error: ApiError; onRetry: () => void; what: string }) {
+export function ErrorView({
+  error,
+  onRetry,
+  what,
+}: {
+  error: ApiError
+  onRetry: () => void
+  what: string
+}) {
   return (
     <div className="scat__empty" role="alert">
       <TriangleAlert size={44} strokeWidth={1.1} aria-hidden="true" />
-      <h3>{error.status === 0 ? 'The parts service is not reachable' : `${what} could not be loaded`}</h3>
+      <h3>
+        {error.status === 0 ? 'The parts service is not reachable' : `${what} could not be loaded`}
+      </h3>
       <p>{error.message}</p>
       <button type="button" className="btn btn-secondary" onClick={onRetry}>
         Try again
@@ -28,7 +38,15 @@ export function ErrorView({ error, onRetry, what }: { error: ApiError; onRetry: 
   )
 }
 
-export function EmptyView({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
+export function EmptyView({
+  title,
+  children,
+  action,
+}: {
+  title: string
+  children: ReactNode
+  action?: ReactNode
+}) {
   return (
     <div className="scat__empty">
       <PackageSearch size={44} strokeWidth={1.1} aria-hidden="true" />

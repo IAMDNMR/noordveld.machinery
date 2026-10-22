@@ -11,7 +11,8 @@ import '../sections/home.css'
 export function HomePage() {
   usePageMeta({
     title: 'Noordveld Machinery B.V. — Built for demanding work',
-    description: 'Industrial and agricultural machinery engineered for performance, reliability and the work that keeps industries moving. Fictional company and demonstration data.',
+    description:
+      'Industrial and agricultural machinery engineered for performance, reliability and the work that keeps industries moving. Fictional company and demonstration data.',
     path: '/',
   })
   return (

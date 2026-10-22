@@ -1,6 +1,18 @@
 import { Check, HandCoins, MapPin, Package, Store, Truck, User, Wrench } from 'lucide-react'
 import { clamp01, easeOut, lerp, seg } from '../../lib/math'
-import { DrawPath, Glyph, Label, SCENE_H, SCENE_W, accent, accentInk, ink, ink2, ink3, line } from './primitives'
+import {
+  DrawPath,
+  Glyph,
+  Label,
+  SCENE_H,
+  SCENE_W,
+  accent,
+  accentInk,
+  ink,
+  ink2,
+  ink3,
+  line,
+} from './primitives'
 
 /*
   One continuous journey: Need → Seller → Product → Transaction → Delivery → Service.
@@ -53,7 +65,12 @@ const rowTarget = { x: PX + 130, y: PY + ROW_Y(0) + 16 }
 
 const LEGS = [
   { a: 0.025, b: CLICK[0] - 0.012, from: { x: 160, y: 462 }, to: nodeTarget(0) },
-  ...[1, 2, 3, 4].map((i) => ({ a: lineFrom(i) + 0.03, b: CLICK[i] - 0.012, from: nodeTarget(i - 1), to: nodeTarget(i) })),
+  ...[1, 2, 3, 4].map((i) => ({
+    a: lineFrom(i) + 0.03,
+    b: CLICK[i] - 0.012,
+    from: nodeTarget(i - 1),
+    to: nodeTarget(i),
+  })),
   { a: CLICK[DELIVERY] + 0.03, b: PICK - 0.014, from: nodeTarget(DELIVERY), to: rowTarget },
   { a: CLOSE[0] - 0.005, b: CLICK[LAST] - 0.012, from: rowTarget, to: nodeTarget(LAST) },
 ]
@@ -77,12 +94,21 @@ const cursorAt = (p: number) => {
 /** 1 at `at`, easing to 0 either side over `span` */
 const bump = (p: number, at: number, span: number): number => clamp01(1 - Math.abs(p - at) / span)
 
-const meta = { fontFamily: 'var(--font-sans)', fontSize: 'var(--scene-meta, 17px)', letterSpacing: '-0.01em' } as const
+const meta = {
+  fontFamily: 'var(--font-sans)',
+  fontSize: 'var(--scene-meta, 17px)',
+  letterSpacing: '-0.01em',
+} as const
 
 export function CommerceScene({ p }: { p: number }) {
   const tip = NODES.slice(1).reduce((sum, _, k) => sum + seg(p, lineFrom(k + 1), lineTo(k + 1)), 0)
   const tipX = lerp(NODES[0].x, NODES[LAST].x, tip / LAST)
-  const moving = Math.max(0, ...NODES.slice(1).map((_, k) => clamp01(Math.min((p - lineFrom(k + 1)) / 0.01, (lineTo(k + 1) - p) / 0.01))))
+  const moving = Math.max(
+    0,
+    ...NODES.slice(1).map((_, k) =>
+      clamp01(Math.min((p - lineFrom(k + 1)) / 0.01, (lineTo(k + 1) - p) / 0.01)),
+    ),
+  )
   const current = CLICK.reduce((idx, c, i) => (p >= c ? i : idx), -1)
 
   const cursor = cursorAt(p)
@@ -95,9 +121,27 @@ export function CommerceScene({ p }: { p: number }) {
   const height = lerp(PH_OPEN, PH, seg(p, PICK, ROUTE[0] + 0.02))
 
   return (
-    <svg viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} role="presentation" aria-hidden="true" width="100%" height="100%">
-      <DrawPath d={`M${NODES[0].x} ${Y} L${NODES[LAST].x} ${Y}`} t={1} stroke={ink2} width={1.5} dash="2 9" opacity={seg(p, 0, 0.06)} />
-      <DrawPath d={`M${NODES[0].x} ${Y} L${NODES[LAST].x} ${Y}`} t={tip / LAST} stroke={accent} width={3} />
+    <svg
+      viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
+      role="presentation"
+      aria-hidden="true"
+      width="100%"
+      height="100%"
+    >
+      <DrawPath
+        d={`M${NODES[0].x} ${Y} L${NODES[LAST].x} ${Y}`}
+        t={1}
+        stroke={ink2}
+        width={1.5}
+        dash="2 9"
+        opacity={seg(p, 0, 0.06)}
+      />
+      <DrawPath
+        d={`M${NODES[0].x} ${Y} L${NODES[LAST].x} ${Y}`}
+        t={tip / LAST}
+        stroke={accent}
+        width={3}
+      />
       {moving > 0 ? (
         <g opacity={moving}>
           <circle cx={tipX} cy={Y} r={16} fill="var(--accent-soft)" />
@@ -113,8 +157,22 @@ export function CommerceScene({ p }: { p: number }) {
         return (
           <g key={n.label}>
             <circle cx={n.x} cy={Y} r={50} fill="var(--accent-soft)" opacity={act * appear} />
-            <Glyph icon={n.icon} x={n.x} y={Y + (1 - appear) * 14} size={54} scale={pop} color={reached ? accent : ink} opacity={appear} />
-            <Label x={n.x} y={Y + 96} opacity={appear} fill={reached ? ink : ink2} className={i === current ? undefined : 'scene-label--minor'}>
+            <Glyph
+              icon={n.icon}
+              x={n.x}
+              y={Y + (1 - appear) * 14}
+              size={54}
+              scale={pop}
+              color={reached ? accent : ink}
+              opacity={appear}
+            />
+            <Label
+              x={n.x}
+              y={Y + 96}
+              opacity={appear}
+              fill={reached ? ink : ink2}
+              className={i === current ? undefined : 'scene-label--minor'}
+            >
               {n.label}
             </Label>
           </g>
@@ -127,17 +185,52 @@ export function CommerceScene({ p }: { p: number }) {
         const opacity = seg(p, inAt, inAt + 0.025) * (1 - seg(p, outAt, outAt + 0.02))
         if (opacity < 0.01) return null
         return (
-          <text key={n.caption} x={X0 - 8} y={150 + (1 - opacity) * 8} opacity={opacity} style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--scene-caption, 30px)', fontWeight: 600, letterSpacing: '-0.025em', fill: ink }}>
+          <text
+            key={n.caption}
+            x={X0 - 8}
+            y={150 + (1 - opacity) * 8}
+            opacity={opacity}
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 'var(--scene-caption, 30px)',
+              fontWeight: 600,
+              letterSpacing: '-0.025em',
+              fill: ink,
+            }}
+          >
             {n.caption}
           </text>
         )
       })}
 
       {open > 0.01 ? (
-        <g transform={`translate(${PX} ${PY + PH - height + (1 - open) * 14}) translate(${PW / 2} ${height}) scale(${0.94 + 0.06 * open}) translate(${-PW / 2} ${-height})`} opacity={open} style={{ filter: 'drop-shadow(0 18px 28px rgb(10 50 44 / 0.12))' }}>
-          <rect width={PW} height={height} rx={16} fill="var(--paper)" stroke={line} strokeWidth={1} />
-          <path d={`M${PW / 2 - 11} ${height} L${PW / 2} ${height + 11} L${PW / 2 + 11} ${height}`} fill="var(--paper)" stroke={line} strokeWidth={1} />
-          <line x1={PW / 2 - 10} x2={PW / 2 + 10} y1={height} y2={height} stroke="var(--paper)" strokeWidth={2} />
+        <g
+          transform={`translate(${PX} ${PY + PH - height + (1 - open) * 14}) translate(${PW / 2} ${height}) scale(${0.94 + 0.06 * open}) translate(${-PW / 2} ${-height})`}
+          opacity={open}
+          style={{ filter: 'drop-shadow(0 18px 28px rgb(10 50 44 / 0.12))' }}
+        >
+          <rect
+            width={PW}
+            height={height}
+            rx={16}
+            fill="var(--paper)"
+            stroke={line}
+            strokeWidth={1}
+          />
+          <path
+            d={`M${PW / 2 - 11} ${height} L${PW / 2} ${height + 11} L${PW / 2 + 11} ${height}`}
+            fill="var(--paper)"
+            stroke={line}
+            strokeWidth={1}
+          />
+          <line
+            x1={PW / 2 - 10}
+            x2={PW / 2 + 10}
+            y1={height}
+            y2={height}
+            stroke="var(--paper)"
+            strokeWidth={2}
+          />
           <text x={24} y={38} style={{ ...meta, fontWeight: 500, fill: ink3 }}>
             Delivery options
           </text>
@@ -149,15 +242,37 @@ export function CommerceScene({ p }: { p: number }) {
             const dim = i === 0 ? 1 : lerp(1, 0.4, pick)
             return (
               <g key={o.name} opacity={on * dim} transform={`translate(0 ${(1 - on) * 6})`}>
-                {i === 0 ? <rect x={12} y={y} width={PW - 24} height={32} rx={9} fill="var(--accent-soft)" opacity={chosen} /> : null}
-                <circle cx={36} cy={y + 16} r={8} fill="none" stroke={ink3} strokeWidth={1.4} opacity={1 - chosen} />
+                {i === 0 ? (
+                  <rect
+                    x={12}
+                    y={y}
+                    width={PW - 24}
+                    height={32}
+                    rx={9}
+                    fill="var(--accent-soft)"
+                    opacity={chosen}
+                  />
+                ) : null}
+                <circle
+                  cx={36}
+                  cy={y + 16}
+                  r={8}
+                  fill="none"
+                  stroke={ink3}
+                  strokeWidth={1.4}
+                  opacity={1 - chosen}
+                />
                 {i === 0 ? (
                   <g opacity={chosen}>
                     <circle cx={36} cy={y + 16} r={8.5} fill={accent} />
                     <Glyph icon={Check} x={36} y={y + 16} size={12} color="#fff" strokeWidth={3} />
                   </g>
                 ) : null}
-                <text x={56} y={y + 22} style={{ ...meta, fontWeight: i === 0 ? 600 : 500, fill: ink }}>
+                <text
+                  x={56}
+                  y={y + 22}
+                  style={{ ...meta, fontWeight: i === 0 ? 600 : 500, fill: ink }}
+                >
                   {o.name}
                 </text>
                 <text x={PW - 24} y={y + 22} textAnchor="end" style={{ ...meta, fill: ink3 }}>
@@ -171,13 +286,41 @@ export function CommerceScene({ p }: { p: number }) {
             <DrawPath d="M36 196 L294 196" t={1} stroke={ink3} width={1.5} dash="2 8" />
             <DrawPath d="M36 196 L294 196" t={route} stroke={accent} width={2.5} />
             <circle cx={36} cy={196} r={4.5} fill={ink3} />
-            <Glyph icon={MapPin} x={294} y={190} size={22} color={accent} strokeWidth={1.6} opacity={seg(route, 0.9, 1)} />
-            <Glyph icon={Truck} x={lerp(36, 294, route)} y={178} size={22} color={ink} strokeWidth={1.5} opacity={1 - seg(route, 0.92, 1)} />
+            <Glyph
+              icon={MapPin}
+              x={294}
+              y={190}
+              size={22}
+              color={accent}
+              strokeWidth={1.6}
+              opacity={seg(route, 0.9, 1)}
+            />
+            <Glyph
+              icon={Truck}
+              x={lerp(36, 294, route)}
+              y={178}
+              size={22}
+              color={ink}
+              strokeWidth={1.5}
+              opacity={1 - seg(route, 0.92, 1)}
+            />
           </g>
-          <text x={24} y={230} opacity={seg(p, ROUTE[0], ROUTE[0] + 0.02) * (1 - seg(p, ROUTE[1] - 0.01, ROUTE[1] + 0.01))} style={{ ...meta, fontWeight: 500, fill: ink3 }}>
+          <text
+            x={24}
+            y={230}
+            opacity={
+              seg(p, ROUTE[0], ROUTE[0] + 0.02) * (1 - seg(p, ROUTE[1] - 0.01, ROUTE[1] + 0.01))
+            }
+            style={{ ...meta, fontWeight: 500, fill: ink3 }}
+          >
             On its way
           </text>
-          <text x={24} y={230} opacity={seg(p, ROUTE[1] - 0.01, ROUTE[1] + 0.02)} style={{ ...meta, fontWeight: 600, fill: accentInk }}>
+          <text
+            x={24}
+            y={230}
+            opacity={seg(p, ROUTE[1] - 0.01, ROUTE[1] + 0.02)}
+            style={{ ...meta, fontWeight: 600, fill: accentInk }}
+          >
             Arrives tomorrow
           </text>
         </g>
@@ -185,12 +328,33 @@ export function CommerceScene({ p }: { p: number }) {
 
       {CLICKS.map((c) => {
         const t = seg(p, c.at, c.at + 0.05, easeOut)
-        return t > 0 && t < 1 ? <circle key={c.at} cx={c.x - 5} cy={c.y - 3} r={10 + 36 * t} fill="none" stroke={accent} strokeWidth={2} opacity={0.55 * (1 - t)} /> : null
+        return t > 0 && t < 1 ? (
+          <circle
+            key={c.at}
+            cx={c.x - 5}
+            cy={c.y - 3}
+            r={10 + 36 * t}
+            fill="none"
+            stroke={accent}
+            strokeWidth={2}
+            opacity={0.55 * (1 - t)}
+          />
+        ) : null
       })}
 
       {cursorOpacity > 0.01 ? (
-        <g transform={`translate(${cursor.x} ${cursor.y}) scale(${cursorScale})`} opacity={cursorOpacity} style={{ filter: 'drop-shadow(0 3px 5px rgb(10 50 44 / 0.28))' }}>
-          <path d="M0 0 L0 20.5 L5.2 15.8 L8.8 24 L12.4 22.4 L8.8 14.4 L15.6 14.4 Z" fill={ink} stroke="#fff" strokeWidth={1.6} strokeLinejoin="round" />
+        <g
+          transform={`translate(${cursor.x} ${cursor.y}) scale(${cursorScale})`}
+          opacity={cursorOpacity}
+          style={{ filter: 'drop-shadow(0 3px 5px rgb(10 50 44 / 0.28))' }}
+        >
+          <path
+            d="M0 0 L0 20.5 L5.2 15.8 L8.8 24 L12.4 22.4 L8.8 14.4 L15.6 14.4 Z"
+            fill={ink}
+            stroke="#fff"
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+          />
         </g>
       ) : null}
     </svg>

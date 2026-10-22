@@ -1,0 +1,4018 @@
+{
+ "business": {
+  "brief": {
+   "capability": "",
+   "constraints": [],
+   "dependencies": [],
+   "domain_id": null,
+   "goal": "",
+   "outcomes": [],
+   "problem": "",
+   "purpose": "",
+   "subdomain": "",
+   "user_types": []
+  },
+  "decisions": [
+   {
+    "affects": [
+     "rule_carrier_eligibility"
+    ],
+    "answer": "",
+    "deferral_reason": "",
+    "id": "dec_carrier_selection",
+    "origin": null,
+    "question": "Who selects the carrier: the planner, an automatic rule, or a customer preference, and on what criteria?",
+    "status": "open"
+   },
+   {
+    "affects": [
+     "rule_delivery_outcome"
+    ],
+    "answer": "",
+    "deferral_reason": "",
+    "id": "dec_delay_threshold",
+    "origin": null,
+    "question": "How late is late? When does a delay become an exception, and who is told?",
+    "status": "open"
+   },
+   {
+    "affects": [
+     "rule_pod_required"
+    ],
+    "answer": "",
+    "deferral_reason": "",
+    "id": "dec_pod_requirements",
+    "origin": null,
+    "question": "What counts as proof of delivery (signature, photo, code), and can a delivery be closed without it?",
+    "status": "open"
+   },
+   {
+    "affects": [
+     "rule_handoff_complete",
+     "wh_handoff"
+    ],
+    "answer": "",
+    "deferral_reason": "",
+    "id": "dec_partial_handoff",
+    "origin": null,
+    "question": "May a handoff release part of an order, and does transport plan each part separately?",
+    "status": "open"
+   }
+  ],
+  "entities": [
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "order_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Order id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "order_status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Order status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "order_date",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Order date",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "date",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "currency",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Currency",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "subtotal_ex_vat",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Subtotal ex vat",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "shipping_ex_vat",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Shipping ex vat",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "shipping_method",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Shipping method",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "vat_rate",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Vat rate",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "vat_amount",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Vat amount",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "order_total_incl_vat",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Order total incl vat",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "channel",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Channel",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "Synthetic demonstration entity.",
+    "id": "ent_order",
+    "name": "Order",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "one_to_many",
+      "id": "rel_order_contains_line_order_line",
+      "name": "contains line",
+      "required": false,
+      "target": "ent_order_line"
+     },
+     {
+      "cardinality": "one_to_many",
+      "id": "rel_order_has_shipment_shipment",
+      "name": "has shipment",
+      "required": false,
+      "target": "ent_shipment"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: order"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "order_line_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Order line id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "source_id_value",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Source id value",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "line_no",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Line no",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "integer",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "quantity",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Quantity",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "integer",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "unit_price_eur",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Unit price eur",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "line_total_eur",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Line total eur",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "allocation_status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Allocation status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "Synthetic demonstration entity.",
+    "id": "ent_order_line",
+    "name": "OrderLine",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_order_line_allocated_from_warehouse",
+      "name": "allocated from",
+      "required": false,
+      "target": "ent_warehouse"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_order_line_planned_fulfilment_from_warehouse",
+      "name": "planned fulfilment from",
+      "required": false,
+      "target": "ent_warehouse"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: order_line"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "warehouse_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Warehouse id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "name",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Name",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "personal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "city",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "City",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "country_code",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Country code",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "pickup_allowed",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Pickup allowed",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "boolean",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "ships_to",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Ships to",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "Synthetic demonstration entity.",
+    "id": "ent_warehouse",
+    "name": "Warehouse",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: warehouse"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "pick_task_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Pick task id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "quantity",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Quantity",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "integer",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     }
+    ],
+    "description": "An instruction to pick the quantity of one order line from a warehouse.",
+    "id": "ent_pick_task",
+    "name": "Pick task",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_pick_task_for_line_order_line",
+      "name": "for line",
+      "required": true,
+      "target": "ent_order_line"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_pick_task_from_warehouse_warehouse",
+      "name": "from warehouse",
+      "required": true,
+      "target": "ent_warehouse"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_pick_task_packed_into_pack_unit",
+      "name": "packed into",
+      "required": false,
+      "target": "ent_pack_unit"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: pick_task"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "pack_unit_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Pack unit id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "weight_kg",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Weight kg",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     }
+    ],
+    "description": "A parcel or pallet that holds picked goods for shipping.",
+    "id": "ent_pack_unit",
+    "name": "Pack unit",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: pack_unit"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "handoff_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Handoff id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "released_at",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Released at",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "datetime",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     }
+    ],
+    "description": "The point where packed goods are released to transport.",
+    "id": "ent_fulfilment_handoff",
+    "name": "Fulfilment handoff",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "one_to_many",
+      "id": "rel_fulfilment_handoff_covers_pack_unit",
+      "name": "covers",
+      "required": true,
+      "target": "ent_pack_unit"
+     },
+     {
+      "cardinality": "one_to_one",
+      "id": "rel_fulfilment_handoff_hands_off_to_transport_request",
+      "name": "hands off to",
+      "required": true,
+      "target": "ent_transport_request"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: fulfilment_handoff"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "transport_request_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Transport request id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "requested_pickup_date",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Requested pickup date",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "date",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "requested_delivery_date",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Requested delivery date",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "date",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "special_handling",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Special handling",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     }
+    ],
+    "description": "A request to move goods for an order from a collection point to a delivery address.",
+    "id": "ent_transport_request",
+    "name": "Transport request",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_request_for_order_order",
+      "name": "for order",
+      "required": true,
+      "target": "ent_order"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_request_collects_at_warehouse",
+      "name": "collects at",
+      "required": false,
+      "target": "ent_warehouse"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: transport_request"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "transport_plan_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Transport plan id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "planned_departure",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Planned departure",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "datetime",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "planned_arrival",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Planned arrival",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "datetime",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     }
+    ],
+    "description": "The planner's decision on how a request will be moved: which carrier, vehicle and route.",
+    "id": "ent_transport_plan",
+    "name": "Transport plan",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_plan_fulfils_transport_request",
+      "name": "fulfils",
+      "required": true,
+      "target": "ent_transport_request"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_plan_assigned_carrier_carrier",
+      "name": "assigned carrier",
+      "required": true,
+      "target": "ent_carrier"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_plan_assigned_vehicle_vehicle",
+      "name": "assigned vehicle",
+      "required": false,
+      "target": "ent_vehicle"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_plan_uses_route_route",
+      "name": "uses route",
+      "required": false,
+      "target": "ent_route"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: transport_plan"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "vehicle_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Vehicle id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "registration",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Registration",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "capacity_kg",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Capacity kg",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "capacity_volume_m3",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Capacity volume m3",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     }
+    ],
+    "description": "A vehicle a carrier can assign to a plan, with its capacity.",
+    "id": "ent_vehicle",
+    "name": "Vehicle",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_vehicle_operated_by_carrier",
+      "name": "operated by",
+      "required": true,
+      "target": "ent_carrier"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: vehicle"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "carrier_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Carrier id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "name",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Name",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "personal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "key_basis",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Key basis",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "Synthetic demonstration entity.",
+    "id": "ent_carrier",
+    "name": "Carrier",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: carrier"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "route_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Route id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "origin_location_id",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Origin location id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "destination_location_id",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Destination location id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "transport_mode",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Transport mode",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "planned_transit_days",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Planned transit days",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "integer",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "estimated_cost",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Estimated cost",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "currency",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Currency",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "service_level",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Service level",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "A lane between two locations by a transport mode, with its service level and planned transit time.",
+    "id": "ent_route",
+    "name": "Route",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: route"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "shipment_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Shipment id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "shipment_status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Shipment status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "straight_line_km",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Straight line km",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "est_road_km",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Est road km",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "decimal",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "tracking_ref",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Tracking ref",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "Synthetic demonstration entity.",
+    "id": "ent_shipment",
+    "name": "Shipment",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_shipment_ships_line_order_line",
+      "name": "ships line",
+      "required": false,
+      "target": "ent_order_line"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_shipment_dispatched_from_warehouse",
+      "name": "dispatched from",
+      "required": false,
+      "target": "ent_warehouse"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_shipment_carried_by_carrier",
+      "name": "carried by",
+      "required": false,
+      "target": "ent_carrier"
+     },
+     {
+      "cardinality": "one_to_many",
+      "id": "rel_shipment_has_tracking_event_tracking_event",
+      "name": "has tracking event",
+      "required": false,
+      "target": "ent_tracking_event"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_shipment_follows_route_route",
+      "name": "follows route",
+      "required": false,
+      "target": "ent_route"
+     },
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_shipment_executes_transport_plan",
+      "name": "executes",
+      "required": false,
+      "target": "ent_transport_plan"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: shipment"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "tracking_event_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Tracking event id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "source_id_value",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Source id value",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "event_seq",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Event seq",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "integer",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "event_status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Event status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "event_location",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Event location",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "event_date",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Event date",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "date",
+      "validations": [],
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "description": "Synthetic demonstration entity.",
+    "id": "ent_tracking_event",
+    "name": "TrackingEvent",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: tracking_event"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "pod_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Pod id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "delivered_at",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Delivered at",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "datetime",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "received_by",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Received by",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "evidence_reference",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Evidence reference",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     }
+    ],
+    "description": "The confirmation that a shipment reached the receiver.",
+    "id": "ent_proof_of_delivery",
+    "name": "Proof of delivery",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "one_to_one",
+      "id": "rel_proof_of_delivery_confirms_shipment",
+      "name": "confirms",
+      "required": true,
+      "target": "ent_shipment"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: proof_of_delivery"
+   },
+   {
+    "attributes": [
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "exception_id",
+      "key": true,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Exception id",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "kind",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Kind",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "raised_at",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Raised at",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "datetime",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "resolution",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Resolution",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": false,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "user_entered",
+      "writable": true
+     },
+     {
+      "allow_unknown": false,
+      "default": null,
+      "description": "",
+      "enum": [],
+      "format": null,
+      "id": "status",
+      "key": false,
+      "max_length": null,
+      "maximum": null,
+      "min_length": null,
+      "minimum": null,
+      "name": "Status",
+      "owner_role_id": null,
+      "pattern": null,
+      "reference": null,
+      "required": true,
+      "sensitivity": "internal",
+      "type": "string",
+      "validations": [],
+      "value_source": "system_generated",
+      "writable": false
+     }
+    ],
+    "description": "A delay, failed delivery or other deviation that needs a decision.",
+    "id": "ent_transport_exception",
+    "name": "Transport exception",
+    "origin": null,
+    "owner_role_id": null,
+    "relationships": [
+     {
+      "cardinality": "many_to_one",
+      "id": "rel_transport_exception_affects_shipment",
+      "name": "affects",
+      "required": true,
+      "target": "ent_shipment"
+     }
+    ],
+    "source_system": "Domain pack noordveld_machinery 1.1.0: transport_exception"
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_no_carrier",
+    "name": "No eligible carrier",
+    "origin": null,
+    "recovery": "Re-plan with another route or constraints.",
+    "resolution": "recover",
+    "resolution_state_id": "tl_plan",
+    "trigger": "No carrier is eligible for the route and the goods."
+   },
+   {
+    "id": "exc_capacity_exceeded",
+    "name": "Capacity exceeded",
+    "origin": null,
+    "recovery": "Assign another vehicle or carrier.",
+    "resolution": "recover",
+    "resolution_state_id": "tl_assign",
+    "trigger": "The assigned vehicle cannot carry the load."
+   },
+   {
+    "id": "exc_goods_not_ready",
+    "name": "Goods not released",
+    "origin": null,
+    "recovery": "Wait for the warehouse handoff and check again.",
+    "resolution": "recover",
+    "resolution_state_id": "tl_check_ready",
+    "trigger": "The warehouse has not released the goods for dispatch."
+   },
+   {
+    "id": "exc_delivery_delayed",
+    "name": "Delivery delayed or failed",
+    "origin": null,
+    "recovery": "A dispatcher decides to retry or cancel.",
+    "resolution": "escalate",
+    "resolution_state_id": "tl_resolve",
+    "trigger": "The shipment is past its planned arrival or the delivery failed."
+   },
+   {
+    "id": "exc_pod_missing",
+    "name": "Proof of delivery missing",
+    "origin": null,
+    "recovery": "Record the proof of delivery.",
+    "resolution": "recover",
+    "resolution_state_id": "tl_pod",
+    "trigger": "Delivery was reported but no proof of delivery is recorded."
+   },
+   {
+    "id": "exc_stock_unavailable",
+    "name": "Stock unavailable",
+    "origin": null,
+    "recovery": "The order cannot be fulfilled from this depot.",
+    "resolution": "terminate",
+    "resolution_state_id": "wh_end_unfulfilled",
+    "trigger": "A line has no known stock at the depot."
+   },
+   {
+    "id": "exc_pick_incomplete",
+    "name": "Pick incomplete",
+    "origin": null,
+    "recovery": "Finish picking and packing.",
+    "resolution": "recover",
+    "resolution_state_id": "wh_pick",
+    "trigger": "A pick task is not packed when the handoff is attempted."
+   }
+  ],
+  "integrations": [
+   {
+    "contract_status": "deferred",
+    "direction": "inbound",
+    "entity_ids": [
+     "ent_tracking_event"
+    ],
+    "events": [
+     "Tracking events"
+    ],
+    "failure_handling": "",
+    "id": "int_carrier_tracking",
+    "name": "Carrier tracking feed",
+    "origin": null,
+    "system": "Carrier tracking system"
+   }
+  ],
+  "knowledge": [],
+  "questions": [],
+  "requirements": [
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_transport_request_1",
+      "statement": "A request names the order, the collection point and the delivery address."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_transport_request",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "A transport request can be registered for an order.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_transport_planning_1",
+      "statement": "A plan is linked to its request and, when chosen, to a route."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_transport_planning",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "A planner can plan how a request is moved.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_carrier_assignment_1",
+      "statement": "An ineligible carrier is refused with the reason."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_carrier_assignment",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "Only an eligible carrier can be assigned, and a vehicle where the carrier assigns one.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_capacity_1",
+      "statement": "A plan that exceeds capacity cannot be dispatched and is returned for re-assignment."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_capacity",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "A plan is dispatched only if the vehicle capacity covers the load.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_dispatch_1",
+      "statement": "Dispatch is refused while the warehouse has not released the goods."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_dispatch",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "A dispatcher dispatches a plan once its goods are ready.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_tracking_1",
+      "statement": "An event that cannot follow the previous one is refused."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_tracking",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "Tracking events are recorded in a valid sequence.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_delivery_pod_1",
+      "statement": "A delivery without proof of delivery is not closed."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_delivery_pod",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "A delivery is confirmed with proof of delivery.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_exceptions_1",
+      "statement": "Each exception ends in a retry or a cancellation, with a reason."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_exceptions",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "Delayed or failed deliveries are resolved by a dispatcher.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_warehouse_fulfilment_1",
+      "statement": "Goods are released only when every pick task is packed."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_warehouse_fulfilment",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "Allocated order lines are picked and packed before release to transport.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_req_warehouse_handoff_1",
+      "statement": "The handoff names the pack units it releases."
+     }
+    ],
+    "category": null,
+    "deferral_reason": "",
+    "id": "req_warehouse_handoff",
+    "kind": "functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "A warehouse handoff creates the transport request.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_audit_1",
+      "statement": "A status history lists each change with its actor and time."
+     }
+    ],
+    "category": "auditability",
+    "deferral_reason": "",
+    "id": "nfr_audit",
+    "kind": "non_functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "Every transport and warehouse status change is recorded with who, when and why.",
+    "status": "draft"
+   },
+   {
+    "acceptance_criteria": [
+     {
+      "id": "ac_access_1",
+      "statement": "A user without the permission cannot perform the action."
+     }
+    ],
+    "category": "security",
+    "deferral_reason": "",
+    "id": "nfr_access",
+    "kind": "non_functional",
+    "origin": null,
+    "priority": "must",
+    "statement": "Each action is limited to the roles that hold its permission.",
+    "status": "draft"
+   }
+  ],
+  "roles": [
+   {
+    "approval_authority": [],
+    "id": "tms_planner",
+    "name": "Transport planner",
+    "origin": null,
+    "permissions": [
+     "transport.assign",
+     "transport.plan.write",
+     "transport.request.read",
+     "transport.request.write"
+    ],
+    "responsibilities": [
+     "Transport planner in the TMS application."
+    ]
+   },
+   {
+    "approval_authority": [
+     "Resolve delayed and failed deliveries, including cancelling a transport"
+    ],
+    "id": "tms_dispatcher",
+    "name": "Dispatcher",
+    "origin": null,
+    "permissions": [
+     "exception.resolve",
+     "tracking.write",
+     "transport.dispatch",
+     "transport.request.read"
+    ],
+    "responsibilities": [
+     "Dispatcher in the TMS application."
+    ]
+   },
+   {
+    "approval_authority": [],
+    "id": "tms_carrier_partner",
+    "name": "Carrier or logistics partner",
+    "origin": null,
+    "permissions": [
+     "pod.submit",
+     "tracking.write_own",
+     "transport.assigned.read"
+    ],
+    "responsibilities": [
+     "Carrier or logistics partner in the TMS application."
+    ]
+   },
+   {
+    "approval_authority": [],
+    "id": "wms_operator",
+    "name": "Warehouse operator",
+    "origin": null,
+    "permissions": [
+     "handoff.create",
+     "pack.execute",
+     "pick.execute"
+    ],
+    "responsibilities": [
+     "Warehouse operator in the WMS application."
+    ]
+   },
+   {
+    "approval_authority": [
+     "Decide what to do when stock is unavailable"
+    ],
+    "id": "wms_inventory_manager",
+    "name": "Inventory manager",
+    "origin": null,
+    "permissions": [
+     "allocation.read",
+     "stock.adjust"
+    ],
+    "responsibilities": [
+     "Inventory manager in the WMS application."
+    ]
+   },
+   {
+    "approval_authority": [],
+    "id": "tms_platform",
+    "name": "Platform (automated checks in transport)",
+    "origin": null,
+    "permissions": [],
+    "responsibilities": [
+     "Applies rules automatically"
+    ]
+   },
+   {
+    "approval_authority": [],
+    "id": "wms_platform",
+    "name": "Platform (automated checks in the warehouse)",
+    "origin": null,
+    "permissions": [],
+    "responsibilities": [
+     "Applies rules automatically"
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "condition": "",
+    "description": "A depot can supply the order only if every line has known stock of at least the quantity and a recorded route reaches the destination. Unknown stock is never treated as zero.",
+    "execution": null,
+    "id": "rule_availability",
+    "origin": null,
+    "outcomes": [
+     "AVAILABLE",
+     "INSUFFICIENT_STOCK",
+     "STOCK_UNKNOWN",
+     "NO_ROUTE"
+    ],
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py _plan and place (availability, route_mismatch); docs/ORDER_FLOW.md"
+    },
+    "status": "confirmed",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "Allocation reserves every line or none, in one transaction with row locks.",
+    "execution": null,
+    "id": "rule_allocation",
+    "origin": null,
+    "outcomes": [
+     "RESERVED",
+     "ALLOCATION_FAILED"
+    ],
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/order_flow.py allocate; docs/ORDER_FLOW.md Allocation"
+    },
+    "status": "confirmed",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "A carrier may be assigned only if it is eligible for the route and the goods.",
+    "execution": null,
+    "id": "rule_carrier_eligibility",
+    "origin": null,
+    "outcomes": [
+     "ELIGIBLE",
+     "NOT_ELIGIBLE"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "A plan may be dispatched only if the assigned vehicle's capacity covers the load.",
+    "execution": null,
+    "id": "rule_capacity_check",
+    "origin": null,
+    "outcomes": [
+     "WITHIN_CAPACITY",
+     "EXCEEDS_CAPACITY"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "Goods are released to transport only when every pick task of the handoff is packed.",
+    "execution": null,
+    "id": "rule_handoff_complete",
+    "origin": null,
+    "outcomes": [
+     "COMPLETE",
+     "INCOMPLETE"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "Dispatch waits until the warehouse has released the goods, when they leave a managed warehouse.",
+    "execution": null,
+    "id": "rule_goods_ready",
+    "origin": null,
+    "outcomes": [
+     "READY",
+     "NOT_READY"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "A tracked shipment ends as delivered, delayed past its planned arrival, or failed.",
+    "execution": null,
+    "id": "rule_delivery_outcome",
+    "origin": null,
+    "outcomes": [
+     "DELIVERED",
+     "DELAYED",
+     "FAILED"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "A delivery is complete only when proof of delivery is recorded.",
+    "execution": null,
+    "id": "rule_pod_required",
+    "origin": null,
+    "outcomes": [
+     "POD_RECORDED",
+     "POD_MISSING"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "A dispatcher resolves a delayed or failed delivery by retrying it or cancelling the transport.",
+    "execution": {
+     "fail_outcome": null,
+     "field": "ent_transport_exception.resolution",
+     "kind": "value",
+     "operator": "eq",
+     "other_field": null,
+     "pass_outcome": null,
+     "value": null
+    },
+    "id": "rule_exception_resolution",
+    "origin": null,
+    "outcomes": [
+     "RETRY_DELIVERY",
+     "CANCEL_TRANSPORT"
+    ],
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "TMS/WMS design assumption: the business has not stated this rule"
+    },
+    "status": "assumption",
+    "type": "decision"
+   },
+   {
+    "condition": "",
+    "description": "Tracking events must start with ORDER_CONFIRMED or PICKED, follow the allowed transitions and never be dated backwards.",
+    "execution": null,
+    "id": "rule_tracking_sequence",
+    "origin": null,
+    "outcomes": [],
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/logistics/rules.py sequence_errors and TRANSITIONS"
+    },
+    "status": "confirmed",
+    "type": "validation"
+   }
+  ],
+  "terms": [
+   {
+    "definition": "The point where packed goods are released from the warehouse to transport.",
+    "id": "term_handoff",
+    "origin": null,
+    "term": "Handoff"
+   },
+   {
+    "definition": "The confirmation that a shipment reached the receiver.",
+    "id": "term_pod",
+    "origin": null,
+    "term": "Proof of delivery"
+   }
+  ]
+ },
+ "capability": {
+  "id": "cap_move_and_fulfil",
+  "name": "Fulfil orders from the warehouse and move them to the customer"
+ },
+ "depends_on": [],
+ "description": "Transport lifecycle and warehouse fulfilment workflows. Entities, relationships and roles come from the domain pack noordveld_machinery; rules introduced here are assumptions and the open decisions stay open. Synthetic demonstration knowledge.",
+ "domain_id": "transport_warehouse",
+ "domains": [
+  {
+   "id": "transport_warehouse",
+   "keywords": [
+    "transport",
+    "tms",
+    "dispatch",
+    "carrier",
+    "vehicle",
+    "proof of delivery",
+    "consignment",
+    "warehouse",
+    "wms",
+    "picking",
+    "packing",
+    "handoff",
+    "fulfilment"
+   ],
+   "name": "Transport and warehouse operations",
+   "subdomains": [
+    "Transport management",
+    "Warehouse operations"
+   ]
+  }
+ ],
+ "evidence": [],
+ "id": "noordveld_transport",
+ "layer": "business",
+ "synthetic": true,
+ "title": "Noordveld transport and warehouse (TMS/WMS)",
+ "version": "2026.10.19.1",
+ "workflows": [
+  {
+   "id": "wf_transport_lifecycle",
+   "name": "Transport lifecycle",
+   "states": [
+    {
+     "exception_ids": [],
+     "id": "tl_start",
+     "kind": "start",
+     "label": "A shipment must be moved",
+     "outcome": null,
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [],
+     "role_id": null,
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "tl_request",
+     "kind": "form",
+     "label": "Register the transport request",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.request.write",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_order"
+     ],
+     "requirement_ids": [
+      "req_transport_request"
+     ],
+     "role_id": "tms_planner",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_transport_request"
+     ],
+     "input_fields": {
+      "ent_transport_request": [
+       "requested_pickup_date",
+       "requested_delivery_date",
+       "special_handling"
+      ]
+     },
+     "input_relationships": {
+      "ent_transport_request": [
+       "rel_transport_request_for_order_order",
+       "rel_transport_request_collects_at_warehouse"
+      ]
+     }
+    },
+    {
+     "exception_ids": [
+      "exc_no_carrier"
+     ],
+     "id": "tl_plan",
+     "kind": "form",
+     "label": "Plan the transport",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.plan.write",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_transport_request",
+      "ent_route"
+     ],
+     "requirement_ids": [
+      "req_transport_planning"
+     ],
+     "role_id": "tms_planner",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_transport_plan"
+     ],
+     "input_fields": {
+      "ent_transport_plan": [
+       "planned_departure",
+       "planned_arrival"
+      ]
+     },
+     "input_relationships": {
+      "ent_transport_plan": [
+       "rel_transport_plan_fulfils_transport_request",
+       "rel_transport_plan_uses_route_route"
+      ]
+     }
+    },
+    {
+     "exception_ids": [
+      "exc_no_carrier"
+     ],
+     "id": "tl_check_eligibility",
+     "kind": "branch",
+     "label": "Is a carrier eligible?",
+     "outcome": null,
+     "outputs": [
+      "rule_carrier_eligibility"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_transport_plan",
+      "ent_carrier",
+      "ent_route"
+     ],
+     "requirement_ids": [
+      "req_carrier_assignment"
+     ],
+     "role_id": "tms_platform",
+     "rule_ids": [
+      "rule_carrier_eligibility"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_no_carrier"
+     ],
+     "id": "tl_no_carrier",
+     "kind": "exception",
+     "label": "No eligible carrier",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.plan.write",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_carrier_assignment"
+     ],
+     "role_id": "tms_planner",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_capacity_exceeded"
+     ],
+     "id": "tl_assign",
+     "kind": "form",
+     "label": "Assign carrier and vehicle",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.assign",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_carrier",
+      "ent_vehicle"
+     ],
+     "requirement_ids": [
+      "req_carrier_assignment",
+      "nfr_access"
+     ],
+     "role_id": "tms_planner",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_transport_plan"
+     ],
+     "input_fields": {
+      "ent_transport_plan": []
+     },
+     "input_relationships": {
+      "ent_transport_plan": [
+       "rel_transport_plan_assigned_carrier_carrier",
+       "rel_transport_plan_assigned_vehicle_vehicle"
+      ]
+     }
+    },
+    {
+     "exception_ids": [
+      "exc_capacity_exceeded"
+     ],
+     "id": "tl_check_capacity",
+     "kind": "branch",
+     "label": "Does the vehicle cover the load?",
+     "outcome": null,
+     "outputs": [
+      "rule_capacity_check"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_transport_plan",
+      "ent_vehicle"
+     ],
+     "requirement_ids": [
+      "req_capacity"
+     ],
+     "role_id": "tms_platform",
+     "rule_ids": [
+      "rule_capacity_check"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_capacity_exceeded"
+     ],
+     "id": "tl_capacity_issue",
+     "kind": "exception",
+     "label": "Capacity exceeded",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.plan.write",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_capacity"
+     ],
+     "role_id": "tms_planner",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_goods_not_ready"
+     ],
+     "id": "tl_check_ready",
+     "kind": "branch",
+     "label": "Has the warehouse released the goods?",
+     "outcome": null,
+     "outputs": [
+      "rule_goods_ready"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_transport_request"
+     ],
+     "requirement_ids": [
+      "req_dispatch"
+     ],
+     "role_id": "tms_platform",
+     "rule_ids": [
+      "rule_goods_ready"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_goods_not_ready"
+     ],
+     "id": "tl_wait_goods",
+     "kind": "exception",
+     "label": "Goods not released",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.dispatch",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_dispatch"
+     ],
+     "role_id": "tms_dispatcher",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "tl_dispatch",
+     "kind": "action",
+     "label": "Dispatch",
+     "outcome": null,
+     "outputs": [],
+     "permission": "transport.dispatch",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_transport_plan"
+     ],
+     "requirement_ids": [
+      "req_dispatch",
+      "nfr_access"
+     ],
+     "role_id": "tms_dispatcher",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_shipment"
+     ],
+     "input_fields": {
+      "ent_shipment": []
+     },
+     "input_relationships": {
+      "ent_shipment": [
+       "rel_shipment_executes_transport_plan",
+       "rel_shipment_carried_by_carrier",
+       "rel_shipment_follows_route_route"
+      ]
+     }
+    },
+    {
+     "exception_ids": [],
+     "id": "tl_track",
+     "kind": "action",
+     "label": "Record tracking events",
+     "outcome": null,
+     "outputs": [],
+     "permission": "tracking.write",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_shipment"
+     ],
+     "requirement_ids": [
+      "req_tracking",
+      "nfr_audit"
+     ],
+     "role_id": "tms_dispatcher",
+     "rule_ids": [
+      "rule_tracking_sequence"
+     ],
+     "writes_entity_ids": [
+      "ent_tracking_event"
+     ],
+     "input_fields": {
+      "ent_tracking_event": []
+     },
+     "input_relationships": {
+      "ent_tracking_event": []
+     }
+    },
+    {
+     "exception_ids": [
+      "exc_delivery_delayed"
+     ],
+     "id": "tl_check_delivery",
+     "kind": "branch",
+     "label": "How did the delivery end?",
+     "outcome": null,
+     "outputs": [
+      "rule_delivery_outcome"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_shipment",
+      "ent_tracking_event"
+     ],
+     "requirement_ids": [
+      "req_exceptions",
+      "req_delivery_pod"
+     ],
+     "role_id": "tms_platform",
+     "rule_ids": [
+      "rule_delivery_outcome"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_pod_missing"
+     ],
+     "id": "tl_pod",
+     "kind": "form",
+     "label": "Record proof of delivery",
+     "outcome": null,
+     "outputs": [],
+     "permission": "pod.submit",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_shipment"
+     ],
+     "requirement_ids": [
+      "req_delivery_pod"
+     ],
+     "role_id": "tms_carrier_partner",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_proof_of_delivery"
+     ],
+     "input_fields": {
+      "ent_proof_of_delivery": [
+       "delivered_at",
+       "received_by",
+       "evidence_reference"
+      ]
+     },
+     "input_relationships": {
+      "ent_proof_of_delivery": [
+       "rel_proof_of_delivery_confirms_shipment"
+      ]
+     }
+    },
+    {
+     "exception_ids": [
+      "exc_pod_missing"
+     ],
+     "id": "tl_check_pod",
+     "kind": "branch",
+     "label": "Is proof of delivery recorded?",
+     "outcome": null,
+     "outputs": [
+      "rule_pod_required"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_proof_of_delivery"
+     ],
+     "requirement_ids": [
+      "req_delivery_pod"
+     ],
+     "role_id": "tms_platform",
+     "rule_ids": [
+      "rule_pod_required"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_pod_missing"
+     ],
+     "id": "tl_pod_issue",
+     "kind": "exception",
+     "label": "Proof of delivery missing",
+     "outcome": null,
+     "outputs": [],
+     "permission": "exception.resolve",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_delivery_pod"
+     ],
+     "role_id": "tms_dispatcher",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_delivery_delayed"
+     ],
+     "id": "tl_delay_issue",
+     "kind": "exception",
+     "label": "Delivery delayed or failed",
+     "outcome": null,
+     "outputs": [],
+     "permission": "exception.resolve",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_exceptions"
+     ],
+     "role_id": "tms_dispatcher",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "tl_resolve",
+     "kind": "form",
+     "label": "Resolve the exception",
+     "outcome": null,
+     "outputs": [
+      "rule_exception_resolution"
+     ],
+     "permission": "exception.resolve",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_shipment"
+     ],
+     "requirement_ids": [
+      "req_exceptions"
+     ],
+     "role_id": "tms_dispatcher",
+     "rule_ids": [
+      "rule_exception_resolution"
+     ],
+     "writes_entity_ids": [
+      "ent_transport_exception"
+     ],
+     "input_fields": {
+      "ent_transport_exception": [
+       "kind",
+       "raised_at",
+       "resolution"
+      ]
+     },
+     "input_relationships": {
+      "ent_transport_exception": [
+       "rel_transport_exception_affects_shipment"
+      ]
+     }
+    },
+    {
+     "exception_ids": [],
+     "id": "tl_end_delivered",
+     "kind": "end",
+     "label": "Delivered and confirmed",
+     "outcome": "success",
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [],
+     "role_id": null,
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "tl_end_cancelled",
+     "kind": "end",
+     "label": "Transport cancelled",
+     "outcome": "cancelled",
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [],
+     "role_id": null,
+     "rule_ids": [],
+     "writes_entity_ids": []
+    }
+   ],
+   "transitions": [
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t1",
+     "source": "tl_start",
+     "target": "tl_request"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t2",
+     "source": "tl_request",
+     "target": "tl_plan"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t3",
+     "source": "tl_plan",
+     "target": "tl_check_eligibility"
+    },
+    {
+     "condition": {
+      "field": "rule_carrier_eligibility",
+      "kind": "equals",
+      "value": "ELIGIBLE"
+     },
+     "id": "tl_t4",
+     "source": "tl_check_eligibility",
+     "target": "tl_assign"
+    },
+    {
+     "condition": {
+      "field": "rule_carrier_eligibility",
+      "kind": "equals",
+      "value": "NOT_ELIGIBLE"
+     },
+     "id": "tl_t5",
+     "source": "tl_check_eligibility",
+     "target": "tl_no_carrier"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t6",
+     "source": "tl_no_carrier",
+     "target": "tl_plan"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t7",
+     "source": "tl_assign",
+     "target": "tl_check_capacity"
+    },
+    {
+     "condition": {
+      "field": "rule_capacity_check",
+      "kind": "equals",
+      "value": "WITHIN_CAPACITY"
+     },
+     "id": "tl_t8",
+     "source": "tl_check_capacity",
+     "target": "tl_check_ready"
+    },
+    {
+     "condition": {
+      "field": "rule_capacity_check",
+      "kind": "equals",
+      "value": "EXCEEDS_CAPACITY"
+     },
+     "id": "tl_t9",
+     "source": "tl_check_capacity",
+     "target": "tl_capacity_issue"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t10",
+     "source": "tl_capacity_issue",
+     "target": "tl_assign"
+    },
+    {
+     "condition": {
+      "field": "rule_goods_ready",
+      "kind": "equals",
+      "value": "READY"
+     },
+     "id": "tl_t11",
+     "source": "tl_check_ready",
+     "target": "tl_dispatch"
+    },
+    {
+     "condition": {
+      "field": "rule_goods_ready",
+      "kind": "equals",
+      "value": "NOT_READY"
+     },
+     "id": "tl_t12",
+     "source": "tl_check_ready",
+     "target": "tl_wait_goods"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t13",
+     "source": "tl_wait_goods",
+     "target": "tl_check_ready"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t14",
+     "source": "tl_dispatch",
+     "target": "tl_track"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t15",
+     "source": "tl_track",
+     "target": "tl_check_delivery"
+    },
+    {
+     "condition": {
+      "field": "rule_delivery_outcome",
+      "kind": "equals",
+      "value": "DELIVERED"
+     },
+     "id": "tl_t16",
+     "source": "tl_check_delivery",
+     "target": "tl_pod"
+    },
+    {
+     "condition": {
+      "field": "rule_delivery_outcome",
+      "kind": "equals",
+      "value": "DELAYED"
+     },
+     "id": "tl_t17",
+     "source": "tl_check_delivery",
+     "target": "tl_delay_issue"
+    },
+    {
+     "condition": {
+      "field": "rule_delivery_outcome",
+      "kind": "equals",
+      "value": "FAILED"
+     },
+     "id": "tl_t18",
+     "source": "tl_check_delivery",
+     "target": "tl_delay_issue"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t19",
+     "source": "tl_pod",
+     "target": "tl_check_pod"
+    },
+    {
+     "condition": {
+      "field": "rule_pod_required",
+      "kind": "equals",
+      "value": "POD_RECORDED"
+     },
+     "id": "tl_t20",
+     "source": "tl_check_pod",
+     "target": "tl_end_delivered"
+    },
+    {
+     "condition": {
+      "field": "rule_pod_required",
+      "kind": "equals",
+      "value": "POD_MISSING"
+     },
+     "id": "tl_t21",
+     "source": "tl_check_pod",
+     "target": "tl_pod_issue"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t22",
+     "source": "tl_pod_issue",
+     "target": "tl_pod"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "tl_t23",
+     "source": "tl_delay_issue",
+     "target": "tl_resolve"
+    },
+    {
+     "condition": {
+      "field": "rule_exception_resolution",
+      "kind": "equals",
+      "value": "RETRY_DELIVERY"
+     },
+     "id": "tl_t24",
+     "source": "tl_resolve",
+     "target": "tl_track"
+    },
+    {
+     "condition": {
+      "field": "rule_exception_resolution",
+      "kind": "equals",
+      "value": "CANCEL_TRANSPORT"
+     },
+     "id": "tl_t25",
+     "source": "tl_resolve",
+     "target": "tl_end_cancelled"
+    }
+   ],
+   "version": 1
+  },
+  {
+   "id": "wf_warehouse_fulfilment",
+   "name": "Warehouse fulfilment and handoff",
+   "states": [
+    {
+     "exception_ids": [],
+     "id": "wh_start",
+     "kind": "start",
+     "label": "An order line needs fulfilling",
+     "outcome": null,
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [],
+     "role_id": null,
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_stock_unavailable"
+     ],
+     "id": "wh_check_stock",
+     "kind": "branch",
+     "label": "Is stock available?",
+     "outcome": null,
+     "outputs": [
+      "rule_availability"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_order_line",
+      "ent_warehouse"
+     ],
+     "requirement_ids": [
+      "req_warehouse_fulfilment"
+     ],
+     "role_id": "wms_platform",
+     "rule_ids": [
+      "rule_availability"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_stock_unavailable"
+     ],
+     "id": "wh_stock_issue",
+     "kind": "exception",
+     "label": "Stock unavailable",
+     "outcome": null,
+     "outputs": [],
+     "permission": "stock.adjust",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_warehouse_fulfilment"
+     ],
+     "role_id": "wms_inventory_manager",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "wh_allocate",
+     "kind": "action",
+     "label": "Allocate stock to the order line",
+     "outcome": null,
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_order_line",
+      "ent_warehouse"
+     ],
+     "requirement_ids": [
+      "req_warehouse_fulfilment"
+     ],
+     "role_id": "wms_platform",
+     "rule_ids": [
+      "rule_allocation"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_pick_incomplete"
+     ],
+     "id": "wh_pick",
+     "kind": "form",
+     "label": "Pick the goods",
+     "outcome": null,
+     "outputs": [],
+     "permission": "pick.execute",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_order_line",
+      "ent_warehouse"
+     ],
+     "requirement_ids": [
+      "req_warehouse_fulfilment"
+     ],
+     "role_id": "wms_operator",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_pick_task"
+     ],
+     "input_fields": {
+      "ent_pick_task": [
+       "quantity"
+      ]
+     },
+     "input_relationships": {
+      "ent_pick_task": [
+       "rel_pick_task_for_line_order_line",
+       "rel_pick_task_from_warehouse_warehouse"
+      ]
+     }
+    },
+    {
+     "exception_ids": [],
+     "id": "wh_pack",
+     "kind": "form",
+     "label": "Pack the goods",
+     "outcome": null,
+     "outputs": [],
+     "permission": "pack.execute",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_pick_task"
+     ],
+     "requirement_ids": [
+      "req_warehouse_fulfilment"
+     ],
+     "role_id": "wms_operator",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_pack_unit"
+     ],
+     "input_fields": {
+      "ent_pack_unit": [
+       "weight_kg"
+      ]
+     },
+     "input_relationships": {
+      "ent_pack_unit": []
+     }
+    },
+    {
+     "exception_ids": [
+      "exc_pick_incomplete"
+     ],
+     "id": "wh_check_complete",
+     "kind": "branch",
+     "label": "Is everything packed?",
+     "outcome": null,
+     "outputs": [
+      "rule_handoff_complete"
+     ],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_pick_task",
+      "ent_pack_unit"
+     ],
+     "requirement_ids": [
+      "req_warehouse_handoff"
+     ],
+     "role_id": "wms_platform",
+     "rule_ids": [
+      "rule_handoff_complete"
+     ],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [
+      "exc_pick_incomplete"
+     ],
+     "id": "wh_incomplete_issue",
+     "kind": "exception",
+     "label": "Pick incomplete",
+     "outcome": null,
+     "outputs": [],
+     "permission": "pick.execute",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [
+      "req_warehouse_handoff"
+     ],
+     "role_id": "wms_operator",
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "wh_handoff",
+     "kind": "form",
+     "label": "Hand off to transport",
+     "outcome": null,
+     "outputs": [],
+     "permission": "handoff.create",
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [
+      "ent_pack_unit"
+     ],
+     "requirement_ids": [
+      "req_warehouse_handoff",
+      "nfr_audit"
+     ],
+     "role_id": "wms_operator",
+     "rule_ids": [],
+     "writes_entity_ids": [
+      "ent_fulfilment_handoff",
+      "ent_transport_request"
+     ],
+     "input_fields": {
+      "ent_fulfilment_handoff": [
+       "released_at"
+      ],
+      "ent_transport_request": [
+       "requested_pickup_date",
+       "requested_delivery_date",
+       "special_handling"
+      ]
+     },
+     "input_relationships": {
+      "ent_fulfilment_handoff": [
+       "rel_fulfilment_handoff_covers_pack_unit",
+       "rel_fulfilment_handoff_hands_off_to_transport_request"
+      ],
+      "ent_transport_request": []
+     }
+    },
+    {
+     "exception_ids": [],
+     "id": "wh_end_handed_off",
+     "kind": "end",
+     "label": "Handed off to transport",
+     "outcome": "success",
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [],
+     "role_id": null,
+     "rule_ids": [],
+     "writes_entity_ids": []
+    },
+    {
+     "exception_ids": [],
+     "id": "wh_end_unfulfilled",
+     "kind": "end",
+     "label": "Cannot be fulfilled",
+     "outcome": "failure",
+     "outputs": [],
+     "permission": null,
+     "postconditions": [],
+     "preconditions": [],
+     "reads_entity_ids": [],
+     "requirement_ids": [],
+     "role_id": null,
+     "rule_ids": [],
+     "writes_entity_ids": []
+    }
+   ],
+   "transitions": [
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t1",
+     "source": "wh_start",
+     "target": "wh_check_stock"
+    },
+    {
+     "condition": {
+      "field": "rule_availability",
+      "kind": "equals",
+      "value": "AVAILABLE"
+     },
+     "id": "wh_t2",
+     "source": "wh_check_stock",
+     "target": "wh_allocate"
+    },
+    {
+     "condition": {
+      "field": "rule_availability",
+      "kind": "equals",
+      "value": "INSUFFICIENT_STOCK"
+     },
+     "id": "wh_t3",
+     "source": "wh_check_stock",
+     "target": "wh_stock_issue"
+    },
+    {
+     "condition": {
+      "field": "rule_availability",
+      "kind": "equals",
+      "value": "STOCK_UNKNOWN"
+     },
+     "id": "wh_t3b",
+     "source": "wh_check_stock",
+     "target": "wh_stock_issue"
+    },
+    {
+     "condition": {
+      "field": "rule_availability",
+      "kind": "equals",
+      "value": "NO_ROUTE"
+     },
+     "id": "wh_t3c",
+     "source": "wh_check_stock",
+     "target": "wh_stock_issue"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t4",
+     "source": "wh_stock_issue",
+     "target": "wh_end_unfulfilled"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t5",
+     "source": "wh_allocate",
+     "target": "wh_pick"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t6",
+     "source": "wh_pick",
+     "target": "wh_pack"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t7",
+     "source": "wh_pack",
+     "target": "wh_check_complete"
+    },
+    {
+     "condition": {
+      "field": "rule_handoff_complete",
+      "kind": "equals",
+      "value": "COMPLETE"
+     },
+     "id": "wh_t8",
+     "source": "wh_check_complete",
+     "target": "wh_handoff"
+    },
+    {
+     "condition": {
+      "field": "rule_handoff_complete",
+      "kind": "equals",
+      "value": "INCOMPLETE"
+     },
+     "id": "wh_t9",
+     "source": "wh_check_complete",
+     "target": "wh_incomplete_issue"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t10",
+     "source": "wh_incomplete_issue",
+     "target": "wh_pick"
+    },
+    {
+     "condition": {
+      "field": null,
+      "kind": "always",
+      "value": null
+     },
+     "id": "wh_t11",
+     "source": "wh_handoff",
+     "target": "wh_end_handed_off"
+    }
+   ],
+   "version": 1
+  }
+ ],
+ "company": {
+  "id": "noordveld",
+  "name": "Noordveld Machinery (synthetic demo company)",
+  "industry": "Industrial machinery and spare parts",
+  "operating_context": "The synthetic demonstration company used throughout this repository; its definitions come from the Noordveld demo data.",
+  "business_units": [],
+  "systems_of_record": []
+ },
+ "usage": "source_reference"
+}

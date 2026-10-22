@@ -1,4 +1,24 @@
-import { BadgeCheck, Cog, Factory, Fingerprint, Layers, MapPin, Puzzle, Replace, ScanSearch, Scale, Search, ShoppingBag, PackageCheck, Tag, Target, ThumbsUp, Warehouse, CircleCheck, type LucideIcon } from 'lucide-react'
+import {
+  BadgeCheck,
+  Cog,
+  Factory,
+  Fingerprint,
+  Layers,
+  MapPin,
+  Puzzle,
+  Replace,
+  ScanSearch,
+  Scale,
+  Search,
+  ShoppingBag,
+  PackageCheck,
+  Tag,
+  Target,
+  ThumbsUp,
+  Warehouse,
+  CircleCheck,
+  type LucideIcon,
+} from 'lucide-react'
 
 export interface ProcessStep {
   id: string
@@ -10,13 +30,57 @@ export interface ProcessStep {
 
 /** The user-facing stages of turning a requirement into an outcome. No model internals are shown. */
 export const processSteps: readonly ProcessStep[] = [
-  { id: 'understand', icon: Target, name: 'Understand', question: 'What does the customer actually need?', detail: 'A broken machine and a deadline is not a request for a product. It is a need to be operational again.' },
-  { id: 'context', icon: ScanSearch, name: 'Context', question: 'What machine, product or environment is involved?', detail: 'Machine, model and assembly give the need a precise setting.' },
-  { id: 'discover', icon: Search, name: 'Discover', question: 'What possible solutions exist?', detail: 'Parts, alternatives and suppliers that could restore the machine.' },
-  { id: 'verify', icon: BadgeCheck, name: 'Verify', question: 'Which solutions are compatible?', detail: 'Only options that genuinely fit the machine move forward.' },
-  { id: 'evaluate', icon: Scale, name: 'Evaluate', question: 'How do the options compare against what matters?', detail: 'Price, budget, availability, location, delivery, alternatives and the customer’s own priorities.' },
-  { id: 'recommend', icon: ThumbsUp, name: 'Recommend', question: 'Which option best matches the requirement?', detail: 'The option that best matches the stated requirements and the available evidence.' },
-  { id: 'act', icon: ShoppingBag, name: 'Act', question: 'With the customer’s approval, make it happen.', detail: 'Purchase, then fulfilment, then delivery.' },
+  {
+    id: 'understand',
+    icon: Target,
+    name: 'Understand',
+    question: 'What does the customer actually need?',
+    detail:
+      'A broken machine and a deadline is not a request for a product. It is a need to be operational again.',
+  },
+  {
+    id: 'context',
+    icon: ScanSearch,
+    name: 'Context',
+    question: 'What machine, product or environment is involved?',
+    detail: 'Machine, model and assembly give the need a precise setting.',
+  },
+  {
+    id: 'discover',
+    icon: Search,
+    name: 'Discover',
+    question: 'What possible solutions exist?',
+    detail: 'Parts, alternatives and suppliers that could restore the machine.',
+  },
+  {
+    id: 'verify',
+    icon: BadgeCheck,
+    name: 'Verify',
+    question: 'Which solutions are compatible?',
+    detail: 'Only options that genuinely fit the machine move forward.',
+  },
+  {
+    id: 'evaluate',
+    icon: Scale,
+    name: 'Evaluate',
+    question: 'How do the options compare against what matters?',
+    detail:
+      'Price, budget, availability, location, delivery, alternatives and the customer’s own priorities.',
+  },
+  {
+    id: 'recommend',
+    icon: ThumbsUp,
+    name: 'Recommend',
+    question: 'Which option best matches the requirement?',
+    detail: 'The option that best matches the stated requirements and the available evidence.',
+  },
+  {
+    id: 'act',
+    icon: ShoppingBag,
+    name: 'Act',
+    question: 'With the customer’s approval, make it happen.',
+    detail: 'Purchase, then fulfilment, then delivery.',
+  },
 ]
 
 export interface RelationNode {

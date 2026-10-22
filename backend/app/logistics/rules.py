@@ -8,6 +8,7 @@ Route progress
   Position: all legs completed -> delivered. Otherwise the first incomplete leg is the CURRENT leg; the shipment is `on_leg` while the last event is a
   departure, transit or out-for-delivery event, and `at_location` while the last event is an arrival or customs event.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -17,11 +18,15 @@ from typing import Any
 TRANSITIONS: dict[str, frozenset[str]] = {
     "ORDER_CONFIRMED": frozenset({"BOOKED"}),
     "BOOKED": frozenset({"DEPARTED_ORIGIN"}),
-    "DEPARTED_ORIGIN": frozenset({"IN_TRANSIT", "ARRIVED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY", "DELIVERED"}),
+    "DEPARTED_ORIGIN": frozenset(
+        {"IN_TRANSIT", "ARRIVED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY", "DELIVERED"}
+    ),
     "ARRIVED_PORT": frozenset({"CUSTOMS", "DEPARTED_PORT", "ARRIVED_DC"}),
     "CUSTOMS": frozenset({"DEPARTED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY"}),
     "DEPARTED_PORT": frozenset({"IN_TRANSIT", "ARRIVED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY"}),
-    "IN_TRANSIT": frozenset({"IN_TRANSIT", "ARRIVED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY", "DELIVERED"}),
+    "IN_TRANSIT": frozenset(
+        {"IN_TRANSIT", "ARRIVED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY", "DELIVERED"}
+    ),
     "ARRIVED_DC": frozenset({"DEPARTED_ORIGIN", "IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED"}),
     "OUT_FOR_DELIVERY": frozenset({"DELIVERED"}),
     "DELIVERED": frozenset(),
@@ -31,14 +36,19 @@ TRANSITIONS: dict[str, frozenset[str]] = {
 FIRST_EVENTS = frozenset({"ORDER_CONFIRMED", "PICKED"})
 ARRIVAL_TYPES = frozenset({"ARRIVED_PORT", "ARRIVED_DC", "DELIVERED"})
 MOVING_TYPES = frozenset({"DEPARTED_ORIGIN", "DEPARTED_PORT", "IN_TRANSIT", "OUT_FOR_DELIVERY"})
-AT_SEA_OR_IN_FLIGHT = frozenset({"IN_TRANSIT"})  # the only status that may have no location: there is no live position
+AT_SEA_OR_IN_FLIGHT = frozenset(
+    {"IN_TRANSIT"}
+)  # the only status that may have no location: there is no live position
 
 
 def sequence_errors(events: list[dict[str, Any]]) -> list[str]:
     """Why a shipment's events are impossible, or [] when they are coherent. `events`: dicts with timestamp, event_type, location_id, sequence (any order given)."""
     if not events:
         return []
-    ordered = sorted(events, key=lambda e: (e.get("sequence") if e.get("sequence") is not None else 0, e["timestamp"]))
+    ordered = sorted(
+        events,
+        key=lambda e: (e.get("sequence") if e.get("sequence") is not None else 0, e["timestamp"]),
+    )
     errors: list[str] = []
     if ordered[0]["event_type"] not in FIRST_EVENTS:
         errors.append(f"starts with {ordered[0]['event_type']}")
@@ -51,7 +61,11 @@ def sequence_errors(events: list[dict[str, Any]]) -> list[str]:
         if nxt["event_type"] not in TRANSITIONS.get(prev["event_type"], frozenset()):
             errors.append(f"{nxt['event_type']} cannot follow {prev['event_type']}")
     for e in ordered:
-        if not e.get("location_id") and e["event_type"] not in AT_SEA_OR_IN_FLIGHT and not e.get("location_text"):
+        if (
+            not e.get("location_id")
+            and e["event_type"] not in AT_SEA_OR_IN_FLIGHT
+            and not e.get("location_text")
+        ):
             errors.append(f"{e['event_type']} has no location")
     return errors
 
@@ -63,10 +77,23 @@ def tracking_group_check(records: list[Any]) -> dict[str, str]:
         by_shipment[r.shipment_id].append(r)
     bad: dict[str, str] = {}
     for shipment, evs in by_shipment.items():
-        errs = sequence_errors([{"timestamp": e.timestamp, "event_type": e.event_type, "location_id": e.location_id, "location_text": e.location_text, "sequence": e.sequence} for e in evs])
+        errs = sequence_errors(
+            [
+                {
+                    "timestamp": e.timestamp,
+                    "event_type": e.event_type,
+                    "location_id": e.location_id,
+                    "location_text": e.location_text,
+                    "sequence": e.sequence,
+                }
+                for e in evs
+            ]
+        )
         if errs:
             for e in evs:
-                bad[e.tracking_event_id] = f"impossible event sequence for {shipment}: {'; '.join(errs[:3])}"
+                bad[e.tracking_event_id] = (
+                    f"impossible event sequence for {shipment}: {'; '.join(errs[:3])}"
+                )
     return bad
 
 
@@ -74,19 +101,29 @@ def route_progress(legs: list[dict[str, Any]], events: list[dict[str, Any]]) -> 
     """Where a shipment is on its route, from discrete events only. `legs`: sequence, origin_location_id, destination_location_id (any order);
     `events`: timestamp, event_type, location_id, sequence."""
     legs = sorted(legs, key=lambda leg: leg["sequence"])
-    evs = sorted(events, key=lambda e: (e.get("sequence") if e.get("sequence") is not None else 0, e["timestamp"]))
-    arrived = {e["location_id"] for e in evs if e["event_type"] in ARRIVAL_TYPES and e.get("location_id")}
+    evs = sorted(
+        events,
+        key=lambda e: (e.get("sequence") if e.get("sequence") is not None else 0, e["timestamp"]),
+    )
+    arrived = {
+        e["location_id"] for e in evs if e["event_type"] in ARRIVAL_TYPES and e.get("location_id")
+    }
     completed: list[dict[str, Any]] = []
     for leg in legs:
         if leg["destination_location_id"] in arrived:
             completed.append(leg)
         else:
             break  # legs complete in order: a later arrival does not complete an earlier unfinished leg
-    remaining = legs[len(completed):]
+    remaining = legs[len(completed) :]
     last = evs[-1] if evs else None
-    out: dict[str, Any] = {"legs_total": len(legs), "completed_legs": [leg["sequence"] for leg in completed], "remaining_legs": [leg["sequence"] for leg in remaining],
-                           "current_leg": remaining[0]["sequence"] if remaining else None, "last_event_type": last["event_type"] if last else None,
-                           "last_event_location_id": last.get("location_id") if last else None}
+    out: dict[str, Any] = {
+        "legs_total": len(legs),
+        "completed_legs": [leg["sequence"] for leg in completed],
+        "remaining_legs": [leg["sequence"] for leg in remaining],
+        "current_leg": remaining[0]["sequence"] if remaining else None,
+        "last_event_type": last["event_type"] if last else None,
+        "last_event_location_id": last.get("location_id") if last else None,
+    }
     if not legs:
         out["position"] = "no_route"
     elif not evs:

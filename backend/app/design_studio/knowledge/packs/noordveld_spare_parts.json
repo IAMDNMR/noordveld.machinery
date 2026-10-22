@@ -1,0 +1,2644 @@
+{
+ "id": "noordveld_spare_parts",
+ "version": "2026.10.19.1",
+ "layer": "business",
+ "title": "Noordveld Machinery: spare-parts ordering and warranty (synthetic reference)",
+ "description": "Derived from the implemented Noordveld order flow (app/services/checkout.py, order_flow.py), roles (app/core/roles.py), warranty rules (app/lifecycle/rules.py) and tracking rules (app/logistics/rules.py). Confirmed rules cite that code. Anything not implemented is an assumption or an open business decision. Noordveld is a fictional demo company.",
+ "synthetic": true,
+ "domain_id": "spare_parts_commerce",
+ "capability": {
+  "id": "cap_sell_spare_parts",
+  "name": "Sell and support spare parts for installed machines"
+ },
+ "depends_on": [
+  "reusable_parts_commerce"
+ ],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_find_part",
+    "statement": "A customer can find an orderable spare part by part number, name or alias.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_find_exact",
+      "statement": "Searching an exact part number returns that part."
+     },
+     {
+      "id": "ac_find_not_orderable",
+      "statement": "A part that is not VERIFIED and orderable cannot be ordered, and the reason is shown."
+     }
+    ]
+   },
+   {
+    "id": "req_compatibility",
+    "statement": "When a machine is selected, an order only accepts parts recorded as fitting that machine.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_fit_refused",
+      "statement": "A part without a fitment record for the selected machine is refused with the reason that it is not recorded as fitting."
+     }
+    ]
+   },
+   {
+    "id": "req_order_details",
+    "statement": "The customer provides requester and receiver contact details and a recorded delivery destination.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_details_format",
+      "statement": "A malformed email or phone number is refused and the field is named."
+     },
+     {
+      "id": "ac_details_destination",
+      "statement": "A destination that is not a recorded ship-to is refused."
+     }
+    ]
+   },
+   {
+    "id": "req_stock_truth",
+    "statement": "Availability is shown per depot, and unknown stock is never treated as zero.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_stock_selectable",
+      "statement": "A depot is selectable only if every line has known stock of at least the ordered quantity and a recorded route to the destination."
+     },
+     {
+      "id": "ac_stock_unknown",
+      "statement": "UNKNOWN stock is displayed as unknown and is never allocated."
+     }
+    ]
+   },
+   {
+    "id": "req_place_once",
+    "statement": "Placing an order is idempotent.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_place_once",
+      "statement": "Resubmitting with the same key returns the existing order and creates nothing new."
+     }
+    ]
+   },
+   {
+    "id": "req_allocation",
+    "statement": "Stock is reserved for every line of an order or for none.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_alloc_atomic",
+      "statement": "If any line cannot be reserved, the order becomes ALLOCATION_FAILED and no stock changes."
+     },
+     {
+      "id": "ac_alloc_concurrent",
+      "statement": "Two orders cannot reserve the same units."
+     }
+    ]
+   },
+   {
+    "id": "req_shipment",
+    "statement": "Shipment progress and shipment exceptions are recorded and visible.",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_ship_resume",
+      "statement": "A shipment exception can be resumed, and a failed delivery can be cancelled."
+     },
+     {
+      "id": "ac_ship_sequence",
+      "statement": "Tracking events follow the allowed event sequence."
+     }
+    ]
+   },
+   {
+    "id": "req_dealer_service",
+    "statement": "Optional dealer installation is recorded until it completes.",
+    "priority": "should",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_service_none",
+      "statement": "An order without dealer service completes after delivery."
+     },
+     {
+      "id": "ac_service_done",
+      "statement": "Completing the dealer service completes the order."
+     }
+    ]
+   },
+   {
+    "id": "req_warranty",
+    "statement": "A warranty claim receives a deterministic, explained outcome.",
+    "priority": "should",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_warranty_outcome",
+      "statement": "The outcome is ELIGIBLE, NOT_ELIGIBLE, REQUIRES_REVIEW or INSUFFICIENT_DATA, with the factors that decided it."
+     }
+    ]
+   },
+   {
+    "id": "nfr_audit",
+    "statement": "Every order status change is recorded with its actor and time.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_audit_event",
+      "statement": "Each order action writes a status event in the same transaction as the change."
+     }
+    ]
+   },
+   {
+    "id": "nfr_access",
+    "statement": "The backend enforces role permissions for every order action.",
+    "kind": "non_functional",
+    "category": "security",
+    "priority": "must",
+    "status": "draft",
+    "acceptance_criteria": [
+     {
+      "id": "ac_access_denied",
+      "statement": "An End User attempting an Order Processor action is refused with 403."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_end_user",
+    "name": "End User (customer)",
+    "responsibilities": [
+     "Find parts",
+     "Place orders",
+     "Follow own orders",
+     "Cancel own order while it is early"
+    ],
+    "permissions": [
+     "agentic_shopping.use",
+     "cart.read",
+     "cart.write",
+     "catalogue.read",
+     "intelligence.query",
+     "orders.cancel_own",
+     "orders.place",
+     "orders.read_own",
+     "parts.read"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_order_processor",
+    "name": "Order Processor",
+    "responsibilities": [
+     "Process customer orders",
+     "Handle allocation failures",
+     "Move orders through fulfilment and shipment",
+     "Record dealer service steps on the dealer's behalf"
+    ],
+    "permissions": [
+     "catalogue.read",
+     "fulfilment.read",
+     "intelligence.query",
+     "inventory.read",
+     "orders.process",
+     "orders.read",
+     "orders.update_status",
+     "parts.read",
+     "shipment.read",
+     "tracking.read"
+    ],
+    "approval_authority": [
+     "Reject an order that is NEW or ALLOCATION_FAILED"
+    ]
+   },
+   {
+    "id": "role_platform",
+    "name": "Noordveld platform (automated checks)",
+    "responsibilities": [
+     "Enforce catalogue status, fitment, availability, idempotency and allocation rules on the server"
+    ],
+    "permissions": [],
+    "approval_authority": []
+   },
+   {
+    "id": "role_dealer",
+    "name": "Dealer",
+    "responsibilities": [
+     "Install delivered parts when service is requested",
+     "File warranty claims"
+    ],
+    "permissions": [],
+    "approval_authority": []
+   },
+   {
+    "id": "role_warranty_reviewer",
+    "name": "Warranty reviewer (to be confirmed)",
+    "responsibilities": [
+     "Decide claims that the rules mark REQUIRES_REVIEW"
+    ],
+    "permissions": [],
+    "approval_authority": [
+     "Accept or decline a warranty claim under review"
+    ]
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_part",
+    "name": "Part",
+    "description": "A catalogue part.",
+    "source_system": "Noordveld graph: Part, PartCatalogProfile",
+    "attributes": [
+     {
+      "id": "part_id",
+      "name": "Part ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "part_number",
+      "name": "Part number",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "category",
+      "name": "Category",
+      "type": "string",
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "part_status",
+      "name": "Catalogue status",
+      "type": "string",
+      "required": true,
+      "description": "Only VERIFIED parts can be ordered.",
+      "enum": [
+       "VERIFIED",
+       "IDENTIFICATION_REQUIRED",
+       "AMBIGUOUS",
+       "UNVERIFIED"
+      ],
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "orderable",
+      "name": "Orderable online",
+      "type": "boolean",
+      "allow_unknown": true,
+      "description": "Missing means unknown, which is not orderable.",
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_part_fits",
+      "name": "fits",
+      "target": "ent_machine",
+      "cardinality": "many_to_many"
+     }
+    ]
+   },
+   {
+    "id": "ent_machine",
+    "name": "Machine",
+    "source_system": "Noordveld graph: Machine, MachineVariant",
+    "attributes": [
+     {
+      "id": "machine_id",
+      "name": "Machine ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "model_code",
+      "name": "Model",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_fitment",
+    "name": "Fitment",
+    "description": "A recorded part-to-machine fit. No record means not recorded, not proven incompatible.",
+    "source_system": "Noordveld graph: FITS, FitmentContext",
+    "attributes": [
+     {
+      "id": "fitment_id",
+      "name": "Fitment ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "status",
+      "name": "Fitment status",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_fitment_part",
+      "name": "of part",
+      "target": "ent_part",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_fitment_machine",
+      "name": "on machine",
+      "target": "ent_machine",
+      "cardinality": "many_to_one"
+     }
+    ]
+   },
+   {
+    "id": "ent_depot",
+    "name": "Depot",
+    "source_system": "Noordveld graph: Warehouse",
+    "attributes": [
+     {
+      "id": "warehouse_id",
+      "name": "Depot ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "country_code",
+      "name": "Country",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_inventory",
+    "name": "Depot stock",
+    "description": "Stock of one part at one depot.",
+    "source_system": "Noordveld graph: AVAILABLE_AT",
+    "owner_role_id": "role_platform",
+    "attributes": [
+     {
+      "id": "row_id",
+      "name": "Stock row ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "stock_status",
+      "name": "Stock status",
+      "type": "string",
+      "required": true,
+      "description": "IN_STOCK, LOW_STOCK or UNKNOWN.",
+      "value_source": "imported",
+      "enum": [
+       "IN_STOCK",
+       "LOW_STOCK",
+       "ON_ORDER",
+       "OUT_OF_STOCK",
+       "UNKNOWN"
+      ],
+      "writable": false
+     },
+     {
+      "id": "available",
+      "name": "Available quantity",
+      "type": "integer",
+      "allow_unknown": true,
+      "description": "Unknown is not zero.",
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "reserved",
+      "name": "Reserved quantity",
+      "type": "integer",
+      "required": true,
+      "value_source": "calculated",
+      "description": "Changed only by allocation, release and dispatch.",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_stock_part",
+      "name": "of part",
+      "target": "ent_part",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_stock_depot",
+      "name": "at depot",
+      "target": "ent_depot",
+      "cardinality": "many_to_one"
+     }
+    ]
+   },
+   {
+    "id": "ent_ship_to",
+    "name": "Ship-to",
+    "source_system": "Noordveld graph: ShipTo",
+    "attributes": [
+     {
+      "id": "ship_to_id",
+      "name": "Ship-to ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "street",
+      "name": "Street",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "postal_code",
+      "name": "Postal code",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "city",
+      "name": "City",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "country_code",
+      "name": "Country",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_route",
+    "name": "Transport route",
+    "source_system": "Noordveld graph: TransportRoute (synthetic)",
+    "attributes": [
+     {
+      "id": "route_id",
+      "name": "Route ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "transport_mode",
+      "name": "Transport mode",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "estimated_days",
+      "name": "Estimated days",
+      "type": "integer",
+      "allow_unknown": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_route_depot",
+      "name": "from depot",
+      "target": "ent_depot",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_route_ship_to",
+      "name": "to ship-to",
+      "target": "ent_ship_to",
+      "cardinality": "many_to_one"
+     }
+    ]
+   },
+   {
+    "id": "ent_dealer",
+    "name": "Dealer",
+    "source_system": "Noordveld graph: Dealer",
+    "attributes": [
+     {
+      "id": "dealer_id",
+      "name": "Dealer ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "authorized_status",
+      "name": "Authorisation status",
+      "type": "string",
+      "allow_unknown": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_order",
+    "name": "Order",
+    "source_system": "Noordveld graph: Order (written by the order service)",
+    "owner_role_id": "role_order_processor",
+    "attributes": [
+     {
+      "id": "order_id",
+      "name": "Order number",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "description": "Assigned by the order service from one counter (HCME-ORD-000001…).",
+      "writable": false
+     },
+     {
+      "id": "idempotency_key",
+      "name": "Submission key",
+      "type": "string",
+      "required": true,
+      "value_source": "system_generated",
+      "description": "Generated per submission so a retry returns the same order.",
+      "writable": false
+     },
+     {
+      "id": "order_status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "value_source": "calculated",
+      "description": "Changed only by order actions on the server.",
+      "writable": false
+     },
+     {
+      "id": "requester_name",
+      "name": "Requester name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "personal"
+     },
+     {
+      "id": "requester_email",
+      "name": "Requester email",
+      "type": "string",
+      "required": true,
+      "validations": [
+       {
+        "kind": "email"
+       }
+      ],
+      "sensitivity": "personal",
+      "format": "email"
+     },
+     {
+      "id": "requester_phone",
+      "name": "Requester phone",
+      "type": "string",
+      "required": true,
+      "sensitivity": "personal",
+      "format": "phone"
+     },
+     {
+      "id": "receiver_name",
+      "name": "Receiver name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "personal"
+     },
+     {
+      "id": "receiver_phone",
+      "name": "Receiver phone",
+      "type": "string",
+      "required": true,
+      "sensitivity": "personal",
+      "format": "phone"
+     },
+     {
+      "id": "dealer_service_required",
+      "name": "Dealer installation requested",
+      "type": "boolean",
+      "required": true,
+      "default": false
+     },
+     {
+      "id": "cost_status",
+      "name": "Cost status",
+      "type": "string",
+      "required": true,
+      "description": "NOT_AVAILABLE: totals are not calculated.",
+      "value_source": "calculated",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_order_lines",
+      "name": "contains",
+      "target": "ent_order_line",
+      "cardinality": "one_to_many"
+     },
+     {
+      "id": "rel_order_ship_to",
+      "name": "ships to",
+      "target": "ent_ship_to",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_order_dealer",
+      "name": "for dealer",
+      "target": "ent_dealer",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_order_route",
+      "name": "uses route",
+      "target": "ent_route",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_order_events",
+      "name": "has status event",
+      "target": "ent_status_event",
+      "cardinality": "one_to_many"
+     }
+    ]
+   },
+   {
+    "id": "ent_order_line",
+    "name": "Order line",
+    "source_system": "Noordveld graph: OrderLine",
+    "attributes": [
+     {
+      "id": "order_line_id",
+      "name": "Line ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "id": "quantity",
+      "name": "Quantity",
+      "type": "integer",
+      "required": true,
+      "description": "Merged per part and machine; at most 99.",
+      "minimum": 1,
+      "maximum": 99
+     },
+     {
+      "id": "machine_model",
+      "name": "For machine",
+      "type": "string"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_line_part",
+      "name": "orders part",
+      "target": "ent_part",
+      "cardinality": "many_to_one"
+     }
+    ]
+   },
+   {
+    "id": "ent_status_event",
+    "name": "Order status event",
+    "source_system": "Noordveld graph: OrderStatusEvent",
+    "attributes": [
+     {
+      "id": "status_event_id",
+      "name": "Event ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "id": "actor_id",
+      "name": "Actor",
+      "type": "string",
+      "required": true,
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "id": "at",
+      "name": "Recorded at",
+      "type": "datetime",
+      "required": true,
+      "value_source": "system_generated",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_shipment",
+    "name": "Shipment",
+    "source_system": "Noordveld graph: Shipment",
+    "attributes": [
+     {
+      "id": "shipment_id",
+      "name": "Shipment ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "id": "status",
+      "name": "Shipment status",
+      "type": "string",
+      "required": true,
+      "value_source": "calculated",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_shipment_events",
+      "name": "has tracking event",
+      "target": "ent_tracking_event",
+      "cardinality": "one_to_many"
+     }
+    ]
+   },
+   {
+    "id": "ent_tracking_event",
+    "name": "Tracking event",
+    "source_system": "Noordveld graph: TrackingEvent (synthetic)",
+    "attributes": [
+     {
+      "id": "tracking_event_id",
+      "name": "Event ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "event_type",
+      "name": "Event type",
+      "type": "string",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "timestamp",
+      "name": "Time",
+      "type": "datetime",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "location_id",
+      "name": "Location",
+      "type": "string",
+      "allow_unknown": true,
+      "description": "Only IN_TRANSIT may have no location.",
+      "value_source": "imported",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_warranty_policy",
+    "name": "Warranty policy",
+    "source_system": "Noordveld graph: WarrantyPolicy (synthetic)",
+    "attributes": [
+     {
+      "id": "warranty_policy_id",
+      "name": "Policy ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "imported",
+      "writable": false
+     },
+     {
+      "id": "coverage_period_days",
+      "name": "Coverage (days)",
+      "type": "integer",
+      "required": true,
+      "value_source": "imported",
+      "writable": false
+     }
+    ]
+   },
+   {
+    "id": "ent_warranty_claim",
+    "name": "Warranty claim",
+    "source_system": "Noordveld graph: WarrantyClaim (synthetic)",
+    "attributes": [
+     {
+      "id": "claim_id",
+      "name": "Claim ID",
+      "type": "string",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false
+     },
+     {
+      "id": "failure_description",
+      "name": "Failure description",
+      "type": "string",
+      "required": true
+     },
+     {
+      "id": "outcome",
+      "name": "Outcome",
+      "type": "string",
+      "allow_unknown": true,
+      "value_source": "calculated",
+      "description": "Set by the warranty evaluation, never typed in.",
+      "writable": false
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_claim_part",
+      "name": "for part",
+      "target": "ent_part",
+      "cardinality": "many_to_one"
+     },
+     {
+      "id": "rel_claim_dealer",
+      "name": "filed by",
+      "target": "ent_dealer",
+      "cardinality": "many_to_one"
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_part_orderable",
+    "description": "A part must exist in the catalogue and be VERIFIED and orderable before it can be ordered.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py _lines (unknown_part, not_orderable); app/services/part_status.py is_orderable"
+    },
+    "condition": "part exists AND part_status = VERIFIED AND orderable = true",
+    "outcomes": [
+     "FOUND",
+     "NOT_FOUND",
+     "NOT_ORDERABLE"
+    ]
+   },
+   {
+    "id": "rule_identification",
+    "description": "Some parts need the machine variant identified before the right part is certain.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "graph_data",
+     "reference": "IdentificationRequirement nodes are shown in part views but are not enforced at checkout"
+    },
+    "outcomes": [
+     "IDENTIFIED",
+     "IDENTIFICATION_NEEDED"
+    ]
+   },
+   {
+    "id": "rule_fitment",
+    "description": "When a machine is selected, a part that is not recorded as fitting that machine is refused.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py _lines (machine_mismatch)"
+    },
+    "condition": "no machine selected OR a fitment record exists for (part, machine)",
+    "outcomes": [
+     "COMPATIBLE",
+     "NOT_RECORDED"
+    ]
+   },
+   {
+    "id": "rule_details_valid",
+    "description": "Requester and receiver need a name, a valid email and phone, and the destination must be a recorded ship-to.",
+    "type": "validation",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py place (invalid_details, destination_not_found)"
+    },
+    "outcomes": [
+     "VALID",
+     "INVALID"
+    ]
+   },
+   {
+    "id": "rule_dealer_can_install",
+    "description": "If dealer installation is requested, the chosen dealer must be recorded as installing every ordered part.",
+    "type": "validation",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py place (dealer_cannot_install)"
+    }
+   },
+   {
+    "id": "rule_availability",
+    "description": "A depot can supply the order only if every line has known stock of at least the quantity and a recorded route reaches the destination. Unknown stock is never treated as zero.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py _plan and place (availability, route_mismatch); docs/ORDER_FLOW.md"
+    },
+    "outcomes": [
+     "AVAILABLE",
+     "INSUFFICIENT_STOCK",
+     "STOCK_UNKNOWN",
+     "NO_ROUTE"
+    ]
+   },
+   {
+    "id": "rule_idempotent",
+    "description": "A repeated place-order with the same key returns the existing order; nothing new is created.",
+    "type": "validation",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/checkout.py place (idempotency_key, GraphConflictError)"
+    }
+   },
+   {
+    "id": "rule_cost_not_available",
+    "description": "Order totals are not calculated; the freight figure is a synthetic estimate shown as context only.",
+    "type": "policy",
+    "status": "confirmed",
+    "source": {
+     "kind": "document",
+     "reference": "docs/ORDER_FLOW.md (cost_status = NOT_AVAILABLE)"
+    }
+   },
+   {
+    "id": "rule_allocation",
+    "description": "Allocation reserves every line or none, in one transaction with row locks.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/order_flow.py allocate; docs/ORDER_FLOW.md Allocation"
+    },
+    "outcomes": [
+     "RESERVED",
+     "ALLOCATION_FAILED"
+    ]
+   },
+   {
+    "id": "rule_allocation_concurrency",
+    "description": "Two orders cannot reserve the same units.",
+    "type": "validation",
+    "status": "confirmed",
+    "source": {
+     "kind": "document",
+     "reference": "docs/ORDER_FLOW.md Allocation (tested with concurrent allocations)"
+    }
+   },
+   {
+    "id": "rule_allocation_recovery",
+    "description": "From ALLOCATION_FAILED the processor can retry allocation, reject the order or cancel it.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/order_flow.py ACTIONS allocate, reject, cancel"
+    },
+    "outcomes": [
+     "RETRY",
+     "REJECT",
+     "CANCEL"
+    ]
+   },
+   {
+    "id": "rule_action_status",
+    "description": "Each order action is valid only from specific statuses and is checked on the server.",
+    "type": "policy",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/order_flow.py ACTIONS"
+    }
+   },
+   {
+    "id": "rule_shipment_outcome",
+    "description": "A dispatched shipment is delivered, reports an exception (which can be resumed), or fails delivery.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/order_flow.py ACTIONS deliver, shipment_exception, resume_shipment, delivery_failed"
+    },
+    "outcomes": [
+     "DELIVERED",
+     "SHIPMENT_EXCEPTION",
+     "DELIVERY_FAILED"
+    ]
+   },
+   {
+    "id": "rule_tracking_sequence",
+    "description": "Tracking events must start with ORDER_CONFIRMED or PICKED, follow the allowed transitions, and carry a location unless IN_TRANSIT.",
+    "type": "validation",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/logistics/rules.py sequence_errors"
+    }
+   },
+   {
+    "id": "rule_dealer_service",
+    "description": "An order with dealer service completes when the service completes; without service it completes after delivery.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/services/order_flow.py ACTIONS service_complete, complete_order"
+    },
+    "outcomes": [
+     "REQUESTED",
+     "NOT_REQUESTED"
+    ]
+   },
+   {
+    "id": "rule_warranty_outcome",
+    "description": "A claim is evaluated deterministically against fitment, approved part, authorised dealer, coverage window, installation evidence, and prior claims or replacements.",
+    "type": "decision",
+    "status": "confirmed",
+    "source": {
+     "kind": "implemented_code",
+     "reference": "app/lifecycle/rules.py evaluate"
+    },
+    "outcomes": [
+     "ELIGIBLE",
+     "NOT_ELIGIBLE",
+     "REQUIRES_REVIEW",
+     "INSUFFICIENT_DATA"
+    ]
+   },
+   {
+    "id": "rule_warranty_review",
+    "description": "A reviewer accepts or declines a claim marked REQUIRES_REVIEW. No review step is implemented.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Design Studio demo assumption pending dec_warranty_reviewer"
+    },
+    "outcomes": [
+     "ACCEPT",
+     "DECLINE"
+    ]
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_part_not_found",
+    "name": "Part not found",
+    "trigger": "The searched part is not in the catalogue (unknown_part).",
+    "recovery": "Search again or give up; nothing is ordered.",
+    "resolution": "recover",
+    "resolution_state_id": "order_find_part"
+   },
+   {
+    "id": "exc_part_not_orderable",
+    "name": "Part not orderable",
+    "trigger": "The part is not VERIFIED or not orderable online (not_orderable).",
+    "recovery": "Show the reason; the customer chooses another part.",
+    "resolution": "recover",
+    "resolution_state_id": "order_find_part"
+   },
+   {
+    "id": "exc_identification_needed",
+    "name": "Ambiguous identification",
+    "trigger": "The machine variant must be identified before the right part is certain.",
+    "recovery": "Ask for the machine variant, then search again.",
+    "resolution": "recover",
+    "resolution_state_id": "order_find_part"
+   },
+   {
+    "id": "exc_incompatible",
+    "name": "Part does not fit the selected machine",
+    "trigger": "A fit is known to be wrong. The data holds no negative fitment records, so today this appears as NOT_RECORDED.",
+    "recovery": "Choose another part or machine.",
+    "resolution": "recover",
+    "resolution_state_id": "order_find_part"
+   },
+   {
+    "id": "exc_compat_unknown",
+    "name": "Compatibility unknown",
+    "trigger": "No fitment record exists for the part and the selected machine (machine_mismatch).",
+    "recovery": "Today the order is refused; whether to allow it with a warning is undecided (dec_unknown_compatibility).",
+    "resolution": "recover",
+    "resolution_state_id": "order_find_part"
+   },
+   {
+    "id": "exc_invalid_details",
+    "name": "Invalid contact details or address",
+    "trigger": "Malformed email or phone, or a destination that is not a recorded ship-to.",
+    "recovery": "Name the field and let the customer correct it.",
+    "resolution": "recover",
+    "resolution_state_id": "order_enter_details"
+   },
+   {
+    "id": "exc_stock_unknown",
+    "name": "Missing stock data",
+    "trigger": "No depot has a recorded quantity for a line (stock UNKNOWN).",
+    "recovery": "The order cannot be placed from that depot; unknown is never treated as zero.",
+    "resolution": "terminate",
+    "resolution_state_id": "order_end_unfulfilled"
+   },
+   {
+    "id": "exc_insufficient_stock",
+    "name": "Insufficient stock",
+    "trigger": "No depot has enough known stock for every line.",
+    "recovery": "The order cannot be placed; partial fulfilment is undecided (dec_partial_fulfilment).",
+    "resolution": "terminate",
+    "resolution_state_id": "order_end_unfulfilled"
+   },
+   {
+    "id": "exc_no_route",
+    "name": "No shipping route",
+    "trigger": "No recorded route from a capable depot to the destination.",
+    "recovery": "Choose another destination.",
+    "resolution": "recover",
+    "resolution_state_id": "order_enter_details"
+   },
+   {
+    "id": "exc_duplicate_submission",
+    "name": "Duplicate order submission",
+    "trigger": "The same place-order key arrives again, possibly at the same time.",
+    "recovery": "The existing order is returned and continues; no second order is created.",
+    "resolution": "recover",
+    "resolution_state_id": "order_allocate"
+   },
+   {
+    "id": "exc_allocation_failed",
+    "name": "Allocation failure",
+    "trigger": "A line cannot be reserved when allocation runs.",
+    "recovery": "The processor retries, rejects or cancels the order; no stock changed.",
+    "resolution": "recover",
+    "resolution_state_id": "order_handle_allocation"
+   },
+   {
+    "id": "exc_concurrent_allocation",
+    "name": "Concurrent stock allocation",
+    "trigger": "Another order reserved the same units first.",
+    "recovery": "The later allocation fails atomically and follows the allocation-failure path.",
+    "resolution": "recover",
+    "resolution_state_id": "order_handle_allocation"
+   },
+   {
+    "id": "exc_allocation_released",
+    "name": "Allocation released before dispatch",
+    "trigger": "The processor releases reserved stock before the shipment leaves the depot.",
+    "recovery": "The stock returns to the depot; the processor allocates again or cancels the order.",
+    "resolution": "recover",
+    "resolution_state_id": "order_handle_allocation"
+   },
+   {
+    "id": "exc_shipment_exception",
+    "name": "Shipment exception",
+    "trigger": "A dispatched shipment reports an exception.",
+    "recovery": "Resume the shipment, or record a failed delivery.",
+    "resolution": "recover",
+    "resolution_state_id": "order_ship"
+   },
+   {
+    "id": "exc_delivery_failed",
+    "name": "Delivery failure",
+    "trigger": "Delivery fails.",
+    "recovery": "The order is cancelled; refunds and returns are undecided (dec_returns_refunds).",
+    "resolution": "terminate",
+    "resolution_state_id": "order_end_cancelled"
+   },
+   {
+    "id": "exc_service_cancelled",
+    "name": "Dealer service cancelled",
+    "trigger": "The dealer service is cancelled after delivery.",
+    "recovery": "The order can still be completed.",
+    "resolution": "terminate",
+    "resolution_state_id": "order_end_completed"
+   },
+   {
+    "id": "exc_insufficient_evidence",
+    "name": "Insufficient warranty evidence",
+    "trigger": "The evaluation lacks the data needed for a decision (INSUFFICIENT_DATA).",
+    "recovery": "Ask the dealer for the missing evidence and resubmit.",
+    "resolution": "recover",
+    "resolution_state_id": "claim_submit"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_order_approval",
+    "question": "Does any order need approval before allocation, and if so above which threshold and by whom? The implemented flow has no approval step.",
+    "affects": [
+     "order_review"
+    ]
+   },
+   {
+    "id": "dec_partial_fulfilment",
+    "question": "Should an order be partly fulfilled when no single depot can supply every line? Today it cannot be placed.",
+    "affects": [
+     "exc_insufficient_stock",
+     "rule_availability"
+    ]
+   },
+   {
+    "id": "dec_unknown_compatibility",
+    "question": "When fitment is not recorded for the selected machine, should the order be refused (as implemented) or allowed with a warning? Should explicit incompatibility be recorded?",
+    "affects": [
+     "rule_fitment",
+     "exc_compat_unknown",
+     "exc_incompatible"
+    ]
+   },
+   {
+    "id": "dec_pricing_credit",
+    "question": "How are prices, totals and credit limits determined? Order totals are not calculated today.",
+    "affects": [
+     "rule_cost_not_available",
+     "ent_order"
+    ]
+   },
+   {
+    "id": "dec_returns_refunds",
+    "question": "What is the returns and refunds policy after a failed delivery or a declined claim?",
+    "affects": [
+     "exc_delivery_failed"
+    ]
+   },
+   {
+    "id": "dec_identification_enforcement",
+    "question": "Should identification requirements be enforced before ordering?",
+    "affects": [
+     "rule_identification",
+     "exc_identification_needed"
+    ]
+   },
+   {
+    "id": "dec_warranty_reviewer",
+    "question": "Who reviews warranty claims marked REQUIRES_REVIEW, and how?",
+    "affects": [
+     "role_warranty_reviewer",
+     "rule_warranty_review",
+     "claim_review"
+    ]
+   },
+   {
+    "id": "dec_design_approvers",
+    "question": "Who besides the project owner may approve application designs?",
+    "affects": []
+   }
+  ],
+  "integrations": [
+   {
+    "id": "int_catalogue_graph",
+    "name": "Catalogue and fitment data",
+    "system": "Noordveld graph (AuraDB), read-only",
+    "direction": "inbound",
+    "events": [],
+    "entity_ids": [
+     "ent_part",
+     "ent_machine",
+     "ent_fitment",
+     "ent_depot",
+     "ent_inventory",
+     "ent_route",
+     "ent_ship_to",
+     "ent_dealer"
+    ],
+    "failure_handling": "Graph unavailable returns 503 graph_unavailable; nothing is guessed.",
+    "contract_status": "defined"
+   },
+   {
+    "id": "int_order_records",
+    "name": "Order workflow records",
+    "system": "Noordveld graph via the order service (fixed write queries)",
+    "direction": "bidirectional",
+    "events": [
+     "order placed",
+     "status changed",
+     "stock reserved",
+     "shipment created"
+    ],
+    "entity_ids": [
+     "ent_order",
+     "ent_order_line",
+     "ent_status_event",
+     "ent_shipment",
+     "ent_inventory"
+    ],
+    "failure_handling": "A transaction commits completely or not at all; a constraint conflict is reported as a conflict.",
+    "contract_status": "defined"
+   },
+   {
+    "id": "int_tracking",
+    "name": "Shipment tracking",
+    "system": "Synthetic tracking events (no live carrier integration)",
+    "direction": "inbound",
+    "events": [
+     "tracking event recorded"
+    ],
+    "entity_ids": [
+     "ent_tracking_event"
+    ],
+    "failure_handling": "No carrier outage handling exists; a live integration would need one.",
+    "contract_status": "deferred"
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_spare_parts_order",
+   "name": "Spare-parts order",
+   "states": [
+    {
+     "id": "order_start",
+     "label": "Customer needs a spare part",
+     "kind": "start",
+     "role_id": "role_end_user"
+    },
+    {
+     "id": "order_find_part",
+     "label": "Find the part",
+     "kind": "search",
+     "role_id": "role_end_user",
+     "permission": "parts.read",
+     "outputs": [
+      "rule_part_orderable"
+     ],
+     "requirement_ids": [
+      "req_find_part"
+     ],
+     "reads_entity_ids": [
+      "ent_part"
+     ],
+     "rule_ids": [
+      "rule_part_orderable",
+      "rule_identification"
+     ],
+     "exception_ids": [
+      "exc_part_not_found",
+      "exc_part_not_orderable",
+      "exc_identification_needed"
+     ]
+    },
+    {
+     "id": "order_part_issue",
+     "label": "Part cannot be ordered",
+     "kind": "exception",
+     "role_id": "role_end_user",
+     "requirement_ids": [
+      "req_find_part"
+     ],
+     "exception_ids": [
+      "exc_part_not_found",
+      "exc_part_not_orderable",
+      "exc_identification_needed"
+     ],
+     "permission": "parts.read"
+    },
+    {
+     "id": "order_check_fitment",
+     "label": "Check fitment for the selected machine",
+     "kind": "branch",
+     "role_id": "role_platform",
+     "outputs": [
+      "rule_fitment"
+     ],
+     "requirement_ids": [
+      "req_compatibility"
+     ],
+     "reads_entity_ids": [
+      "ent_fitment",
+      "ent_machine"
+     ],
+     "rule_ids": [
+      "rule_fitment"
+     ],
+     "exception_ids": [
+      "exc_incompatible",
+      "exc_compat_unknown"
+     ]
+    },
+    {
+     "id": "order_fitment_issue",
+     "label": "Fit not recorded",
+     "kind": "exception",
+     "role_id": "role_end_user",
+     "requirement_ids": [
+      "req_compatibility"
+     ],
+     "exception_ids": [
+      "exc_incompatible",
+      "exc_compat_unknown"
+     ],
+     "permission": "parts.read"
+    },
+    {
+     "id": "order_enter_details",
+     "label": "Enter contact and delivery details",
+     "kind": "form",
+     "role_id": "role_end_user",
+     "permission": "orders.place",
+     "outputs": [
+      "rule_details_valid"
+     ],
+     "requirement_ids": [
+      "req_order_details"
+     ],
+     "reads_entity_ids": [
+      "ent_ship_to",
+      "ent_dealer"
+     ],
+     "writes_entity_ids": [
+      "ent_order"
+     ],
+     "rule_ids": [
+      "rule_details_valid",
+      "rule_dealer_can_install"
+     ],
+     "exception_ids": [
+      "exc_invalid_details"
+     ],
+     "input_fields": {
+      "ent_order": [
+       "requester_name",
+       "requester_email",
+       "requester_phone",
+       "receiver_name",
+       "receiver_phone",
+       "dealer_service_required"
+      ]
+     },
+     "input_relationships": {
+      "ent_order": [
+       "rel_order_ship_to",
+       "rel_order_dealer"
+      ]
+     }
+    },
+    {
+     "id": "order_details_issue",
+     "label": "Correct the details",
+     "kind": "exception",
+     "role_id": "role_end_user",
+     "requirement_ids": [
+      "req_order_details"
+     ],
+     "exception_ids": [
+      "exc_invalid_details"
+     ],
+     "permission": "orders.place"
+    },
+    {
+     "id": "order_check_availability",
+     "label": "Check depot availability and route",
+     "kind": "branch",
+     "role_id": "role_platform",
+     "outputs": [
+      "rule_availability"
+     ],
+     "requirement_ids": [
+      "req_stock_truth"
+     ],
+     "reads_entity_ids": [
+      "ent_inventory",
+      "ent_depot",
+      "ent_route"
+     ],
+     "rule_ids": [
+      "rule_availability"
+     ],
+     "exception_ids": [
+      "exc_stock_unknown",
+      "exc_insufficient_stock",
+      "exc_no_route"
+     ]
+    },
+    {
+     "id": "order_availability_issue",
+     "label": "Order cannot be supplied",
+     "kind": "exception",
+     "role_id": "role_end_user",
+     "requirement_ids": [
+      "req_stock_truth"
+     ],
+     "exception_ids": [
+      "exc_stock_unknown",
+      "exc_insufficient_stock",
+      "exc_no_route"
+     ],
+     "permission": "orders.place"
+    },
+    {
+     "id": "order_review",
+     "label": "Review and place the order",
+     "kind": "review",
+     "role_id": "role_end_user",
+     "permission": "orders.place",
+     "requirement_ids": [
+      "req_place_once",
+      "req_stock_truth"
+     ],
+     "reads_entity_ids": [
+      "ent_order",
+      "ent_depot",
+      "ent_route"
+     ],
+     "writes_entity_ids": [
+      "ent_order",
+      "ent_order_line"
+     ],
+     "rule_ids": [
+      "rule_idempotent",
+      "rule_cost_not_available"
+     ],
+     "exception_ids": [
+      "exc_duplicate_submission"
+     ],
+     "preconditions": [
+      "Every line has a depot with known stock of at least the quantity and a recorded route"
+     ],
+     "postconditions": [
+      "An order exists with status NEW; placing it again with the same key returns it"
+     ],
+     "input_fields": {
+      "ent_order": [],
+      "ent_order_line": [
+       "quantity",
+       "machine_model"
+      ]
+     },
+     "input_relationships": {
+      "ent_order": [],
+      "ent_order_line": [
+       "rel_line_part"
+      ]
+     }
+    },
+    {
+     "id": "order_allocate",
+     "label": "Reserve stock",
+     "kind": "action",
+     "role_id": "role_platform",
+     "outputs": [
+      "rule_allocation"
+     ],
+     "requirement_ids": [
+      "req_allocation",
+      "nfr_audit"
+     ],
+     "writes_entity_ids": [
+      "ent_inventory",
+      "ent_order",
+      "ent_status_event"
+     ],
+     "rule_ids": [
+      "rule_allocation",
+      "rule_allocation_concurrency"
+     ],
+     "exception_ids": [
+      "exc_allocation_failed",
+      "exc_concurrent_allocation"
+     ],
+     "preconditions": [
+      "The order is NEW, ALLOCATION_FAILED or ALLOCATION_RELEASED"
+     ],
+     "postconditions": [
+      "Every line is reserved, or the order is ALLOCATION_FAILED and no stock changed"
+     ],
+     "input_fields": {
+      "ent_inventory": [],
+      "ent_order": [],
+      "ent_status_event": []
+     },
+     "input_relationships": {
+      "ent_inventory": [],
+      "ent_order": [],
+      "ent_status_event": []
+     }
+    },
+    {
+     "id": "order_handle_allocation",
+     "label": "Handle allocation failure",
+     "kind": "exception",
+     "role_id": "role_order_processor",
+     "permission": "orders.process",
+     "outputs": [
+      "rule_allocation_recovery"
+     ],
+     "requirement_ids": [
+      "req_allocation",
+      "nfr_access"
+     ],
+     "reads_entity_ids": [
+      "ent_order"
+     ],
+     "writes_entity_ids": [
+      "ent_order",
+      "ent_status_event"
+     ],
+     "rule_ids": [
+      "rule_allocation_recovery",
+      "rule_action_status"
+     ],
+     "exception_ids": [
+      "exc_allocation_failed",
+      "exc_concurrent_allocation"
+     ],
+     "input_fields": {
+      "ent_order": [],
+      "ent_status_event": []
+     },
+     "input_relationships": {
+      "ent_order": [],
+      "ent_status_event": []
+     }
+    },
+    {
+     "id": "order_fulfil",
+     "label": "Pick, pack and mark ready",
+     "kind": "action",
+     "role_id": "role_order_processor",
+     "permission": "orders.update_status",
+     "requirement_ids": [
+      "req_shipment",
+      "nfr_audit"
+     ],
+     "writes_entity_ids": [
+      "ent_order",
+      "ent_status_event"
+     ],
+     "rule_ids": [
+      "rule_action_status"
+     ],
+     "exception_ids": [
+      "exc_allocation_released"
+     ],
+     "input_fields": {
+      "ent_order": [],
+      "ent_status_event": []
+     },
+     "input_relationships": {
+      "ent_order": [],
+      "ent_status_event": []
+     }
+    },
+    {
+     "id": "order_ship",
+     "label": "Ship and track",
+     "kind": "action",
+     "role_id": "role_order_processor",
+     "permission": "orders.update_status",
+     "outputs": [
+      "rule_shipment_outcome"
+     ],
+     "requirement_ids": [
+      "req_shipment"
+     ],
+     "writes_entity_ids": [
+      "ent_shipment",
+      "ent_tracking_event"
+     ],
+     "rule_ids": [
+      "rule_shipment_outcome",
+      "rule_tracking_sequence"
+     ],
+     "exception_ids": [
+      "exc_shipment_exception",
+      "exc_delivery_failed"
+     ],
+     "preconditions": [
+      "The order is READY_TO_SHIP and a shipment exists"
+     ],
+     "postconditions": [
+      "The shipment is delivered, has an exception, or delivery failed"
+     ],
+     "input_fields": {
+      "ent_shipment": [],
+      "ent_tracking_event": []
+     },
+     "input_relationships": {
+      "ent_shipment": [],
+      "ent_tracking_event": []
+     }
+    },
+    {
+     "id": "order_shipment_issue",
+     "label": "Shipment exception",
+     "kind": "exception",
+     "role_id": "role_order_processor",
+     "permission": "orders.update_status",
+     "requirement_ids": [
+      "req_shipment"
+     ],
+     "reads_entity_ids": [
+      "ent_shipment"
+     ],
+     "exception_ids": [
+      "exc_shipment_exception"
+     ]
+    },
+    {
+     "id": "order_delivery_failed",
+     "label": "Delivery failed",
+     "kind": "exception",
+     "role_id": "role_order_processor",
+     "permission": "orders.update_status",
+     "requirement_ids": [
+      "req_shipment"
+     ],
+     "reads_entity_ids": [
+      "ent_shipment"
+     ],
+     "exception_ids": [
+      "exc_delivery_failed"
+     ]
+    },
+    {
+     "id": "order_check_service",
+     "label": "Dealer service requested?",
+     "kind": "branch",
+     "role_id": "role_platform",
+     "outputs": [
+      "rule_dealer_service"
+     ],
+     "requirement_ids": [
+      "req_dealer_service"
+     ],
+     "reads_entity_ids": [
+      "ent_order"
+     ],
+     "rule_ids": [
+      "rule_dealer_service"
+     ]
+    },
+    {
+     "id": "order_dealer_service",
+     "label": "Record dealer installation",
+     "kind": "form",
+     "role_id": "role_order_processor",
+     "permission": "orders.update_status",
+     "requirement_ids": [
+      "req_dealer_service"
+     ],
+     "reads_entity_ids": [
+      "ent_dealer"
+     ],
+     "writes_entity_ids": [
+      "ent_status_event"
+     ],
+     "rule_ids": [
+      "rule_action_status"
+     ],
+     "exception_ids": [
+      "exc_service_cancelled"
+     ],
+     "input_fields": {
+      "ent_status_event": []
+     },
+     "input_relationships": {
+      "ent_status_event": []
+     }
+    },
+    {
+     "id": "order_end_completed",
+     "label": "Order completed",
+     "kind": "end",
+     "outcome": "success"
+    },
+    {
+     "id": "order_end_rejected",
+     "label": "Order rejected",
+     "kind": "end",
+     "outcome": "failure"
+    },
+    {
+     "id": "order_end_cancelled",
+     "label": "Order cancelled",
+     "kind": "end",
+     "outcome": "cancelled"
+    },
+    {
+     "id": "order_end_unfulfilled",
+     "label": "Order could not be supplied",
+     "kind": "end",
+     "outcome": "failure"
+    },
+    {
+     "id": "order_end_abandoned",
+     "label": "Customer stopped searching",
+     "kind": "end",
+     "outcome": "cancelled"
+    }
+   ],
+   "transitions": [
+    {
+     "id": "order_t_start",
+     "source": "order_start",
+     "target": "order_find_part",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_found",
+     "source": "order_find_part",
+     "target": "order_check_fitment",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_part_orderable",
+      "value": "FOUND"
+     }
+    },
+    {
+     "id": "order_t_not_found",
+     "source": "order_find_part",
+     "target": "order_part_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_part_orderable",
+      "value": "NOT_FOUND"
+     }
+    },
+    {
+     "id": "order_t_not_orderable",
+     "source": "order_find_part",
+     "target": "order_part_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_part_orderable",
+      "value": "NOT_ORDERABLE"
+     }
+    },
+    {
+     "id": "order_t_search_again",
+     "source": "order_part_issue",
+     "target": "order_find_part",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_give_up",
+     "source": "order_part_issue",
+     "target": "order_end_abandoned",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_fits",
+     "source": "order_check_fitment",
+     "target": "order_enter_details",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fitment",
+      "value": "COMPATIBLE"
+     }
+    },
+    {
+     "id": "order_t_fit_unknown",
+     "source": "order_check_fitment",
+     "target": "order_fitment_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fitment",
+      "value": "NOT_RECORDED"
+     }
+    },
+    {
+     "id": "order_t_fit_retry",
+     "source": "order_fitment_issue",
+     "target": "order_find_part",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_details_valid",
+     "source": "order_enter_details",
+     "target": "order_check_availability",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_details_valid",
+      "value": "VALID"
+     }
+    },
+    {
+     "id": "order_t_details_invalid",
+     "source": "order_enter_details",
+     "target": "order_details_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_details_valid",
+      "value": "INVALID"
+     }
+    },
+    {
+     "id": "order_t_details_fix",
+     "source": "order_details_issue",
+     "target": "order_enter_details",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_available",
+     "source": "order_check_availability",
+     "target": "order_review",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_availability",
+      "value": "AVAILABLE"
+     }
+    },
+    {
+     "id": "order_t_insufficient",
+     "source": "order_check_availability",
+     "target": "order_availability_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_availability",
+      "value": "INSUFFICIENT_STOCK"
+     }
+    },
+    {
+     "id": "order_t_stock_unknown",
+     "source": "order_check_availability",
+     "target": "order_availability_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_availability",
+      "value": "STOCK_UNKNOWN"
+     }
+    },
+    {
+     "id": "order_t_no_route",
+     "source": "order_check_availability",
+     "target": "order_availability_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_availability",
+      "value": "NO_ROUTE"
+     }
+    },
+    {
+     "id": "order_t_change_destination",
+     "source": "order_availability_issue",
+     "target": "order_enter_details",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_unfulfilled",
+     "source": "order_availability_issue",
+     "target": "order_end_unfulfilled",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_place",
+     "source": "order_review",
+     "target": "order_allocate",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_reserved",
+     "source": "order_allocate",
+     "target": "order_fulfil",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_allocation",
+      "value": "RESERVED"
+     }
+    },
+    {
+     "id": "order_t_alloc_failed",
+     "source": "order_allocate",
+     "target": "order_handle_allocation",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_allocation",
+      "value": "ALLOCATION_FAILED"
+     }
+    },
+    {
+     "id": "order_t_alloc_retry",
+     "source": "order_handle_allocation",
+     "target": "order_allocate",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_allocation_recovery",
+      "value": "RETRY"
+     }
+    },
+    {
+     "id": "order_t_alloc_reject",
+     "source": "order_handle_allocation",
+     "target": "order_end_rejected",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_allocation_recovery",
+      "value": "REJECT"
+     }
+    },
+    {
+     "id": "order_t_alloc_cancel",
+     "source": "order_handle_allocation",
+     "target": "order_end_cancelled",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_allocation_recovery",
+      "value": "CANCEL"
+     }
+    },
+    {
+     "id": "order_t_ready",
+     "source": "order_fulfil",
+     "target": "order_ship",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_release",
+     "source": "order_fulfil",
+     "target": "order_handle_allocation",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_delivered",
+     "source": "order_ship",
+     "target": "order_check_service",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_shipment_outcome",
+      "value": "DELIVERED"
+     }
+    },
+    {
+     "id": "order_t_ship_exception",
+     "source": "order_ship",
+     "target": "order_shipment_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_shipment_outcome",
+      "value": "SHIPMENT_EXCEPTION"
+     }
+    },
+    {
+     "id": "order_t_delivery_failed",
+     "source": "order_ship",
+     "target": "order_delivery_failed",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_shipment_outcome",
+      "value": "DELIVERY_FAILED"
+     }
+    },
+    {
+     "id": "order_t_resume",
+     "source": "order_shipment_issue",
+     "target": "order_ship",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_exception_failed",
+     "source": "order_shipment_issue",
+     "target": "order_delivery_failed",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_failed_cancel",
+     "source": "order_delivery_failed",
+     "target": "order_end_cancelled",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "order_t_service",
+     "source": "order_check_service",
+     "target": "order_dealer_service",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_dealer_service",
+      "value": "REQUESTED"
+     }
+    },
+    {
+     "id": "order_t_no_service",
+     "source": "order_check_service",
+     "target": "order_end_completed",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_dealer_service",
+      "value": "NOT_REQUESTED"
+     }
+    },
+    {
+     "id": "order_t_service_done",
+     "source": "order_dealer_service",
+     "target": "order_end_completed",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  },
+  {
+   "version": 1,
+   "id": "wf_warranty_claim",
+   "name": "Warranty claim",
+   "states": [
+    {
+     "id": "claim_start",
+     "label": "Installed part has failed",
+     "kind": "start",
+     "role_id": "role_dealer"
+    },
+    {
+     "id": "claim_submit",
+     "label": "Submit warranty claim",
+     "kind": "form",
+     "role_id": "role_dealer",
+     "requirement_ids": [
+      "req_warranty"
+     ],
+     "reads_entity_ids": [
+      "ent_part"
+     ],
+     "writes_entity_ids": [
+      "ent_warranty_claim"
+     ],
+     "exception_ids": [
+      "exc_insufficient_evidence"
+     ],
+     "input_fields": {
+      "ent_warranty_claim": [
+       "failure_description"
+      ]
+     },
+     "input_relationships": {
+      "ent_warranty_claim": [
+       "rel_claim_part",
+       "rel_claim_dealer"
+      ]
+     }
+    },
+    {
+     "id": "claim_evaluate",
+     "label": "Evaluate the claim",
+     "kind": "branch",
+     "role_id": "role_platform",
+     "outputs": [
+      "rule_warranty_outcome"
+     ],
+     "requirement_ids": [
+      "req_warranty"
+     ],
+     "reads_entity_ids": [
+      "ent_warranty_policy",
+      "ent_warranty_claim"
+     ],
+     "writes_entity_ids": [
+      "ent_warranty_claim"
+     ],
+     "rule_ids": [
+      "rule_warranty_outcome"
+     ]
+    },
+    {
+     "id": "claim_review",
+     "label": "Review the claim",
+     "kind": "approval",
+     "role_id": "role_warranty_reviewer",
+     "outputs": [
+      "rule_warranty_review"
+     ],
+     "requirement_ids": [
+      "req_warranty"
+     ],
+     "reads_entity_ids": [
+      "ent_warranty_claim"
+     ],
+     "writes_entity_ids": [
+      "ent_warranty_claim"
+     ],
+     "rule_ids": [
+      "rule_warranty_review"
+     ],
+     "input_fields": {
+      "ent_warranty_claim": []
+     },
+     "input_relationships": {
+      "ent_warranty_claim": []
+     }
+    },
+    {
+     "id": "claim_missing_evidence",
+     "label": "Provide missing evidence",
+     "kind": "exception",
+     "role_id": "role_dealer",
+     "requirement_ids": [
+      "req_warranty"
+     ],
+     "exception_ids": [
+      "exc_insufficient_evidence"
+     ]
+    },
+    {
+     "id": "claim_end_accepted",
+     "label": "Claim accepted",
+     "kind": "end",
+     "outcome": "success"
+    },
+    {
+     "id": "claim_end_declined",
+     "label": "Claim declined",
+     "kind": "end",
+     "outcome": "failure"
+    }
+   ],
+   "transitions": [
+    {
+     "id": "claim_t_start",
+     "source": "claim_start",
+     "target": "claim_submit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "claim_t_submitted",
+     "source": "claim_submit",
+     "target": "claim_evaluate",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "claim_t_eligible",
+     "source": "claim_evaluate",
+     "target": "claim_end_accepted",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_warranty_outcome",
+      "value": "ELIGIBLE"
+     }
+    },
+    {
+     "id": "claim_t_not_eligible",
+     "source": "claim_evaluate",
+     "target": "claim_end_declined",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_warranty_outcome",
+      "value": "NOT_ELIGIBLE"
+     }
+    },
+    {
+     "id": "claim_t_review",
+     "source": "claim_evaluate",
+     "target": "claim_review",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_warranty_outcome",
+      "value": "REQUIRES_REVIEW"
+     }
+    },
+    {
+     "id": "claim_t_insufficient",
+     "source": "claim_evaluate",
+     "target": "claim_missing_evidence",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_warranty_outcome",
+      "value": "INSUFFICIENT_DATA"
+     }
+    },
+    {
+     "id": "claim_t_resubmit",
+     "source": "claim_missing_evidence",
+     "target": "claim_submit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "claim_t_accept",
+     "source": "claim_review",
+     "target": "claim_end_accepted",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_warranty_review",
+      "value": "ACCEPT"
+     }
+    },
+    {
+     "id": "claim_t_decline",
+     "source": "claim_review",
+     "target": "claim_end_declined",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_warranty_review",
+      "value": "DECLINE"
+     }
+    }
+   ]
+  }
+ ],
+ "evidence": [
+  {
+   "item_id": "role_end_user",
+   "kind": "role_permissions",
+   "value": "END_USER"
+  },
+  {
+   "item_id": "role_order_processor",
+   "kind": "role_permissions",
+   "value": "ORDER_PROCESSOR"
+  },
+  {
+   "item_id": "rule_part_orderable",
+   "kind": "checkout_error",
+   "value": "unknown_part"
+  },
+  {
+   "item_id": "rule_part_orderable",
+   "kind": "checkout_error",
+   "value": "not_orderable"
+  },
+  {
+   "item_id": "rule_fitment",
+   "kind": "checkout_error",
+   "value": "machine_mismatch"
+  },
+  {
+   "item_id": "rule_details_valid",
+   "kind": "checkout_error",
+   "value": "invalid_details"
+  },
+  {
+   "item_id": "rule_details_valid",
+   "kind": "checkout_error",
+   "value": "destination_not_found"
+  },
+  {
+   "item_id": "rule_dealer_can_install",
+   "kind": "checkout_error",
+   "value": "dealer_cannot_install"
+  },
+  {
+   "item_id": "rule_availability",
+   "kind": "checkout_error",
+   "value": "availability"
+  },
+  {
+   "item_id": "rule_availability",
+   "kind": "checkout_error",
+   "value": "route_mismatch"
+  },
+  {
+   "item_id": "rule_allocation_recovery",
+   "kind": "order_action",
+   "value": "allocate"
+  },
+  {
+   "item_id": "rule_allocation_recovery",
+   "kind": "order_action",
+   "value": "reject"
+  },
+  {
+   "item_id": "rule_allocation_recovery",
+   "kind": "order_action",
+   "value": "cancel"
+  },
+  {
+   "item_id": "rule_shipment_outcome",
+   "kind": "order_action",
+   "value": "deliver"
+  },
+  {
+   "item_id": "rule_shipment_outcome",
+   "kind": "order_action",
+   "value": "shipment_exception"
+  },
+  {
+   "item_id": "rule_shipment_outcome",
+   "kind": "order_action",
+   "value": "resume_shipment"
+  },
+  {
+   "item_id": "rule_shipment_outcome",
+   "kind": "order_action",
+   "value": "delivery_failed"
+  },
+  {
+   "item_id": "rule_dealer_service",
+   "kind": "order_action",
+   "value": "service_complete"
+  },
+  {
+   "item_id": "rule_dealer_service",
+   "kind": "order_action",
+   "value": "complete_order"
+  },
+  {
+   "item_id": "exc_service_cancelled",
+   "kind": "order_action",
+   "value": "service_cancel"
+  },
+  {
+   "item_id": "order_end_rejected",
+   "kind": "order_status",
+   "value": "REJECTED"
+  },
+  {
+   "item_id": "order_end_cancelled",
+   "kind": "order_status",
+   "value": "CANCELLED"
+  },
+  {
+   "item_id": "order_handle_allocation",
+   "kind": "order_status",
+   "value": "ALLOCATION_FAILED"
+  },
+  {
+   "item_id": "order_shipment_issue",
+   "kind": "order_status",
+   "value": "SHIPMENT_EXCEPTION"
+  },
+  {
+   "item_id": "order_delivery_failed",
+   "kind": "order_status",
+   "value": "DELIVERY_FAILED"
+  },
+  {
+   "item_id": "exc_service_cancelled",
+   "kind": "order_status",
+   "value": "SERVICE_CANCELLED"
+  },
+  {
+   "item_id": "exc_allocation_released",
+   "kind": "order_status",
+   "value": "ALLOCATION_RELEASED"
+  },
+  {
+   "item_id": "exc_allocation_released",
+   "kind": "order_action",
+   "value": "release_allocation"
+  },
+  {
+   "item_id": "order_end_completed",
+   "kind": "order_status",
+   "value": "COMPLETED"
+  },
+  {
+   "item_id": "rule_warranty_outcome",
+   "kind": "warranty_outcome",
+   "value": "ELIGIBLE,NOT_ELIGIBLE,REQUIRES_REVIEW,INSUFFICIENT_DATA"
+  },
+  {
+   "item_id": "rule_tracking_sequence",
+   "kind": "tracking_rule",
+   "value": "ORDER_CONFIRMED,PICKED"
+  },
+  {
+   "item_id": "ent_inventory",
+   "kind": "stock_states",
+   "value": "IN_STOCK,LOW_STOCK,ON_ORDER,OUT_OF_STOCK,UNKNOWN"
+  },
+  {
+   "item_id": "ent_part",
+   "kind": "part_statuses",
+   "value": "VERIFIED,IDENTIFICATION_REQUIRED,AMBIGUOUS,UNVERIFIED"
+  },
+  {
+   "item_id": "ent_order_line",
+   "kind": "quantity_limit",
+   "value": "99"
+  }
+ ],
+ "company": {
+  "id": "noordveld",
+  "name": "Noordveld Machinery (synthetic demo company)",
+  "industry": "Industrial machinery and spare parts",
+  "operating_context": "The synthetic demonstration company used throughout this repository; its definitions come from the Noordveld demo data.",
+  "business_units": [],
+  "systems_of_record": []
+ },
+ "usage": "source_reference"
+}

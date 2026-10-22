@@ -22,7 +22,10 @@ export function Hero() {
         <h1 id="hero-title" className="hero-title">
           Built for demanding work.
         </h1>
-        <p className="lead hero__lead">Industrial and agricultural machinery engineered for performance, reliability and the work that keeps industries moving.</p>
+        <p className="lead hero__lead">
+          Industrial and agricultural machinery engineered for performance, reliability and the work
+          that keeps industries moving.
+        </p>
         <div className="hero__actions">
           <ButtonLink to="/machines">Explore Machines</ButtonLink>
           <ButtonLink to="/#company" variant="secondary" arrow={false}>

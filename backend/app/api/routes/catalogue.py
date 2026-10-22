@@ -1,4 +1,5 @@
 """Catalogue filter options and cart quote."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter

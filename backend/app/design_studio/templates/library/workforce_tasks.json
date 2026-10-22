@@ -1,0 +1,69 @@
+{
+  "id": "workforce_tasks",
+  "version": "1.0.0",
+  "name": "Workforce & Tasks",
+  "category": "Operations",
+  "summary": "Tasks, assignments, team workload, schedules and approvals.",
+  "description": "A practical internal operations app: work items with clear owners, a board from to-do to done, each person's workload, a weekly schedule and approvals, built to work on phones as well as desks.",
+  "status": "preview",
+  "domain_ids": ["workforce_tasks"],
+  "app_type": "Internal operations",
+  "users": ["Team member", "Team lead", "Operations manager"],
+  "keywords": ["task", "assignment", "team", "workload", "schedule", "shift", "roster", "leave", "approval", "work item", "project", "progress"],
+  "theme": {
+    "id": "schedule_first",
+    "label": "Schedule first",
+    "direction": "Clear white with a sky-blue accent and a slim rail; schedule grids and assignment boards with visible owners and progress.",
+    "colors": {
+      "primary": "#0369A1", "primary_text": "#FFFFFF", "accent": "#EA580C",
+      "background": "#F7FAFC", "surface": "#FFFFFF", "surface_alt": "#E6EEF5",
+      "text": "#0B1B2B", "muted": "#4A5D70", "border": "#D3DEE8",
+      "nav_background": "#0B1B2B", "nav_text": "#D3DEE8",
+      "success": "#15803D", "warning": "#B45309", "danger": "#B91C1C"
+    },
+    "font_heading": "humanist", "font_body": "humanist", "density": "comfortable",
+    "radius": 8, "shadow": "soft", "card_style": "outlined", "table_style": "lined", "touch": true
+  },
+  "nav_style": "rail",
+  "entity_roles": [
+    {"id": "task", "label": "Task", "matches": ["task", "work item", "job", "assignment"], "fields": ["title", "owner", "due", "status", "priority"]},
+    {"id": "shift", "label": "Shift", "matches": ["shift", "schedule", "roster", "booking"], "fields": ["person", "day", "start", "end"]},
+    {"id": "request", "label": "Request", "matches": ["leave", "request", "approval"], "fields": ["person", "kind", "dates", "status"]}
+  ],
+  "pages": [
+    {"id": "board", "title": "Work board", "icon": "Columns3", "layout": "board", "purpose": "Every task from to-do to done.", "users": ["Team member", "Team lead"],
+     "components": [
+       {"type": "status_board", "title": "Tasks", "role": "task", "fields": ["title", "owner", "due"], "group_by": "status", "span": 3}
+     ]},
+    {"id": "schedule", "title": "Schedule", "icon": "CalendarDays", "layout": "schedule", "purpose": "Who works when this week.", "users": ["Team lead"],
+     "components": [
+       {"type": "schedule_week", "title": "This week", "role": "shift", "fields": ["person", "day", "start", "end"], "span": 3}
+     ]},
+    {"id": "approvals", "title": "Approvals", "icon": "CheckCheck", "layout": "queue", "purpose": "Requests waiting for a decision.", "users": ["Operations manager"],
+     "components": [
+       {"type": "task_queue", "title": "Waiting for you", "role": "request", "fields": ["person", "kind", "dates"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "tasks", "name": "Tasks and assignments", "status": "supported", "keywords": ["task", "assign", "assignment", "owner", "work"]},
+    {"id": "workload", "name": "Team workload and progress", "status": "supported", "keywords": ["workload", "progress", "team", "capacity"]},
+    {"id": "schedule", "name": "Weekly schedule", "status": "supported", "keywords": ["schedule", "shift", "roster", "week"]},
+    {"id": "approvals", "name": "Approvals", "status": "supported", "keywords": ["approve", "approval", "leave", "request"]},
+    {"id": "payroll", "name": "Time and payroll export", "status": "requires_integration", "keywords": ["payroll", "timesheet", "salary", "hours"], "note": "Needs an HR or payroll integration delivered by our partner."}
+  ],
+  "limitations": ["Payroll and HR records need an integration from our partner."],
+  "sample": {
+    "task": [
+      {"id": "wt1", "title": "Prepare service van", "owner": "Team member A", "due": "2026-10-23", "status": "To do", "priority": "High"},
+      {"id": "wt2", "title": "Update parts labels", "owner": "Team member B", "due": "2026-10-24", "status": "In progress", "priority": "Normal"},
+      {"id": "wt3", "title": "Safety briefing", "owner": "Team lead", "due": "2026-10-21", "status": "Done", "priority": "Normal"}
+    ],
+    "shift": [
+      {"id": "sh1", "person": "Team member A", "day": "Mon", "start": "07:00", "end": "15:30"},
+      {"id": "sh2", "person": "Team member B", "day": "Tue", "start": "08:00", "end": "16:30"}
+    ],
+    "request": [
+      {"id": "lr1", "person": "Team member B", "kind": "Leave", "dates": "3-7 Nov", "status": "Waiting"}
+    ]
+  }
+}

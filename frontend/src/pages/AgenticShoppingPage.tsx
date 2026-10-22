@@ -1,8 +1,24 @@
-import { ArrowLeft, ArrowRight, Check, CircleAlert, RotateCcw, ShoppingBag, ShoppingCart } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleAlert,
+  RotateCcw,
+  ShoppingBag,
+  ShoppingCart,
+} from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { askAgent, getAgentPipeline, getAgentSuggestions, type AgentCandidate, type AgentInterpretation, type AgentResponse, type AgentStep } from '../api/agent'
-import type { ApiError } from '../api'
+import {
+  askAgent,
+  getAgentPipeline,
+  getAgentSuggestions,
+  type AgentCandidate,
+  type AgentInterpretation,
+  type AgentResponse,
+  type AgentStep,
+} from '../api/agent'
+import type { ApiError } from '../api/index'
 import { canOrder } from '../components/store/Badges'
 import { CartDrawer } from '../components/store/CartDrawer'
 import { PartImage } from '../components/store/PartImage'
@@ -20,12 +36,17 @@ const PI = '/parts-intelligence'
 const STEP_MS = 320 // the API answers at once; the steps it reports are revealed one after another so the work can be followed
 
 /**
- * Agentic Shopping: the decision. Parts Store finds the part, Parts Intelligence explains it; this page answers "what should we
+ * Agentic Shopping: the decision. Parts Portal finds the part, Parts Intelligence explains it; this page answers "what should we
  * do?". The agent reads the request, checks fitment, availability and fulfilment in the Noordveld graph, ranks the valid options
  * against the user's requirements and gets the best one ready for the cart. Every value on the page comes from the API.
  */
 export default function AgenticShoppingPage() {
-  usePageMeta({ title: 'Agentic Shopping', description: "Tell us what you need. We'll work out the best way to fulfil it, from Noordveld fitment, price, stock and supply data.", path: AGENT_ROUTE })
+  usePageMeta({
+    title: 'Agentic Shopping',
+    description:
+      "Tell us what you need. We'll work out the best way to fulfil it, from Noordveld fitment, price, stock and supply data.",
+    path: AGENT_ROUTE,
+  })
   return (
     <CartProvider>
       <AgentShop />
@@ -49,7 +70,12 @@ function AgentShop() {
 function CartButton() {
   const { count, setOpen, justAdded } = useCart()
   return (
-    <button type="button" className={`ag-cart ${justAdded ? 'is-bump' : ''}`} onClick={() => setOpen(true)} aria-label={`Open cart, ${count} ${count === 1 ? 'item' : 'items'}`}>
+    <button
+      type="button"
+      className={`ag-cart ${justAdded ? 'is-bump' : ''}`}
+      onClick={() => setOpen(true)}
+      aria-label={`Open cart, ${count} ${count === 1 ? 'item' : 'items'}`}
+    >
       <ShoppingBag size={17} strokeWidth={1.8} aria-hidden="true" />
       <span>Cart</span>
       {count > 0 ? <span className="ag-cart__n">{count}</span> : null}
@@ -69,23 +95,44 @@ function Compose({ onRun }: { onRun: (q: string) => void }) {
         <div className="ag-compose__inner">
           <p className="eyebrow">Agentic Shopping</p>
           <h1 id="ag-title" className="ag-compose__title">
-            What do you need?
+            Your next part. <br />A smarter way to find it.
           </h1>
-          <p className="ag-compose__lede">Describe what you're looking for in plain language. The agent checks the right part against your requirements and finds the best available path.</p>
-          <p className="ag-compose__aside">
-            Built on Parts Intelligence: the same machines, parts, fitment and availability. <Link to={PI}>Open Parts Intelligence</Link>
+          <p className="ag-compose__lede">
+            Describe what you're looking for in plain language. The agent checks the right part
+            against your requirements and finds the best available path.
           </p>
-          <RequestBox onRun={onRun} placeholder={suggestions.data?.[0]?.request ? `e.g. ${suggestions.data[0].request}` : undefined} />
+          <p className="ag-compose__aside">
+            Built on Parts Intelligence: the same machines, parts, fitment and availability.{' '}
+            <Link to={PI}>Ask Spark in Parts Intelligence</Link>
+          </p>
+          <RequestBox
+            onRun={onRun}
+            placeholder={
+              suggestions.data?.[0]?.request ? `e.g. ${suggestions.data[0].request}` : undefined
+            }
+          />
           {suggestions.data?.length ? (
-            <ul className="ag-pills" aria-label="Example requests">
-              {suggestions.data.map((s) => (
-                <li key={s.request}>
-                  <button type="button" onClick={() => onRun(s.request)}>
-                    {s.request}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="ag-examples">
+              <div className="ag-examples__head">
+                <p className="eyebrow">Start with a real example</p>
+                <span>Built from the demonstration catalogue</span>
+              </div>
+              <ul className="ag-pills" aria-label="Example requests">
+                {suggestions.data.map((s) => (
+                  <li key={s.request}>
+                    <button type="button" aria-label={s.request} onClick={() => onRun(s.request)}>
+                      <span className="ag-example__intent">{s.action}</span>
+                      <strong>{s.need}</strong>
+                      <span>{s.context}</span>
+                      <span className="ag-example__request">
+                        {s.request}
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </div>
       </div>
@@ -110,7 +157,9 @@ function RequestBox({ onRun, placeholder }: { onRun: (q: string) => void; placeh
         rows={2}
         maxLength={400}
         value={text}
-        placeholder={placeholder ?? 'Describe the machine, the part you need and what matters to you.'}
+        placeholder={
+          placeholder ?? 'Describe the machine, the part you need and what matters to you.'
+        }
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
@@ -141,7 +190,9 @@ function Run({ request, onRun }: { request: string; onRun: (q: string) => void }
     const instant = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches // reduced motion: everything at once
     const timers = instant
       ? [window.setTimeout(() => setShown(visible), 0)]
-      : Array.from({ length: visible }, (_, i) => window.setTimeout(() => setShown(i + 1), (i + 1) * STEP_MS))
+      : Array.from({ length: visible }, (_, i) =>
+          window.setTimeout(() => setShown(i + 1), (i + 1) * STEP_MS),
+        )
     return () => timers.forEach(clearTimeout)
   }, [steps])
 
@@ -149,7 +200,8 @@ function Run({ request, onRun }: { request: string; onRun: (q: string) => void }
   const done = r ? shown >= r.steps.filter((s) => s.status !== 'skipped').length : false
   const direct = r && r.state !== 'recommendation' // clarifications and limits are shown as soon as the steps finish
   useEffect(() => {
-    if (open || (done && direct)) results.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (open || (done && direct))
+      results.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [open, done, direct])
 
   return (
@@ -183,7 +235,9 @@ function Run({ request, onRun }: { request: string; onRun: (q: string) => void }
         ) : null}
 
         <div ref={results} className="ag-results">
-          {r && done && (open || direct) ? <Result r={r} onRefine={(extra) => onRun(extra ? `${r.request} ${extra}` : '')} /> : null}
+          {r && done && (open || direct) ? (
+            <Result r={r} onRefine={(extra) => onRun(extra ? `${r.request} ${extra}` : '')} />
+          ) : null}
         </div>
       </div>
     </section>
@@ -192,12 +246,27 @@ function Run({ request, onRun }: { request: string; onRun: (q: string) => void }
 
 /** How the agent read the request. Only what was understood is shown; nothing is filled in. */
 function YourRequest({ i }: { i: AgentInterpretation }) {
-  const priority = [i.preference === 'cheapest' ? 'Lowest price' : i.preference === 'fastest' ? 'Fastest' : null,
-    i.availability === 'require' ? 'Must be in stock' : i.availability === 'prefer' ? 'Prefer in stock' : i.availability === 'future' ? 'Accepts on-order stock' : null].filter(Boolean).join(' · ')
+  const priority = [
+    i.preference === 'cheapest' ? 'Lowest price' : i.preference === 'fastest' ? 'Fastest' : null,
+    i.availability === 'require'
+      ? 'Must be in stock'
+      : i.availability === 'prefer'
+        ? 'Prefer in stock'
+        : i.availability === 'future'
+          ? 'Accepts on-order stock'
+          : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
   const fields: [string, string | null][] = [
     ['Machine', i.machine],
     ['Need', i.part_type],
-    ['Budget', i.budget_max != null ? `Up to ${formatMoney({ amount: i.budget_max, currency: i.budget_currency ?? 'EUR' })}` : null],
+    [
+      'Budget',
+      i.budget_max != null
+        ? `Up to ${formatMoney({ amount: i.budget_max, currency: i.budget_currency ?? 'EUR' })}`
+        : null,
+    ],
     ['Priority', priority || null],
     ['Location', i.delivery_place],
     ['Quantity', i.quantity != null ? String(i.quantity) : null],
@@ -223,14 +292,25 @@ function YourRequest({ i }: { i: AgentInterpretation }) {
 }
 
 /** The agent's steps, as the API reports them: a numbered stepper, then one line for each thing it found. */
-function Rail({ steps, shown, pending }: { steps: AgentStep[] | null; shown: number; pending: string[] }) {
+function Rail({
+  steps,
+  shown,
+  pending,
+}: {
+  steps: AgentStep[] | null
+  shown: number
+  pending: string[]
+}) {
   const visible = steps?.filter((s) => s.status !== 'skipped') ?? []
-  const rows = steps ?? pending.map((label, i) => ({ key: String(i), label, status: 'skipped' as const, message: '' }))
+  const rows =
+    steps ??
+    pending.map((label, i) => ({ key: String(i), label, status: 'skipped' as const, message: '' }))
   const stateOf = (i: number): string => {
     if (!steps) return i === 0 ? 'is-active' : 'is-idle'
     const s = steps[i]
     const pos = visible.indexOf(s)
-    if (s.status === 'skipped' || pos < 0 || pos >= shown) return pos === shown ? 'is-active' : 'is-idle'
+    if (s.status === 'skipped' || pos < 0 || pos >= shown)
+      return pos === shown ? 'is-active' : 'is-idle'
     return s.status === 'done' ? 'is-done' : 'is-blocked'
   }
   return (
@@ -256,7 +336,11 @@ function Rail({ steps, shown, pending }: { steps: AgentStep[] | null; shown: num
         ) : (
           visible.slice(0, shown).map((s) => (
             <li key={s.key} className={`is-${s.status}`}>
-              {s.status === 'done' ? <Check size={16} strokeWidth={2.4} aria-hidden="true" /> : <CircleAlert size={16} strokeWidth={2} aria-hidden="true" />}
+              {s.status === 'done' ? (
+                <Check size={16} strokeWidth={2.4} aria-hidden="true" />
+              ) : (
+                <CircleAlert size={16} strokeWidth={2} aria-hidden="true" />
+              )}
               <span>{s.message}</span>
             </li>
           ))
@@ -270,9 +354,15 @@ function Rail({ steps, shown, pending }: { steps: AgentStep[] | null; shown: num
 function ServiceState({ error, onRetry }: { error: ApiError; onRetry: () => void }) {
   const [title, text] =
     error.code === 'llm_unavailable' || error.code === 'llm_invalid_response'
-      ? ['Agent temporarily unavailable', 'The question-understanding service is unavailable. Please try again.']
+      ? [
+          'Agent temporarily unavailable',
+          'The question-understanding service is unavailable. Please try again.',
+        ]
       : error.code === 'graph_unavailable'
-        ? ['Parts data temporarily unavailable', 'The parts catalogue could not be reached. Please try again.']
+        ? [
+            'Parts data temporarily unavailable',
+            'The parts catalogue could not be reached. Please try again.',
+          ]
         : error.status === 0 || (error.status >= 500 && error.code === 'error')
           ? ['Agent not reachable', 'The agent could not be reached. Please try again.']
           : ['Request not handled', 'Please rephrase the request and try again.']
@@ -315,12 +405,19 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
 
       {r.state !== 'recommendation' ? (
         <div className="ag-need card card-pad">
-          <p className="eyebrow">{r.state === 'no_match' ? 'No verified option meets your request' : 'One more detail'}</p>
+          <p className="eyebrow">
+            {r.state === 'no_match' ? 'No verified option meets your request' : 'One more detail'}
+          </p>
           <p className="ag-need__q">{r.question}</p>
           {r.options.length ? (
             <div className="chip-row ag-need__opts">
               {r.options.map((o) => (
-                <button key={o.label} type="button" className="chip" onClick={() => onRefine(o.refine)}>
+                <button
+                  key={o.label}
+                  type="button"
+                  className="chip"
+                  onClick={() => onRefine(o.refine)}
+                >
                   {o.label}
                 </button>
               ))}
@@ -333,7 +430,10 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
           ))}
           <Excluded r={r} />
           {r.state === 'no_match' && i.machine ? (
-            <Link className="link-more" to={`${PI}?q=${encodeURIComponent(`Which parts fit the ${i.machine}?`)}`}>
+            <Link
+              className="link-more"
+              to={`${PI}?q=${encodeURIComponent(`Which parts fit the ${i.machine}?`)}`}
+            >
               See what fits the {i.machine} in Parts Intelligence →
             </Link>
           ) : null}
@@ -385,18 +485,44 @@ function Excluded({ r }: { r: AgentResponse }) {
   )
 }
 
-const tone = (label: string) => (label === 'In stock' ? 'tag-good' : label === 'Low stock' ? 'tag-warn' : label === 'On order' || label === 'Out of stock' ? 'tag-bad' : 'tag-plain')
-const fitTone = (c: AgentCandidate) => (c.fitment_label === 'Confirmed fit' ? 'tag-good' : 'tag-warn')
-const priceText = (c: AgentCandidate) => (c.part.price ? `${formatMoney(c.part.price)}${c.price_basis ? ` · ${c.price_basis}` : ''}` : 'Price not recorded')
+const tone = (label: string) =>
+  label === 'In stock'
+    ? 'tag-good'
+    : label === 'Low stock'
+      ? 'tag-warn'
+      : label === 'On order' || label === 'Out of stock'
+        ? 'tag-bad'
+        : 'tag-plain'
+const fitTone = (c: AgentCandidate) =>
+  c.fitment_label === 'Confirmed fit' ? 'tag-good' : 'tag-warn'
+const priceText = (c: AgentCandidate) =>
+  c.part.price
+    ? `${formatMoney(c.part.price)}${c.price_basis ? ` · ${c.price_basis}` : ''}`
+    : 'Price not recorded'
 
 /** The commercial action, truthful about what the demo can do: add to the cart, then review the order. Nothing is paid or placed here. */
-function OrderAction({ c, machine, qty, compact = false }: { c: AgentCandidate; machine: string | null; qty: number | null; compact?: boolean }) {
+function OrderAction({
+  c,
+  machine,
+  qty,
+  compact = false,
+}: {
+  c: AgentCandidate
+  machine: string | null
+  qty: number | null
+  compact?: boolean
+}) {
   const { add } = useCart()
   const [added, setAdded] = useState(false)
-  const orderable = c.order_action === 'add_to_cart' && canOrder(c.part.availability?.part_status, c.part.availability?.orderable)
+  const orderable =
+    c.order_action === 'add_to_cart' &&
+    canOrder(c.part.availability?.part_status, c.part.availability?.orderable)
   if (c.order_action === 'identify')
     return (
-      <Link className="btn btn-secondary btn-sm" to={`${PI}?part=${encodeURIComponent(c.part.part_number)}&tab=store`}>
+      <Link
+        className="btn btn-secondary btn-sm"
+        to={`${PI}?part=${encodeURIComponent(c.part.part_number)}&tab=store`}
+      >
         Identification required
       </Link>
     )
@@ -458,14 +584,31 @@ function DecisionPanel({ d }: { d: NonNullable<AgentResponse['decision']> }) {
 }
 
 /** The recommended option, complete: every decision field has a value or a plain "not recorded" state. */
-function Recommended({ c, machine, qty }: { c: AgentCandidate; machine: string | null; qty: number | null }) {
+function Recommended({
+  c,
+  machine,
+  qty,
+}: {
+  c: AgentCandidate
+  machine: string | null
+  qty: number | null
+}) {
   const p = c.part
   const rows: [string, React.ReactNode][] = [
-    ['Availability', <span key="a" className={`tag ${tone(c.availability_label)}`}><i className="tag-dot" aria-hidden="true" />{c.availability_label}</span>],
+    [
+      'Availability',
+      <span key="a" className={`tag ${tone(c.availability_label)}`}>
+        <i className="tag-dot" aria-hidden="true" />
+        {c.availability_label}
+      </span>,
+    ],
     ['Inventory', c.inventory],
     ['Fulfilment', c.fulfilment],
     ['Delivery', c.delivery],
-    [c.suppliers.length > 1 ? 'Suppliers' : 'Supplier', c.suppliers.length > 1 ? c.suppliers.map((s) => s.name).join(', ') : c.supplier_label],
+    [
+      c.suppliers.length > 1 ? 'Suppliers' : 'Supplier',
+      c.suppliers.length > 1 ? c.suppliers.map((s) => s.name).join(', ') : c.supplier_label,
+    ],
   ]
   return (
     <article className="reco-card card is-best ag-recommended" aria-labelledby="ag-rec-title">
@@ -482,18 +625,24 @@ function Recommended({ c, machine, qty }: { c: AgentCandidate; machine: string |
           <p className="muted reco-name">{p.name}</p>
           <div className="reco-tags">
             <span className={`tag ${fitTone(c)}`}>{c.fitment_label}</span>
-            {p.availability?.part_status === 'VERIFIED' ? <span className="tag tag-good">Verified</span> : null}
+            {p.availability?.part_status === 'VERIFIED' ? (
+              <span className="tag tag-good">Verified</span>
+            ) : null}
             {c.within_budget === true ? <span className="tag tag-info">Within budget</span> : null}
           </div>
           <p className="reco-price">
-            {p.price ? formatMoney(p.price) : 'Price not recorded'} {c.price_basis ? <span className="small muted">{c.price_basis}</span> : null}
+            {p.price ? formatMoney(p.price) : 'Price not recorded'}{' '}
+            {c.price_basis ? <span className="small muted">{c.price_basis}</span> : null}
           </p>
           <div className="reco-actions">
             <OrderAction c={c} machine={machine} qty={qty} />
             <Link className="btn btn-secondary btn-sm" to={partPath(p.part_number)}>
               View part
             </Link>
-            <Link className="btn btn-secondary btn-sm" to={`${PI}?part=${encodeURIComponent(p.part_number)}`}>
+            <Link
+              className="btn btn-secondary btn-sm"
+              to={`${PI}?part=${encodeURIComponent(p.part_number)}`}
+            >
               View evidence
             </Link>
           </div>
@@ -562,16 +711,18 @@ function HowWeKnow({ r, best }: { r: AgentResponse; best: AgentCandidate }) {
         ))}
       </dl>
       <ul className="evidence-list">
-        {r.evidence.filter((e) => e.key !== 'ranking').map((e) => (
-          <li key={e.key} className={`ev-item ${e.ok ? 'is-ok' : 'is-warn'}`}>
-            <span className="ev-mark" aria-hidden="true">
-              {e.ok ? '✓' : '!'}
-            </span>
-            <p className="ev-detail">
-              <strong>{e.label}</strong> · {e.detail}
-            </p>
-          </li>
-        ))}
+        {r.evidence
+          .filter((e) => e.key !== 'ranking')
+          .map((e) => (
+            <li key={e.key} className={`ev-item ${e.ok ? 'is-ok' : 'is-warn'}`}>
+              <span className="ev-mark" aria-hidden="true">
+                {e.ok ? '✓' : '!'}
+              </span>
+              <p className="ev-detail">
+                <strong>{e.label}</strong> · {e.detail}
+              </p>
+            </li>
+          ))}
       </ul>
     </section>
   )
@@ -584,7 +735,11 @@ function Alternatives({ r }: { r: AgentResponse }) {
     <section className="card card-pad ag-opts" aria-labelledby="ag-opts-title">
       <h3 id="ag-opts-title">Alternatives</h3>
       {alts.length === 0 ? (
-        <p className="pi-empty">{r.notes.some((n) => n.startsWith('Not considered') || n.startsWith('Over your')) ? 'No other verified compatible option meets your requirements.' : 'No other verified compatible options were found.'}</p>
+        <p className="pi-empty">
+          {r.notes.some((n) => n.startsWith('Not considered') || n.startsWith('Over your'))
+            ? 'No other verified compatible option meets your requirements.'
+            : 'No other verified compatible options were found.'}
+        </p>
       ) : (
         <div className="table-scroll">
           <table className="data-table ag-table">
@@ -614,13 +769,22 @@ function Alternatives({ r }: { r: AgentResponse }) {
                   <td data-label="Availability">{c.availability_label}</td>
                   <td data-label="Fulfilment">{c.fulfilment}</td>
                   <td data-label="Supplier">{c.supplier_label}</td>
-                  <td data-label="Reason">{c.tradeoffs.length ? c.tradeoffs.join(' · ') : 'Ranks lower on your priorities'}</td>
+                  <td data-label="Reason">
+                    {c.tradeoffs.length
+                      ? c.tradeoffs.join(' · ')
+                      : 'Ranks lower on your priorities'}
+                  </td>
                   <td className="ag-table__act">
                     <div className="row">
                       <Link className="link-more" to={partPath(c.part.part_number)}>
                         View →
                       </Link>
-                      <OrderAction c={c} machine={r.interpretation.machine} qty={r.interpretation.quantity} compact />
+                      <OrderAction
+                        c={c}
+                        machine={r.interpretation.machine}
+                        qty={r.interpretation.quantity}
+                        compact
+                      />
                     </div>
                   </td>
                 </tr>

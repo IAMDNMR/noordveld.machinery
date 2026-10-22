@@ -31,7 +31,8 @@ const snapshot = (): Records => {
     cachedRaw = raw
     try {
       const parsed = JSON.parse(raw ?? '{}') as unknown
-      cached = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Records) : {}
+      cached =
+        parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Records) : {}
     } catch {
       cached = {}
     }
@@ -63,12 +64,23 @@ const save = (partNumber: string, patch: IdentificationRecord) => {
 
 export function useIdentification(partNumber: string) {
   const records = useSyncExternalStore(subscribe, snapshot, () => cached)
-  const request = useCallback(() => save(partNumber, { requestedAt: new Date().toISOString() }), [partNumber])
+  const request = useCallback(
+    () => save(partNumber, { requestedAt: new Date().toISOString() }),
+    [partNumber],
+  )
   const submit = useCallback(
-    (machine: string, serialOrVariant: string) => save(partNumber, { machine: machine.trim(), serialOrVariant: serialOrVariant.trim(), submittedAt: new Date().toISOString() }),
+    (machine: string, serialOrVariant: string) =>
+      save(partNumber, {
+        machine: machine.trim(),
+        serialOrVariant: serialOrVariant.trim(),
+        submittedAt: new Date().toISOString(),
+      }),
     [partNumber],
   )
   return { record: records[partNumber] ?? null, request, submit }
 }
 
-export const formatDate = (iso: string | undefined): string => (iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '')
+export const formatDate = (iso: string | undefined): string =>
+  iso
+    ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : ''

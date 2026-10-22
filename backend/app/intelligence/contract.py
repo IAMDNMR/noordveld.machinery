@@ -4,6 +4,7 @@ A question walks through intermediate nodes (a part, a warehouse, a supplier...)
 entity type may appear as a result card; anything else a handler returns is removed here and logged, so a query that over-reaches
 cannot leak intermediate nodes into the answer. The allowed kinds per intent live in registry.RESULT_KINDS.
 """
+
 from __future__ import annotations
 
 import logging
@@ -20,7 +21,9 @@ def enforce_result_kinds(intent: Intent, outcome: Outcome) -> int:
     kept = [r for r in outcome.results if r.kind in allowed]
     dropped = len(outcome.results) - len(kept)
     if dropped:
-        log.warning("intent %s returned %d result(s) outside %s: removed", intent.value, dropped, allowed)
+        log.warning(
+            "intent %s returned %d result(s) outside %s: removed", intent.value, dropped, allowed
+        )
         outcome.results = kept
         outcome.total = max(len(kept), outcome.total - dropped)
     return dropped

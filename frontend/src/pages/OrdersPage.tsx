@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { ClipboardList, Clock3, Truck, CircleAlert, Search } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { DIRECT_ORDER, getOrders, type OrderRow, type Queue } from '../api/orders'
 import { Restricted } from '../components/orders/Restricted'
@@ -6,6 +8,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { useSession } from '../store/session'
 import '../styles/wf.css'
 import '../components/orders/orders.css'
+import './ProcurementPage.css'
 
 const QUEUES: { id: Queue | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -17,31 +20,57 @@ const QUEUES: { id: Queue | 'all'; label: string }[] = [
   { id: 'exceptions', label: 'Exceptions' },
 ]
 
-const WARN = new Set(['CANCELLED', 'REJECTED', 'ALLOCATION_FAILED', 'ALLOCATION_RELEASED', 'SHIPMENT_EXCEPTION', 'DELIVERY_FAILED', 'SERVICE_CANCELLED'])
+const WARN = new Set([
+  'CANCELLED',
+  'REJECTED',
+  'ALLOCATION_FAILED',
+  'ALLOCATION_RELEASED',
+  'SHIPMENT_EXCEPTION',
+  'DELIVERY_FAILED',
+  'SERVICE_CANCELLED',
+])
 export const statusTone = (status: string): string =>
-  status === 'DELIVERED' || status === 'COMPLETED' ? 'tag-good' : status === 'SHIPPED' || status === 'ALLOCATED' || status === 'READY_TO_SHIP' ? 'tag-info' : status === 'NEW' || WARN.has(status) ? 'tag-warn' : 'tag-plain'
+  status === 'DELIVERED' || status === 'COMPLETED'
+    ? 'tag-good'
+    : status === 'SHIPPED' || status === 'ALLOCATED' || status === 'READY_TO_SHIP'
+      ? 'tag-info'
+      : status === 'NEW' || WARN.has(status)
+        ? 'tag-warn'
+        : 'tag-plain'
 
 const money = (amount: number | null, currency: string, direct = false) =>
-  amount == null ? (direct ? 'Not available' : 'Not recorded') : new Intl.NumberFormat('en-NL', { style: 'currency', currency }).format(amount)
+  amount == null
+    ? direct
+      ? 'Not available'
+      : 'Not recorded'
+    : new Intl.NumberFormat('en-NL', { style: 'currency', currency }).format(amount)
 
 /** End User: my requests and orders. Order Processor: the work queue. Which one is shown follows the role the server returns. */
 export default function OrdersPage() {
   const { user, ready } = useSession()
   const processor = user?.role === 'ORDER_PROCESSOR'
-  usePageMeta({ title: processor ? 'Order processing' : 'My orders', description: 'Orders and their status.', path: '/orders' })
-  const orders = useApi((s) => (user ? getOrders(s) : Promise.resolve(null)), `orders:${user?.id ?? 'none'}`)
+  usePageMeta({
+    title: processor ? 'Order processing' : 'My orders',
+    description: 'Orders and their status.',
+    path: '/orders',
+  })
+  const orders = useApi(
+    (s) => (user ? getOrders(s) : Promise.resolve(null)),
+    `orders:${user?.id ?? 'none'}`,
+  )
   const [params, setParams] = useSearchParams()
+  const [query, setQuery] = useState('')
   const queue = (params.get('queue') as Queue | null) ?? 'all'
 
   if (!ready) return <div className="wf ord-page" />
   return (
-    <div className="wf ord-page">
+    <div className={`wf ord-page ${processor ? 'ord-page--processor' : ''}`}>
       <div className="wf-container">
-        <p className="eyebrow">{processor ? 'Order Processor' : 'End User'}</p>
+        <p className="eyebrow">{processor ? 'NOORDVELD · PROCUREMENT WORKSPACE' : 'End User'}</p>
         <h1>{processor ? 'Order processing' : 'My orders'}</h1>
         <p className="lede">
           {processor
-            ? 'Customer orders to allocate, fulfil, ship and follow. Every step is recorded in the Noordveld graph; nothing here edits catalogue facts.'
+            ? 'A clear view of what needs your attention. Review requests, coordinate fulfilment, and keep every order moving.'
             : 'Your orders, their status and how they are being fulfilled.'}
         </p>
 
@@ -54,18 +83,93 @@ export default function OrdersPage() {
         ) : (
           <>
             {processor ? (
+              <>
+                <div className="proc-summary" aria-label="Order overview">
+                  {[
+                    {
+                      label: 'Total orders',
+                      count: orders.data.length,
+                      icon: ClipboardList,
+                      tone: 'green',
+                    },
+                    {
+                      label: 'Pending review',
+                      count: orders.data.filter((o) => o.queue === 'pending_review').length,
+                      icon: Clock3,
+                      tone: 'amber',
+                    },
+                    {
+                      label: 'Ready to ship',
+                      count: orders.data.filter((o) => o.queue === 'ready_to_ship').length,
+                      icon: Truck,
+                      tone: 'blue',
+                    },
+                    {
+                      label: 'Exceptions',
+                      count: orders.data.filter((o) => o.queue === 'exceptions').length,
+                      icon: CircleAlert,
+                      tone: 'red',
+                    },
+                  ].map(({ label, count, icon: Icon, tone }) => (
+                    <article key={label}>
+                      <div>
+                        <span>{label}</span>
+                        <strong>{count}</strong>
+                      </div>
+                      <i data-tone={tone}>
+                        <Icon size={20} />
+                      </i>
+                    </article>
+                  ))}
+                </div>
+                <div className="proc-table-head">
+                  <div>
+                    <h2>Order workbench</h2>
+                    <p>Choose a queue or find a specific order.</p>
+                  </div>
+                  <label className="proc-search">
+                    <Search size={15} />
+                    <input
+                      aria-label="Search orders"
+                      placeholder="Search orders, customers, parts…"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  </label>
+                </div>
+              </>
+            ) : null}
+            {processor ? (
               <div className="chip-row ord-queues" role="group" aria-label="Queue">
                 {QUEUES.map((q) => {
-                  const n = q.id === 'all' ? orders.data!.length : orders.data!.filter((o) => o.queue === q.id).length
+                  const n =
+                    q.id === 'all'
+                      ? orders.data!.length
+                      : orders.data!.filter((o) => o.queue === q.id).length
                   return (
-                    <button key={q.id} type="button" className="chip" aria-pressed={queue === q.id} onClick={() => setParams(q.id === 'all' ? {} : { queue: q.id })}>
+                    <button
+                      key={q.id}
+                      type="button"
+                      className="chip"
+                      aria-pressed={queue === q.id}
+                      onClick={() => setParams(q.id === 'all' ? {} : { queue: q.id })}
+                    >
                       {q.label} <span className="muted">{n}</span>
                     </button>
                   )
                 })}
               </div>
             ) : null}
-            <OrderTable rows={orders.data.filter((o) => queue === 'all' || o.queue === queue)} processor={processor} />
+            <OrderTable
+              rows={orders.data.filter(
+                (o) =>
+                  (queue === 'all' || o.queue === queue) &&
+                  `${o.order_id} ${o.customer ?? ''} ${o.parts.join(' ')}`
+                    .toLowerCase()
+                    .includes(query.trim().toLowerCase()),
+              )}
+              processor={processor}
+            />
           </>
         )}
       </div>
@@ -74,7 +178,14 @@ export default function OrdersPage() {
 }
 
 function OrderTable({ rows, processor }: { rows: OrderRow[]; processor: boolean }) {
-  if (rows.length === 0) return <p className="pi-empty">{processor ? 'No orders in this queue.' : 'You have no orders yet. Add verified parts to your cart and place an order at checkout.'}</p>
+  if (rows.length === 0)
+    return (
+      <p className="pi-empty">
+        {processor
+          ? 'No orders in this queue.'
+          : 'You have no orders yet. Add verified parts to your cart and place an order at checkout.'}
+      </p>
+    )
   return (
     <div className="card ord-table">
       <div className="table-scroll">
@@ -103,12 +214,22 @@ function OrderTable({ rows, processor }: { rows: OrderRow[]; processor: boolean 
                 {processor ? <td data-label="Customer">{o.customer}</td> : null}
                 <td data-label="Date">{o.order_date ?? 'Not recorded'}</td>
                 <td data-label="Parts">{o.parts.join(', ') || 'No lines'}</td>
-                <td data-label="Fits">{o.fits.length ? o.fits.slice(0, 3).join(', ') + (o.fits.length > 3 ? ` +${o.fits.length - 3}` : '') : 'No fitment recorded'}</td>
+                <td data-label="Fits">
+                  {o.fits.length
+                    ? o.fits.slice(0, 3).join(', ') +
+                      (o.fits.length > 3 ? ` +${o.fits.length - 3}` : '')
+                    : 'No fitment recorded'}
+                </td>
                 <td data-label="Status">
                   <span className={`tag ${statusTone(o.status)}`}>{o.status_label}</span>
                 </td>
                 <td data-label="Fulfilment">{o.fulfilment}</td>
-                <td data-label="Total">{money(o.total, o.currency, o.channel === DIRECT_ORDER)}</td>
+                <td data-label="Total">
+                  {money(o.total, o.currency, o.channel === DIRECT_ORDER)}
+                  {o.channel === DIRECT_ORDER && o.total != null ? (
+                    <small className="small muted"> · demo estimate</small>
+                  ) : null}
+                </td>
               </tr>
             ))}
           </tbody>

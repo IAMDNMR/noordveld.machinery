@@ -1,0 +1,377 @@
+{
+ "id": "cap_approvals",
+ "version": "2026.10.19",
+ "layer": "reusable",
+ "title": "Approvals capability",
+ "description": "A request that a different person must approve or reject before work continues.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [],
+ "uses_capabilities": [
+  "approval_workflow",
+  "audit_history",
+  "identity_access"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_apr_decide",
+    "statement": "A request is decided by a person other than the requester, and the decision is recorded.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_apr_decide_1",
+      "statement": "The requester cannot approve their own request."
+     },
+     {
+      "id": "ac_apr_decide_2",
+      "statement": "The decision and its time are in the history."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_apr_requester",
+    "name": "Requester",
+    "responsibilities": [
+     "Asks for approval"
+    ],
+    "permissions": [
+     "apr.approval_submit"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_apr_approver",
+    "name": "Approver",
+    "responsibilities": [
+     "Decides approval requests"
+    ],
+    "permissions": [
+     "apr.approval_decide"
+    ],
+    "approval_authority": [
+     "Approval requests"
+    ]
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_apr_request",
+    "name": "Approval request",
+    "description": "Something that needs a decision from someone other than the requester.",
+    "attributes": [
+     {
+      "id": "request_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "subject",
+      "name": "Subject",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 200
+     },
+     {
+      "id": "reason",
+      "name": "Reason",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 500
+     },
+     {
+      "id": "amount",
+      "name": "Amount",
+      "type": "decimal",
+      "required": false,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "requested_on",
+      "name": "Requested on",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "decision",
+      "name": "Decision",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "owner_role_id": "role_apr_approver"
+     },
+     {
+      "id": "decision_note",
+      "name": "Decision note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_apr_approver",
+      "max_length": 500
+     }
+    ],
+    "relationships": []
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_apr_decision",
+    "description": "The approver's recorded decision selects what happens next.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "APPROVED",
+     "REJECTED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_apr_request.decision",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [],
+  "decisions": [],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_apr_approval",
+    "term": "Approval",
+    "definition": "A decision by someone other than the requester that lets work continue."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_apr_approval",
+   "name": "Approval",
+   "states": [
+    {
+     "id": "st_apr_approval_start",
+     "label": "Approval needed",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_apr_approval_submit",
+     "label": "Submit the request",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_apr_requester",
+     "permission": "apr.approval_submit",
+     "requirement_ids": [
+      "req_apr_decide"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_apr_request"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_apr_request": [
+       "subject",
+       "reason",
+       "amount",
+       "requested_on"
+      ]
+     },
+     "input_relationships": {
+      "ent_apr_request": []
+     }
+    },
+    {
+     "id": "st_apr_approval_decide",
+     "label": "Decide the request",
+     "kind": "approval",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_apr_approver",
+     "permission": "apr.approval_decide",
+     "requirement_ids": [
+      "req_apr_decide"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_apr_request"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_apr_request": [
+       "decision",
+       "decision_note"
+      ]
+     },
+     "input_relationships": {
+      "ent_apr_request": []
+     }
+    },
+    {
+     "id": "st_apr_approval_verdict",
+     "label": "Decision",
+     "kind": "branch",
+     "outputs": [
+      "rule_apr_decision"
+     ],
+     "outcome": null,
+     "role_id": "role_apr_approver",
+     "permission": null,
+     "requirement_ids": [
+      "req_apr_decide"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_apr_decision"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_apr_approval_approved",
+     "label": "Approved",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_apr_approval_rejected",
+     "label": "Rejected",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "failure",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_apr_approval_1",
+     "source": "st_apr_approval_start",
+     "target": "st_apr_approval_submit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_apr_approval_2",
+     "source": "st_apr_approval_submit",
+     "target": "st_apr_approval_decide",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_apr_approval_3",
+     "source": "st_apr_approval_decide",
+     "target": "st_apr_approval_verdict",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_apr_approval_4",
+     "source": "st_apr_approval_verdict",
+     "target": "st_apr_approval_approved",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_apr_decision",
+      "value": "APPROVED"
+     }
+    },
+    {
+     "id": "tr_apr_approval_5",
+     "source": "st_apr_approval_verdict",
+     "target": "st_apr_approval_rejected",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_apr_decision",
+      "value": "REJECTED"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Approval",
+   "definition": "A decision by someone other than the requester that lets work continue.",
+   "synonyms": [
+    "sign-off",
+    "authorisation",
+    "authorization",
+    "release"
+   ],
+   "refers_to": "ent_apr_request"
+  }
+ ],
+ "overrides": []
+}

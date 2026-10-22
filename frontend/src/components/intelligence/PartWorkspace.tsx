@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { getPartOverview, type PartOverview, type PartTab } from '../../api'
+import { getPartOverview, type PartOverview, type PartTab } from '../../api/index'
 import { useApi } from '../../hooks/useApi'
 import { useIdentification } from '../../store/identification'
 import { PartImage } from '../store/PartImage'
@@ -24,7 +24,7 @@ export const TABS: readonly { id: PartTab; label: string }[] = [
   { id: 'graph', label: 'Graph Relationships' },
   { id: 'provenance', label: 'Data & Provenance' },
   { id: 'insights', label: 'Intelligence / Insights' },
-  { id: 'store', label: 'Parts Store Action' },
+  { id: 'store', label: 'Parts Portal Action' },
 ]
 
 interface Props {
@@ -43,10 +43,17 @@ export function PartWorkspace({ partKey, tab, backLabel, onTab, onOpenPart, onCl
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
+    // Each part navigation resets the document scroll.
+    // eslint-disable-next-line react/exhaustive-effect-dependencies
   }, [partKey])
 
   const moveTab = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
+    const step =
+      e.key === 'ArrowRight' || e.key === 'ArrowDown'
+        ? 1
+        : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+          ? -1
+          : 0
     if (!step) return
     e.preventDefault()
     const next = TABS[(index + step + TABS.length) % TABS.length]
@@ -62,7 +69,11 @@ export function PartWorkspace({ partKey, tab, backLabel, onTab, onOpenPart, onCl
       </button>
 
       {overview.error ? (
-        <ErrorNotice error={overview.error} onRetry={overview.reload} title={overview.error.notFound ? 'Part not found' : 'This part could not be loaded'} />
+        <ErrorNotice
+          error={overview.error}
+          onRetry={overview.reload}
+          title={overview.error.notFound ? 'Part not found' : 'This part could not be loaded'}
+        />
       ) : !data ? (
         <p className="pw-loading" role="status">
           Loading part…
@@ -91,14 +102,20 @@ export function PartWorkspace({ partKey, tab, backLabel, onTab, onOpenPart, onCl
                 {data.part_number}
               </h1>
               <p className="pi-name">{data.name}</p>
-              <p className="small muted">{[data.families.join(', '), data.subcategory].filter(Boolean).join(' · ')}</p>
+              <p className="small muted">
+                {[data.families.join(', '), data.subcategory].filter(Boolean).join(' · ')}
+              </p>
               <div className="pi-head-badges">
                 <span className="small muted">Status</span>
                 <StatusBadge overview={data} />
                 <span className="small muted">Data</span>
                 <ProvenanceBadge value={data.data_class} />
               </div>
-              {data.status.data_class === 'SYNTHETIC_DEMO' ? <p className="pw__demo-note">Status and orderability come from demo data, not a live catalogue.</p> : null}
+              {data.status.data_class === 'SYNTHETIC_DEMO' ? (
+                <p className="pw__demo-note">
+                  Status and orderability come from demo data, not a live catalogue.
+                </p>
+              ) : null}
             </div>
             <div className="pi-head-action">
               <PartActions overview={data} onIdentify={() => onTab('store')} />
@@ -125,7 +142,13 @@ export function PartWorkspace({ partKey, tab, backLabel, onTab, onOpenPart, onCl
           </div>
 
           <div className="pw__body" id="pw-panel" role="tabpanel" aria-labelledby={`pw-tab-${tab}`}>
-            <TabContent tab={tab} partKey={data.part_number} overview={data} onTab={onTab} onOpenPart={onOpenPart} />
+            <TabContent
+              tab={tab}
+              partKey={data.part_number}
+              overview={data}
+              onTab={onTab}
+              onOpenPart={onOpenPart}
+            />
           </div>
         </>
       )}
@@ -141,13 +164,21 @@ export function StatusBadge({ overview }: { overview: PartOverview }) {
   return (
     <span className={`pw__status pw__status--${code.toLowerCase()}`}>
       {requested ? 'Identification requested' : label}
-      {!requested && code !== 'VERIFIED' && record?.submittedAt ? <span className="pw__status-sub"> · details submitted</span> : null}
+      {!requested && code !== 'VERIFIED' && record?.submittedAt ? (
+        <span className="pw__status-sub"> · details submitted</span>
+      ) : null}
     </span>
   )
 }
 
 /** One primary action per status, as the API defines it. */
-export function PartActions({ overview, onIdentify }: { overview: PartOverview; onIdentify: () => void }) {
+export function PartActions({
+  overview,
+  onIdentify,
+}: {
+  overview: PartOverview
+  onIdentify: () => void
+}) {
   const { record, request } = useIdentification(overview.part_number)
   const action = overview.actions[0]
   if (!action) return null
@@ -162,7 +193,12 @@ export function PartActions({ overview, onIdentify }: { overview: PartOverview; 
           {action.label}
         </button>
       ) : action.kind === 'request_identification' ? (
-        <button type="button" className="btn btn-primary" onClick={request} disabled={Boolean(record?.requestedAt)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={request}
+          disabled={Boolean(record?.requestedAt)}
+        >
           {record?.requestedAt ? 'Identification requested' : action.label}
         </button>
       ) : null}
@@ -170,7 +206,19 @@ export function PartActions({ overview, onIdentify }: { overview: PartOverview; 
   )
 }
 
-function TabContent({ tab, partKey, overview, onTab, onOpenPart }: { tab: PartTab; partKey: string; overview: PartOverview; onTab: (t: PartTab) => void; onOpenPart: (pn: string) => void }) {
+function TabContent({
+  tab,
+  partKey,
+  overview,
+  onTab,
+  onOpenPart,
+}: {
+  tab: PartTab
+  partKey: string
+  overview: PartOverview
+  onTab: (t: PartTab) => void
+  onOpenPart: (pn: string) => void
+}) {
   switch (tab) {
     case 'overview':
       return <OverviewTab overview={overview} onTab={onTab} />

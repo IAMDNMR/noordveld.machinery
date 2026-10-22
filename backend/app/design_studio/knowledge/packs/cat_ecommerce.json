@@ -1,0 +1,787 @@
+{
+ "id": "cat_ecommerce",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "E-commerce and order management",
+ "description": "Customer orders from entry through availability, payment and confirmation.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_inventory"
+ ],
+ "uses_capabilities": [
+  "audit_history",
+  "search_filter",
+  "reporting_dashboards",
+  "notifications"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_eco_order",
+    "statement": "Orders are entered, checked against stock and payment, and confirmed.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_eco_order_1",
+      "statement": "An agent enters an order with its lines."
+     },
+     {
+      "id": "ac_eco_order_2",
+      "statement": "An order is confirmed only when stock is available and payment is received."
+     },
+     {
+      "id": "ac_eco_order_3",
+      "statement": "A failed payment cancels the order."
+     }
+    ]
+   },
+   {
+    "id": "req_eco_track",
+    "statement": "Everyone can see where an order stands.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_eco_track_1",
+      "statement": "The order's current step and history are visible."
+     }
+    ]
+   },
+   {
+    "id": "req_eco_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_eco_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_eco_agent",
+    "name": "Order agent",
+    "responsibilities": [
+     "Enters and confirms orders"
+    ],
+    "permissions": [
+     "eco.order_enter",
+     "eco.order_backorder",
+     "eco.order_confirm"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_eco_payments",
+    "name": "Payments clerk",
+    "responsibilities": [
+     "Records and chases payment"
+    ],
+    "permissions": [
+     "eco.order_payment",
+     "eco.order_chase"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_eco_order",
+    "name": "Customer order",
+    "description": "A customer's request to buy items.",
+    "attributes": [
+     {
+      "id": "order_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "channel",
+      "name": "Channel",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "WEB",
+       "PHONE",
+       "EMAIL",
+       "MARKETPLACE"
+      ]
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "NEW",
+       "CONFIRMED",
+       "IN_FULFILMENT",
+       "COMPLETED",
+       "CANCELLED"
+      ]
+     },
+     {
+      "id": "payment_status",
+      "name": "Payment status",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "PAID",
+       "FAILED"
+      ],
+      "owner_role_id": "role_eco_payments"
+     },
+     {
+      "id": "total_amount",
+      "name": "Total amount",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "currency",
+      "name": "Currency",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "EUR",
+       "USD",
+       "GBP"
+      ]
+     },
+     {
+      "id": "order_date",
+      "name": "Order date",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_eco_order_customer",
+      "name": "Customer",
+      "target": "ent_core_customer",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ],
+    "owner_role_id": "role_eco_agent"
+   },
+   {
+    "id": "ent_eco_order_line",
+    "name": "Order line",
+    "description": "One item and quantity on a customer order.",
+    "attributes": [
+     {
+      "id": "order_line_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "quantity",
+      "name": "Quantity",
+      "type": "integer",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 1
+     },
+     {
+      "id": "unit_price",
+      "name": "Unit price",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_eco_order_line_order",
+      "name": "Order",
+      "target": "ent_eco_order",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_eco_order_line_item",
+      "name": "Item",
+      "target": "ent_core_item",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ],
+    "owner_role_id": "role_eco_agent"
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_eco_availability",
+    "description": "An order line can be filled only if on-hand stock covers the quantity.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "IN_STOCK",
+     "SHORT"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_inv_stock_level.on_hand",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_eco_order_line.quantity",
+     "pass_outcome": "IN_STOCK",
+     "fail_outcome": "SHORT"
+    }
+   },
+   {
+    "id": "rule_eco_payment",
+    "description": "The recorded payment status decides whether the order is confirmed.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "PAID",
+     "PENDING",
+     "FAILED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_eco_order.payment_status",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_eco_backorder",
+    "name": "Stock is short",
+    "trigger": "On-hand stock does not cover an order line.",
+    "recovery": "The agent resolves the shortage and the check is repeated.",
+    "resolution": "recover",
+    "resolution_state_id": "st_eco_order_avail"
+   },
+   {
+    "id": "exc_eco_payment_late",
+    "name": "Payment not received",
+    "trigger": "Payment is still pending when the order is ready to confirm.",
+    "recovery": "The payments clerk chases payment and the check is repeated.",
+    "resolution": "recover",
+    "resolution_state_id": "st_eco_order_pay_check"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_eco_backorder",
+    "question": "Does the company accept backorders, or cancel the order when stock is short?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_eco_availability"
+    ]
+   },
+   {
+    "id": "dec_eco_terms",
+    "question": "Which payment terms apply to which customer segment?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_eco_payment"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_eco_order",
+    "term": "Customer order",
+    "definition": "A customer's request to buy items."
+   },
+   {
+    "id": "term_eco_line",
+    "term": "Order line",
+    "definition": "One item and quantity on an order."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_eco_order",
+   "name": "Order to confirmation",
+   "states": [
+    {
+     "id": "st_eco_order_start",
+     "label": "Customer order received",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_eco_order_enter",
+     "label": "Enter the order",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_eco_agent",
+     "permission": "eco.order_enter",
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_core_customer",
+      "ent_inv_stock_level"
+     ],
+     "writes_entity_ids": [
+      "ent_eco_order",
+      "ent_eco_order_line"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_eco_order": [
+       "channel",
+       "total_amount",
+       "currency",
+       "order_date",
+       "status"
+      ],
+      "ent_eco_order_line": [
+       "quantity",
+       "unit_price"
+      ]
+     },
+     "input_relationships": {
+      "ent_eco_order": [
+       "rel_eco_order_customer"
+      ],
+      "ent_eco_order_line": [
+       "rel_eco_order_line_order",
+       "rel_eco_order_line_item"
+      ]
+     }
+    },
+    {
+     "id": "st_eco_order_avail",
+     "label": "Is the stock available?",
+     "kind": "branch",
+     "outputs": [
+      "rule_eco_availability"
+     ],
+     "outcome": null,
+     "role_id": "role_eco_agent",
+     "permission": null,
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_eco_availability"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_eco_order_backorder",
+     "label": "Resolve the shortage",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_eco_agent",
+     "permission": "eco.order_backorder",
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_eco_order_line"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_eco_backorder"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_eco_order_line": [
+       "quantity"
+      ]
+     },
+     "input_relationships": {
+      "ent_eco_order_line": []
+     }
+    },
+    {
+     "id": "st_eco_order_payment",
+     "label": "Record the payment",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_eco_payments",
+     "permission": "eco.order_payment",
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_eco_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_eco_order": [
+       "payment_status"
+      ]
+     },
+     "input_relationships": {
+      "ent_eco_order": []
+     }
+    },
+    {
+     "id": "st_eco_order_pay_check",
+     "label": "Payment status",
+     "kind": "branch",
+     "outputs": [
+      "rule_eco_payment"
+     ],
+     "outcome": null,
+     "role_id": "role_eco_payments",
+     "permission": null,
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_eco_payment"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_eco_order_chase",
+     "label": "Chase the payment",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_eco_payments",
+     "permission": "eco.order_chase",
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_eco_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_eco_payment_late"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_eco_order": [
+       "payment_status"
+      ]
+     },
+     "input_relationships": {
+      "ent_eco_order": []
+     }
+    },
+    {
+     "id": "st_eco_order_confirm",
+     "label": "Confirm the order",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_eco_agent",
+     "permission": "eco.order_confirm",
+     "requirement_ids": [
+      "req_eco_order",
+      "req_eco_track",
+      "req_eco_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_eco_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_eco_order": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_eco_order": []
+     }
+    },
+    {
+     "id": "st_eco_order_done",
+     "label": "Order confirmed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_eco_order_cancelled",
+     "label": "Order cancelled",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "cancelled",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_eco_order_1",
+     "source": "st_eco_order_start",
+     "target": "st_eco_order_enter",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_eco_order_2",
+     "source": "st_eco_order_enter",
+     "target": "st_eco_order_avail",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_eco_order_3",
+     "source": "st_eco_order_avail",
+     "target": "st_eco_order_payment",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_eco_availability",
+      "value": "IN_STOCK"
+     }
+    },
+    {
+     "id": "tr_eco_order_4",
+     "source": "st_eco_order_avail",
+     "target": "st_eco_order_backorder",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_eco_availability",
+      "value": "SHORT"
+     }
+    },
+    {
+     "id": "tr_eco_order_5",
+     "source": "st_eco_order_backorder",
+     "target": "st_eco_order_avail",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_eco_order_6",
+     "source": "st_eco_order_payment",
+     "target": "st_eco_order_pay_check",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_eco_order_7",
+     "source": "st_eco_order_pay_check",
+     "target": "st_eco_order_confirm",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_eco_payment",
+      "value": "PAID"
+     }
+    },
+    {
+     "id": "tr_eco_order_8",
+     "source": "st_eco_order_pay_check",
+     "target": "st_eco_order_chase",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_eco_payment",
+      "value": "PENDING"
+     }
+    },
+    {
+     "id": "tr_eco_order_9",
+     "source": "st_eco_order_pay_check",
+     "target": "st_eco_order_cancelled",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_eco_payment",
+      "value": "FAILED"
+     }
+    },
+    {
+     "id": "tr_eco_order_10",
+     "source": "st_eco_order_chase",
+     "target": "st_eco_order_pay_check",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_eco_order_11",
+     "source": "st_eco_order_confirm",
+     "target": "st_eco_order_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Customer order",
+   "definition": "A customer's request to buy items.",
+   "synonyms": [
+    "sales order",
+    "purchase order from a customer",
+    "web order"
+   ],
+   "refers_to": "ent_eco_order"
+  },
+  {
+   "term": "Order line",
+   "definition": "One item and quantity on an order.",
+   "synonyms": [
+    "line item",
+    "order item",
+    "basket line"
+   ],
+   "refers_to": "ent_eco_order_line"
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "ecommerce_orders",
+   "name": "E-commerce and order management",
+   "subdomains": [
+    "Order entry",
+    "Payment",
+    "Order confirmation"
+   ],
+   "keywords": [
+    "order",
+    "orders",
+    "e-commerce",
+    "ecommerce",
+    "webshop",
+    "web shop",
+    "checkout",
+    "cart",
+    "basket",
+    "online store",
+    "order management",
+    "sales order",
+    "customer order"
+   ],
+   "description": "Taking customer orders and getting them confirmed."
+  }
+ ],
+ "domain_id": "ecommerce_orders",
+ "capability": {
+  "id": "ecommerce_orders",
+  "name": "Order management"
+ }
+}

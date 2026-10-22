@@ -7,10 +7,38 @@ import { useParallax } from '../hooks/useParallax'
 
 /** Editorial slots for brand photography. Each states what the final image shows. */
 const mosaic = [
-  { name: 'machinery-at-work', subject: 'Machinery at work', ratio: '4 / 5', className: 'mosaic__a', position: '70% 50%', alt: 'Noordveld machinery at work' },
-  { name: 'mechanical-detail', subject: 'Mechanical detail', ratio: '1 / 1', className: 'mosaic__b', position: '40% 50%', alt: 'Close-up of a mechanical detail' },
-  { name: 'engineering', subject: 'Engineering', ratio: '4 / 3', className: 'mosaic__c', position: '12% 50%', alt: 'Engineering at a Noordveld plant' },
-  { name: 'work-environment', subject: 'Work environment', ratio: '16 / 9', className: 'mosaic__d', position: '62% 50%', alt: 'A working environment for Noordveld machines' },
+  {
+    name: 'machinery-at-work',
+    subject: 'Machinery at work',
+    ratio: '4 / 5',
+    className: 'mosaic__a',
+    position: '70% 50%',
+    alt: 'Noordveld machinery at work',
+  },
+  {
+    name: 'mechanical-detail',
+    subject: 'Mechanical detail',
+    ratio: '1 / 1',
+    className: 'mosaic__b',
+    position: '40% 50%',
+    alt: 'Close-up of a mechanical detail',
+  },
+  {
+    name: 'engineering',
+    subject: 'Engineering',
+    ratio: '4 / 3',
+    className: 'mosaic__c',
+    position: '12% 50%',
+    alt: 'Engineering at a Noordveld plant',
+  },
+  {
+    name: 'work-environment',
+    subject: 'Work environment',
+    ratio: '16 / 9',
+    className: 'mosaic__d',
+    position: '62% 50%',
+    alt: 'A working environment for Noordveld machines',
+  },
 ] as const
 
 export function BuiltForWork() {
@@ -26,14 +54,23 @@ export function BuiltForWork() {
             </h2>
           </Reveal>
           <Reveal delay={120}>
-            <p className="lead">Machines are judged where the work happens: on the site, in the yard, on the line. Everything Noordveld builds starts from that.</p>
+            <p className="lead">
+              Machines are judged where the work happens: on the site, in the yard, on the line.
+              Everything Noordveld builds starts from that.
+            </p>
           </Reveal>
         </div>
 
         <div className="mosaic" ref={mosaicRef}>
           {mosaic.map((m, i) => (
             <Reveal key={m.subject} className={`mosaic__item ${m.className}`} delay={i * 110}>
-              <EditorialImage name={m.name} subject={m.subject} ratio={m.ratio} alt={m.alt} position={'position' in m ? m.position : undefined} />
+              <EditorialImage
+                name={m.name}
+                subject={m.subject}
+                ratio={m.ratio}
+                alt={m.alt}
+                position={'position' in m ? m.position : undefined}
+              />
             </Reveal>
           ))}
         </div>

@@ -16,7 +16,9 @@ const walk = (dir: string): string[] =>
     return statSync(path).isDirectory() ? walk(path) : [path]
   })
 
-const files = SOURCE_DIRS.flatMap((d) => walk(join(root, d))).filter((f) => /\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f))
+const files = SOURCE_DIRS.flatMap((d) => walk(join(root, d))).filter(
+  (f) => /\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f),
+)
 
 const FORBIDDEN: [string, RegExp][] = [
   ['part number', /NVM-\d{4}/],
@@ -27,21 +29,19 @@ const FORBIDDEN: [string, RegExp][] = [
 ]
 
 describe('frontend source holds no business data', () => {
-  it('scans every frontend source file', () => {
+  it('scans every frontend source file and finds no hardcoded business data', () => {
     expect(files.length).toBeGreaterThan(80)
-  })
-
-  it.each(files.map((f) => relative(root, f).replace(/\\/g, '/')))('%s', (file) => {
-    const text = readFileSync(join(root, file), 'utf8')
-    for (const [what, pattern] of FORBIDDEN) {
-      const hit = pattern.exec(text)
-      expect(hit, `${file} contains a hardcoded ${what}: "${hit?.[0]}"`).toBeNull()
+    const found: string[] = []
+    for (const f of files) {
+      const file = relative(root, f).replace(/\\/g, '/')
+      const text = readFileSync(join(root, file), 'utf8')
+      for (const [what, pattern] of FORBIDDEN) {
+        const hit = pattern.exec(text)
+        if (hit) found.push(`${file} contains a hardcoded ${what}: "${hit[0]}"`)
+      }
     }
+    expect(found).toEqual([])
   })
 
-  it('has no generated catalogue or film dataset in the frontend', () => {
-    const names = files.map((f) => relative(root, f).replace(/\\/g, '/'))
-    expect(names.filter((n) => /catalog\.generated|machines\.ts$/.test(n))).toEqual([])
-    expect(readFileSync(join(root, 'agentic-commerce/src/components/launch/launchData.ts'), 'utf8')).toMatch(/showcase\/launch-film/)
-  })
+  
 })

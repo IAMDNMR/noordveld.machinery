@@ -1,0 +1,87 @@
+{
+  "id": "agentic_commerce",
+  "version": "1.0.0",
+  "name": "Agentic Shopping & Commerce",
+  "category": "Commerce",
+  "summary": "Product discovery, recommendations, cart, checkout and order tracking.",
+  "description": "A spacious, editorial storefront where customers discover products, compare alternatives, get recommendations that explain themselves, and check out. Buyers in a company see their purchasing controls; customers follow their orders to the door.",
+  "status": "stable",
+  "domain_ids": ["ecommerce_orders", "spare_parts_commerce", "sales_crm"],
+  "app_type": "Storefront",
+  "users": ["Customer", "Business buyer", "Store manager"],
+  "keywords": ["shop", "shopping", "store", "storefront", "product", "cart", "checkout", "order", "customer", "recommendation", "catalog", "category", "payment", "delivery", "track"],
+  "theme": {
+    "id": "editorial_commerce",
+    "label": "Editorial commerce",
+    "direction": "Warm paper background, near-black type, one deep green accent; generous space and large product imagery.",
+    "colors": {
+      "primary": "#1E4D3A", "primary_text": "#FBF8F2", "accent": "#C8553D",
+      "background": "#FBF8F2", "surface": "#FFFFFF", "surface_alt": "#F2EDE3",
+      "text": "#1C1B19", "muted": "#5E5A52", "border": "#E4DDD0",
+      "nav_background": "#FBF8F2", "nav_text": "#1C1B19",
+      "success": "#2F6B47", "warning": "#A16207", "danger": "#B42318"
+    },
+    "font_heading": "serif", "font_body": "humanist", "density": "spacious",
+    "radius": 10, "shadow": "soft", "card_style": "flat", "table_style": "lined"
+  },
+  "nav_style": "topbar",
+  "entity_roles": [
+    {"id": "product", "label": "Product", "matches": ["product", "item", "part", "article"], "fields": ["name", "category", "price", "availability", "image", "rating"]},
+    {"id": "order", "label": "Order", "matches": ["order", "purchase"], "fields": ["number", "date", "status", "total", "delivery"]},
+    {"id": "order_line", "label": "Order line", "matches": ["line", "cart", "basket"], "fields": ["product", "quantity", "price"]},
+    {"id": "customer", "label": "Customer", "matches": ["customer", "buyer", "account"], "fields": ["name", "company", "email", "spending_limit"]}
+  ],
+  "pages": [
+    {"id": "discover", "title": "Discover", "icon": "Sparkles", "layout": "catalogue", "purpose": "Find products by need, category or search.", "users": ["Customer"],
+     "components": [
+       {"type": "filter_bar", "title": "Search products", "span": 3},
+       {"type": "product_grid", "title": "Recommended for you", "role": "product", "fields": ["image", "name", "price", "availability"], "span": 3}
+     ]},
+    {"id": "product", "title": "Product", "icon": "Package", "layout": "detail", "purpose": "Details, alternatives and why it is recommended.", "users": ["Customer"],
+     "components": [
+       {"type": "detail_panel", "title": "Product", "role": "product", "fields": ["name", "category", "price", "availability", "rating"], "span": 2},
+       {"type": "product_grid", "title": "Alternatives", "role": "product", "fields": ["name", "price"], "span": 1}
+     ]},
+    {"id": "cart", "title": "Cart", "icon": "ShoppingCart", "layout": "split", "purpose": "Review the basket and continue to checkout.", "users": ["Customer", "Business buyer"],
+     "components": [
+       {"type": "data_table", "title": "Your cart", "role": "order_line", "fields": ["product", "quantity", "price"], "span": 2},
+       {"type": "record_form", "title": "Delivery and payment", "role": "order", "fields": ["delivery"], "span": 1}
+     ]},
+    {"id": "orders", "title": "Orders", "icon": "Truck", "layout": "timeline", "purpose": "Order history and where each order is.", "users": ["Customer"],
+     "components": [
+       {"type": "data_table", "title": "Your orders", "role": "order", "fields": ["number", "date", "status", "total"], "span": 3}
+     ]},
+    {"id": "account", "title": "Account", "icon": "UserRound", "layout": "form", "purpose": "Profile and, for business buyers, purchasing limits.", "users": ["Business buyer"],
+     "components": [
+       {"type": "detail_panel", "title": "Profile", "role": "customer", "fields": ["name", "company", "email", "spending_limit"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "discovery", "name": "Product discovery and search", "status": "supported", "keywords": ["discover", "search", "browse", "category", "product"]},
+    {"id": "recommendations", "name": "Explained recommendations and alternatives", "status": "supported", "keywords": ["recommend", "recommendation", "alternative", "similar", "compare"]},
+    {"id": "checkout", "name": "Cart and checkout", "status": "supported", "keywords": ["cart", "basket", "checkout", "buy"]},
+    {"id": "order_tracking", "name": "Order history and tracking", "status": "supported", "keywords": ["order", "track", "tracking", "history", "status"]},
+    {"id": "buyer_controls", "name": "Business buyer purchasing limits", "status": "configurable", "keywords": ["limit", "approval", "budget", "procurement", "buyer"]},
+    {"id": "payments", "name": "Online payments", "status": "requires_integration", "keywords": ["payment", "pay", "card", "invoice"], "note": "Needs a payment provider connection, delivered by our integration partner."}
+  ],
+  "limitations": ["Card payments need a payment provider integration from our partner.", "Carrier tracking events need a carrier integration from our partner."],
+  "sample": {
+    "product": [
+      {"id": "a1", "name": "Hydraulic filter", "category": "Hydraulics", "price": 48.5, "availability": "In stock", "rating": 4.7},
+      {"id": "a2", "name": "LED work light", "category": "Lighting", "price": 89.0, "availability": "In stock", "rating": 4.5},
+      {"id": "a3", "name": "Seat cushion", "category": "Cabin", "price": 64.0, "availability": "3 days", "rating": 4.2},
+      {"id": "a4", "name": "Grease cartridge", "category": "Service", "price": 9.9, "availability": "In stock", "rating": 4.8}
+    ],
+    "order": [
+      {"id": "o1", "number": "SO-1042", "date": "2026-10-14", "status": "Shipped", "total": 137.4, "delivery": "Standard"},
+      {"id": "o2", "number": "SO-1039", "date": "2026-10-02", "status": "Delivered", "total": 89.0, "delivery": "Express"}
+    ],
+    "order_line": [
+      {"id": "l1", "product": "Hydraulic filter", "quantity": 2, "price": 97.0},
+      {"id": "l2", "product": "Grease cartridge", "quantity": 4, "price": 39.6}
+    ],
+    "customer": [
+      {"id": "c1", "name": "Sample buyer", "company": "Sample Contracting B.V.", "email": "buyer@example.com", "spending_limit": 5000}
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+[
+  {
+    "workflow_id": "wf_stk_reorder",
+    "pack_id": "cat_stock_control",
+    "names": [
+      "restocking"
+    ],
+    "basis": "Automatic reorder creates a purchase request when an item's projected stock falls to its reorder level (requirement req_stk_reorder); restocking is the warehouse word for that purchase-driven refill. Internal pick-location replenishment by stock transfer is a different activity and is not covered by this entry.",
+    "review_state": "proposed"
+  },
+  {
+    "workflow_id": "wf_stk_count",
+    "pack_id": "cat_stock_control",
+    "names": [
+      "stocktake",
+      "physical inventory"
+    ],
+    "basis": "Stock count is the periodic count of physical stock against the system (requirement req_stk_count). Its glossary already lists 'stocktake' and 'cycle count' as other names for a stock count.",
+    "review_state": "proposed"
+  },
+  {
+    "workflow_id": "wf_whs_return",
+    "pack_id": "cat_warehouse_fulfilment",
+    "names": [
+      "customer return"
+    ],
+    "basis": "Sales return records items a customer returns against the delivery note (requirement req_whs_return); 'customer return' is the same activity named from the customer's side.",
+    "review_state": "proposed"
+  },
+  {
+    "workflow_id": "wf_whs_receipt",
+    "pack_id": "cat_warehouse_fulfilment",
+    "names": [
+      "goods receiving",
+      "inbound receiving"
+    ],
+    "basis": "Receive goods and put away registers incoming goods on a receipt and assigns them to a warehouse (requirements req_whs_receive, req_whs_putaway); receiving is the warehouse's own word for the first half.",
+    "review_state": "proposed"
+  },
+  {
+    "workflow_id": "wf_whs_pick_deliver",
+    "pack_id": "cat_warehouse_fulfilment",
+    "names": [
+      "order picking"
+    ],
+    "basis": "Pick and deliver an order creates the pick list for a sales order, picks it and delivers it (requirements req_whs_pick, req_whs_deliver); order picking is the same first half of that process.",
+    "review_state": "proposed"
+  }
+]

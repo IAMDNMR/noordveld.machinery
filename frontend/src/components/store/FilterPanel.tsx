@@ -1,4 +1,4 @@
-import type { CatalogueFilters, PartQuery } from '../../api'
+import type { CatalogueFilters, PartQuery } from '../../api/index'
 import { humanize } from '../../lib/format'
 import { activeFilterCount } from '../../lib/storeQuery'
 
@@ -13,7 +13,11 @@ interface FilterPanelProps {
 export function FilterPanel({ query, options, onChange, onClear }: FilterPanelProps) {
   const active = activeFilterCount(query)
   const toggleAvailability = (state: string) =>
-    onChange({ availability: query.availability.includes(state) ? query.availability.filter((s) => s !== state) : [...query.availability, state] })
+    onChange({
+      availability: query.availability.includes(state)
+        ? query.availability.filter((s) => s !== state)
+        : [...query.availability, state],
+    })
 
   return (
     <form className="filters" onSubmit={(e) => e.preventDefault()} aria-label="Filter parts">
@@ -33,8 +37,17 @@ export function FilterPanel({ query, options, onChange, onClear }: FilterPanelPr
           <fieldset className="filters__cats">
             <legend>Category</legend>
             {options.categories.map((c) => (
-              <label key={c.category_id} className={`${query.category === c.name ? 'is-on' : ''} ${c.part_count === 0 ? 'is-empty' : ''}`}>
-                <input type="radio" name="category" checked={query.category === c.name} onChange={() => onChange({ category: c.name })} onClick={() => query.category === c.name && onChange({ category: '' })} />
+              <label
+                key={c.category_id}
+                className={`${query.category === c.name ? 'is-on' : ''} ${c.part_count === 0 ? 'is-empty' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="category"
+                  checked={query.category === c.name}
+                  onChange={() => onChange({ category: c.name })}
+                  onClick={() => query.category === c.name && onChange({ category: '' })}
+                />
                 <span className="filters__label">{c.name}</span>
                 <span className="filters__n">{c.part_count}</span>
               </label>
@@ -62,7 +75,11 @@ export function FilterPanel({ query, options, onChange, onClear }: FilterPanelPr
               <legend>Availability</legend>
               {options.availability.map((a) => (
                 <label key={a.state}>
-                  <input type="checkbox" checked={query.availability.includes(a.state)} onChange={() => toggleAvailability(a.state)} />
+                  <input
+                    type="checkbox"
+                    checked={query.availability.includes(a.state)}
+                    onChange={() => toggleAvailability(a.state)}
+                  />
                   <span className="filters__label">{humanize(a.state)}</span>
                   <span className="filters__n">{a.part_count}</span>
                 </label>
@@ -75,7 +92,11 @@ export function FilterPanel({ query, options, onChange, onClear }: FilterPanelPr
       <fieldset>
         <legend>Ordering</legend>
         <label className="filters__switch">
-          <input type="checkbox" checked={query.orderable} onChange={(e) => onChange({ orderable: e.target.checked })} />
+          <input
+            type="checkbox"
+            checked={query.orderable}
+            onChange={(e) => onChange({ orderable: e.target.checked })}
+          />
           <span className="filters__track" aria-hidden="true" />
           <span className="filters__label">Orderable online</span>
         </label>

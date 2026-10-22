@@ -1,0 +1,354 @@
+{
+ "id": "core_foundations",
+ "version": "2026.10.1",
+ "layer": "reusable",
+ "title": "Core business foundations",
+ "description": "Customers, suppliers, items and locations that every domain reuses, so each concept is modelled once.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [],
+ "uses_capabilities": [
+  "identity_access",
+  "audit_history",
+  "search_filter"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [],
+  "roles": [
+   {
+    "id": "role_core_steward",
+    "name": "Master data steward",
+    "responsibilities": [
+     "Keeps customers, suppliers, items and locations correct"
+    ],
+    "permissions": [
+     "core.maintain"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_core_customer",
+    "name": "Customer",
+    "description": "A person or organization that buys from the company.",
+    "attributes": [
+     {
+      "id": "customer_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 120
+     },
+     {
+      "id": "email",
+      "name": "Email",
+      "type": "string",
+      "required": false,
+      "sensitivity": "personal",
+      "format": "email"
+     },
+     {
+      "id": "phone",
+      "name": "Phone",
+      "type": "string",
+      "required": false,
+      "sensitivity": "personal",
+      "format": "phone"
+     },
+     {
+      "id": "country",
+      "name": "Country",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 60
+     },
+     {
+      "id": "segment",
+      "name": "Segment",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "SMALL",
+       "MID",
+       "ENTERPRISE"
+      ]
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_core_steward"
+   },
+   {
+    "id": "ent_core_supplier",
+    "name": "Supplier",
+    "description": "An organization the company buys from.",
+    "attributes": [
+     {
+      "id": "supplier_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 120
+     },
+     {
+      "id": "email",
+      "name": "Email",
+      "type": "string",
+      "required": false,
+      "sensitivity": "personal",
+      "format": "email"
+     },
+     {
+      "id": "country",
+      "name": "Country",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 60
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "ACTIVE",
+       "ON_HOLD"
+      ]
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_core_steward"
+   },
+   {
+    "id": "ent_core_item",
+    "name": "Item",
+    "description": "Something the company stocks, sells, buys or services: a product, part or material.",
+    "attributes": [
+     {
+      "id": "item_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "sku",
+      "name": "Item code",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 60
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 160
+     },
+     {
+      "id": "uom",
+      "name": "Unit of measure",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "EA",
+       "KG",
+       "M",
+       "L",
+       "BOX"
+      ]
+     },
+     {
+      "id": "unit_cost",
+      "name": "Unit cost",
+      "type": "decimal",
+      "required": false,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "ACTIVE",
+       "DISCONTINUED"
+      ]
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_core_steward"
+   },
+   {
+    "id": "ent_core_location",
+    "name": "Location",
+    "description": "A place where the company keeps or handles things.",
+    "attributes": [
+     {
+      "id": "location_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 120
+     },
+     {
+      "id": "kind",
+      "name": "Kind",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "WAREHOUSE",
+       "SITE",
+       "DEPOT",
+       "STORE"
+      ]
+     },
+     {
+      "id": "city",
+      "name": "City",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 80
+     },
+     {
+      "id": "country",
+      "name": "Country",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 60
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_core_steward"
+   }
+  ],
+  "rules": [],
+  "exceptions": [],
+  "decisions": [],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_core_customer",
+    "term": "Customer",
+    "definition": "A person or organization that buys from the company."
+   },
+   {
+    "id": "term_core_supplier",
+    "term": "Supplier",
+    "definition": "An organization the company buys from."
+   },
+   {
+    "id": "term_core_item",
+    "term": "Item",
+    "definition": "Something the company stocks, sells, buys or services."
+   },
+   {
+    "id": "term_core_location",
+    "term": "Location",
+    "definition": "A place where the company keeps or handles things."
+   }
+  ]
+ },
+ "workflows": [],
+ "glossary": [
+  {
+   "term": "Customer",
+   "definition": "A person or organization that buys from the company.",
+   "synonyms": [
+    "client",
+    "account",
+    "buyer"
+   ],
+   "refers_to": "ent_core_customer"
+  },
+  {
+   "term": "Supplier",
+   "definition": "An organization the company buys from.",
+   "synonyms": [
+    "vendor",
+    "provider"
+   ],
+   "refers_to": "ent_core_supplier"
+  },
+  {
+   "term": "Item",
+   "definition": "Something the company stocks, sells, buys or services.",
+   "synonyms": [
+    "product",
+    "article",
+    "part",
+    "SKU",
+    "material"
+   ],
+   "refers_to": "ent_core_item"
+  },
+  {
+   "term": "Location",
+   "definition": "A place where the company keeps or handles things.",
+   "synonyms": [
+    "site",
+    "warehouse",
+    "depot",
+    "facility",
+    "store"
+   ],
+   "refers_to": "ent_core_location"
+  }
+ ],
+ "overrides": []
+}

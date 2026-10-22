@@ -1,16 +1,23 @@
 """Demo sign-in and the current user. There is no password or identity provider: the demo signs in as a seeded demo user and the
 backend keeps the user id in a signed, httpOnly cookie. The role is always read from the user record."""
+
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from app.api.dependencies import CurrentUser, OrdersSvc
 from app.core.config import get_settings
+from app.core.demo_access import local_demo_request
 from app.core.roles import PERMISSIONS
 from app.core.session import COOKIE, MAX_AGE, sign
 
 router = APIRouter(tags=["accounts"])
+
+
+def require_demo_context(request: Request) -> None:
+    if not local_demo_request(request):
+        raise HTTPException(status_code=404, detail={"code": "not_found", "message": "Not found."})
 
 
 class SignIn(BaseModel):
@@ -18,23 +25,42 @@ class SignIn(BaseModel):
 
 
 def _me(user) -> dict:
-    return {"id": user.id, "name": user.name, "email": user.email, "role": user.role.value, "customer": user.customer_name,
-            "permissions": sorted(PERMISSIONS[user.role])}
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value,
+        "customer": user.customer_name,
+        "permissions": sorted(PERMISSIONS[user.role]),
+    }
 
 
-@router.get("/auth/demo-users")
+@router.get("/auth/demo-users", dependencies=[Depends(require_demo_context)])
 def demo_users(orders: OrdersSvc) -> list[dict]:
     """The demo accounts that can be signed in as (names and roles only)."""
-    return [{"id": u["id"], "name": u["name"], "role": u["role"], "customer": u.get("customer_name")} for u in orders.demo_users()]
+    return [
+        {"id": u["id"], "name": u["name"], "role": u["role"], "customer": u.get("customer_name")}
+        for u in orders.demo_users()
+    ]
 
 
-@router.post("/auth/login")
+@router.post("/auth/login", dependencies=[Depends(require_demo_context)])
 def login(body: SignIn, response: Response, orders: OrdersSvc) -> dict:
     user = orders.user(body.user_id)
     if user is None:
-        raise HTTPException(status_code=401, detail={"code": "unknown_user", "message": "No such demo user."})
+        raise HTTPException(
+            status_code=401, detail={"code": "unknown_user", "message": "No such demo user."}
+        )
     s = get_settings()
-    response.set_cookie(COOKIE, sign(user.id, s.session_secret), max_age=MAX_AGE, httponly=True, samesite="lax", secure=s.session_cookie_secure, path="/")
+    response.set_cookie(
+        COOKIE,
+        sign(user.id, s.session_secret),
+        max_age=MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=s.session_cookie_secure,
+        path="/",
+    )
     return _me(user)
 
 
@@ -47,3 +73,45 @@ def logout(response: Response) -> dict:
 @router.get("/me")
 def me(user: CurrentUser) -> dict:
     return _me(user)
+
+
+@router.post("/studio-session/demo", dependencies=[Depends(require_demo_context)])
+def studio_demo(response: Response, orders: OrdersSvc) -> dict:
+    """Single local Studio preview identity, independent of the commerce session."""
+    from app.design_studio.preview_identity import cached, remember
+
+    user = cached()
+    if user is None:
+        account = next((item for item in orders.demo_users() if item["role"] == "END_USER"), None)
+        user = orders.user(account["id"]) if account else None
+    if user is None:
+        raise HTTPException(
+            503,
+            detail={
+                "code": "studio_preview_unavailable",
+                "message": "The local Studio preview account is unavailable.",
+            },
+        )
+    settings = get_settings()
+    remember(user)
+    response.set_cookie(
+        "nv_studio_session",
+        sign(user.id, "studio:" + settings.session_secret),
+        max_age=MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=settings.session_cookie_secure,
+        path="/api/v1",
+    )
+    return _me(user)
+
+
+@router.get("/studio-session/me", dependencies=[Depends(require_demo_context)])
+def studio_me(user: CurrentUser) -> dict:
+    return _me(user)
+
+
+@router.post("/studio-session/logout")
+def studio_logout(response: Response) -> dict:
+    response.delete_cookie("nv_studio_session", path="/api/v1")
+    return {"signed_out": True}

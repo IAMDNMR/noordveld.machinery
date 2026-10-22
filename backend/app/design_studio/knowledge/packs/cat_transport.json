@@ -1,0 +1,1118 @@
+{
+ "id": "cat_transport",
+ "version": "2026.10.2",
+ "layer": "business",
+ "title": "Transport management",
+ "description": "Planning, dispatching, tracking and confirming the delivery of shipments.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_ecommerce",
+  "cat_warehouse"
+ ],
+ "uses_capabilities": [
+  "audit_history",
+  "search_filter",
+  "reporting_dashboards",
+  "notifications",
+  "external_integration"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_tms_deliver",
+    "statement": "Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_tms_deliver_1",
+      "statement": "A planner assigns an active carrier and a vehicle that fits the load."
+     },
+     {
+      "id": "ac_tms_deliver_2",
+      "statement": "A dispatcher records tracking updates."
+     },
+     {
+      "id": "ac_tms_deliver_3",
+      "statement": "Delivery is confirmed with a receiver and a proof reference."
+     }
+    ]
+   },
+   {
+    "id": "req_tms_recover",
+    "statement": "Delayed or failed deliveries are resolved explicitly.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_tms_recover_1",
+      "statement": "A delay or failure leads to a recorded retry or cancellation."
+     }
+    ]
+   },
+   {
+    "id": "req_tms_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_tms_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_tms_planner",
+    "name": "Transport planner",
+    "responsibilities": [
+     "Plans shipments and maintains carriers and vehicles"
+    ],
+    "permissions": [
+     "tms.shipment_plan",
+     "tms.shipment_assign",
+     "tms.shipment_replan"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_tms_dispatcher",
+    "name": "Dispatcher",
+    "responsibilities": [
+     "Dispatches, tracks and resolves delivery exceptions"
+    ],
+    "permissions": [
+     "tms.shipment_dispatch",
+     "tms.shipment_track",
+     "tms.shipment_resolve"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_tms_driver",
+    "name": "Driver or carrier partner",
+    "responsibilities": [
+     "Confirms delivery with proof"
+    ],
+    "permissions": [
+     "tms.shipment_pod"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_tms_carrier",
+    "name": "Carrier",
+    "description": "A company or fleet that moves goods.",
+    "attributes": [
+     {
+      "id": "carrier_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 120
+     },
+     {
+      "id": "mode",
+      "name": "Mode",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "ROAD",
+       "RAIL",
+       "SEA",
+       "AIR"
+      ]
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "ACTIVE",
+       "SUSPENDED"
+      ]
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_tms_planner"
+   },
+   {
+    "id": "ent_tms_vehicle",
+    "name": "Vehicle",
+    "description": "A vehicle a carrier uses, with its load capacity.",
+    "attributes": [
+     {
+      "id": "vehicle_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "plate",
+      "name": "Registration",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 20
+     },
+     {
+      "id": "capacity_kg",
+      "name": "Capacity (kg)",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 1
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_tms_vehicle_carrier",
+      "name": "Carrier",
+      "target": "ent_tms_carrier",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ],
+    "owner_role_id": "role_tms_planner"
+   },
+   {
+    "id": "ent_tms_shipment",
+    "name": "Shipment",
+    "description": "One movement of goods for a customer order.",
+    "attributes": [
+     {
+      "id": "shipment_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "destination",
+      "name": "Destination",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 200
+     },
+     {
+      "id": "weight_kg",
+      "name": "Load weight (kg)",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 1
+     },
+     {
+      "id": "planned_departure",
+      "name": "Planned departure",
+      "type": "datetime",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "planned_arrival",
+      "name": "Planned arrival",
+      "type": "datetime",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "PLANNED",
+       "DISPATCHED",
+       "IN_TRANSIT",
+       "DELIVERED",
+       "FAILED"
+      ]
+     },
+     {
+      "id": "tracking_status",
+      "name": "Tracking status",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "IN_TRANSIT",
+       "DELIVERED",
+       "DELAYED",
+       "FAILED"
+      ],
+      "owner_role_id": "role_tms_dispatcher"
+     },
+     {
+      "id": "resolution",
+      "name": "Exception resolution",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "RETRY",
+       "CANCEL"
+      ],
+      "owner_role_id": "role_tms_dispatcher"
+     },
+     {
+      "id": "received_by",
+      "name": "Received by",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_tms_driver",
+      "max_length": 120
+     },
+     {
+      "id": "pod_reference",
+      "name": "Proof of delivery reference",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_tms_driver",
+      "max_length": 120
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_tms_shipment_order",
+      "name": "Order",
+      "target": "ent_eco_order",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_tms_shipment_pack_unit",
+      "name": "Pack unit",
+      "target": "ent_wms_pack_unit",
+      "cardinality": "many_to_one",
+      "required": false
+     },
+     {
+      "id": "rel_tms_shipment_carrier",
+      "name": "Carrier",
+      "target": "ent_tms_carrier",
+      "cardinality": "many_to_one",
+      "required": false
+     },
+     {
+      "id": "rel_tms_shipment_vehicle",
+      "name": "Vehicle",
+      "target": "ent_tms_vehicle",
+      "cardinality": "many_to_one",
+      "required": false
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_tms_carrier_active",
+    "description": "Only an active carrier may be assigned.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_tms_carrier.status",
+     "operator": "eq",
+     "value": "ACTIVE",
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_tms_capacity",
+    "description": "The assigned vehicle must cover the shipment weight.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "FITS",
+     "OVER_CAPACITY"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_tms_vehicle.capacity_kg",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_tms_shipment.weight_kg",
+     "pass_outcome": "FITS",
+     "fail_outcome": "OVER_CAPACITY"
+    }
+   },
+   {
+    "id": "rule_tms_tracking",
+    "description": "The recorded tracking status selects the delivery path.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "IN_TRANSIT",
+     "DELIVERED",
+     "DELAYED",
+     "FAILED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_tms_shipment.tracking_status",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_tms_receiver",
+    "description": "The receiver is recorded before delivery is confirmed.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_tms_shipment.received_by",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_tms_pod",
+    "description": "Proof of delivery is recorded before delivery is confirmed.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_tms_shipment.pod_reference",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_tms_resolution",
+    "description": "A dispatcher's recorded choice selects retry or cancellation.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "RETRY",
+     "CANCEL"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_tms_shipment.resolution",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_tms_overload",
+    "name": "Load exceeds vehicle capacity",
+    "trigger": "The assigned vehicle cannot carry the shipment.",
+    "recovery": "The planner changes the vehicle or the load and capacity is checked again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_tms_shipment_assign"
+   },
+   {
+    "id": "exc_tms_failed_delivery",
+    "name": "Delivery delayed or failed",
+    "trigger": "Tracking reports a delay or a failed delivery.",
+    "recovery": "The dispatcher records a retry or cancels the shipment.",
+    "resolution": "recover",
+    "resolution_state_id": "st_tms_shipment_track"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_tms_delay",
+    "question": "How late is late? When does a delay become an exception, and who is told?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_tms_tracking"
+    ]
+   },
+   {
+    "id": "dec_tms_carrier",
+    "question": "Who selects the carrier: the planner, an automatic rule, or a customer preference, and on what criteria?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_tms_carrier_active"
+    ]
+   }
+  ],
+  "integrations": [
+   {
+    "id": "int_tms_tracking_feed",
+    "name": "Carrier tracking feed",
+    "system": "Carrier systems",
+    "direction": "inbound",
+    "events": [
+     "Tracking event received"
+    ],
+    "entity_ids": [
+     "ent_tms_shipment"
+    ],
+    "failure_handling": "Not connected: tracking is recorded by the dispatcher.",
+    "contract_status": "deferred"
+   }
+  ],
+  "terms": [
+   {
+    "id": "term_tms_shipment",
+    "term": "Shipment",
+    "definition": "One movement of goods for a customer order."
+   },
+   {
+    "id": "term_tms_carrier",
+    "term": "Carrier",
+    "definition": "A company or fleet that moves goods."
+   },
+   {
+    "id": "term_tms_pod",
+    "term": "Proof of delivery",
+    "definition": "Confirmation that a shipment reached the receiver."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_tms_shipment",
+   "name": "Shipment delivery",
+   "states": [
+    {
+     "id": "st_tms_shipment_start",
+     "label": "Shipment requested",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_tms_shipment_plan",
+     "label": "Plan the shipment",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_tms_planner",
+     "permission": "tms.shipment_plan",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_eco_order"
+     ],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": [
+       "destination",
+       "weight_kg",
+       "planned_departure",
+       "planned_arrival",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_tms_shipment": [
+       "rel_tms_shipment_order",
+       "rel_tms_shipment_pack_unit"
+      ]
+     }
+    },
+    {
+     "id": "st_tms_shipment_assign",
+     "label": "Assign carrier and vehicle",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_tms_planner",
+     "permission": "tms.shipment_assign",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_tms_carrier",
+      "ent_tms_vehicle"
+     ],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [
+      "rule_tms_carrier_active"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": []
+     },
+     "input_relationships": {
+      "ent_tms_shipment": [
+       "rel_tms_shipment_carrier",
+       "rel_tms_shipment_vehicle"
+      ]
+     }
+    },
+    {
+     "id": "st_tms_shipment_cap",
+     "label": "Does the load fit?",
+     "kind": "branch",
+     "outputs": [
+      "rule_tms_capacity"
+     ],
+     "outcome": null,
+     "role_id": "role_tms_planner",
+     "permission": null,
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_tms_capacity"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_tms_shipment_replan",
+     "label": "Resolve the overload",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_tms_planner",
+     "permission": "tms.shipment_replan",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_tms_overload"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": [
+       "weight_kg"
+      ]
+     },
+     "input_relationships": {
+      "ent_tms_shipment": [
+       "rel_tms_shipment_vehicle"
+      ]
+     }
+    },
+    {
+     "id": "st_tms_shipment_dispatch",
+     "label": "Dispatch the shipment",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_tms_dispatcher",
+     "permission": "tms.shipment_dispatch",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_tms_carrier",
+      "ent_tms_vehicle"
+     ],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_tms_shipment": []
+     }
+    },
+    {
+     "id": "st_tms_shipment_track",
+     "label": "Record a tracking update",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_tms_dispatcher",
+     "permission": "tms.shipment_track",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": [
+       "tracking_status"
+      ]
+     },
+     "input_relationships": {
+      "ent_tms_shipment": []
+     }
+    },
+    {
+     "id": "st_tms_shipment_delivery",
+     "label": "Delivery outcome",
+     "kind": "branch",
+     "outputs": [
+      "rule_tms_tracking"
+     ],
+     "outcome": null,
+     "role_id": "role_tms_dispatcher",
+     "permission": null,
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_tms_tracking"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_tms_shipment_resolve",
+     "label": "Resolve the delivery exception",
+     "kind": "exception",
+     "outputs": [
+      "rule_tms_resolution"
+     ],
+     "outcome": null,
+     "role_id": "role_tms_dispatcher",
+     "permission": "tms.shipment_resolve",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [
+      "rule_tms_resolution"
+     ],
+     "exception_ids": [
+      "exc_tms_failed_delivery"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": [
+       "resolution"
+      ]
+     },
+     "input_relationships": {
+      "ent_tms_shipment": []
+     }
+    },
+    {
+     "id": "st_tms_shipment_pod",
+     "label": "Confirm delivery and proof",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_tms_driver",
+     "permission": "tms.shipment_pod",
+     "requirement_ids": [
+      "req_tms_deliver",
+      "req_tms_recover",
+      "req_tms_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_tms_shipment"
+     ],
+     "rule_ids": [
+      "rule_tms_receiver",
+      "rule_tms_pod"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_tms_shipment": [
+       "received_by",
+       "pod_reference"
+      ]
+     },
+     "input_relationships": {
+      "ent_tms_shipment": []
+     }
+    },
+    {
+     "id": "st_tms_shipment_done",
+     "label": "Delivered with proof",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_tms_shipment_cancelled",
+     "label": "Shipment cancelled",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "cancelled",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_tms_shipment_1",
+     "source": "st_tms_shipment_start",
+     "target": "st_tms_shipment_plan",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_2",
+     "source": "st_tms_shipment_plan",
+     "target": "st_tms_shipment_assign",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_3",
+     "source": "st_tms_shipment_assign",
+     "target": "st_tms_shipment_cap",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_4",
+     "source": "st_tms_shipment_cap",
+     "target": "st_tms_shipment_dispatch",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_capacity",
+      "value": "FITS"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_5",
+     "source": "st_tms_shipment_cap",
+     "target": "st_tms_shipment_replan",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_capacity",
+      "value": "OVER_CAPACITY"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_6",
+     "source": "st_tms_shipment_replan",
+     "target": "st_tms_shipment_assign",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_7",
+     "source": "st_tms_shipment_dispatch",
+     "target": "st_tms_shipment_track",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_8",
+     "source": "st_tms_shipment_track",
+     "target": "st_tms_shipment_delivery",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_9",
+     "source": "st_tms_shipment_delivery",
+     "target": "st_tms_shipment_track",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_tracking",
+      "value": "IN_TRANSIT"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_10",
+     "source": "st_tms_shipment_delivery",
+     "target": "st_tms_shipment_pod",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_tracking",
+      "value": "DELIVERED"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_11",
+     "source": "st_tms_shipment_delivery",
+     "target": "st_tms_shipment_resolve",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_tracking",
+      "value": "DELAYED"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_12",
+     "source": "st_tms_shipment_delivery",
+     "target": "st_tms_shipment_resolve",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_tracking",
+      "value": "FAILED"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_13",
+     "source": "st_tms_shipment_resolve",
+     "target": "st_tms_shipment_track",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_resolution",
+      "value": "RETRY"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_14",
+     "source": "st_tms_shipment_resolve",
+     "target": "st_tms_shipment_cancelled",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_tms_resolution",
+      "value": "CANCEL"
+     }
+    },
+    {
+     "id": "tr_tms_shipment_15",
+     "source": "st_tms_shipment_pod",
+     "target": "st_tms_shipment_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Shipment",
+   "definition": "One movement of goods for a customer order.",
+   "synonyms": [
+    "consignment",
+    "load",
+    "delivery",
+    "freight"
+   ],
+   "refers_to": "ent_tms_shipment"
+  },
+  {
+   "term": "Carrier",
+   "definition": "A company or fleet that moves goods.",
+   "synonyms": [
+    "haulier",
+    "transporter",
+    "logistics provider",
+    "3PL"
+   ],
+   "refers_to": "ent_tms_carrier"
+  },
+  {
+   "term": "Proof of delivery",
+   "definition": "Confirmation that a shipment reached the receiver.",
+   "synonyms": [
+    "POD",
+    "delivery receipt",
+    "signed delivery note"
+   ]
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "transport_management",
+   "name": "Transport management",
+   "subdomains": [
+    "Planning",
+    "Dispatch",
+    "Tracking",
+    "Proof of delivery"
+   ],
+   "keywords": [
+    "transport",
+    "tms",
+    "shipment",
+    "shipments",
+    "carrier",
+    "freight",
+    "fleet",
+    "haulage",
+    "logistics",
+    "delivery",
+    "deliveries",
+    "dispatch",
+    "route",
+    "driver",
+    "vehicle",
+    "tracking",
+    "proof of delivery"
+   ],
+   "description": "Moving goods from the warehouse to the customer."
+  }
+ ],
+ "domain_id": "transport_management",
+ "capability": {
+  "id": "transport_management",
+  "name": "Shipment management"
+ }
+}

@@ -3,7 +3,8 @@ import type { Film } from '../../data/content'
 import './media.css'
 
 /** Append ?placeholders to any URL to see each slot's intended asset path on screen. */
-const showSpec = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('placeholders')
+const showSpec =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('placeholders')
 
 export type ImageType = 'studio' | 'action' | 'detail'
 
@@ -21,9 +22,22 @@ interface MachineImagePlaceholderProps {
  * Stands in for a machine image: a studio-lit frame with the model mark.
  * Replace by adding the file at `assetPath` (see src/assets/README.md); nothing else changes.
  */
-export function MachineImagePlaceholder({ model, ratio, imageType, alt, assetPath }: MachineImagePlaceholderProps) {
+export function MachineImagePlaceholder({
+  model,
+  ratio,
+  imageType,
+  alt,
+  assetPath,
+}: MachineImagePlaceholderProps) {
   return (
-    <div className="mimg__inner mimg__placeholder" style={{ aspectRatio: ratio }} role="img" aria-label={alt} data-image-type={imageType} data-asset-path={assetPath}>
+    <div
+      className="mimg__inner mimg__placeholder"
+      style={{ aspectRatio: ratio }}
+      role="img"
+      aria-label={alt}
+      data-image-type={imageType}
+      data-asset-path={assetPath}
+    >
       <span className="mimg__floor" aria-hidden="true" />
       <span className="mimg__crop mimg__crop--tl" aria-hidden="true" />
       <span className="mimg__crop mimg__crop--tr" aria-hidden="true" />
@@ -32,7 +46,11 @@ export function MachineImagePlaceholder({ model, ratio, imageType, alt, assetPat
       <span className="mimg__model" aria-hidden="true">
         {model}
       </span>
-      {showSpec ? <span className="mimg__spec">{imageType} · {ratio} · {assetPath}</span> : null}
+      {showSpec ? (
+        <span className="mimg__spec">
+          {imageType} · {ratio} · {assetPath}
+        </span>
+      ) : null}
     </div>
   )
 }
@@ -59,13 +77,23 @@ interface PlantImagePlaceholderProps {
 /** Stands in for a plant image: a low-light exterior frame with a horizon line. */
 export function PlantImagePlaceholder({ city, ratio, alt, assetPath }: PlantImagePlaceholderProps) {
   return (
-    <div className="pimg__inner" style={{ aspectRatio: ratio }} role="img" aria-label={alt} data-asset-path={assetPath}>
+    <div
+      className="pimg__inner"
+      style={{ aspectRatio: ratio }}
+      role="img"
+      aria-label={alt}
+      data-asset-path={assetPath}
+    >
       <span className="pimg__horizon" aria-hidden="true" />
       <Crops />
       <span className="pimg__city" aria-hidden="true">
         {city}
       </span>
-      {showSpec ? <span className="mimg__spec">{ratio} · {assetPath}</span> : null}
+      {showSpec ? (
+        <span className="mimg__spec">
+          {ratio} · {assetPath}
+        </span>
+      ) : null}
     </div>
   )
 }
@@ -80,13 +108,23 @@ interface EditorialPlaceholderProps {
 /** Stands in for brand and editorial photography (work environments, engineering, detail). */
 export function EditorialPlaceholder({ subject, ratio, alt }: EditorialPlaceholderProps) {
   return (
-    <div className="pimg__inner" style={{ aspectRatio: ratio }} role="img" aria-label={alt} data-subject={subject}>
+    <div
+      className="pimg__inner"
+      style={{ aspectRatio: ratio }}
+      role="img"
+      aria-label={alt}
+      data-subject={subject}
+    >
       <span className="pimg__horizon" aria-hidden="true" />
       <Crops />
       <span className="pimg__city" aria-hidden="true">
         {subject}
       </span>
-      {showSpec ? <span className="mimg__spec">{ratio} · {subject}</span> : null}
+      {showSpec ? (
+        <span className="mimg__spec">
+          {ratio} · {subject}
+        </span>
+      ) : null}
     </div>
   )
 }
@@ -105,7 +143,13 @@ interface VideoPlaceholderProps {
  */
 export function VideoPlaceholder({ film, ratio, size = 'standard' }: VideoPlaceholderProps) {
   return (
-    <div className={`vph vph--${size}`} style={{ aspectRatio: ratio ?? film.ratio }} role="img" aria-label={`${film.title}: film coming soon`} data-film={film.id}>
+    <div
+      className={`vph vph--${size}`}
+      style={{ aspectRatio: ratio ?? film.ratio }}
+      role="img"
+      aria-label={`${film.title}: film coming soon`}
+      data-film={film.id}
+    >
       <span className="vph__light" aria-hidden="true" />
       <span className="vph__grain" aria-hidden="true" />
       <span className="vph__bars vph__bars--top" aria-hidden="true" />
@@ -119,7 +163,11 @@ export function VideoPlaceholder({ film, ratio, size = 'standard' }: VideoPlaceh
         <span className="vph__title">{film.title}</span>
         <span className="vph__status">Film coming soon</span>
       </div>
-      {showSpec ? <span className="mimg__spec">{film.id} · {ratio ?? film.ratio} · {film.brief}</span> : null}
+      {showSpec ? (
+        <span className="mimg__spec">
+          {film.id} · {ratio ?? film.ratio} · {film.brief}
+        </span>
+      ) : null}
     </div>
   )
 }

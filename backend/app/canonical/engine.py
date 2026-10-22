@@ -10,6 +10,7 @@ Write policy (what makes a run safe on the shared graph)
   * Nothing is ever deleted. Nothing is created without a unique id; relationships are unique per (type, from, to).
   * Dry-run reads the graph and writes nothing.
 """
+
 from __future__ import annotations
 
 import json
@@ -62,7 +63,9 @@ def same(a: Any, b: Any) -> bool:
     return a == b
 
 
-def compare(mapped: dict[str, Any], existing: dict[str, Any], casefold: set[str] = frozenset()) -> tuple[str, list[str]]:
+def compare(
+    mapped: dict[str, Any], existing: dict[str, Any], casefold: set[str] = frozenset()
+) -> tuple[str, list[str]]:
     """verified: every canonical value equals the graph's · extension_pending: the graph lacks values canonical holds · drift: a value differs."""
     ext, conflict = [], []
     for prop, value in mapped.items():
@@ -86,7 +89,11 @@ def norm_spec_name(name: str) -> str:
 def normalise(spec: DatasetSpec, rec: Canon) -> Canon:
     """Deterministic clean-up that never changes meaning: country codes upper-case, specification names in one spelling (the original text stays in source_text)."""
     update: dict[str, Any] = {}
-    if hasattr(rec, "country_code") and rec.country_code and rec.country_code != rec.country_code.upper():
+    if (
+        hasattr(rec, "country_code")
+        and rec.country_code
+        and rec.country_code != rec.country_code.upper()
+    ):
         update["country_code"] = rec.country_code.upper()
     if spec.name == "specifications":
         update["name"] = norm_spec_name(rec.name)
@@ -122,17 +129,33 @@ class Result:
     def report(self, dry_run: bool) -> dict[str, Any]:
         s = self.status
         return {
-            "dataset": self.dataset, "version": self.version, "canonical_schema_version": SCHEMA_VERSION, "dry_run": dry_run,
-            "records_read": self.records_read, "records_valid": self.records_valid, "records_invalid": len(self.invalid),
-            "nodes_to_create": self.nodes_to_create, "nodes_to_update": self.nodes_to_update,
-            "relationships_to_create": self.rels_to_create, "relationships_to_update": self.rels_to_update,
+            "dataset": self.dataset,
+            "version": self.version,
+            "canonical_schema_version": SCHEMA_VERSION,
+            "dry_run": dry_run,
+            "records_read": self.records_read,
+            "records_valid": self.records_valid,
+            "records_invalid": len(self.invalid),
+            "nodes_to_create": self.nodes_to_create,
+            "nodes_to_update": self.nodes_to_update,
+            "relationships_to_create": self.rels_to_create,
+            "relationships_to_update": self.rels_to_update,
             "records_skipped": len(self.invalid),
-            "records_created": s["create"] if self.applied else 0, "records_updated": s["update"] if self.applied else 0,
-            "records_unchanged": s["unchanged"], "records_verified": s["verified"], "records_extension_pending": s["extension_pending"],
-            "records_drift": s["drift"], "records_protected_skipped": self.protected_skipped, "records_failed": self.failed,
-            "relationships_created": self.rels_written if self.applied else 0, "unresolved_graph_references": self.unresolved_refs,
-            "checksum": self.checksum, "started_at": self.started_at, "completed_at": self.completed_at,
-            "invalid_examples": self.invalid[:5], "drift_examples": self.drift[:5],
+            "records_created": s["create"] if self.applied else 0,
+            "records_updated": s["update"] if self.applied else 0,
+            "records_unchanged": s["unchanged"],
+            "records_verified": s["verified"],
+            "records_extension_pending": s["extension_pending"],
+            "records_drift": s["drift"],
+            "records_protected_skipped": self.protected_skipped,
+            "records_failed": self.failed,
+            "relationships_created": self.rels_written if self.applied else 0,
+            "unresolved_graph_references": self.unresolved_refs,
+            "checksum": self.checksum,
+            "started_at": self.started_at,
+            "completed_at": self.completed_at,
+            "invalid_examples": self.invalid[:5],
+            "drift_examples": self.drift[:5],
         }
 
 
@@ -143,8 +166,12 @@ def _now() -> str:
 class Engine:
     def __init__(self, store: Store | None, root: Path = CANON_DIR, clock=_now) -> None:
         self.store, self.root, self.clock = store, root, clock
-        self.canon: dict[str, dict[str, tuple[str, str]]] = defaultdict(dict)  # kind -> id -> (label, key), filled as datasets are accepted
-        self.cache: dict[str, dict[str, tuple[str, str] | None]] = defaultdict(dict)  # graph lookups
+        self.canon: dict[str, dict[str, tuple[str, str]]] = defaultdict(
+            dict
+        )  # kind -> id -> (label, key), filled as datasets are accepted
+        self.cache: dict[str, dict[str, tuple[str, str] | None]] = defaultdict(
+            dict
+        )  # graph lookups
         self.records: dict[str, list[Canon]] = {}
 
     # ── public ───────────────────────────────────────────────────────────────────────────────────
@@ -156,8 +183,15 @@ class Engine:
             for k, v in r.report(dry_run).items():
                 if isinstance(v, int) and not isinstance(v, bool):
                     totals[k] += v
-        return {"canonical_schema_version": SCHEMA_VERSION, "dry_run": dry_run, "offline": self.store is None, "started_at": started, "completed_at": self.clock(),
-                "totals": dict(totals), "datasets": [r.report(dry_run) for r in results]}
+        return {
+            "canonical_schema_version": SCHEMA_VERSION,
+            "dry_run": dry_run,
+            "offline": self.store is None,
+            "started_at": started,
+            "completed_at": self.clock(),
+            "totals": dict(totals),
+            "datasets": [r.report(dry_run) for r in results],
+        }
 
     # ── one dataset ──────────────────────────────────────────────────────────────────────────────
     def _dataset(self, spec: DatasetSpec, dry_run: bool) -> Result:
@@ -194,10 +228,20 @@ class Engine:
             try:
                 rec = spec.model.model_validate(row)
             except ValidationError as exc:
-                res.invalid.append({"row": i, "id": rid, "errors": "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())[:400]})
+                res.invalid.append(
+                    {
+                        "row": i,
+                        "id": rid,
+                        "errors": "; ".join(
+                            f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors()
+                        )[:400],
+                    }
+                )
                 continue
             if rec.id in seen:
-                res.invalid.append({"row": i, "id": rec.id, "errors": "duplicate id in this dataset"})
+                res.invalid.append(
+                    {"row": i, "id": rec.id, "errors": "duplicate id in this dataset"}
+                )
                 continue
             seen.add(rec.id)
             out.append(normalise(spec, rec))
@@ -227,7 +271,13 @@ class Engine:
             r = spec.rel
             need.append((r.from_field, r.from_kind, getattr(rec, r.from_field)))
             kind = r.to_kind or r.to_kind_from[1].get(getattr(rec, r.to_kind_from[0]))
-            need.append((r.to_field, kind or f"?{getattr(rec, r.to_kind_from[0])}", getattr(rec, r.to_field)))
+            need.append(
+                (
+                    r.to_field,
+                    kind or f"?{getattr(rec, r.to_kind_from[0])}",
+                    getattr(rec, r.to_field),
+                )
+            )
         return need
 
     def _prefetch(self, needs: set[tuple[str, str]]) -> None:
@@ -260,7 +310,9 @@ class Engine:
                 if bad:
                     break
             if bad:
-                res.invalid.append({"row": None, "id": rec.id, "errors": f"missing reference: {bad}"})
+                res.invalid.append(
+                    {"row": None, "id": rec.id, "errors": f"missing reference: {bad}"}
+                )
             else:
                 ok.append(rec)
         return ok
@@ -282,10 +334,24 @@ class Engine:
         label = target.extra_label_map.get(value) if value else None
         return (label,) if label else ()
 
-    def _create_stamp(self, spec: DatasetSpec, rec: Canon, now: str, extra: dict[str, Any] | None = None) -> dict[str, Any]:
-        s = {"source_id": SRC_CANON, "source_name": SOURCE_NAME, "source_file": f"backend/data/canonical/{spec.path}", "authoritative_flag": False, "confidence": "NOT_STATED",
-             "data_status": rec.data_status, "provenance_type": rec.data_status, "source_type": rec.source_type, "source_record_id": rec.source_record_id or rec.id,
-             "ingestion_timestamp": now, "last_updated": now[:10], "canonical_dataset": spec.name, "canonical_schema_version": SCHEMA_VERSION}
+    def _create_stamp(
+        self, spec: DatasetSpec, rec: Canon, now: str, extra: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        s = {
+            "source_id": SRC_CANON,
+            "source_name": SOURCE_NAME,
+            "source_file": f"backend/data/canonical/{spec.path}",
+            "authoritative_flag": False,
+            "confidence": "NOT_STATED",
+            "data_status": rec.data_status,
+            "provenance_type": rec.data_status,
+            "source_type": rec.source_type,
+            "source_record_id": rec.source_record_id or rec.id,
+            "ingestion_timestamp": now,
+            "last_updated": now[:10],
+            "canonical_dataset": spec.name,
+            "canonical_schema_version": SCHEMA_VERSION,
+        }
         if rec.effective_from:
             s["effective_from"] = rec.effective_from
         if rec.effective_to:
@@ -295,7 +361,11 @@ class Engine:
 
     @staticmethod
     def _update_stamp(spec: DatasetSpec, now: str) -> dict[str, Any]:
-        return {"ingestion_timestamp": now, "canonical_dataset": spec.name, "canonical_schema_version": SCHEMA_VERSION}
+        return {
+            "ingestion_timestamp": now,
+            "canonical_dataset": spec.name,
+            "canonical_schema_version": SCHEMA_VERSION,
+        }
 
     @staticmethod
     def _mapped(target: NodeTarget, rec: Canon) -> dict[str, Any]:
@@ -308,10 +378,16 @@ class Engine:
         return out
 
     # ── plan and apply ───────────────────────────────────────────────────────────────────────────
-    def _plan_and_apply(self, spec: DatasetSpec, recs: list[Canon], res: Result, dry_run: bool) -> list[Canon]:
+    def _plan_and_apply(
+        self, spec: DatasetSpec, recs: list[Canon], res: Result, dry_run: bool
+    ) -> list[Canon]:
         now = self.clock()
-        node_writes: dict[tuple[str, str, bool, tuple[str, ...]], list[dict[str, Any]]] = defaultdict(list)
-        rel_writes: dict[tuple[str, tuple[str, str], tuple[str, str]], list[dict[str, Any]]] = defaultdict(list)
+        node_writes: dict[tuple[str, str, bool, tuple[str, ...]], list[dict[str, Any]]] = (
+            defaultdict(list)
+        )
+        rel_writes: dict[tuple[str, tuple[str, str], tuple[str, str]], list[dict[str, Any]]] = (
+            defaultdict(list)
+        )
 
         # existing nodes for every target; a target that must exist (create=False) but does not makes the record invalid
         exist: list[dict[tuple[str, str], dict[str, Any]]] = []
@@ -327,15 +403,31 @@ class Engine:
             exist.append(found)
         kept: list[Canon] = []
         for rec in recs:
-            missing = next((self._identity(t, rec) for ti, t in enumerate(spec.targets) if not t.create and (self._identity(t, rec)[0], self._identity(t, rec)[2]) not in exist[ti]), None)
+            missing = next(
+                (
+                    self._identity(t, rec)
+                    for ti, t in enumerate(spec.targets)
+                    if not t.create
+                    and (self._identity(t, rec)[0], self._identity(t, rec)[2]) not in exist[ti]
+                ),
+                None,
+            )
             if missing:
-                res.invalid.append({"row": None, "id": rec.id, "errors": f"target {missing[0]} {missing[2]!r} does not exist and this dataset may not create it"})
+                res.invalid.append(
+                    {
+                        "row": None,
+                        "id": rec.id,
+                        "errors": f"target {missing[0]} {missing[2]!r} does not exist and this dataset may not create it",
+                    }
+                )
             else:
                 kept.append(rec)
         res.records_valid = len(kept)
 
         status_of: dict[str, str] = {}
-        merge_nodes: dict[str, list[tuple[NodeTarget, str, str, str]]] = defaultdict(list)  # rec id -> merge-eligible targets (for relationships)
+        merge_nodes: dict[str, list[tuple[NodeTarget, str, str, str]]] = defaultdict(
+            list
+        )  # rec id -> merge-eligible targets (for relationships)
         rank = ["unchanged", "verified", "extension_pending", "create", "update", "drift"]
 
         def note(rid: str, st: str) -> None:
@@ -349,7 +441,9 @@ class Engine:
                 ex = exist[ti].get((label, gid))
                 mapped = self._mapped(target, rec)
                 if ex is None:
-                    node_writes[(label, key, True, self._extra_labels(target, rec))].append({"id": gid, "props": mapped, "create": self._create_stamp(spec, rec, now)})
+                    node_writes[(label, key, True, self._extra_labels(target, rec))].append(
+                        {"id": gid, "props": mapped, "create": self._create_stamp(spec, rec, now)}
+                    )
                     res.nodes_to_create += 1
                     note(rec.id, "create")
                     merge_nodes[rec.id].append((target, label, key, gid))
@@ -361,14 +455,24 @@ class Engine:
                     if why:
                         res.protected_skipped += 1
                     if st == "drift":
-                        res.drift.append({"id": rec.id, "node": f"{label}:{gid}", "properties": detail})
+                        res.drift.append(
+                            {"id": rec.id, "node": f"{label}:{gid}", "properties": detail}
+                        )
                     if st == "extension_pending":
                         res.extension += 1
                     note(rec.id, st)
                     continue
                 diff = {p: v for p, v in mapped.items() if p != key and not same(ex.get(p), v)}
                 if diff:
-                    node_writes[(label, key, target.create, self._extra_labels(target, rec))].append({"id": gid, "props": {**diff, **self._update_stamp(spec, now)}, "create": {}})
+                    node_writes[
+                        (label, key, target.create, self._extra_labels(target, rec))
+                    ].append(
+                        {
+                            "id": gid,
+                            "props": {**diff, **self._update_stamp(spec, now)},
+                            "create": {},
+                        }
+                    )
                     res.nodes_to_update += 1
                     note(rec.id, "update")
                 else:
@@ -376,7 +480,10 @@ class Engine:
                 merge_nodes[rec.id].append((target, label, key, gid))
 
         # relationships declared on node records (only for nodes this dataset may merge); looked up in batches per (type, from label, to label)
-        pending: dict[tuple[str, tuple[str, str], tuple[str, str]], list[tuple[Canon, str, str, dict[str, Any]]]] = defaultdict(list)
+        pending: dict[
+            tuple[str, tuple[str, str], tuple[str, str]],
+            list[tuple[Canon, str, str, dict[str, Any]]],
+        ] = defaultdict(list)
         for rec in kept:
             for target, label, key, gid in merge_nodes.get(rec.id, []):
                 for rd in target.rels:
@@ -388,12 +495,21 @@ class Engine:
                 if ex is None:
                     create = self._create_stamp(spec, rec, now, {"rel_id": f"{type_}:{f}:{t}"})
                     create.pop("source_record_id", None)
-                    rel_writes[(type_, fl, tl)].append({"f": f, "t": t, "props": props, "create": create})
+                    rel_writes[(type_, fl, tl)].append(
+                        {"f": f, "t": t, "props": props, "create": create}
+                    )
                     res.rels_to_create += 1
                 else:
                     diff = {p: v for p, v in props.items() if not same(ex.get(p), v)}
                     if diff:
-                        rel_writes[(type_, fl, tl)].append({"f": f, "t": t, "props": {**diff, **self._update_stamp(spec, now)}, "create": {}})
+                        rel_writes[(type_, fl, tl)].append(
+                            {
+                                "f": f,
+                                "t": t,
+                                "props": {**diff, **self._update_stamp(spec, now)},
+                                "create": {},
+                            }
+                        )
                         res.rels_to_update += 1
 
         # the record IS a relationship
@@ -415,28 +531,44 @@ class Engine:
         other = self._ref(kind, tid)
         if other is None:  # offline or already reported invalid
             return
-        (fl, fk, fid), (tl, tk, tid_) = ((other[0], other[1], tid), this) if rd.reverse else (this, (other[0], other[1], tid))
+        (fl, fk, fid), (tl, tk, tid_) = (
+            ((other[0], other[1], tid), this) if rd.reverse else (this, (other[0], other[1], tid))
+        )
         props = {p: getattr(rec, p) for p in rd.props if getattr(rec, p) is not None}
         pending[(rd.type, (fl, fk), (tl, tk))].append((rec, fid, tid_, props))
 
-    def _plan_rel_dataset(self, spec, recs: list[Canon], res: Result, rel_writes, now: str, note) -> None:
+    def _plan_rel_dataset(
+        self, spec, recs: list[Canon], res: Result, rel_writes, now: str, note
+    ) -> None:
         r = spec.rel
-        grouped: dict[tuple[tuple[str, str], tuple[str, str]], list[tuple[Canon, str, str]]] = defaultdict(list)
+        grouped: dict[tuple[tuple[str, str], tuple[str, str]], list[tuple[Canon, str, str]]] = (
+            defaultdict(list)
+        )
         for rec in recs:
             f_ref = self._ref(r.from_kind, getattr(rec, r.from_field))
             to_kind = r.to_kind or r.to_kind_from[1][getattr(rec, r.to_kind_from[0])]
             t_ref = self._ref(to_kind, getattr(rec, r.to_field))
             if f_ref is None or t_ref is None:
                 continue
-            grouped[(f_ref, t_ref)].append((rec, getattr(rec, r.from_field), getattr(rec, r.to_field)))
+            grouped[(f_ref, t_ref)].append(
+                (rec, getattr(rec, r.from_field), getattr(rec, r.to_field))
+            )
         for (fl, tl), items in grouped.items():
             have = self.store.fetch_rels(r.type, fl, tl, [(f, t) for _, f, t in items])
             for rec, f, t in items:
-                props = {gp: getattr(rec, cf) for cf, gp in r.fields.items() if getattr(rec, cf) is not None and getattr(rec, cf) != []}
+                props = {
+                    gp: getattr(rec, cf)
+                    for cf, gp in r.fields.items()
+                    if getattr(rec, cf) is not None and getattr(rec, cf) != []
+                }
                 ex = have.get((f, t))
                 if ex is None:
-                    create = self._create_stamp(spec, rec, now, {"rel_id": r.rel_id.format(id=rec.id)})
-                    rel_writes[(r.type, fl, tl)].append({"f": f, "t": t, "props": props, "create": create})
+                    create = self._create_stamp(
+                        spec, rec, now, {"rel_id": r.rel_id.format(id=rec.id)}
+                    )
+                    rel_writes[(r.type, fl, tl)].append(
+                        {"f": f, "t": t, "props": props, "create": create}
+                    )
                     res.rels_to_create += 1
                     note(rec.id, "create")
                     continue
@@ -446,14 +578,27 @@ class Engine:
                     if why:
                         res.protected_skipped += 1
                     if st == "drift":
-                        res.drift.append({"id": rec.id, "relationship": f"{r.type}:{f}->{t}", "properties": detail})
+                        res.drift.append(
+                            {
+                                "id": rec.id,
+                                "relationship": f"{r.type}:{f}->{t}",
+                                "properties": detail,
+                            }
+                        )
                     if st == "extension_pending":
                         res.extension += 1
                     note(rec.id, st)
                     continue
                 diff = {p: v for p, v in props.items() if not same(ex.get(p), v)}
                 if diff:
-                    rel_writes[(r.type, fl, tl)].append({"f": f, "t": t, "props": {**diff, **self._update_stamp(spec, now)}, "create": {}})
+                    rel_writes[(r.type, fl, tl)].append(
+                        {
+                            "f": f,
+                            "t": t,
+                            "props": {**diff, **self._update_stamp(spec, now)},
+                            "create": {},
+                        }
+                    )
                     res.rels_to_update += 1
                     note(rec.id, "update")
                 else:
@@ -463,13 +608,35 @@ class Engine:
         for label in spec.new_labels:
             self.store.ensure_constraint(label, NEW_LABELS[label])
         if node_writes or rel_writes:
-            self.store.upsert_nodes("DataSource", "source_id", [{"id": SRC_CANON, "create": {}, "props": {
-                "name": SOURCE_NAME, "layer": "canonical ingestion", "source_record_id": SRC_CANON, "source_file": "backend/data/canonical", "data_status": "SYNTHETIC_DEMO",
-                "provenance_type": "SYNTHETIC_DEMO", "source_type": "SYNTHETIC_DEMO", "source_id": SRC_CANON, "source_name": SOURCE_NAME, "authoritative_flag": False, "confidence": "NOT_STATED",
-                "verification": "Schema-validated records; references checked before every write",
-                "limitations": "Synthetic demonstration data unless a record says otherwise. Not linked to a live ERP, PLM or MES."}}])
+            self.store.upsert_nodes(
+                "DataSource",
+                "source_id",
+                [
+                    {
+                        "id": SRC_CANON,
+                        "create": {},
+                        "props": {
+                            "name": SOURCE_NAME,
+                            "layer": "canonical ingestion",
+                            "source_record_id": SRC_CANON,
+                            "source_file": "backend/data/canonical",
+                            "data_status": "SYNTHETIC_DEMO",
+                            "provenance_type": "SYNTHETIC_DEMO",
+                            "source_type": "SYNTHETIC_DEMO",
+                            "source_id": SRC_CANON,
+                            "source_name": SOURCE_NAME,
+                            "authoritative_flag": False,
+                            "confidence": "NOT_STATED",
+                            "verification": "Schema-validated records; references checked before every write",
+                            "limitations": "Synthetic demonstration data unless a record says otherwise. Not linked to a live ERP, PLM or MES.",
+                        },
+                    }
+                ],
+            )
         for (label, key, create, extra), rows in node_writes.items():
-            res.nodes_written += self.store.upsert_nodes(label, key, rows, create=create, extra_labels=extra)
+            res.nodes_written += self.store.upsert_nodes(
+                label, key, rows, create=create, extra_labels=extra
+            )
         for (type_, fl, tl), rows in rel_writes.items():
             res.rels_written += self.store.upsert_rels(type_, fl, tl, rows)
         res.applied = True

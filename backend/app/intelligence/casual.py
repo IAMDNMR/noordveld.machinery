@@ -1,5 +1,6 @@
 """Short, casual part requests ("show me that belt", "do you have a hose", "hydraulics you have available"): drop the filler words and
 singularise what is left, so the catalogue is searched for the thing the user named. Words are only removed, never added or guessed."""
+
 from __future__ import annotations
 
 import re

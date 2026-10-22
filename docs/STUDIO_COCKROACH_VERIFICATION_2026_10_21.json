@@ -1,0 +1,48 @@
+{
+  "project_survives_new_connection": true,
+  "cross_owner_read_blocked": true,
+  "concurrent_saves_one_commit_one_conflict": true,
+  "immutable_package_persisted_and_owner_scoped": true,
+  "test_history_persisted": true,
+  "project_count": 6,
+  "revision_count": 40,
+  "release_count": 2,
+  "website_archives_checksum_verified": 2,
+  "transport_project_unchanged": true,
+  "transport_history_entries": 12,
+  "generated_test_result": {
+    "ran": 50,
+    "passed_count": 43,
+    "failed_count": 0,
+    "skipped_count": 7
+  },
+  "dashboard_counts": {
+    "active": 1,
+    "archived": 0,
+    "trashed": 4,
+    "needs_attention": 0,
+    "approved": 1,
+    "reviewed": 1
+  },
+  "final_dashboard_counts": {
+    "active": 1,
+    "archived": 0,
+    "trashed": 2,
+    "needs_attention": 0,
+    "approved": 1,
+    "reviewed": 1
+  },
+  "final_dashboard_request_seconds": 7.19,
+  "permanent_delete_live_verification": true,
+  "permanent_delete_test_data_removed": true,
+  "inventory_note": "Migration counts record the verified cutover snapshot. Users subsequently deleted projects through the new confirmed Trash action; those deletions are preserved.",
+  "connection_pool_enabled": true,
+  "frontend_tests_passed": 429,
+  "frontend_check_passed": true,
+  "frontend_build_passed": true,
+  "backend_full_suite_before_followups": {
+    "passed": 667,
+    "skipped": 316
+  },
+  "backend_storage_and_dashboard_followup_tests_passed": 24
+}

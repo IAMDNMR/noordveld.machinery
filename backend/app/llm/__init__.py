@@ -1,12 +1,31 @@
 """Language-model providers. `create_llm` is the only place a provider is chosen (LLM_PROVIDER); business code sees only LLMClient."""
+
 from __future__ import annotations
 
+from dataclasses import replace
 from functools import lru_cache
 
 from app.core.config import Settings
-from app.llm.base import LLMClient, LLMError, LLMInvalidResponse, LLMParse, LLMUnavailable, ShoppingParse
+from app.llm.base import (
+    LLMClient,
+    LLMError,
+    LLMInvalidResponse,
+    LLMParse,
+    LLMUnavailable,
+    ShoppingParse,
+)
 
-__all__ = ["LLMClient", "LLMError", "LLMInvalidResponse", "LLMParse", "LLMUnavailable", "ShoppingParse", "create_llm", "PROVIDERS"]
+__all__ = [
+    "LLMClient",
+    "LLMError",
+    "LLMInvalidResponse",
+    "LLMParse",
+    "LLMUnavailable",
+    "ShoppingParse",
+    "create_llm",
+    "create_studio_llm",
+    "PROVIDERS",
+]
 
 PROVIDERS = ("groq", "gemini")
 
@@ -25,3 +44,31 @@ def create_llm(settings: Settings) -> LLMClient | None:
     from app.llm.groq import GroqClient
 
     return GroqClient(settings)
+
+
+@lru_cache(maxsize=4)
+def create_studio_llm(settings: Settings) -> LLMClient | None:
+    """The Design Studio conversation model: `AI_PROVIDER` (nvidia, groq or gemini) when set, otherwise the project's `LLM_PROVIDER`.
+    One provider, chosen by configuration; there is no silent failover between providers (the Studio falls back to its labelled local rules)."""
+    provider = settings.ai_provider or settings.llm_provider
+    if provider == "nvidia":
+        if not (
+            settings.nvidia_api_key
+            and (settings.nvidia_planner_model or settings.nvidia_fast_model)
+        ):
+            return None
+        from app.llm.nvidia import NvidiaClient
+
+        # The planner model is the default: the smaller one is 2-4x faster but proposed duplicates and malformed steps in testing. STUDIO_MODEL=fast opts in.
+        import os
+
+        fast = os.environ.get("STUDIO_MODEL", "").strip().lower() == "fast"
+        return NvidiaClient(
+            settings,
+            model=(settings.nvidia_fast_model or settings.nvidia_planner_model)
+            if fast
+            else (settings.nvidia_planner_model or settings.nvidia_fast_model),
+        )
+    if provider not in PROVIDERS:
+        raise ValueError(f"AI_PROVIDER must be one of nvidia, {', '.join(PROVIDERS)}")
+    return create_llm(replace(settings, llm_provider=provider))

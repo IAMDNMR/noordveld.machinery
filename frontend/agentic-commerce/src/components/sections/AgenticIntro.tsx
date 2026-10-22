@@ -15,7 +15,11 @@ const OPTIONS = [
 
 export function AgenticIntro() {
   return (
-    <section id="agentic" className="section on-night agentic-intro" aria-labelledby="agentic-title">
+    <section
+      id="agentic"
+      className="section on-night agentic-intro"
+      aria-labelledby="agentic-title"
+    >
       <div className="container">
         <Reveal>
           <p className="eyebrow">What comes next</p>
@@ -26,7 +30,10 @@ export function AgenticIntro() {
           </h2>
         </Reveal>
         <Reveal delay={160}>
-          <p className="lead agentic-intro__lead">Every earlier chapter of commerce started with a product the customer already had in mind. This one starts with a need, and the constraints that come with it.</p>
+          <p className="lead agentic-intro__lead">
+            Every earlier chapter of commerce started with a product the customer already had in
+            mind. This one starts with a need, and the constraints that come with it.
+          </p>
         </Reveal>
 
         <ol className="concept" aria-label="How an agent turns a need into an action">
@@ -55,12 +62,16 @@ export function AgenticIntro() {
           </Reveal>
           <Reveal as="li" className="concept__step concept__step--action" delay={360}>
             <p className="concept__label">Recommended action</p>
-            <p className="concept__action">The option that best meets every constraint, checked and ready to order.</p>
+            <p className="concept__action">
+              The option that best meets every constraint, checked and ready to order.
+            </p>
           </Reveal>
         </ol>
 
         <Reveal className="concept__foot" delay={480}>
-          <p className="requirement__note">A conceptual illustration. It shows no real machine, part or price.</p>
+          <p className="requirement__note">
+            A conceptual illustration. It shows no real machine, part or price.
+          </p>
           <ButtonLink href="/agentic-shopping">See it work with real Noordveld data</ButtonLink>
         </Reveal>
       </div>

@@ -1,0 +1,2281 @@
+{
+  "id": "cat_ecommerce_order_to_delivery",
+  "version": "2026.10.22",
+  "layer": "business",
+  "title": "Online order to delivery, withdrawal and late delivery (Europe)",
+  "description": "How an online order moves through payment, processing, shipment and completion in Shopware and WooCommerce, and what EU consumer law (Directive 2011/83/EU) requires for withdrawal, reimbursement and late delivery.",
+  "synthetic": false,
+  "status": "approved",
+  "provenance": {
+    "kind": "verified_source",
+    "reference": "Official documentation, read and checked 2026-10-21: developer.shopware.com/docs/concepts/commerce/checkout-concept/orders.html; github.com/shopware/shopware/blob/trunk/src/Core/Migration/V6_3/Migration1536233560BasicData.php; woocommerce.com/document/managing-orders/order-statuses/; github.com/wooc",
+    "verification": "verified"
+  },
+  "depends_on": [],
+  "uses_capabilities": [
+    "audit_history",
+    "search_filter"
+  ],
+  "dependency_mode": "full",
+  "includes": [],
+  "business": {
+    "requirements": [
+      {
+        "id": "req_eco_place",
+        "statement": "A customer places an order for products; an order is created from the basket with its line items, prices, delivery address, shipping and payment method.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_place_1",
+            "statement": "An order lists its lines with quantities and prices."
+          },
+          {
+            "id": "ac_eco_place_2",
+            "statement": "The order starts as open with an open payment and an open delivery."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_pay",
+        "statement": "The payment of each order is tracked: paid, partially paid, awaiting confirmation, failed or cancelled; a reminder can be sent for an unpaid or partially paid order.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_pay_1",
+            "statement": "The payment status is visible on the order."
+          },
+          {
+            "id": "ac_eco_pay_2",
+            "statement": "A failed or cancelled payment returns the reserved stock."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_process",
+        "statement": "Once payment is received the order moves to processing and stock is reduced.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_process_1",
+            "statement": "An order in processing has reduced stock."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_ship",
+        "statement": "The warehouse ships the order, fully or partially, and records what was shipped.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_ship_1",
+            "statement": "Shipped quantity is recorded per order line."
+          },
+          {
+            "id": "ac_eco_ship_2",
+            "statement": "A partial shipment leaves the rest to be shipped."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_deliver",
+        "statement": "Delivery to the customer is recorded with its date.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_deliver_1",
+            "statement": "The delivery date is stored on the delivery."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_complete",
+        "statement": "A fulfilled order is completed.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_complete_1",
+            "statement": "A completed order needs no further action."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_track",
+        "statement": "The status of each order, its payment and its delivery can be followed.",
+        "kind": "functional",
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_track_1",
+            "statement": "Order, payment and delivery statuses are visible together."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_history",
+        "statement": "Each change of the order, payment and delivery state is recorded, so progress can be tracked and the customer notified, as the Shopware state machines provide.",
+        "kind": "non_functional",
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_history_1",
+            "statement": "Every state change is kept with its date."
+          }
+        ],
+        "category": "auditability"
+      },
+      {
+        "id": "req_eco_withdraw",
+        "statement": "A consumer who bought at a distance can withdraw within the withdrawal period without giving a reason; the right does not exist for the listed exceptions, such as goods made to the consumer's specifications.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_withdraw_1",
+            "statement": "The consumer's withdrawal is recorded with its date."
+          },
+          {
+            "id": "ac_eco_withdraw_2",
+            "statement": "A withdrawal outside the period or for an excluded purchase is not accepted."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_return",
+        "statement": "After withdrawing, the consumer sends the goods back without undue delay and in any event within 14 days of communicating the decision; the consumer bears only the direct cost of returning unless the trader agreed to bear it or failed to inform the consumer.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_return_1",
+            "statement": "The date the goods were sent back is recorded."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_refund",
+        "statement": "The trader reimburses all payments, including delivery costs, without undue delay and in any event within 14 days of being informed of the withdrawal, using the same means of payment as the original transaction; the trader may withhold the reimbursement until the goods are back or evidence of sending is supplied.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_refund_1",
+            "statement": "The reimbursement date and means of payment are recorded."
+          },
+          {
+            "id": "ac_eco_refund_2",
+            "statement": "The reimbursement is due within 14 days of the withdrawal notice."
+          }
+        ]
+      },
+      {
+        "id": "req_eco_late",
+        "statement": "If goods are not delivered at the agreed time, or within 30 days of the contract when no time was agreed, the consumer can call on the trader to deliver within an additional period and terminate the contract if the trader still does not deliver; where the delivery date was essential the consumer can terminate immediately; on termination all sums paid are reimbursed.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_eco_late_1",
+            "statement": "The additional period and its outcome are recorded."
+          },
+          {
+            "id": "ac_eco_late_2",
+            "statement": "On termination the trader reimburses all sums paid."
+          }
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "id": "role_eco_customer",
+        "name": "Customer",
+        "responsibilities": [
+          "Places orders",
+          "Withdraws from a purchase",
+          "Reports a missed delivery"
+        ],
+        "permissions": [
+          "eco.order_place",
+          "eco.withdraw",
+          "eco.late_report"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_eco_manager",
+        "name": "Shop manager",
+        "responsibilities": [
+          "Confirms payments and sends reminders",
+          "Processes and completes orders",
+          "Reimburses customers"
+        ],
+        "permissions": [
+          "eco.payment_manage",
+          "eco.order_process",
+          "eco.order_complete",
+          "eco.refund",
+          "eco.order_review"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_eco_warehouse",
+        "name": "Warehouse operator",
+        "responsibilities": [
+          "Ships orders",
+          "Records deliveries",
+          "Receives returned goods"
+        ],
+        "permissions": [
+          "eco.ship",
+          "eco.delivery_record",
+          "eco.return_receive"
+        ],
+        "approval_authority": []
+      }
+    ],
+    "entities": [
+      {
+        "id": "ent_eco_customer",
+        "name": "Customer",
+        "description": "A person or company that buys.",
+        "attributes": [
+          {
+            "id": "customer_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "customer_name",
+            "name": "Name",
+            "type": "string",
+            "required": true,
+            "sensitivity": "personal",
+            "max_length": 140
+          },
+          {
+            "id": "email",
+            "name": "Email",
+            "type": "string",
+            "required": true,
+            "sensitivity": "personal",
+            "format": "email",
+            "max_length": 140
+          },
+          {
+            "id": "customer_type",
+            "name": "Customer type",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "CONSUMER",
+              "BUSINESS"
+            ],
+            "description": "A consumer acts outside any trade, business, craft or profession (Directive 2011/83/EU, Article 2(1))."
+          },
+          {
+            "id": "country",
+            "name": "Country",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 80
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_product",
+        "name": "Product",
+        "description": "Something that is sold.",
+        "attributes": [
+          {
+            "id": "product_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "product_name",
+            "name": "Product name",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "price",
+            "name": "Price",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "stock_quantity",
+            "name": "Stock quantity",
+            "type": "integer",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0,
+            "description": "Stock is reduced when an order is paid or processing and returned when it is cancelled or fails (WooCommerce)."
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_order",
+        "name": "Order",
+        "description": "An order created from a basket.",
+        "attributes": [
+          {
+            "id": "order_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "placed_on",
+            "name": "Placed on",
+            "type": "date",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "status",
+            "name": "Order status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "OPEN",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "default": "OPEN"
+          },
+          {
+            "id": "total",
+            "name": "Total",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0,
+            "value_source": "calculated",
+            "writable": false
+          },
+          {
+            "id": "shipping_method",
+            "name": "Shipping method",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 80
+          },
+          {
+            "id": "payment_method",
+            "name": "Payment method",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 80
+          },
+          {
+            "id": "delivery_address",
+            "name": "Delivery address",
+            "type": "string",
+            "required": true,
+            "sensitivity": "personal",
+            "max_length": 300
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_order_customer",
+            "name": "Customer",
+            "target": "ent_eco_customer",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_line",
+        "name": "Order line",
+        "description": "One product ordered.",
+        "attributes": [
+          {
+            "id": "line_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "quantity",
+            "name": "Quantity",
+            "type": "integer",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 1
+          },
+          {
+            "id": "unit_price",
+            "name": "Unit price",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "shipped_quantity",
+            "name": "Shipped quantity",
+            "type": "integer",
+            "required": false,
+            "sensitivity": "internal",
+            "minimum": 0
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_line_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_eco_line_product",
+            "name": "Product",
+            "target": "ent_eco_product",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_payment",
+        "name": "Payment",
+        "description": "The payment of an order.",
+        "attributes": [
+          {
+            "id": "payment_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "amount",
+            "name": "Amount",
+            "type": "decimal",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "paid_amount",
+            "name": "Paid amount",
+            "type": "decimal",
+            "required": false,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "status",
+            "name": "Payment status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "OPEN",
+              "PAID",
+              "PAID_PARTIALLY",
+              "REMINDED",
+              "CANCELLED",
+              "REFUNDED",
+              "REFUNDED_PARTIALLY"
+            ],
+            "default": "OPEN"
+          },
+          {
+            "id": "payment_result",
+            "name": "Payment result",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "PAID",
+              "AWAITING_CONFIRMATION",
+              "PARTIALLY_PAID",
+              "FAILED",
+              "CANCELLED"
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_payment_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_delivery",
+        "name": "Delivery",
+        "description": "The delivery of an order.",
+        "attributes": [
+          {
+            "id": "delivery_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "status",
+            "name": "Delivery status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "OPEN",
+              "SHIPPED",
+              "SHIPPED_PARTIALLY",
+              "RETURNED",
+              "RETURNED_PARTIALLY",
+              "CANCELLED"
+            ],
+            "default": "OPEN"
+          },
+          {
+            "id": "shipped_on",
+            "name": "Shipped on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "delivered_on",
+            "name": "Delivered on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "agreed_delivery_date",
+            "name": "Agreed delivery date",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal",
+            "description": "If none was agreed, delivery is due without undue delay and within 30 days of the contract (Directive 2011/83/EU, Article 18(1))."
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_delivery_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_withdrawal",
+        "name": "Withdrawal",
+        "description": "A consumer's withdrawal from a distance purchase.",
+        "attributes": [
+          {
+            "id": "withdrawal_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "notified_on",
+            "name": "Withdrawal communicated on",
+            "type": "date",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "statement",
+            "name": "Statement",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 500
+          },
+          {
+            "id": "withdrawal_right",
+            "name": "Right of withdrawal",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "APPLIES",
+              "EXCLUDED"
+            ],
+            "description": "Excluded when the buyer is not a consumer or the purchase falls under an exception such as goods made to the consumer's specifications (Directive 2011/83/EU, Articles 2 and 16)."
+          },
+          {
+            "id": "days_since_delivery",
+            "name": "Days since delivery",
+            "type": "integer",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0,
+            "value_source": "calculated",
+            "writable": false
+          },
+          {
+            "id": "period_days",
+            "name": "Withdrawal period (days)",
+            "type": "integer",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0,
+            "value_source": "calculated",
+            "writable": false,
+            "description": "14 days from delivery of the goods; if the trader did not provide the withdrawal information, the period ends 12 months after the initial period (Articles 9 and 10)."
+          },
+          {
+            "id": "return_sent_on",
+            "name": "Goods sent back on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "return_received_on",
+            "name": "Goods received on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "refund_due_by",
+            "name": "Reimbursement due by",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal",
+            "value_source": "calculated",
+            "writable": false,
+            "description": "14 days from the day the trader is informed of the withdrawal (Article 13(1))."
+          },
+          {
+            "id": "refunded_on",
+            "name": "Reimbursed on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "refund_method",
+            "name": "Reimbursed by",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 80
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_withdrawal_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_eco_late",
+        "name": "Late delivery claim",
+        "description": "A consumer's claim that goods were not delivered in time.",
+        "attributes": [
+          {
+            "id": "claim_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "reported_on",
+            "name": "Reported on",
+            "type": "date",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "timing_essential",
+            "name": "Delivery time essential",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "ESSENTIAL",
+              "NOT_ESSENTIAL"
+            ],
+            "description": "Essential when the consumer told the trader before the contract that delivery on a date is essential, or the circumstances make it essential (Article 18(2))."
+          },
+          {
+            "id": "additional_period_ends",
+            "name": "Additional period ends",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "redelivery",
+            "name": "Delivered within the additional period",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "DELIVERED",
+              "NOT_DELIVERED"
+            ]
+          },
+          {
+            "id": "terminated_on",
+            "name": "Contract terminated on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_late_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule_eco_payment",
+        "description": "Payment moves from open to paid, awaiting confirmation, partially paid, failed or cancelled.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://woocommerce.com/document/managing-orders/order-statuses/ (Pending payment to Processing, On hold, Failed, Cancelled; Shopware order_transaction pay, pay_partially, remind, cancel)"
+        },
+        "condition": "",
+        "outcomes": [
+          "PAID",
+          "AWAITING_CONFIRMATION",
+          "PARTIALLY_PAID",
+          "FAILED",
+          "CANCELLED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_eco_payment.payment_result",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_eco_shipment",
+        "description": "A delivery is shipped when every line is fully shipped, otherwise shipped partially.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://github.com/shopware/shopware/blob/trunk/src/Core/Migration/V6_3/Migration1536233560BasicData.php (order_delivery transitions ship and ship_partially; a partially shipped delivery can be shipped)"
+        },
+        "condition": "",
+        "outcomes": [
+          "SHIPPED",
+          "SHIPPED_PARTIALLY"
+        ],
+        "execution": {
+          "kind": "compare",
+          "field": "ent_eco_line.shipped_quantity",
+          "operator": "gte",
+          "value": null,
+          "other_field": "ent_eco_line.quantity",
+          "pass_outcome": "SHIPPED",
+          "fail_outcome": "SHIPPED_PARTIALLY"
+        }
+      },
+      {
+        "id": "rule_eco_scope",
+        "description": "The right of withdrawal applies to consumers buying at a distance, except the contracts listed in Article 16.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2011/83/oj/eng (Articles 2(1), 9(1) and 16)"
+        },
+        "condition": "",
+        "outcomes": [
+          "APPLIES",
+          "EXCLUDED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_eco_withdrawal.withdrawal_right",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_eco_period",
+        "description": "The consumer must communicate the withdrawal within the withdrawal period.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2011/83/oj/eng (Articles 9(1)-(2) and 10)"
+        },
+        "condition": "",
+        "outcomes": [
+          "WITHIN_PERIOD",
+          "OUTSIDE_PERIOD"
+        ],
+        "execution": {
+          "kind": "compare",
+          "field": "ent_eco_withdrawal.days_since_delivery",
+          "operator": "lte",
+          "value": null,
+          "other_field": "ent_eco_withdrawal.period_days",
+          "pass_outcome": "WITHIN_PERIOD",
+          "fail_outcome": "OUTSIDE_PERIOD"
+        }
+      },
+      {
+        "id": "rule_eco_essential",
+        "description": "When delivery on a date was essential the consumer can terminate at once; otherwise the consumer first sets an additional period.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2011/83/oj/eng (Article 18(2))"
+        },
+        "condition": "",
+        "outcomes": [
+          "ESSENTIAL",
+          "NOT_ESSENTIAL"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_eco_late.timing_essential",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_eco_redelivery",
+        "description": "If the trader does not deliver within the additional period the consumer is entitled to terminate the contract.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2011/83/oj/eng (Article 18(2))"
+        },
+        "condition": "",
+        "outcomes": [
+          "DELIVERED",
+          "NOT_DELIVERED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_eco_late.redelivery",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      }
+    ],
+    "exceptions": [
+      {
+        "id": "exc_eco_unconfirmed",
+        "name": "Payment awaiting confirmation",
+        "trigger": "An offline or delayed-notification payment has not been confirmed yet; the order is on hold.",
+        "recovery": "The shop manager confirms the payment was received, then the order continues.",
+        "resolution": "recover",
+        "resolution_state_id": "st_eco_o_paycheck"
+      },
+      {
+        "id": "exc_eco_partial_pay",
+        "name": "Payment incomplete",
+        "trigger": "Only part of the order total has been paid.",
+        "recovery": "A payment reminder is sent and the payment is checked again.",
+        "resolution": "recover",
+        "resolution_state_id": "st_eco_o_paycheck"
+      },
+      {
+        "id": "exc_eco_pay_failed",
+        "name": "Payment failed",
+        "trigger": "The customer's payment failed or was declined.",
+        "recovery": "Stock held for the order is returned to inventory and the order ends.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_eco_o_cancelled"
+      },
+      {
+        "id": "exc_eco_pay_cancelled",
+        "name": "Order cancelled",
+        "trigger": "The order was cancelled by an administrator or the customer.",
+        "recovery": "Stock for the order lines is returned to inventory; a payment already made may need to be refunded.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_eco_o_cancelled"
+      },
+      {
+        "id": "exc_eco_partial_ship",
+        "name": "Partial shipment",
+        "trigger": "Not all ordered quantity could be shipped.",
+        "recovery": "The shipped part is recorded and the rest is shipped later against the same order.",
+        "resolution": "recover",
+        "resolution_state_id": "st_eco_o_ship"
+      },
+      {
+        "id": "exc_eco_wd_excluded",
+        "name": "Withdrawal not available",
+        "trigger": "The buyer is not a consumer or the purchase is excluded from the right of withdrawal.",
+        "recovery": "The withdrawal is not accepted and the request ends.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_eco_w_denied"
+      },
+      {
+        "id": "exc_eco_wd_late",
+        "name": "Withdrawal period passed",
+        "trigger": "The withdrawal was communicated after the withdrawal period ended.",
+        "recovery": "The withdrawal is not accepted and the request ends.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_eco_w_denied"
+      },
+      {
+        "id": "exc_eco_late_terminated",
+        "name": "Contract terminated for non-delivery",
+        "trigger": "The goods were not delivered within the additional period, or delivery on a date was essential and was missed.",
+        "recovery": "The consumer terminates the contract and the trader reimburses all sums paid.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_eco_l_terminated"
+      }
+    ],
+    "decisions": [],
+    "integrations": [],
+    "terms": [
+      {
+        "id": "term_eco_withdrawal",
+        "term": "Right of withdrawal",
+        "definition": "A consumer's right to cancel a distance purchase within 14 days without giving a reason."
+      },
+      {
+        "id": "term_eco_trader",
+        "term": "Trader",
+        "definition": "A person or company acting for purposes relating to its trade, business, craft or profession."
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "version": 1,
+      "id": "wf_eco_order",
+      "name": "Order to delivery",
+      "states": [
+        {
+          "id": "st_eco_o_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_place",
+          "label": "Place the order",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_customer",
+          "permission": "eco.order_place",
+          "requirement_ids": [
+            "req_eco_place"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_product",
+            "ent_eco_customer"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_line",
+            "ent_eco_payment",
+            "ent_eco_delivery"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_paycheck",
+          "label": "What is the payment result?",
+          "kind": "branch",
+          "outputs": [
+            "rule_eco_payment"
+          ],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_eco_pay"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_eco_payment"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_unconfirmed",
+          "label": "Confirm the payment",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.payment_manage",
+          "requirement_ids": [
+            "req_eco_pay"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_payment"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_payment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_unconfirmed"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_partial_pay",
+          "label": "Send a payment reminder",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.payment_manage",
+          "requirement_ids": [
+            "req_eco_pay"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_payment"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_payment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_partial_pay"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_failed",
+          "label": "Return the stock of the failed payment",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.payment_manage",
+          "requirement_ids": [
+            "req_eco_pay"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_payment",
+            "ent_eco_line"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_product",
+            "ent_eco_order"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_pay_failed"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_cancelling",
+          "label": "Cancel the order and return the stock",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.payment_manage",
+          "requirement_ids": [
+            "req_eco_pay"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_line"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_product",
+            "ent_eco_order"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_pay_cancelled"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_process",
+          "label": "Start processing the order",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.order_process",
+          "requirement_ids": [
+            "req_eco_process"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_line"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_product"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_ship",
+          "label": "Ship the order",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_warehouse",
+          "permission": "eco.ship",
+          "requirement_ids": [
+            "req_eco_ship"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_line"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_delivery",
+            "ent_eco_line"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_shipcheck",
+          "label": "Is every line fully shipped?",
+          "kind": "branch",
+          "outputs": [
+            "rule_eco_shipment"
+          ],
+          "outcome": null,
+          "role_id": "role_eco_warehouse",
+          "permission": null,
+          "requirement_ids": [
+            "req_eco_ship"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_eco_shipment"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_partial_ship",
+          "label": "Record the partial shipment",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_warehouse",
+          "permission": "eco.ship",
+          "requirement_ids": [
+            "req_eco_ship"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_line"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_delivery",
+            "ent_eco_line"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_partial_ship"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_deliver",
+          "label": "Record the delivery to the customer",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_warehouse",
+          "permission": "eco.delivery_record",
+          "requirement_ids": [
+            "req_eco_deliver"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_delivery"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_delivery"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_complete",
+          "label": "Complete the order",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.order_complete",
+          "requirement_ids": [
+            "req_eco_complete"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_delivery"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_order"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_review",
+          "label": "Review order status",
+          "kind": "search",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.order_review",
+          "requirement_ids": [
+            "req_eco_track",
+            "req_eco_history"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_payment",
+            "ent_eco_delivery"
+          ],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_completed",
+          "label": "Order completed",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_o_cancelled",
+          "label": "Order ended without delivery",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_eco_o_1",
+          "source": "st_eco_o_start",
+          "target": "st_eco_o_place",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_2",
+          "source": "st_eco_o_place",
+          "target": "st_eco_o_paycheck",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_3",
+          "source": "st_eco_o_paycheck",
+          "target": "st_eco_o_process",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_payment",
+            "value": "PAID"
+          }
+        },
+        {
+          "id": "tr_eco_o_4",
+          "source": "st_eco_o_paycheck",
+          "target": "st_eco_o_unconfirmed",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_payment",
+            "value": "AWAITING_CONFIRMATION"
+          }
+        },
+        {
+          "id": "tr_eco_o_5",
+          "source": "st_eco_o_unconfirmed",
+          "target": "st_eco_o_paycheck",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_6",
+          "source": "st_eco_o_paycheck",
+          "target": "st_eco_o_partial_pay",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_payment",
+            "value": "PARTIALLY_PAID"
+          }
+        },
+        {
+          "id": "tr_eco_o_7",
+          "source": "st_eco_o_partial_pay",
+          "target": "st_eco_o_paycheck",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_8",
+          "source": "st_eco_o_paycheck",
+          "target": "st_eco_o_failed",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_payment",
+            "value": "FAILED"
+          }
+        },
+        {
+          "id": "tr_eco_o_9",
+          "source": "st_eco_o_failed",
+          "target": "st_eco_o_cancelled",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_10",
+          "source": "st_eco_o_paycheck",
+          "target": "st_eco_o_cancelling",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_payment",
+            "value": "CANCELLED"
+          }
+        },
+        {
+          "id": "tr_eco_o_11",
+          "source": "st_eco_o_cancelling",
+          "target": "st_eco_o_cancelled",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_12",
+          "source": "st_eco_o_process",
+          "target": "st_eco_o_ship",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_13",
+          "source": "st_eco_o_ship",
+          "target": "st_eco_o_shipcheck",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_14",
+          "source": "st_eco_o_shipcheck",
+          "target": "st_eco_o_deliver",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_shipment",
+            "value": "SHIPPED"
+          }
+        },
+        {
+          "id": "tr_eco_o_15",
+          "source": "st_eco_o_shipcheck",
+          "target": "st_eco_o_partial_ship",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_shipment",
+            "value": "SHIPPED_PARTIALLY"
+          }
+        },
+        {
+          "id": "tr_eco_o_16",
+          "source": "st_eco_o_partial_ship",
+          "target": "st_eco_o_ship",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_17",
+          "source": "st_eco_o_deliver",
+          "target": "st_eco_o_complete",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_18",
+          "source": "st_eco_o_complete",
+          "target": "st_eco_o_review",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_o_19",
+          "source": "st_eco_o_review",
+          "target": "st_eco_o_completed",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_eco_withdrawal",
+      "name": "Withdrawal and reimbursement",
+      "states": [
+        {
+          "id": "st_eco_w_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_notify",
+          "label": "Communicate the withdrawal",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_customer",
+          "permission": "eco.withdraw",
+          "requirement_ids": [
+            "req_eco_withdraw"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_delivery"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_scope",
+          "label": "Does the right of withdrawal apply?",
+          "kind": "branch",
+          "outputs": [
+            "rule_eco_scope"
+          ],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_eco_withdraw"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_eco_scope"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_excluded",
+          "label": "Decline: withdrawal not available",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.refund",
+          "requirement_ids": [
+            "req_eco_withdraw"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_wd_excluded"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_period",
+          "label": "Was the withdrawal within the period?",
+          "kind": "branch",
+          "outputs": [
+            "rule_eco_period"
+          ],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_eco_withdraw"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_eco_period"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_late",
+          "label": "Decline: withdrawal period passed",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.refund",
+          "requirement_ids": [
+            "req_eco_withdraw"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_wd_late"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_return",
+          "label": "Send the goods back",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_customer",
+          "permission": "eco.withdraw",
+          "requirement_ids": [
+            "req_eco_return"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_receive",
+          "label": "Receive the returned goods",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_warehouse",
+          "permission": "eco.return_receive",
+          "requirement_ids": [
+            "req_eco_return"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_withdrawal"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_withdrawal",
+            "ent_eco_delivery"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_refund",
+          "label": "Reimburse the customer",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.refund",
+          "requirement_ids": [
+            "req_eco_refund"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_withdrawal",
+            "ent_eco_payment"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_withdrawal",
+            "ent_eco_payment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_refunded",
+          "label": "Withdrawal completed",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_w_denied",
+          "label": "Withdrawal not accepted",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_eco_w_1",
+          "source": "st_eco_w_start",
+          "target": "st_eco_w_notify",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_w_2",
+          "source": "st_eco_w_notify",
+          "target": "st_eco_w_scope",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_w_3",
+          "source": "st_eco_w_scope",
+          "target": "st_eco_w_period",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_scope",
+            "value": "APPLIES"
+          }
+        },
+        {
+          "id": "tr_eco_w_4",
+          "source": "st_eco_w_scope",
+          "target": "st_eco_w_excluded",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_scope",
+            "value": "EXCLUDED"
+          }
+        },
+        {
+          "id": "tr_eco_w_5",
+          "source": "st_eco_w_excluded",
+          "target": "st_eco_w_denied",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_w_6",
+          "source": "st_eco_w_period",
+          "target": "st_eco_w_return",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_period",
+            "value": "WITHIN_PERIOD"
+          }
+        },
+        {
+          "id": "tr_eco_w_7",
+          "source": "st_eco_w_period",
+          "target": "st_eco_w_late",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_period",
+            "value": "OUTSIDE_PERIOD"
+          }
+        },
+        {
+          "id": "tr_eco_w_8",
+          "source": "st_eco_w_late",
+          "target": "st_eco_w_denied",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_w_9",
+          "source": "st_eco_w_return",
+          "target": "st_eco_w_receive",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_w_10",
+          "source": "st_eco_w_receive",
+          "target": "st_eco_w_refund",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_w_11",
+          "source": "st_eco_w_refund",
+          "target": "st_eco_w_refunded",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_eco_late_delivery",
+      "name": "Late delivery and termination",
+      "states": [
+        {
+          "id": "st_eco_l_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_report",
+          "label": "Report the missed delivery",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_customer",
+          "permission": "eco.late_report",
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_order",
+            "ent_eco_delivery"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_late"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_essential",
+          "label": "Was delivery on a date essential?",
+          "kind": "branch",
+          "outputs": [
+            "rule_eco_essential"
+          ],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_eco_essential"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_extra",
+          "label": "Set the additional delivery period",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_customer",
+          "permission": "eco.late_report",
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_late"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_late"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_deliver",
+          "label": "Deliver within the additional period",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_warehouse",
+          "permission": "eco.delivery_record",
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_late",
+            "ent_eco_order"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_late",
+            "ent_eco_delivery"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_redelivered",
+          "label": "Was the order delivered in time?",
+          "kind": "branch",
+          "outputs": [
+            "rule_eco_redelivery"
+          ],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": null,
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_eco_redelivery"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_terminate",
+          "label": "Terminate the contract",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_customer",
+          "permission": "eco.late_report",
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_late"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_late"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_eco_late_terminated"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_refund",
+          "label": "Reimburse all sums paid",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_eco_manager",
+          "permission": "eco.refund",
+          "requirement_ids": [
+            "req_eco_late"
+          ],
+          "reads_entity_ids": [
+            "ent_eco_late",
+            "ent_eco_payment"
+          ],
+          "writes_entity_ids": [
+            "ent_eco_payment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_delivered",
+          "label": "Order delivered",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_eco_l_terminated",
+          "label": "Contract terminated",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_eco_l_1",
+          "source": "st_eco_l_start",
+          "target": "st_eco_l_report",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_l_2",
+          "source": "st_eco_l_report",
+          "target": "st_eco_l_essential",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_l_3",
+          "source": "st_eco_l_essential",
+          "target": "st_eco_l_extra",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_essential",
+            "value": "NOT_ESSENTIAL"
+          }
+        },
+        {
+          "id": "tr_eco_l_4",
+          "source": "st_eco_l_essential",
+          "target": "st_eco_l_terminate",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_essential",
+            "value": "ESSENTIAL"
+          }
+        },
+        {
+          "id": "tr_eco_l_5",
+          "source": "st_eco_l_extra",
+          "target": "st_eco_l_deliver",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_l_6",
+          "source": "st_eco_l_deliver",
+          "target": "st_eco_l_redelivered",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_l_7",
+          "source": "st_eco_l_redelivered",
+          "target": "st_eco_l_delivered",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_redelivery",
+            "value": "DELIVERED"
+          }
+        },
+        {
+          "id": "tr_eco_l_8",
+          "source": "st_eco_l_redelivered",
+          "target": "st_eco_l_terminate",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_eco_redelivery",
+            "value": "NOT_DELIVERED"
+          }
+        },
+        {
+          "id": "tr_eco_l_9",
+          "source": "st_eco_l_terminate",
+          "target": "st_eco_l_refund",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_eco_l_10",
+          "source": "st_eco_l_refund",
+          "target": "st_eco_l_terminated",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    }
+  ],
+  "process_contexts": [
+    {
+      "workflow_id": "wf_eco_order",
+      "family_id": "order_to_delivery",
+      "variant": "Order, payment and delivery state machines",
+      "region": "Europe",
+      "source_system": "Shopware; WooCommerce",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: developer.shopware.com/docs/concepts/commerce/checkout-concept/orders.html; github.com/shopware/shopware/blob/trunk/src/Core/Migration/V6_3/Migration1536233560BasicData.php; woocommerce.com/document/managing-orders/order-statuses/; github.com/wooc",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_eco_withdrawal",
+      "family_id": "distance_selling_withdrawal",
+      "variant": "EU right of withdrawal and reimbursement",
+      "region": "European Union",
+      "source_system": "Directive 2011/83/EU",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: eur-lex.europa.eu/eli/dir/2011/83/oj/eng",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_eco_late_delivery",
+      "family_id": "late_delivery",
+      "variant": "EU delivery time and termination for non-delivery",
+      "region": "European Union",
+      "source_system": "Directive 2011/83/EU",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: eur-lex.europa.eu/eli/dir/2011/83/oj/eng",
+        "verification": "verified"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Order",
+      "definition": "A customer's purchase created from the basket.",
+      "synonyms": [
+        "sales order"
+      ],
+      "refers_to": "ent_eco_order"
+    },
+    {
+      "term": "Withdrawal",
+      "definition": "A consumer's cancellation of a distance purchase within the withdrawal period.",
+      "synonyms": [
+        "cooling-off",
+        "return right"
+      ],
+      "refers_to": "ent_eco_withdrawal"
+    }
+  ],
+  "overrides": [],
+  "domain_id": "ecommerce_orders",
+  "capability": {
+    "id": "order_to_delivery",
+    "name": "Order to delivery"
+  }
+}

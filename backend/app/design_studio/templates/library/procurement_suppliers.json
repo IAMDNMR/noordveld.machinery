@@ -1,0 +1,84 @@
+{
+  "id": "procurement_suppliers",
+  "version": "1.0.0",
+  "name": "Procurement & Suppliers",
+  "category": "Procurement",
+  "summary": "Purchase requests, approvals, purchase orders, quotes and supplier performance.",
+  "description": "A structured B2B workspace: requesters raise purchase requests, approvers decide in one queue, buyers compare quotes and place purchase orders, and everyone follows deliveries and supplier performance.",
+  "status": "stable",
+  "domain_ids": ["procurement_purchasing"],
+  "app_type": "B2B operations",
+  "users": ["Requester", "Approver", "Buyer", "Supplier manager"],
+  "keywords": ["procurement", "purchase", "purchasing", "requisition", "request", "approval", "approve", "supplier", "vendor", "quote", "quotation", "purchase order", "spend", "budget"],
+  "theme": {
+    "id": "structured_b2b",
+    "label": "Structured B2B",
+    "direction": "Cool grey-blue workspace, indigo actions and clear financial hierarchy; comparison tables and approval states lead.",
+    "colors": {
+      "primary": "#3346A8", "primary_text": "#FFFFFF", "accent": "#0F766E",
+      "background": "#F4F6FA", "surface": "#FFFFFF", "surface_alt": "#E8ECF4",
+      "text": "#141A2E", "muted": "#4E5873", "border": "#D3D9E6",
+      "nav_background": "#FFFFFF", "nav_text": "#141A2E",
+      "success": "#15803D", "warning": "#B45309", "danger": "#B91C1C"
+    },
+    "font_heading": "humanist", "font_body": "humanist", "density": "comfortable",
+    "radius": 6, "shadow": "soft", "card_style": "outlined", "table_style": "lined"
+  },
+  "nav_style": "sidebar",
+  "profile": "requests",
+  "entity_roles": [
+    {"id": "request", "label": "Purchase request", "matches": ["request", "requisition"], "fields": ["number", "requester", "item", "amount", "status", "needed_by"]},
+    {"id": "purchase_order", "label": "Purchase order", "matches": ["purchase order", "order", "po"], "fields": ["number", "supplier", "amount", "status", "delivery_date"]},
+    {"id": "supplier", "label": "Supplier", "matches": ["supplier", "vendor"], "fields": ["name", "category", "rating", "on_time", "status"]},
+    {"id": "quote", "label": "Quote", "matches": ["quote", "quotation", "offer"], "fields": ["supplier", "price", "lead_time", "terms"]}
+  ],
+  "pages": [
+    {"id": "approvals", "title": "Approvals", "icon": "CheckCheck", "layout": "queue", "purpose": "Requests waiting for your decision.", "users": ["Approver"],
+     "components": [
+       {"type": "task_queue", "title": "Waiting for approval", "role": "request", "fields": ["number", "requester", "item", "amount"], "span": 3}
+     ]},
+    {"id": "requests", "title": "Purchase requests", "icon": "FilePlus", "layout": "table", "purpose": "Raise and follow purchase requests.", "users": ["Requester"],
+     "components": [
+       {"type": "metric_strip", "title": "Requests by status", "role": "request", "group_by": "status", "span": 3},
+       {"type": "data_table", "title": "Purchase requests", "role": "request", "fields": ["number", "item", "amount", "needed_by", "status"], "span": 3}
+     ]},
+    {"id": "quotes", "title": "Quote comparison", "icon": "Scale", "layout": "comparison", "purpose": "Compare supplier quotes side by side.", "users": ["Buyer"],
+     "components": [
+       {"type": "comparison_table", "title": "Quotes", "role": "quote", "fields": ["supplier", "price", "lead_time", "terms"], "span": 3}
+     ]},
+    {"id": "orders", "title": "Purchase orders", "icon": "FileText", "layout": "table", "purpose": "Orders placed and their delivery.", "users": ["Buyer"],
+     "components": [
+       {"type": "data_table", "title": "Purchase orders", "role": "purchase_order", "fields": ["number", "supplier", "amount", "delivery_date", "status"], "span": 3}
+     ]},
+    {"id": "suppliers", "title": "Suppliers", "icon": "Building2", "layout": "catalogue", "purpose": "Supplier profiles and performance.", "users": ["Supplier manager"],
+     "components": [
+       {"type": "data_table", "title": "Supplier directory", "role": "supplier", "fields": ["name", "category", "rating", "on_time", "status"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "requests", "name": "Purchase requests", "status": "supported", "keywords": ["request", "requisition", "raise"]},
+    {"id": "approvals", "name": "Approval queue with spending limits", "status": "supported", "keywords": ["approve", "approval", "limit", "manager"]},
+    {"id": "quotes", "name": "Quote comparison", "status": "supported", "keywords": ["quote", "quotation", "compare", "rfq"]},
+    {"id": "orders", "name": "Purchase orders and receipts", "status": "supported", "keywords": ["purchase order", "order", "receipt", "receive", "delivery"]},
+    {"id": "suppliers", "name": "Supplier directory and scorecards", "status": "supported", "keywords": ["supplier", "vendor", "scorecard", "performance", "directory"]},
+    {"id": "einvoicing", "name": "E-invoicing (Peppol)", "status": "requires_integration", "keywords": ["invoice", "peppol", "e-invoicing"], "note": "Peppol access point connection, delivered by our integration partner."}
+  ],
+  "limitations": ["Peppol e-ordering and e-invoicing need an access point integration from our partner."],
+  "sample": {
+    "request": [
+      {"id": "q1", "number": "PR-301", "requester": "Sample requester", "item": "Safety gloves", "amount": 240, "status": "Waiting", "needed_by": "2026-11-01"},
+      {"id": "q2", "number": "PR-302", "requester": "Sample requester", "item": "Laptop", "amount": 1450, "status": "Approved", "needed_by": "2026-11-10"}
+    ],
+    "purchase_order": [
+      {"id": "po1", "number": "PO-881", "supplier": "Sample Supplies", "amount": 1450, "status": "Confirmed", "delivery_date": "2026-11-08"}
+    ],
+    "supplier": [
+      {"id": "sp1", "name": "Sample Supplies", "category": "Office", "rating": 4.4, "on_time": "96%", "status": "Approved"},
+      {"id": "sp2", "name": "Sample Safety", "category": "PPE", "rating": 4.1, "on_time": "91%", "status": "Approved"}
+    ],
+    "quote": [
+      {"id": "qt1", "supplier": "Sample Supplies", "price": 1450, "lead_time": "5 days", "terms": "30 days"},
+      {"id": "qt2", "supplier": "Sample Tech", "price": 1399, "lead_time": "12 days", "terms": "14 days"}
+    ]
+  }
+}

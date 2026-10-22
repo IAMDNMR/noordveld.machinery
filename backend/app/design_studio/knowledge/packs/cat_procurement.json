@@ -1,0 +1,972 @@
+{
+ "id": "cat_procurement",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "Procurement and purchasing",
+ "description": "Purchase requisitions, approval above a spending limit, purchase orders and goods receipt.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_inventory"
+ ],
+ "uses_capabilities": [
+  "approval_workflow",
+  "audit_history",
+  "search_filter",
+  "document_handling",
+  "notifications"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_pro_buy",
+    "statement": "Needs are requested, approved when above the limit, ordered and received.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_pro_buy_1",
+      "statement": "A requester raises a requisition for an item."
+     },
+     {
+      "id": "ac_pro_buy_2",
+      "statement": "A requisition above the limit is approved by someone else before ordering."
+     },
+     {
+      "id": "ac_pro_buy_3",
+      "statement": "Received goods are checked against what was requested."
+     }
+    ]
+   },
+   {
+    "id": "req_pro_supplier",
+    "statement": "Purchase orders name the supplier and expected delivery.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_pro_supplier_1",
+      "statement": "A purchase order refers to a supplier and a requisition."
+     }
+    ]
+   },
+   {
+    "id": "req_pro_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_pro_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_pro_requester",
+    "name": "Requester",
+    "responsibilities": [
+     "Asks for something to be bought"
+    ],
+    "permissions": [
+     "pro.requisition_raise"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_pro_buyer",
+    "name": "Buyer",
+    "responsibilities": [
+     "Places and closes purchase orders"
+    ],
+    "permissions": [
+     "pro.requisition_order",
+     "pro.requisition_reconcile",
+     "pro.requisition_close"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_pro_approver",
+    "name": "Purchasing approver",
+    "responsibilities": [
+     "Approves requisitions above the limit"
+    ],
+    "permissions": [
+     "pro.requisition_approve"
+    ],
+    "approval_authority": [
+     "Requisitions above the spending limit"
+    ]
+   },
+   {
+    "id": "role_pro_receiver",
+    "name": "Goods receiver",
+    "responsibilities": [
+     "Records what arrived"
+    ],
+    "permissions": [
+     "pro.requisition_receive"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_pro_requisition",
+    "name": "Purchase requisition",
+    "description": "A request to buy an item.",
+    "attributes": [
+     {
+      "id": "requisition_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "quantity",
+      "name": "Quantity",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 1
+     },
+     {
+      "id": "estimated_cost",
+      "name": "Estimated cost",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "needed_by",
+      "name": "Needed by",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "justification",
+      "name": "Justification",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 500
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "DRAFT",
+       "SUBMITTED",
+       "APPROVED",
+       "REJECTED",
+       "ORDERED"
+      ]
+     },
+     {
+      "id": "decision",
+      "name": "Decision",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "owner_role_id": "role_pro_approver"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_pro_requisition_item",
+      "name": "Item",
+      "target": "ent_core_item",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_pro_purchase_order",
+    "name": "Purchase order",
+    "description": "An order placed with a supplier.",
+    "attributes": [
+     {
+      "id": "purchase_order_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "total_amount",
+      "name": "Total amount",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "order_date",
+      "name": "Order date",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "expected_date",
+      "name": "Expected delivery",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "DRAFT",
+       "SENT",
+       "RECEIVED",
+       "CLOSED",
+       "CANCELLED"
+      ]
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_pro_purchase_order_requisition",
+      "name": "Requisition",
+      "target": "ent_pro_requisition",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_pro_purchase_order_supplier",
+      "name": "Supplier",
+      "target": "ent_core_supplier",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_pro_goods_receipt",
+    "name": "Goods receipt",
+    "description": "Goods that arrived against a purchase order.",
+    "attributes": [
+     {
+      "id": "goods_receipt_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "quantity_received",
+      "name": "Quantity received",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "received_on",
+      "name": "Received on",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "condition",
+      "name": "Condition",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "OK",
+       "DAMAGED",
+       "INCOMPLETE"
+      ]
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_pro_goods_receipt_purchase_order",
+      "name": "Purchase order",
+      "target": "ent_pro_purchase_order",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_pro_limit",
+    "description": "A requisition above 5,000 needs approval before it is ordered.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "WITHIN_LIMIT",
+     "NEEDS_APPROVAL"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_pro_requisition.estimated_cost",
+     "operator": "lte",
+     "value": 5000,
+     "other_field": null,
+     "pass_outcome": "WITHIN_LIMIT",
+     "fail_outcome": "NEEDS_APPROVAL"
+    }
+   },
+   {
+    "id": "rule_pro_decision",
+    "description": "The approver's recorded decision selects what happens to the requisition.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "APPROVED",
+     "REJECTED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_pro_requisition.decision",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_pro_match",
+    "description": "Goods are accepted when the quantity received covers the quantity requested.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "MATCH",
+     "MISMATCH"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_pro_goods_receipt.quantity_received",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_pro_requisition.quantity",
+     "pass_outcome": "MATCH",
+     "fail_outcome": "MISMATCH"
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_pro_receipt_mismatch",
+    "name": "Receipt does not match",
+    "trigger": "Less arrived than was requested, or goods are damaged.",
+    "recovery": "The buyer reconciles with the supplier and receipt is recorded again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_pro_requisition_receive"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_pro_limit",
+    "question": "What spending limit may a buyer commit without approval, and does it differ by category?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_pro_limit"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_pro_requisition",
+    "term": "Purchase requisition",
+    "definition": "A request to buy an item."
+   },
+   {
+    "id": "term_pro_po",
+    "term": "Purchase order",
+    "definition": "An order placed with a supplier."
+   },
+   {
+    "id": "term_pro_receipt",
+    "term": "Goods receipt",
+    "definition": "Goods that arrived against a purchase order."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_pro_requisition",
+   "name": "Requisition to purchase order",
+   "states": [
+    {
+     "id": "st_pro_requisition_start",
+     "label": "Need identified",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_pro_requisition_raise",
+     "label": "Raise the requisition",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_pro_requester",
+     "permission": "pro.requisition_raise",
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_core_item"
+     ],
+     "writes_entity_ids": [
+      "ent_pro_requisition"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_pro_requisition": [
+       "quantity",
+       "estimated_cost",
+       "needed_by",
+       "justification",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_pro_requisition": [
+       "rel_pro_requisition_item"
+      ]
+     }
+    },
+    {
+     "id": "st_pro_requisition_limit",
+     "label": "Within the spending limit?",
+     "kind": "branch",
+     "outputs": [
+      "rule_pro_limit"
+     ],
+     "outcome": null,
+     "role_id": "role_pro_requester",
+     "permission": null,
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_pro_limit"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_pro_requisition_approve",
+     "label": "Approve the requisition",
+     "kind": "approval",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_pro_approver",
+     "permission": "pro.requisition_approve",
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_pro_requisition"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_pro_requisition": [
+       "decision"
+      ]
+     },
+     "input_relationships": {
+      "ent_pro_requisition": []
+     }
+    },
+    {
+     "id": "st_pro_requisition_verdict",
+     "label": "Approver's decision",
+     "kind": "branch",
+     "outputs": [
+      "rule_pro_decision"
+     ],
+     "outcome": null,
+     "role_id": "role_pro_approver",
+     "permission": null,
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_pro_decision"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_pro_requisition_order",
+     "label": "Place the purchase order",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_pro_buyer",
+     "permission": "pro.requisition_order",
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_pro_requisition",
+      "ent_core_supplier"
+     ],
+     "writes_entity_ids": [
+      "ent_pro_purchase_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_pro_purchase_order": [
+       "total_amount",
+       "order_date",
+       "expected_date",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_pro_purchase_order": [
+       "rel_pro_purchase_order_requisition",
+       "rel_pro_purchase_order_supplier"
+      ]
+     }
+    },
+    {
+     "id": "st_pro_requisition_receive",
+     "label": "Record goods receipt",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_pro_receiver",
+     "permission": "pro.requisition_receive",
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_pro_purchase_order",
+      "ent_pro_requisition"
+     ],
+     "writes_entity_ids": [
+      "ent_pro_goods_receipt"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_pro_goods_receipt": [
+       "quantity_received",
+       "received_on",
+       "condition"
+      ]
+     },
+     "input_relationships": {
+      "ent_pro_goods_receipt": [
+       "rel_pro_goods_receipt_purchase_order"
+      ]
+     }
+    },
+    {
+     "id": "st_pro_requisition_match",
+     "label": "Does the receipt match?",
+     "kind": "branch",
+     "outputs": [
+      "rule_pro_match"
+     ],
+     "outcome": null,
+     "role_id": "role_pro_receiver",
+     "permission": null,
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_pro_match"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_pro_requisition_reconcile",
+     "label": "Reconcile the difference",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_pro_buyer",
+     "permission": "pro.requisition_reconcile",
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_pro_goods_receipt"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_pro_receipt_mismatch"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_pro_goods_receipt": [
+       "quantity_received",
+       "condition"
+      ]
+     },
+     "input_relationships": {
+      "ent_pro_goods_receipt": []
+     }
+    },
+    {
+     "id": "st_pro_requisition_close",
+     "label": "Close the purchase order",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_pro_buyer",
+     "permission": "pro.requisition_close",
+     "requirement_ids": [
+      "req_pro_buy",
+      "req_pro_supplier",
+      "req_pro_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_pro_purchase_order"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_pro_purchase_order": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_pro_purchase_order": []
+     }
+    },
+    {
+     "id": "st_pro_requisition_done",
+     "label": "Purchase complete",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_pro_requisition_rejected",
+     "label": "Requisition rejected",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "cancelled",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_pro_requisition_1",
+     "source": "st_pro_requisition_start",
+     "target": "st_pro_requisition_raise",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_2",
+     "source": "st_pro_requisition_raise",
+     "target": "st_pro_requisition_limit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_3",
+     "source": "st_pro_requisition_limit",
+     "target": "st_pro_requisition_order",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_pro_limit",
+      "value": "WITHIN_LIMIT"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_4",
+     "source": "st_pro_requisition_limit",
+     "target": "st_pro_requisition_approve",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_pro_limit",
+      "value": "NEEDS_APPROVAL"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_5",
+     "source": "st_pro_requisition_approve",
+     "target": "st_pro_requisition_verdict",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_6",
+     "source": "st_pro_requisition_verdict",
+     "target": "st_pro_requisition_order",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_pro_decision",
+      "value": "APPROVED"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_7",
+     "source": "st_pro_requisition_verdict",
+     "target": "st_pro_requisition_rejected",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_pro_decision",
+      "value": "REJECTED"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_8",
+     "source": "st_pro_requisition_order",
+     "target": "st_pro_requisition_receive",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_9",
+     "source": "st_pro_requisition_receive",
+     "target": "st_pro_requisition_match",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_10",
+     "source": "st_pro_requisition_match",
+     "target": "st_pro_requisition_close",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_pro_match",
+      "value": "MATCH"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_11",
+     "source": "st_pro_requisition_match",
+     "target": "st_pro_requisition_reconcile",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_pro_match",
+      "value": "MISMATCH"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_12",
+     "source": "st_pro_requisition_reconcile",
+     "target": "st_pro_requisition_receive",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_pro_requisition_13",
+     "source": "st_pro_requisition_close",
+     "target": "st_pro_requisition_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Purchase requisition",
+   "definition": "A request to buy an item.",
+   "synonyms": [
+    "purchase request",
+    "buy request",
+    "PR"
+   ],
+   "refers_to": "ent_pro_requisition"
+  },
+  {
+   "term": "Purchase order",
+   "definition": "An order placed with a supplier.",
+   "synonyms": [
+    "PO",
+    "supplier order",
+    "buying order"
+   ],
+   "refers_to": "ent_pro_purchase_order"
+  },
+  {
+   "term": "Goods receipt",
+   "definition": "Goods that arrived against a purchase order.",
+   "synonyms": [
+    "GRN",
+    "goods received note",
+    "delivery note",
+    "inbound receipt"
+   ],
+   "refers_to": "ent_pro_goods_receipt"
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "procurement_purchasing",
+   "name": "Procurement and purchasing",
+   "subdomains": [
+    "Requisitions",
+    "Approval",
+    "Purchase orders",
+    "Goods receipt"
+   ],
+   "keywords": [
+    "procurement",
+    "purchasing",
+    "purchase order",
+    "requisition",
+    "supplier",
+    "suppliers",
+    "vendor",
+    "buyer",
+    "sourcing",
+    "goods receipt",
+    "p2p",
+    "purchase",
+    "buying"
+   ],
+   "description": "Buying what the company needs, with the right approvals."
+  }
+ ],
+ "domain_id": "procurement_purchasing",
+ "capability": {
+  "id": "procurement_purchasing",
+  "name": "Purchase to receipt"
+ }
+}

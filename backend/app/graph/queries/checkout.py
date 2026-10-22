@@ -103,7 +103,7 @@ CREATE (o:Order {order_id: $order_id, idempotency_key: $key, order_date: $today,
   transport_route_id: r.route_id, transport_option_code: r.option_code, transport_mode: r.transport_mode, transport_distance_km: r.total_distance_km,
   transport_estimated_days: r.total_estimated_days, transport_estimate_basis: r.estimate_basis, transport_data_status: 'SYNTHETIC_DEMO',
   freight_estimate_amount: $freight.amount, freight_estimate_currency: $freight.currency, freight_estimate_status: 'SYNTHETIC_DEMO_ESTIMATE',
-  part_cost: null, transport_cost: null, order_total: null, cost_status: 'NOT_AVAILABLE',
+  part_cost: $cost.part_cost, transport_cost: $cost.transport_cost, order_total: $cost.total, cost_status: $cost.status,
   created_by_user_id: $user_id, source_record_id: $order_id, """ + PROVENANCE + """})
 CREATE (o)-[:PLACED_BY {rel_id: 'PLACED_BY:' + $order_id, """ + PROVENANCE + """}]->(u)
 CREATE (o)-[:SHIPS_TO {rel_id: 'SHIPS_TO:' + $order_id, """ + PROVENANCE + """}]->(s)
@@ -114,7 +114,7 @@ WITH o
 UNWIND $lines AS line
 MATCH (p:Part {part_id: line.part_id})
 CREATE (l:OrderLine {order_line_id: line.order_line_id, line_no: line.line_no, quantity: line.quantity, part_number: p.part_number, part_name: p.name,
-  machine_model: line.machine, unit_price_eur: null, line_total_eur: null, allocation_status: 'NOT_YET_ALLOCATED', source_record_id: line.order_line_id, """ + PROVENANCE + """})
+  machine_model: line.machine, unit_price_eur: line.unit_price_eur, line_total_eur: line.line_total_eur, allocation_status: 'NOT_YET_ALLOCATED', source_record_id: line.order_line_id, """ + PROVENANCE + """})
 CREATE (o)-[:CONTAINS_LINE {rel_id: 'CONTAINS_LINE:' + line.order_line_id, """ + PROVENANCE + """}]->(l)
 CREATE (l)-[:REFERENCES_PART {rel_id: 'REFERENCES_PART:' + line.order_line_id, """ + PROVENANCE + """}]->(p)
 RETURN count(l) AS lines

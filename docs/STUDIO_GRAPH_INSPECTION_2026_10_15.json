@@ -1,0 +1,935 @@
+{
+  "target_fingerprint": "aeb0b8bb152b4ff8",
+  "environment_verified": false,
+  "writes_performed": false,
+  "labels": [
+    {
+      "label": "Address"
+    },
+    {
+      "label": "AirportCargoTerminal"
+    },
+    {
+      "label": "AppUser"
+    },
+    {
+      "label": "Assembly"
+    },
+    {
+      "label": "BusinessUnit"
+    },
+    {
+      "label": "Capability"
+    },
+    {
+      "label": "Carrier"
+    },
+    {
+      "label": "Cart"
+    },
+    {
+      "label": "CartLine"
+    },
+    {
+      "label": "Category"
+    },
+    {
+      "label": "ComplianceRequirement"
+    },
+    {
+      "label": "CrossDock"
+    },
+    {
+      "label": "Customer"
+    },
+    {
+      "label": "CustomerContact"
+    },
+    {
+      "label": "CustomerRequest"
+    },
+    {
+      "label": "DataSource"
+    },
+    {
+      "label": "Dealer"
+    },
+    {
+      "label": "DealerContact"
+    },
+    {
+      "label": "DealerService"
+    },
+    {
+      "label": "DeliveryEstimate"
+    },
+    {
+      "label": "Evidence"
+    },
+    {
+      "label": "FeaturedScenario"
+    },
+    {
+      "label": "FitmentContext"
+    },
+    {
+      "label": "FreightRate"
+    },
+    {
+      "label": "IdentificationRequirement"
+    },
+    {
+      "label": "Industry"
+    },
+    {
+      "label": "InlandPort"
+    },
+    {
+      "label": "InstallationEvent"
+    },
+    {
+      "label": "LegacyReference"
+    },
+    {
+      "label": "Location"
+    },
+    {
+      "label": "Machine"
+    },
+    {
+      "label": "MachineFamily"
+    },
+    {
+      "label": "MachineInstance"
+    },
+    {
+      "label": "MachineProfile"
+    },
+    {
+      "label": "MachineSpecification"
+    },
+    {
+      "label": "MachineType"
+    },
+    {
+      "label": "MachineVariant"
+    },
+    {
+      "label": "Order"
+    },
+    {
+      "label": "OrderLine"
+    },
+    {
+      "label": "OrderSequence"
+    },
+    {
+      "label": "OrderStatus"
+    },
+    {
+      "label": "OrderStatusEvent"
+    },
+    {
+      "label": "Part"
+    },
+    {
+      "label": "PartCatalogProfile"
+    },
+    {
+      "label": "PartSpecification"
+    },
+    {
+      "label": "Plant"
+    },
+    {
+      "label": "PostalArea"
+    },
+    {
+      "label": "Price"
+    },
+    {
+      "label": "RailTerminal"
+    },
+    {
+      "label": "Region"
+    },
+    {
+      "label": "ReplacementEvent"
+    },
+    {
+      "label": "SeaPort"
+    },
+    {
+      "label": "SearchAlias"
+    },
+    {
+      "label": "ServiceCentre"
+    },
+    {
+      "label": "ServicePlan"
+    },
+    {
+      "label": "ShipTo"
+    },
+    {
+      "label": "Shipment"
+    },
+    {
+      "label": "ShippingRate"
+    },
+    {
+      "label": "Supplier"
+    },
+    {
+      "label": "SupplierBackorder"
+    },
+    {
+      "label": "SupplierContact"
+    },
+    {
+      "label": "Technician"
+    },
+    {
+      "label": "TrackingEvent"
+    },
+    {
+      "label": "TransportLeg"
+    },
+    {
+      "label": "TransportOption"
+    },
+    {
+      "label": "TransportRoute"
+    },
+    {
+      "label": "TransportTerminal"
+    },
+    {
+      "label": "Warehouse"
+    },
+    {
+      "label": "WarrantyClaim"
+    },
+    {
+      "label": "WarrantyPolicy"
+    },
+    {
+      "label": "WorkOrder"
+    }
+  ],
+  "relationship_types": [
+    {
+      "relationshipType": "ACTS_FOR"
+    },
+    {
+      "relationshipType": "ADMITS_VARIANT"
+    },
+    {
+      "relationshipType": "ALLOCATED_FROM"
+    },
+    {
+      "relationshipType": "APPLIES_FROM"
+    },
+    {
+      "relationshipType": "APPROVED_SOURCE"
+    },
+    {
+      "relationshipType": "ASSIGNED_TO"
+    },
+    {
+      "relationshipType": "AT_LOCATION"
+    },
+    {
+      "relationshipType": "AVAILABLE_AT"
+    },
+    {
+      "relationshipType": "BASED_ON_RATE_CARD"
+    },
+    {
+      "relationshipType": "BRANDED_AS"
+    },
+    {
+      "relationshipType": "CAN_ORDER_PART"
+    },
+    {
+      "relationshipType": "CARRIED_BY"
+    },
+    {
+      "relationshipType": "CLAIM_FOR_PART"
+    },
+    {
+      "relationshipType": "CLAIM_ON_INSTALLATION"
+    },
+    {
+      "relationshipType": "CONTAINS_LINE"
+    },
+    {
+      "relationshipType": "COVERS_CATEGORY"
+    },
+    {
+      "relationshipType": "CO_ORDERED_WITH"
+    },
+    {
+      "relationshipType": "DELIVERS_TO_ADDRESS"
+    },
+    {
+      "relationshipType": "DELIVERS_TO_CUSTOMER"
+    },
+    {
+      "relationshipType": "DELIVERS_TO_LOCATION"
+    },
+    {
+      "relationshipType": "DESTINATION_LOCATION"
+    },
+    {
+      "relationshipType": "DISPATCHED_FROM"
+    },
+    {
+      "relationshipType": "DISTANCE_TO"
+    },
+    {
+      "relationshipType": "EMPLOYED_BY"
+    },
+    {
+      "relationshipType": "FEATURES_CUSTOMER"
+    },
+    {
+      "relationshipType": "FEATURES_INSTANCE"
+    },
+    {
+      "relationshipType": "FEATURES_MACHINE"
+    },
+    {
+      "relationshipType": "FEATURES_ORDER"
+    },
+    {
+      "relationshipType": "FEATURES_PART"
+    },
+    {
+      "relationshipType": "FEATURES_SHIPMENT"
+    },
+    {
+      "relationshipType": "FILED_BY_DEALER"
+    },
+    {
+      "relationshipType": "FITMENT_OF_PART"
+    },
+    {
+      "relationshipType": "FITMENT_ON_MACHINE"
+    },
+    {
+      "relationshipType": "FITS"
+    },
+    {
+      "relationshipType": "FOR_DEALER"
+    },
+    {
+      "relationshipType": "FOR_MACHINE"
+    },
+    {
+      "relationshipType": "FOR_PART"
+    },
+    {
+      "relationshipType": "FROM_DEPOT"
+    },
+    {
+      "relationshipType": "FROM_WAREHOUSE"
+    },
+    {
+      "relationshipType": "FULFILLED_FROM"
+    },
+    {
+      "relationshipType": "HAS_ALIAS"
+    },
+    {
+      "relationshipType": "HAS_CAPABILITY"
+    },
+    {
+      "relationshipType": "HAS_CLAIM"
+    },
+    {
+      "relationshipType": "HAS_COMPLIANCE"
+    },
+    {
+      "relationshipType": "HAS_CONTACT"
+    },
+    {
+      "relationshipType": "HAS_INSTALLATION"
+    },
+    {
+      "relationshipType": "HAS_LEG"
+    },
+    {
+      "relationshipType": "HAS_LEGACY_REFERENCE"
+    },
+    {
+      "relationshipType": "HAS_MACHINE_SPECIFICATION"
+    },
+    {
+      "relationshipType": "HAS_RATE"
+    },
+    {
+      "relationshipType": "HAS_REPLACEMENT"
+    },
+    {
+      "relationshipType": "HAS_SERVICE"
+    },
+    {
+      "relationshipType": "HAS_SERVICE_CENTRE"
+    },
+    {
+      "relationshipType": "HAS_SHIPMENT"
+    },
+    {
+      "relationshipType": "HAS_SHIP_TO"
+    },
+    {
+      "relationshipType": "HAS_SPECIFICATION"
+    },
+    {
+      "relationshipType": "HAS_STATUS_EVENT"
+    },
+    {
+      "relationshipType": "HAS_TRACKING_EVENT"
+    },
+    {
+      "relationshipType": "HAS_TRANSPORT_OPTION"
+    },
+    {
+      "relationshipType": "HAS_WORK_ORDER"
+    },
+    {
+      "relationshipType": "HOME_PLANT"
+    },
+    {
+      "relationshipType": "IDENTIFIED_BY_PART"
+    },
+    {
+      "relationshipType": "INSTALLABLE_BY"
+    },
+    {
+      "relationshipType": "INSTALLED_PART"
+    },
+    {
+      "relationshipType": "INSTALLS_PART"
+    },
+    {
+      "relationshipType": "INSTANCE_OF_MACHINE"
+    },
+    {
+      "relationshipType": "INSTANCE_OF_VARIANT"
+    },
+    {
+      "relationshipType": "IN_CATEGORY"
+    },
+    {
+      "relationshipType": "IN_COUNTRY"
+    },
+    {
+      "relationshipType": "IN_INDUSTRY"
+    },
+    {
+      "relationshipType": "IN_REGION"
+    },
+    {
+      "relationshipType": "IN_SUBCATEGORY"
+    },
+    {
+      "relationshipType": "ISSUED_BY_BUSINESS_UNIT"
+    },
+    {
+      "relationshipType": "LEG_FROM"
+    },
+    {
+      "relationshipType": "LEG_TO"
+    },
+    {
+      "relationshipType": "LOCATED_AT"
+    },
+    {
+      "relationshipType": "LOCATED_AT_ADDRESS"
+    },
+    {
+      "relationshipType": "LOCATED_AT_PLANT"
+    },
+    {
+      "relationshipType": "LOCATED_IN"
+    },
+    {
+      "relationshipType": "MANUFACTURED_AT"
+    },
+    {
+      "relationshipType": "MEMBER_OF_FAMILY"
+    },
+    {
+      "relationshipType": "NEW_INSTALLATION"
+    },
+    {
+      "relationshipType": "OFFERS"
+    },
+    {
+      "relationshipType": "OF_TYPE"
+    },
+    {
+      "relationshipType": "OPENED_BY"
+    },
+    {
+      "relationshipType": "OPERATES_MACHINE"
+    },
+    {
+      "relationshipType": "ORDERED_BY"
+    },
+    {
+      "relationshipType": "ORIGINATES_AT"
+    },
+    {
+      "relationshipType": "ORIGIN_LOCATION"
+    },
+    {
+      "relationshipType": "OWNED_BY"
+    },
+    {
+      "relationshipType": "OWNED_BY_CUSTOMER"
+    },
+    {
+      "relationshipType": "PART_OF"
+    },
+    {
+      "relationshipType": "PERFORMED_AT"
+    },
+    {
+      "relationshipType": "PERFORMED_BY"
+    },
+    {
+      "relationshipType": "PERFORMED_BY_DEALER"
+    },
+    {
+      "relationshipType": "PLACED_BY"
+    },
+    {
+      "relationshipType": "PLACED_WITH"
+    },
+    {
+      "relationshipType": "PLANNED_FULFILMENT_FROM"
+    },
+    {
+      "relationshipType": "PRICED_BY"
+    },
+    {
+      "relationshipType": "PRICES_PART"
+    },
+    {
+      "relationshipType": "PRODUCT_FAMILY_OF"
+    },
+    {
+      "relationshipType": "PROFILES_MACHINE"
+    },
+    {
+      "relationshipType": "PROFILES_PART"
+    },
+    {
+      "relationshipType": "RECORDED_IN"
+    },
+    {
+      "relationshipType": "RECORDS_STATUS"
+    },
+    {
+      "relationshipType": "REFERENCES_PART"
+    },
+    {
+      "relationshipType": "RELATED_COMPONENT"
+    },
+    {
+      "relationshipType": "REMOVED_INSTALLATION"
+    },
+    {
+      "relationshipType": "REPLENISHED_FROM"
+    },
+    {
+      "relationshipType": "REPLENISHES_DEPOT"
+    },
+    {
+      "relationshipType": "REQUIRES_PART"
+    },
+    {
+      "relationshipType": "REQUIRES_SERVICE"
+    },
+    {
+      "relationshipType": "SAME_NAME_GROUP_AS"
+    },
+    {
+      "relationshipType": "SELLS_MACHINE_FAMILY"
+    },
+    {
+      "relationshipType": "SERVES_FAMILY"
+    },
+    {
+      "relationshipType": "SERVES_TERRITORY"
+    },
+    {
+      "relationshipType": "SERVICES_MACHINE_FAMILY"
+    },
+    {
+      "relationshipType": "SERVICES_PART"
+    },
+    {
+      "relationshipType": "SHIPS_LINE"
+    },
+    {
+      "relationshipType": "SHIPS_TO"
+    },
+    {
+      "relationshipType": "SHIPS_TO_COUNTRY"
+    },
+    {
+      "relationshipType": "STOCKED_BY"
+    },
+    {
+      "relationshipType": "SUBCATEGORY_OF"
+    },
+    {
+      "relationshipType": "SUPPLIED_BY"
+    },
+    {
+      "relationshipType": "SUPPLIES_CATEGORY"
+    },
+    {
+      "relationshipType": "SUPPORTS"
+    },
+    {
+      "relationshipType": "SUPPORTS_MACHINE"
+    },
+    {
+      "relationshipType": "TO_CUSTOMER"
+    },
+    {
+      "relationshipType": "TO_DEALER"
+    },
+    {
+      "relationshipType": "TO_SHIP_TO"
+    },
+    {
+      "relationshipType": "USES_OPTION"
+    },
+    {
+      "relationshipType": "USES_ROUTE"
+    },
+    {
+      "relationshipType": "USES_TRANSPORT"
+    },
+    {
+      "relationshipType": "VARIANT_OF"
+    },
+    {
+      "relationshipType": "WARRANTY_FOR_PART"
+    }
+  ],
+  "constraint_count": [
+    {
+      "count": 167
+    }
+  ],
+  "index_states": [
+    {
+      "state": "ONLINE",
+      "count": 176
+    }
+  ],
+  "counts": [
+    {
+      "nodes": 10586
+    }
+  ],
+  "node_labels": [
+    {
+      "label": "TransportRoute",
+      "count": 4825
+    },
+    {
+      "label": "TransportLeg",
+      "count": 1367
+    },
+    {
+      "label": "FreightRate",
+      "count": 653
+    },
+    {
+      "label": "SearchAlias",
+      "count": 493
+    },
+    {
+      "label": "PartSpecification",
+      "count": 279
+    },
+    {
+      "label": "ShipTo",
+      "count": 250
+    },
+    {
+      "label": "FitmentContext",
+      "count": 219
+    },
+    {
+      "label": "Location",
+      "count": 173
+    },
+    {
+      "label": "Address",
+      "count": 160
+    },
+    {
+      "label": "Region",
+      "count": 126
+    },
+    {
+      "label": "Dealer",
+      "count": 105
+    },
+    {
+      "label": "Category",
+      "count": 101
+    },
+    {
+      "label": "Part",
+      "count": 100
+    },
+    {
+      "label": "LegacyReference",
+      "count": 100
+    },
+    {
+      "label": "PartCatalogProfile",
+      "count": 100
+    },
+    {
+      "label": "Price",
+      "count": 100
+    },
+    {
+      "label": "DeliveryEstimate",
+      "count": 100
+    },
+    {
+      "label": "WarrantyPolicy",
+      "count": 100
+    },
+    {
+      "label": "DealerContact",
+      "count": 96
+    },
+    {
+      "label": "Evidence",
+      "count": 89
+    },
+    {
+      "label": "ServiceCentre",
+      "count": 84
+    },
+    {
+      "label": "MachineSpecification",
+      "count": 83
+    },
+    {
+      "label": "TransportTerminal",
+      "count": 76
+    },
+    {
+      "label": "TrackingEvent",
+      "count": 68
+    },
+    {
+      "label": "OrderStatusEvent",
+      "count": 62
+    },
+    {
+      "label": "ServicePlan",
+      "count": 60
+    },
+    {
+      "label": "SupplierContact",
+      "count": 54
+    },
+    {
+      "label": "Supplier",
+      "count": 41
+    },
+    {
+      "label": "InstallationEvent",
+      "count": 35
+    },
+    {
+      "label": "WorkOrder",
+      "count": 33
+    },
+    {
+      "label": "OrderLine",
+      "count": 32
+    },
+    {
+      "label": "MachineVariant",
+      "count": 30
+    },
+    {
+      "label": "Assembly",
+      "count": 30
+    },
+    {
+      "label": "Carrier",
+      "count": 30
+    },
+    {
+      "label": "AirportCargoTerminal",
+      "count": 25
+    },
+    {
+      "label": "SeaPort",
+      "count": 25
+    },
+    {
+      "label": "PostalArea",
+      "count": 23
+    },
+    {
+      "label": "TransportOption",
+      "count": 22
+    },
+    {
+      "label": "Technician",
+      "count": 22
+    },
+    {
+      "label": "Order",
+      "count": 21
+    },
+    {
+      "label": "MachineInstance",
+      "count": 19
+    },
+    {
+      "label": "OrderStatus",
+      "count": 17
+    },
+    {
+      "label": "MachineType",
+      "count": 15
+    },
+    {
+      "label": "Machine",
+      "count": 15
+    },
+    {
+      "label": "Shipment",
+      "count": 15
+    },
+    {
+      "label": "MachineProfile",
+      "count": 15
+    },
+    {
+      "label": "Warehouse",
+      "count": 14
+    },
+    {
+      "label": "Capability",
+      "count": 12
+    },
+    {
+      "label": "WarrantyClaim",
+      "count": 12
+    },
+    {
+      "label": "FeaturedScenario",
+      "count": 12
+    },
+    {
+      "label": "RailTerminal",
+      "count": 12
+    },
+    {
+      "label": "Customer",
+      "count": 10
+    },
+    {
+      "label": "CustomerContact",
+      "count": 10
+    },
+    {
+      "label": "CartLine",
+      "count": 9
+    },
+    {
+      "label": "ShippingRate",
+      "count": 8
+    },
+    {
+      "label": "ComplianceRequirement",
+      "count": 8
+    },
+    {
+      "label": "DataSource",
+      "count": 8
+    },
+    {
+      "label": "InlandPort",
+      "count": 8
+    },
+    {
+      "label": "IdentificationRequirement",
+      "count": 6
+    },
+    {
+      "label": "CustomerRequest",
+      "count": 6
+    },
+    {
+      "label": "ReplacementEvent",
+      "count": 6
+    },
+    {
+      "label": "CrossDock",
+      "count": 6
+    },
+    {
+      "label": "Cart",
+      "count": 5
+    },
+    {
+      "label": "Industry",
+      "count": 5
+    },
+    {
+      "label": "SupplierBackorder",
+      "count": 4
+    },
+    {
+      "label": "BusinessUnit",
+      "count": 3
+    },
+    {
+      "label": "MachineFamily",
+      "count": 3
+    },
+    {
+      "label": "Plant",
+      "count": 3
+    },
+    {
+      "label": "AppUser",
+      "count": 3
+    },
+    {
+      "label": "OrderSequence",
+      "count": 1
+    }
+  ],
+  "duplicate_part_keys": [
+    {
+      "duplicate_groups": 0
+    }
+  ],
+  "duplicate_machine_keys": [
+    {
+      "duplicate_groups": 0
+    }
+  ]
+}

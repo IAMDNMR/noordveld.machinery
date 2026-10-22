@@ -30,7 +30,12 @@ const snapshot = (): RecentQuestion[] => {
     try {
       const parsed = JSON.parse(raw ?? '[]') as unknown
       cached = Array.isArray(parsed)
-        ? parsed.filter((q): q is RecentQuestion => !!q && typeof q.question === 'string' && typeof q.at === 'number').slice(0, MAX)
+        ? parsed
+            .filter(
+              (q): q is RecentQuestion =>
+                !!q && typeof q.question === 'string' && typeof q.at === 'number',
+            )
+            .slice(0, MAX)
         : []
     } catch {
       cached = []
@@ -60,7 +65,12 @@ export function rememberQuestion(question: string): void {
   const q = question.trim()
   if (!q) return
   const earlier = snapshot().find((x) => same(x.question, q))
-  save([{ question: q, at: Date.now(), label: earlier?.label }, ...snapshot().filter((x) => !same(x.question, q))].slice(0, MAX))
+  save(
+    [
+      { question: q, at: Date.now(), label: earlier?.label },
+      ...snapshot().filter((x) => !same(x.question, q)),
+    ].slice(0, MAX),
+  )
 }
 
 /** Records what an answered question was understood as. */
@@ -70,7 +80,8 @@ export function labelQuestion(question: string, label: string): void {
   save(current.map((x) => (same(x.question, question) ? { ...x, label } : x)))
 }
 
-export const useRecentQuestions = (): RecentQuestion[] => useSyncExternalStore(subscribe, snapshot, () => cached)
+export const useRecentQuestions = (): RecentQuestion[] =>
+  useSyncExternalStore(subscribe, snapshot, () => cached)
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 

@@ -1,0 +1,12 @@
+{
+  "note": "Where components sit in this photo (fractions of the image width and height), each tied to a catalogue part. The page shows a hotspot only when the backend confirms the part's fitment for this machine model; names, categories and fitment are read from the catalogue at runtime.",
+  "machine": "NV-4500",
+  "focus": "lift",
+  "hotspots": [
+    { "id": "bucket", "x": 0.43, "y": 0.70, "part": "NVM-1010-AT" },
+    { "id": "lift", "x": 0.555, "y": 0.47, "part": "NVM-1030-HY" },
+    { "id": "wheel", "x": 0.665, "y": 0.68, "part": "NVM-1130-DT" },
+    { "id": "cab", "x": 0.71, "y": 0.27, "part": "NVM-1010-CB" },
+    { "id": "engine", "x": 0.865, "y": 0.42, "part": "NVM-1010-FL" }
+  ]
+}

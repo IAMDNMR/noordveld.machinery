@@ -1,0 +1,211 @@
+.ord-page--processor {
+  min-height: 100vh;
+  background: #f4f7f5;
+  color: #203b31;
+  padding-bottom: 60px;
+}
+.ord-page--processor > .wf-container {
+  max-width: 1280px;
+}
+.ord-page--processor .eyebrow {
+  color: #708d7a;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  margin-bottom: 12px;
+}
+.ord-page--processor h1 {
+  font-size: 32px;
+  letter-spacing: -1.1px;
+  font-weight: 550;
+}
+.ord-page--processor .lede {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #7c8a80;
+  max-width: 660px;
+  margin-top: 8px;
+}
+.proc-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 28px 0 34px;
+}
+.proc-summary article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e1e9e2;
+  border-radius: 13px;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 3px 10px #193f2003;
+}
+.proc-summary article > div {
+  display: grid;
+  gap: 12px;
+}
+.proc-summary span {
+  font-size: 11px;
+  color: #7c8b80;
+}
+.proc-summary strong {
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 550;
+  letter-spacing: -1px;
+}
+.proc-summary i {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #edf4ec;
+  color: #568060;
+}
+.proc-summary i[data-tone='amber'] {
+  background: #faf3e7;
+  color: #b18b47;
+}
+.proc-summary i[data-tone='blue'] {
+  background: #eef2f9;
+  color: #6b83ae;
+}
+.proc-summary i[data-tone='red'] {
+  background: #f9eeeb;
+  color: #ba7b6c;
+}
+.proc-table-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.proc-table-head h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+.proc-table-head p {
+  font-size: 11px;
+  color: #8a978d;
+  margin: 5px 0 0;
+}
+.proc-search {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  border: 1px solid #dce5de;
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 12px;
+  color: #8e9e91;
+}
+.proc-search input {
+  width: 260px;
+  max-width: 100%;
+  padding: 11px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+.proc-search:focus-within {
+  border-color: #5b8f6c;
+  box-shadow: 0 0 0 3px #5b8f6c10;
+}
+.ord-page--processor .ord-queues {
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.ord-page--processor .ord-queues .chip {
+  background: transparent;
+  border: 1px solid #dfe7e0;
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 7px 11px;
+  color: #738578;
+}
+.ord-page--processor .ord-queues .chip[aria-pressed='true'] {
+  background: #1f674d;
+  color: #fff;
+  border-color: #1f674d;
+}
+.ord-page--processor .ord-queues .chip[aria-pressed='true'] .muted {
+  color: #c4decc;
+}
+.ord-page--processor .ord-table {
+  border: 1px solid #dfe7e0;
+  border-radius: 13px;
+  box-shadow: 0 4px 20px #17372204;
+  overflow: hidden;
+  background: #fff;
+}
+.ord-page--processor .data-table thead th {
+  background: #f8faf7;
+  color: #819083;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  padding: 14px 13px;
+  border-bottom: 1px solid #e5ece5;
+  white-space: nowrap;
+}
+.ord-page--processor .data-table tbody td,
+.ord-page--processor .data-table tbody th {
+  padding: 16px 13px;
+  font-size: 11px;
+  border-bottom: 1px solid #eef2ed;
+  vertical-align: middle;
+}
+.ord-page--processor .data-table tbody tr:hover {
+  background: #f8fbf7;
+}
+.ord-page--processor .data-table .link-more {
+  font-weight: 600;
+  color: #2d7052;
+}
+.ord-page--processor .data-table .tag {
+  font-size: 9px;
+  border-radius: 6px;
+  padding: 4px 7px;
+}
+.ord-page--processor .data-table th small {
+  font-size: 9px;
+  color: #8f9d91;
+  margin-top: 4px;
+}
+.ord-page--processor .card {
+  border-radius: 13px;
+  border-color: #dfe7e0;
+}
+.ord-page--processor .btn {
+  border-radius: 8px;
+  font-size: 12px;
+}
+@media (max-width: 800px) {
+  .proc-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .proc-summary article {
+    padding: 16px;
+  }
+  .proc-table-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .proc-search input {
+    width: 100%;
+  }
+  .proc-search {
+    max-width: 100%;
+  }
+  .ord-page--processor h1 {
+    font-size: 27px;
+  }
+}

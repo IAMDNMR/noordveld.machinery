@@ -1,0 +1,8 @@
+node_modules/
+dist/
+assets-source/
+public/
+agentic-commerce/film-masters/
+package-lock.json
+src/data/*.generated.ts
+agentic-commerce/src/data/*.generated.ts

@@ -1,4 +1,5 @@
 """Cart quote models. The cart itself lives in the browser as part ids and quantities; the API only prices it."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field

@@ -1,30 +1,59 @@
 import { ShoppingBag } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ApiError, isAbort, lineKey, quoteCart } from '../api'
+import { ApiError, isAbort, lineKey, quoteCart } from '../api/index'
 import {
-  getCountries, getDealers, getDestinations, placeOrder, reviewCheckout,
-  type CheckoutReview, type DealerRow, type DepotPlan, type Destination, type TransportOption,
+  getCountries,
+  getDealers,
+  getDestinations,
+  placeOrder,
+  reviewCheckout,
+  type CheckoutReview,
+  type DealerRow,
+  type DepotPlan,
+  type Destination,
+  type TransportOption,
 } from '../api/orders'
 import { CartContents } from '../components/store/CartContents'
 import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { CHECKOUT_ROUTE, STORE_ROUTE } from '../lib/storeQuery'
+import { formatMoney } from '../lib/format'
 import { useCart } from '../store/CartContext'
 import { useSession } from '../store/session'
 import '../components/store/checkout.css'
 
-const STEPS = ['Cart', 'Customer details', 'Cart review', 'Delivery & dealer', 'Availability & fulfilment', 'Review & place order'] as const
+const STEPS = [
+  'Cart',
+  'Customer details',
+  'Cart review',
+  'Delivery & dealer',
+  'Availability & fulfilment',
+  'Review & place order',
+] as const
 
 const EMAIL = /^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/
 const PHONE = /^\+?[0-9][0-9 ()\-./]{5,29}$/
 const DETAILS_KEY = 'noordveld-checkout-details'
 const IDEM_KEY = 'noordveld-checkout-key'
 
-const STATE_LABEL: Record<string, string> = { IN_STOCK: 'In stock', LOW_STOCK: 'Low stock', ON_ORDER: 'On order', OUT_OF_STOCK: 'Out of stock', UNKNOWN: 'Unknown' }
+const STATE_LABEL: Record<string, string> = {
+  IN_STOCK: 'In stock',
+  LOW_STOCK: 'Low stock',
+  ON_ORDER: 'On order',
+  OUT_OF_STOCK: 'Out of stock',
+  UNKNOWN: 'Unknown',
+}
 const days = (n: number | null) => (n == null ? 'not recorded' : `${n} ${n === 1 ? 'day' : 'days'}`)
-const km = (n: number | null) => (n == null ? 'not recorded' : `${n.toLocaleString('en-NL', { maximumFractionDigits: 1 })} km`)
-const modeLabel = (m: string | null) => (m ? m.replace(/_/g, ' ').toLowerCase().replace(/^./, (c) => c.toUpperCase()) : 'Not recorded')
+const km = (n: number | null) =>
+  n == null ? 'Not recorded' : `${n.toLocaleString('en-GB', { maximumFractionDigits: 1 })} km`
+const modeLabel = (m: string | null) =>
+  m
+    ? m
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/^./, (c) => c.toUpperCase())
+    : 'Not recorded'
 
 interface Details {
   name: string
@@ -55,12 +84,17 @@ const checkoutKey = (): string => {
 }
 
 /**
- * Parts Store checkout: Cart → Customer details → Cart review → Delivery & dealer → Availability & fulfilment → Review & place order.
+ * Parts Portal checkout: Cart → Customer details → Cart review → Delivery & dealer → Availability & fulfilment → Review & place order.
  * The browser only collects choices. Availability, depots, transport options and every rule come from the API (and Neo4j); the server re-checks all
  * of it when the order is placed. Customer details belong to the order: no customer record is created.
  */
 export default function CheckoutPage() {
-  usePageMeta({ title: 'Checkout', description: 'Check out your cart: customer details, delivery, dealer, availability and fulfilment, then place the order.', path: CHECKOUT_ROUTE })
+  usePageMeta({
+    title: 'Checkout',
+    description:
+      'Check out your cart: customer details, delivery, dealer, availability and fulfilment, then place the order.',
+    path: CHECKOUT_ROUTE,
+  })
   const { lines } = useCart()
   const { user, ready } = useSession()
 
@@ -80,7 +114,11 @@ export default function CheckoutPage() {
     )
   return (
     <div className="wf-container co">
-      <h1>Checkout</h1>
+      <header className="co__intro">
+        <p className="eyebrow">Parts Portal · Order review</p>
+        <h1>A clear path to your next part.</h1>
+        <p>Review your parts, delivery and availability before placing your order.</p>
+      </header>
       {user?.role === 'END_USER' ? (
         <Flow />
       ) : user?.role === 'ORDER_PROCESSOR' ? (
@@ -108,7 +146,12 @@ function Flow() {
   const [details, setDetails] = useState<Details>(() => {
     const d = readDraft()
     // the signed-in account only offers defaults; whatever is entered here is what the order keeps
-    return { name: d.name ?? user?.name.replace(/ \(demo\)$/, '') ?? '', email: d.email ?? user?.email ?? '', phone: d.phone ?? '', company: d.company ?? user?.customer ?? '' }
+    return {
+      name: d.name ?? user?.name.replace(/ \(demo\)$/, '') ?? '',
+      email: d.email ?? user?.email ?? '',
+      phone: d.phone ?? '',
+      company: d.company ?? user?.customer ?? '',
+    }
   })
   const [country, setCountry] = useState('')
   const [shipToId, setShipToId] = useState('')
@@ -124,7 +167,10 @@ function Flow() {
   const [error, setError] = useState<{ message: string; reasons: string[] } | null>(null)
   const idem = useRef(checkoutKey())
 
-  const items = useMemo(() => lines.map((l) => ({ part_id: l.partId, quantity: l.qty, machine: l.machine ?? null })), [lines])
+  const items = useMemo(
+    () => lines.map((l) => ({ part_id: l.partId, quantity: l.qty, machine: l.machine ?? null })),
+    [lines],
+  )
   const cartKey = lines.map((l) => `${lineKey(l)}:${l.qty}`).join(',')
 
   useEffect(() => {
@@ -137,8 +183,14 @@ function Flow() {
 
   // reference data, all from the graph
   const countries = useApi((s) => getCountries(s), 'countries')
-  const destinations = useApi((s) => (country ? getDestinations(country, s) : Promise.resolve([] as Destination[])), `dest:${country}`)
-  const dealers = useApi((s) => getDealers(allDealers ? null : country || null, s), `dealers:${allDealers ? '*' : country}`)
+  const destinations = useApi(
+    (s) => (country ? getDestinations(country, s) : Promise.resolve([] as Destination[])),
+    `dest:${country}`,
+  )
+  const dealers = useApi(
+    (s) => getDealers(allDealers ? null : country || null, s),
+    `dealers:${allDealers ? '*' : country}`,
+  )
   const quote = useApi((s) => quoteCart(lines, s), `quote:${cartKey}`)
 
   // availability, depots and transport for the chosen destination. It is read once per destination + cart: moving between steps keeps the choice made.
@@ -161,7 +213,12 @@ function Flow() {
         setRouteId(rec?.recommended_route_id ?? '')
       },
       (e: unknown) => {
-        if (!isAbort(e)) setReviewError(e instanceof ApiError ? e : new ApiError(0, 'unknown', 'Availability could not be checked.'))
+        if (!isAbort(e))
+          setReviewError(
+            e instanceof ApiError
+              ? e
+              : new ApiError(0, 'unknown', 'Availability could not be checked.'),
+          )
       },
     )
     return () => ctrl.abort()
@@ -171,12 +228,22 @@ function Flow() {
   const dealer = dealers.data?.find((d) => d.dealer_id === dealerId) ?? null
   const depot = review?.depots.find((d) => d.depot_id === depotId) ?? null
   const option = depot?.options.find((o) => o.route_id === routeId) ?? null
-  const blocked = (quote.data?.rejected.length ?? 0) > 0 || (quote.data?.unknown_part_ids.length ?? 0) > 0
+  const cost = option?.cost ?? review?.cost
+  const costValue = (amount: number | null | undefined) =>
+    amount == null ? 'Not available' : formatMoney({ amount, currency: cost?.currency ?? 'EUR' })
+  const blocked =
+    (quote.data?.rejected.length ?? 0) > 0 || (quote.data?.unknown_part_ids.length ?? 0) > 0
 
-  const detailsOk = details.name.trim().length >= 2 && EMAIL.test(details.email.trim()) && PHONE.test(details.phone.trim()) && details.company.trim().length >= 2
-  const deliveryOk = !!destination && receiverName.trim().length >= 2 && PHONE.test(receiverPhone.trim()) && !!dealer
+  const detailsOk =
+    details.name.trim().length >= 2 &&
+    EMAIL.test(details.email.trim()) &&
+    PHONE.test(details.phone.trim()) &&
+    details.company.trim().length >= 2
+  const deliveryOk =
+    !!destination && receiverName.trim().length >= 2 && PHONE.test(receiverPhone.trim()) && !!dealer
   const fulfilmentOk = !!depot?.selectable && !!option
-  const set = (k: keyof Details) => (e: { target: { value: string } }) => setDetails((d) => ({ ...d, [k]: e.target.value }))
+  const set = (k: keyof Details) => (e: { target: { value: string } }) =>
+    setDetails((d) => ({ ...d, [k]: e.target.value }))
 
   const submit = async () => {
     if (!destination || !dealer || !option) return
@@ -185,8 +252,17 @@ function Flow() {
     try {
       const order = await placeOrder({
         items,
-        requester: { name: details.name.trim(), email: details.email.trim(), phone: details.phone.trim(), company: details.company.trim() },
-        delivery: { ship_to_id: destination.ship_to_id, receiver_name: receiverName.trim(), receiver_phone: receiverPhone.trim() },
+        requester: {
+          name: details.name.trim(),
+          email: details.email.trim(),
+          phone: details.phone.trim(),
+          company: details.company.trim(),
+        },
+        delivery: {
+          ship_to_id: destination.ship_to_id,
+          receiver_name: receiverName.trim(),
+          receiver_phone: receiverPhone.trim(),
+        },
         dealer_id: dealer.dealer_id,
         dealer_service_required: serviceRequired,
         depot_id: depotId,
@@ -202,8 +278,17 @@ function Flow() {
       clear() // the ordered lines left the cart on the server; drop them here too so they cannot be saved back
       navigate(`/orders/${encodeURIComponent(order.order_id)}?placed=1`)
     } catch (e) {
-      const reasons = e instanceof ApiError && e.details && typeof e.details === 'object' && 'reasons' in e.details ? ((e.details as { reasons: string[] }).reasons ?? []) : []
-      setError({ message: e instanceof ApiError ? e.message : 'The order could not be placed.', reasons })
+      const reasons =
+        e instanceof ApiError &&
+        e.details &&
+        typeof e.details === 'object' &&
+        'reasons' in e.details
+          ? ((e.details as { reasons: string[] }).reasons ?? [])
+          : []
+      setError({
+        message: e instanceof ApiError ? e.message : 'The order could not be placed.',
+        reasons,
+      })
     } finally {
       setBusy(false)
     }
@@ -217,7 +302,12 @@ function Flow() {
         </button>
       ) : null}
       {next ? (
-        <button type="button" className="btn btn-primary" disabled={!ok} onClick={() => setStep(next)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!ok}
+          onClick={() => setStep(next)}
+        >
           Continue
         </button>
       ) : null}
@@ -228,7 +318,11 @@ function Flow() {
     <>
       <ol className="co__steps" aria-label="Checkout steps">
         {STEPS.map((label, i) => (
-          <li key={label} className={i + 1 === step ? 'is-current' : i + 1 < step ? 'is-done' : ''} aria-current={i + 1 === step ? 'step' : undefined}>
+          <li
+            key={label}
+            className={i + 1 === step ? 'is-current' : i + 1 < step ? 'is-done' : ''}
+            aria-current={i + 1 === step ? 'step' : undefined}
+          >
             <span>{i + 1}</span> {label}
           </li>
         ))}
@@ -245,7 +339,10 @@ function Flow() {
       {step === 2 ? (
         <section className="card card-pad co__panel" aria-labelledby="co-details">
           <h2 id="co-details">Customer details</h2>
-          <p className="small muted">These details are saved with this order only. Your account name and email are offered as defaults; change them if the order is for someone else.</p>
+          <p className="small muted">
+            These details are saved with this order only. Your account name and email are offered as
+            defaults; change them if the order is for someone else.
+          </p>
           <div className="co__grid">
             <label>
               Name
@@ -253,17 +350,39 @@ function Flow() {
             </label>
             <label>
               Company
-              <input value={details.company} onChange={set('company')} autoComplete="organization" required />
+              <input
+                value={details.company}
+                onChange={set('company')}
+                autoComplete="organization"
+                required
+              />
             </label>
             <label>
               Email
-              <input type="email" value={details.email} onChange={set('email')} autoComplete="email" required />
-              {details.email && !EMAIL.test(details.email.trim()) ? <small className="co__bad">Enter a valid email address.</small> : null}
+              <input
+                type="email"
+                value={details.email}
+                onChange={set('email')}
+                autoComplete="email"
+                required
+              />
+              {details.email && !EMAIL.test(details.email.trim()) ? (
+                <small className="co__bad">Enter a valid email address.</small>
+              ) : null}
             </label>
             <label>
               Phone
-              <input type="tel" value={details.phone} onChange={set('phone')} autoComplete="tel" placeholder="+31 20 555 0100" required />
-              {details.phone && !PHONE.test(details.phone.trim()) ? <small className="co__bad">Enter a valid phone number.</small> : null}
+              <input
+                type="tel"
+                value={details.phone}
+                onChange={set('phone')}
+                autoComplete="tel"
+                placeholder="+31 20 555 0100"
+                required
+              />
+              {details.phone && !PHONE.test(details.phone.trim()) ? (
+                <small className="co__bad">Enter a valid phone number.</small>
+              ) : null}
             </label>
           </div>
           {nav(1, 3, detailsOk)}
@@ -301,14 +420,32 @@ function Flow() {
                         </th>
                         <td>{l.qty}</td>
                         <td>{l.machine ?? 'Not specified'}</td>
-                        <td>{ok ? <span className="tag tag-good">Verified, orderable</span> : bad ? <span className="tag tag-warn">{bad.status_label}: cannot be ordered</span> : <span className="tag tag-warn">Not in the catalogue</span>}</td>
+                        <td>
+                          {ok ? (
+                            <span className="tag tag-good">Verified, orderable</span>
+                          ) : bad ? (
+                            <span className="tag tag-warn">
+                              {bad.status_label}: cannot be ordered
+                            </span>
+                          ) : (
+                            <span className="tag tag-warn">Not in the catalogue</span>
+                          )}
+                        </td>
                       </tr>
                     )
                   })}
                 </tbody>
               </table>
-              <p className="small muted">Part cost is not available: no pricing source is connected. The prices in the cart are synthetic demo list prices, not an order cost.</p>
-              {blocked ? <p className="pi-error" role="alert">Remove the parts that cannot be ordered (go back to the cart) to continue. Unverified parts need machine or serial identification first.</p> : null}
+              <p className="small muted">
+                Demo catalogue prices exclude VAT, transport and dealer services. Your selected
+                transport estimate is added in the final review.
+              </p>
+              {blocked ? (
+                <p className="pi-error" role="alert">
+                  Remove the parts that cannot be ordered (go back to the cart) to continue.
+                  Unverified parts need machine or serial identification first.
+                </p>
+              ) : null}
             </>
           )}
           {nav(2, 4, !!quote.data && !blocked)}
@@ -318,12 +455,23 @@ function Flow() {
       {step === 4 ? (
         <section className="card card-pad co__panel" aria-labelledby="co-delivery">
           <h2 id="co-delivery">Delivery &amp; dealer</h2>
-          <p className="small muted">The delivery site, the person receiving, the dealer and the depot it ships from are four separate choices.</p>
+          <p className="small muted">
+            The delivery site, the person receiving, the dealer and the depot it ships from are four
+            separate choices.
+          </p>
           <fieldset className="co__fieldset">
             <legend>Delivery site (ship-to)</legend>
             <label>
               Country
-              <select value={country} onChange={(e) => { setCountry(e.target.value); setShipToId('') ; setDealerId('') }} aria-label="Delivery country">
+              <select
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value)
+                  setShipToId('')
+                  setDealerId('')
+                }}
+                aria-label="Delivery country"
+              >
                 <option value="">Choose a country</option>
                 {(countries.data ?? []).map((c) => (
                   <option key={c.country_code} value={c.country_code}>
@@ -338,7 +486,12 @@ function Flow() {
                   {destinations.data.map((d) => (
                     <li key={d.ship_to_id}>
                       <label className={shipToId === d.ship_to_id ? 'is-on' : ''}>
-                        <input type="radio" name="shipto" checked={shipToId === d.ship_to_id} onChange={() => setShipToId(d.ship_to_id)} />
+                        <input
+                          type="radio"
+                          name="shipto"
+                          checked={shipToId === d.ship_to_id}
+                          onChange={() => setShipToId(d.ship_to_id)}
+                        />
                         <span>
                           <strong>
                             {d.street}, {d.postal_code} {d.city}
@@ -354,7 +507,9 @@ function Flow() {
                   ))}
                 </ul>
               ) : (
-                <p className="muted" role="status">Loading delivery sites…</p>
+                <p className="muted" role="status">
+                  Loading delivery sites…
+                </p>
               )
             ) : null}
           </fieldset>
@@ -363,11 +518,21 @@ function Flow() {
             <div className="co__grid">
               <label>
                 Receiver name
-                <input value={receiverName} onChange={(e) => setReceiverName(e.target.value)} required />
+                <input
+                  value={receiverName}
+                  onChange={(e) => setReceiverName(e.target.value)}
+                  required
+                />
               </label>
               <label>
                 Receiver phone
-                <input type="tel" value={receiverPhone} onChange={(e) => setReceiverPhone(e.target.value)} placeholder="+49 40 555 0199" required />
+                <input
+                  type="tel"
+                  value={receiverPhone}
+                  onChange={(e) => setReceiverPhone(e.target.value)}
+                  placeholder="+49 40 555 0199"
+                  required
+                />
               </label>
             </div>
           </fieldset>
@@ -375,7 +540,11 @@ function Flow() {
             <legend>Dealer</legend>
             <label>
               Receiving / service dealer
-              <select value={dealerId} onChange={(e) => setDealerId(e.target.value)} aria-label="Dealer">
+              <select
+                value={dealerId}
+                onChange={(e) => setDealerId(e.target.value)}
+                aria-label="Dealer"
+              >
                 <option value="">Choose a dealer</option>
                 {(dealers.data ?? []).map((d: DealerRow) => (
                   <option key={d.dealer_id} value={d.dealer_id}>
@@ -385,10 +554,20 @@ function Flow() {
               </select>
             </label>
             <label className="co__check">
-              <input type="checkbox" checked={allDealers} onChange={(e) => setAllDealers(e.target.checked)} /> Show dealers in every country (not only {country || 'the delivery country'})
+              <input
+                type="checkbox"
+                checked={allDealers}
+                onChange={(e) => setAllDealers(e.target.checked)}
+              />{' '}
+              Show dealers in every country (not only {country || 'the delivery country'})
             </label>
             <label className="co__check">
-              <input type="checkbox" checked={serviceRequired} onChange={(e) => setServiceRequired(e.target.checked)} /> The dealer should install the part after delivery
+              <input
+                type="checkbox"
+                checked={serviceRequired}
+                onChange={(e) => setServiceRequired(e.target.checked)}
+              />{' '}
+              The dealer should install the part after delivery
             </label>
           </fieldset>
           {nav(3, 5, deliveryOk)}
@@ -409,12 +588,18 @@ function Flow() {
           ) : (
             <>
               <p className="small muted">
-                Availability is read from the depot inventory. <strong>Unknown</strong> stock is shown as unknown (never as zero) and cannot be used. A depot is offered only if it holds known stock for every line
-                and has a recorded route to {review.destination.city}. Stock, routes and estimates are <span className="badge badge-data">synthetic demo data</span>.
+                Availability is read from the depot inventory. <strong>Unknown</strong> stock is
+                shown as unknown (never as zero) and cannot be used. A depot is offered only if it
+                holds known stock for every line and has a recorded route to{' '}
+                {review.destination.city}. Stock, routes and estimates are{' '}
+                <span className="badge badge-data">synthetic demo data</span>.
               </p>
               <div className="co__depots" role="radiogroup" aria-label="Fulfilment depot">
                 {review.depots.map((d: DepotPlan) => (
-                  <label key={d.depot_id} className={`co__depot ${depotId === d.depot_id ? 'is-on' : ''} ${d.selectable ? '' : 'is-off'}`}>
+                  <label
+                    key={d.depot_id}
+                    className={`co__depot ${depotId === d.depot_id ? 'is-on' : ''} ${d.selectable ? '' : 'is-off'}`}
+                  >
                     <input
                       type="radio"
                       name="depot"
@@ -432,13 +617,23 @@ function Flow() {
                       {d.recommended ? <em className="tag tag-good">Recommended</em> : null}
                       <small>
                         {d.lines.map((l) => (
-                          <span key={l.part_id} className={`co__stock co__stock--${l.state.toLowerCase()}`}>
+                          <span
+                            key={l.part_id}
+                            className={`co__stock co__stock--${l.state.toLowerCase()}`}
+                          >
                             {l.part_number}: {STATE_LABEL[l.state]}
                             {l.available != null ? ` · ${l.available} available` : ''}
                           </span>
                         ))}
                       </small>
-                      {d.selectable ? <small>{d.options.length} transport {d.options.length === 1 ? 'option' : 'options'} to this destination</small> : <small className="co__bad">{d.reasons.join(' ')}</small>}
+                      {d.selectable ? (
+                        <small>
+                          {d.options.length} transport{' '}
+                          {d.options.length === 1 ? 'option' : 'options'} to this destination
+                        </small>
+                      ) : (
+                        <small className="co__bad">{d.reasons.join(' ')}</small>
+                      )}
                     </span>
                   </label>
                 ))}
@@ -446,18 +641,33 @@ function Flow() {
 
               {depot?.selectable ? (
                 <fieldset className="co__fieldset">
-                  <legend>Fulfilment option: {depot.name} → {review.destination.city}</legend>
+                  <legend>
+                    Fulfilment option: {depot.name} → {review.destination.city}
+                  </legend>
                   <ul className="co__choices" aria-label="Transport options">
                     {depot.options.map((o: TransportOption) => (
                       <li key={o.route_id}>
                         <label className={routeId === o.route_id ? 'is-on' : ''}>
-                          <input type="radio" name="route" checked={routeId === o.route_id} onChange={() => setRouteId(o.route_id)} />
+                          <input
+                            type="radio"
+                            name="route"
+                            checked={routeId === o.route_id}
+                            onChange={() => setRouteId(o.route_id)}
+                          />
                           <span>
                             <strong>{o.option_name ?? o.option_code}</strong>
                             <small>
-                              {modeLabel(o.mode)} · {o.service_level?.toLowerCase()} · {km(o.distance_km)} · estimated {days(o.estimated_days)} ({o.estimate_basis.toLowerCase()})
+                              {modeLabel(o.mode)} · {o.service_level?.toLowerCase()} ·{' '}
+                              {km(o.distance_km)} · {days(o.estimated_days)} estimated after
+                              dispatch
                             </small>
-                            {o.freight ? <small>Freight context: {o.freight.currency} {o.freight.amount.toFixed(2)} — {o.freight.label}</small> : <small>No freight estimate recorded</small>}
+                            {o.freight ? (
+                              <small>
+                                Transport estimate: {formatMoney(o.freight)} · demo pricing
+                              </small>
+                            ) : (
+                              <small>No freight estimate recorded</small>
+                            )}
                           </span>
                           <span className="badge badge-data">Synthetic demo</span>
                         </label>
@@ -466,7 +676,12 @@ function Flow() {
                   </ul>
                 </fieldset>
               ) : null}
-              {!review.can_order ? <p className="pi-error" role="alert">No depot can supply this order to this destination. Change the delivery site or the quantities.</p> : null}
+              {!review.can_order ? (
+                <p className="pi-error" role="alert">
+                  No depot can supply this order to this destination. Change the delivery site or
+                  the quantities.
+                </p>
+              ) : null}
             </>
           )}
           {nav(4, 6, fulfilmentOk)}
@@ -480,10 +695,22 @@ function Flow() {
             <section aria-label="Requester">
               <h3>Requester</h3>
               <dl className="kv-list">
-                <div className="kv-row"><dt>Name</dt><dd>{details.name}</dd></div>
-                <div className="kv-row"><dt>Email</dt><dd>{details.email}</dd></div>
-                <div className="kv-row"><dt>Phone</dt><dd>{details.phone}</dd></div>
-                <div className="kv-row"><dt>Company</dt><dd>{details.company}</dd></div>
+                <div className="kv-row">
+                  <dt>Name</dt>
+                  <dd>{details.name}</dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Email</dt>
+                  <dd>{details.email}</dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Phone</dt>
+                  <dd>{details.phone}</dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Company</dt>
+                  <dd>{details.company}</dd>
+                </div>
               </dl>
             </section>
             <section aria-label="Parts">
@@ -506,45 +733,126 @@ function Flow() {
             <section aria-label="Delivery">
               <h3>Delivery</h3>
               <dl className="kv-list">
-                <div className="kv-row"><dt>Ship-to</dt><dd>{destination.street}, {destination.postal_code} {destination.city}, {destination.country_code}</dd></div>
-                <div className="kv-row"><dt>Receiver</dt><dd>{receiverName} · {receiverPhone}</dd></div>
-                <div className="kv-row"><dt>Dealer</dt><dd>{dealer.name} · {dealer.city}, {dealer.country_code}{serviceRequired ? <small>Dealer installation requested</small> : <small>No dealer installation</small>}</dd></div>
+                <div className="kv-row">
+                  <dt>Ship-to</dt>
+                  <dd>
+                    {destination.street}, {destination.postal_code} {destination.city},{' '}
+                    {destination.country_code}
+                  </dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Receiver</dt>
+                  <dd>
+                    {receiverName} · {receiverPhone}
+                  </dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Dealer</dt>
+                  <dd>
+                    {dealer.name} · {dealer.city}, {dealer.country_code}
+                    {serviceRequired ? (
+                      <small>Dealer installation requested</small>
+                    ) : (
+                      <small>No dealer installation</small>
+                    )}
+                  </dd>
+                </div>
               </dl>
             </section>
             <section aria-label="Fulfilment">
               <h3>Fulfilment</h3>
               <dl className="kv-list">
-                <div className="kv-row"><dt>Depot</dt><dd>{depot.name} · {depot.city}, {depot.country_code}</dd></div>
-                <div className="kv-row"><dt>Availability</dt><dd>{depot.lines.map((l) => `${l.part_number}: ${STATE_LABEL[l.state]}${l.available != null ? ` (${l.available})` : ''}`).join('; ')}<small>Stock is reserved for this order when it is placed (synthetic demo inventory).</small></dd></div>
+                <div className="kv-row">
+                  <dt>Depot</dt>
+                  <dd>
+                    {depot.name} · {depot.city}, {depot.country_code}
+                  </dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Availability</dt>
+                  <dd>
+                    {depot.lines
+                      .map(
+                        (l) =>
+                          `${l.part_number}: ${STATE_LABEL[l.state]}${l.available != null ? ` (${l.available})` : ''}`,
+                      )
+                      .join('; ')}
+                    <small>
+                      Stock is reserved for this order when it is placed (synthetic demo inventory).
+                    </small>
+                  </dd>
+                </div>
               </dl>
             </section>
             <section aria-label="Transport">
               <h3>Transport</h3>
               <dl className="kv-list">
-                <div className="kv-row"><dt>Option</dt><dd>{option.option_name ?? option.option_code}</dd></div>
-                <div className="kv-row"><dt>Mode</dt><dd>{modeLabel(option.mode)} · {option.service_level?.toLowerCase()}</dd></div>
-                <div className="kv-row"><dt>Distance</dt><dd>{km(option.distance_km)}</dd></div>
-                <div className="kv-row"><dt>Estimated delivery</dt><dd>{days(option.estimated_days)} after dispatch<small>Estimated and synthetic; not a guaranteed date.</small></dd></div>
+                <div className="kv-row">
+                  <dt>Option</dt>
+                  <dd>{option.option_name ?? option.option_code}</dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Mode</dt>
+                  <dd>
+                    {modeLabel(option.mode)} · {option.service_level?.toLowerCase()}
+                  </dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Estimated route distance</dt>
+                  <dd>
+                    {km(option.distance_km)}
+                    <small>
+                      {depot?.city} → {destination?.city} · demo route estimate
+                    </small>
+                  </dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Estimated transit time</dt>
+                  <dd>
+                    {option.estimated_days == null
+                      ? 'Not recorded'
+                      : `${days(option.estimated_days)} after dispatch`}
+                    <small>
+                      Demo route estimate. Dispatch and delivery dates are not yet confirmed.
+                    </small>
+                  </dd>
+                </div>
               </dl>
             </section>
             <section aria-label="Cost">
-              <h3>Cost</h3>
+              <h3>Cost estimate</h3>
               <dl className="kv-list">
-                <div className="kv-row"><dt>Part cost</dt><dd>Not available</dd></div>
-                <div className="kv-row"><dt>Transportation cost</dt><dd>Not available{option.freight ? <small>Freight context only: {option.freight.currency} {option.freight.amount.toFixed(2)}, {option.freight.label.toLowerCase()}</small> : null}</dd></div>
-                <div className="kv-row"><dt>Total</dt><dd>Not available</dd></div>
+                <div className="kv-row">
+                  <dt>Part cost</dt>
+                  <dd>{costValue(cost?.part_cost)}</dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Transportation cost</dt>
+                  <dd>{costValue(cost?.transport_cost)}</dd>
+                </div>
+                <div className="kv-row">
+                  <dt>Estimated total</dt>
+                  <dd>{costValue(cost?.total)}</dd>
+                </div>
               </dl>
-              <p className="small muted">{review?.cost.note}</p>
+              <p className="small muted">{cost?.note}</p>
             </section>
             <section aria-label="Provenance" className="co__prov">
               <h3>Data status</h3>
               <p className="small">
-                Order details: recorded in this app. Stock, transport options, distances, estimates and tracking: <strong>SYNTHETIC DEMO DATA</strong>. Parts and fitment: source-derived catalogue.
+                Order details: recorded in this app. Stock, transport options, distances, estimates
+                and tracking: <strong>SYNTHETIC DEMO DATA</strong>. Parts and fitment:
+                source-derived catalogue.
               </p>
             </section>
           </div>
           <label className="co__check co__confirm">
-            <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} /> I confirm the details above and want to place this order.
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+            />{' '}
+            I confirm the details above and want to place this order.
           </label>
           {error ? (
             <div className="pi-error" role="alert">
@@ -559,10 +867,20 @@ function Flow() {
             </div>
           ) : null}
           <div className="co__nav">
-            <button type="button" className="btn btn-secondary" onClick={() => setStep(5)} disabled={busy}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setStep(5)}
+              disabled={busy}
+            >
               Back
             </button>
-            <button type="button" className="btn btn-primary" onClick={submit} disabled={!confirmed || busy}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={submit}
+              disabled={!confirmed || busy}
+            >
               {busy ? 'Placing order…' : 'Place order'}
             </button>
           </div>

@@ -9,6 +9,7 @@ their own:
   graph_fingerprint  SHA-256 over every node and relationship the ingestion created (source_id = SRC-CANON), excluding timestamps. After ingesting the
                      same dataset again the fingerprint is identical: the logical graph did not change.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -36,9 +37,21 @@ def graph_fingerprint(store: Store) -> str:
     nodes, rels = store.fingerprint_rows()
     h = hashlib.sha256()
     for r in nodes:
-        h.update(json.dumps({"l": r["l"], "p": {k: v for k, v in r["p"].items() if k not in VOLATILE}}, sort_keys=True, default=str).encode())
+        h.update(
+            json.dumps(
+                {"l": r["l"], "p": {k: v for k, v in r["p"].items() if k not in VOLATILE}},
+                sort_keys=True,
+                default=str,
+            ).encode()
+        )
     for r in rels:
-        h.update(json.dumps({"t": r["t"], "p": {k: v for k, v in r["p"].items() if k not in VOLATILE}}, sort_keys=True, default=str).encode())
+        h.update(
+            json.dumps(
+                {"t": r["t"], "p": {k: v for k, v in r["p"].items() if k not in VOLATILE}},
+                sort_keys=True,
+                default=str,
+            ).encode()
+        )
     return h.hexdigest()
 
 

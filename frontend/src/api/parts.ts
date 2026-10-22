@@ -18,4 +18,5 @@ export const searchParts = (query: PartQuery, signal?: AbortSignal): Promise<Par
   )
 
 /** `key` is the unified part number or the part id. */
-export const getPart = (key: string, signal?: AbortSignal): Promise<PartDetail> => apiGet<PartDetail>(`/parts/${encodeURIComponent(key)}`, {}, signal)
+export const getPart = (key: string, signal?: AbortSignal): Promise<PartDetail> =>
+  apiGet<PartDetail>(`/parts/${encodeURIComponent(key)}`, {}, signal)

@@ -1,14 +1,17 @@
-import type { PartQuery, SortKey } from '../api'
+import type { PartQuery, SortKey } from '../api/index'
 
 export const STORE_ROUTE = '/parts-store'
 export const CHECKOUT_ROUTE = `${STORE_ROUTE}/checkout`
 export const PAGE_SIZE = 24
 
-export const partPath = (partNumber: string): string => `${STORE_ROUTE}/${encodeURIComponent(partNumber)}`
+export const partPath = (partNumber: string): string =>
+  `${STORE_ROUTE}/${encodeURIComponent(partNumber)}`
 
 /** Browse links: the catalogue state lives in the URL, so every list is shareable. */
-export const categoryPath = (name: string): string => `${STORE_ROUTE}?${new URLSearchParams({ category: name })}`
-export const machinePath = (modelCode: string): string => `${STORE_ROUTE}?${new URLSearchParams({ machine: modelCode })}`
+export const categoryPath = (name: string): string =>
+  `${STORE_ROUTE}?${new URLSearchParams({ category: name })}`
+export const machinePath = (modelCode: string): string =>
+  `${STORE_ROUTE}?${new URLSearchParams({ machine: modelCode })}`
 
 export const SORTS: readonly { key: SortKey; label: string }[] = [
   { key: 'relevance', label: 'Relevance' },
@@ -34,7 +37,9 @@ export const parseQuery = (params: URLSearchParams): PartQuery => {
   }
 }
 
-export const toParams = (query: Partial<Omit<PartQuery, 'limit' | 'offset'>> & { page?: number }): URLSearchParams => {
+export const toParams = (
+  query: Partial<Omit<PartQuery, 'limit' | 'offset'>> & { page?: number },
+): URLSearchParams => {
   const params = new URLSearchParams()
   if (query.q?.trim()) params.set('q', query.q.trim())
   if (query.category) params.set('category', query.category)
@@ -47,4 +52,7 @@ export const toParams = (query: Partial<Omit<PartQuery, 'limit' | 'offset'>> & {
 }
 
 export const activeFilterCount = (query: PartQuery): number =>
-  (query.category ? 1 : 0) + (query.machine ? 1 : 0) + query.availability.length + (query.orderable ? 1 : 0)
+  (query.category ? 1 : 0) +
+  (query.machine ? 1 : 0) +
+  query.availability.length +
+  (query.orderable ? 1 : 0)

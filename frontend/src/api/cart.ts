@@ -8,8 +8,13 @@ export interface CartLine {
   machine?: string | null
 }
 
-export const lineKey = (l: Pick<CartLine, 'partId' | 'machine'>): string => `${l.partId}|${l.machine ?? ''}`
+export const lineKey = (l: Pick<CartLine, 'partId' | 'machine'>): string =>
+  `${l.partId}|${l.machine ?? ''}`
 
 /** Prices a cart from the graph. Stateless: nothing is stored and no order is placed. */
 export const quoteCart = (lines: readonly CartLine[], signal?: AbortSignal): Promise<Quote> =>
-  apiPost<Quote>('/cart/quote', { items: lines.map((l) => ({ part_id: l.partId, quantity: l.qty })) }, signal)
+  apiPost<Quote>(
+    '/cart/quote',
+    { items: lines.map((l) => ({ part_id: l.partId, quantity: l.qty })) },
+    signal,
+  )

@@ -1,0 +1,73 @@
+{
+ "pack": "cat_manufacturing",
+ "records": [
+  {
+   "name": "machine1",
+   "entity": "ent_mfg_machine",
+   "role": "role_mfg_planner",
+   "values": {
+    "serial_no": "HX-200-0417",
+    "model": "HX-200",
+    "installed_on": "2025-03-01",
+    "status": "IN_SERVICE",
+    "warranty_end": "2027-03-01"
+   },
+   "refs": {
+    "ent_core_customer": "cust1"
+   },
+   "shared": true
+  },
+  {
+   "name": "bom1",
+   "entity": "ent_mfg_bom_line",
+   "role": "role_mfg_planner",
+   "values": {
+    "quantity": 2
+   },
+   "refs": {
+    "ent_mfg_machine": "machine1",
+    "ent_core_item": "item1"
+   },
+   "shared": true
+  },
+  {
+   "name": "wo1",
+   "entity": "ent_mfg_work_order",
+   "role": "role_mfg_planner",
+   "values": {
+    "kind": "MAINTENANCE",
+    "description": "Replace the hydraulic hoses",
+    "planned_start": "2026-10-20",
+    "planned_hours": 3,
+    "status": "PLANNED"
+   },
+   "refs": {
+    "ent_mfg_machine": "machine1"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_mfg_work_order",
+   "bind": {
+    "ent_mfg_machine": "machine1",
+    "ent_mfg_bom_line": "bom1",
+    "ent_inv_stock_level": "stock1",
+    "ent_mfg_work_order": "wo1"
+   },
+   "set": {
+    "inspect": [
+     {
+      "record": "wo1",
+      "role": "role_mfg_quality",
+      "values": {
+       "inspection_result": "PASS"
+      }
+     }
+    ]
+   },
+   "ends": "done"
+  }
+ ]
+}

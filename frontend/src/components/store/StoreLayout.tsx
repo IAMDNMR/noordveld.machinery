@@ -29,12 +29,17 @@ function StoreBar() {
     <div className={`sbar ${over ? 'sbar--over' : ''}`}>
       <div className="wf-container sbar__inner">
         <Link to={STORE_ROUTE} className="sbar__title">
-          Parts Store
+          Parts Portal
         </Link>
         <div className="sbar__search" hidden={over}>
           <StoreSearch variant="bar" />
         </div>
-        <button type="button" className={`sbar__cart ${justAdded ? 'is-bump' : ''}`} onClick={() => setOpen(true)} aria-label={`Open cart, ${count} ${count === 1 ? 'item' : 'items'}`}>
+        <button
+          type="button"
+          className={`sbar__cart ${justAdded ? 'is-bump' : ''}`}
+          onClick={() => setOpen(true)}
+          aria-label={`Open cart, ${count} ${count === 1 ? 'item' : 'items'}`}
+        >
           <ShoppingBag size={20} strokeWidth={1.7} aria-hidden="true" />
           <span className="sbar__cart-label">Cart</span>
           {count > 0 ? <span className="sbar__count">{count}</span> : null}
@@ -44,7 +49,7 @@ function StoreBar() {
   )
 }
 
-/** Wraps every Parts Store page: shared cart, the sticky store bar and the cart drawer. */
+/** Wraps every Parts Portal page: shared cart, the sticky store bar and the cart drawer. */
 export function StoreLayout() {
   return (
     <CartProvider>

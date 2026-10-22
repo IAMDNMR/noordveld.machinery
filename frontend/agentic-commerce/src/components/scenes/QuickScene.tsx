@@ -1,6 +1,17 @@
 import { House, Timer, Truck, Warehouse } from 'lucide-react'
 import { easeOut, lerp, seg } from '../../lib/math'
-import { DrawPath, Glyph, Label, SCENE_H, SCENE_W, accent, ink, ink2, ink3, line } from './primitives'
+import {
+  DrawPath,
+  Glyph,
+  Label,
+  SCENE_H,
+  SCENE_W,
+  accent,
+  ink,
+  ink2,
+  ink3,
+  line,
+} from './primitives'
 
 const HOME = { x: 640, y: 235 }
 const POINTS = [
@@ -37,38 +48,111 @@ export function QuickScene({ p }: { p: number }) {
   }
 
   return (
-    <svg viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} role="presentation" aria-hidden="true" width="100%" height="100%">
+    <svg
+      viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
+      role="presentation"
+      aria-hidden="true"
+      width="100%"
+      height="100%"
+    >
       {[110, 200, 290, 380].map((r, i) => (
-        <circle key={r} cx={HOME.x} cy={HOME.y} r={r} fill="none" stroke={line} strokeWidth={1.25} strokeDasharray="3 9" opacity={appear * (1 - i * 0.18)} />
+        <circle
+          key={r}
+          cx={HOME.x}
+          cy={HOME.y}
+          r={r}
+          fill="none"
+          stroke={line}
+          strokeWidth={1.25}
+          strokeDasharray="3 9"
+          opacity={appear * (1 - i * 0.18)}
+        />
       ))}
 
       {POINTS.map((pt, i) => {
         const lit = i === NEAREST && p > 0.5
         return (
           <g key={i}>
-            <line x1={HOME.x + pt.dx} y1={HOME.y + pt.dy} x2={pos[i].x} y2={pos[i].y} stroke={ink3} strokeWidth={1.5} opacity={0.28 * squeeze * appear} />
-            <Glyph icon={Warehouse} x={pos[i].x} y={pos[i].y} size={lit ? 38 : 28} color={lit ? accent : ink2} opacity={appear} strokeWidth={lit ? 1.6 : 1.4} />
+            <line
+              x1={HOME.x + pt.dx}
+              y1={HOME.y + pt.dy}
+              x2={pos[i].x}
+              y2={pos[i].y}
+              stroke={ink3}
+              strokeWidth={1.5}
+              opacity={0.28 * squeeze * appear}
+            />
+            <Glyph
+              icon={Warehouse}
+              x={pos[i].x}
+              y={pos[i].y}
+              size={lit ? 38 : 28}
+              color={lit ? accent : ink2}
+              opacity={appear}
+              strokeWidth={lit ? 1.6 : 1.4}
+            />
           </g>
         )
       })}
 
       <DrawPath d={routePath} t={route} stroke={accent} width={3} />
-      {ride > 0 && ride < 1 ? <Glyph icon={Truck} x={rider.x} y={rider.y - 22} size={30} color={accent} strokeWidth={1.6} /> : null}
+      {ride > 0 && ride < 1 ? (
+        <Glyph
+          icon={Truck}
+          x={rider.x}
+          y={rider.y - 22}
+          size={30}
+          color={accent}
+          strokeWidth={1.6}
+        />
+      ) : null}
 
       <circle cx={HOME.x} cy={HOME.y} r={34} fill="var(--accent-soft)" opacity={appear} />
-      <Glyph icon={House} x={HOME.x} y={HOME.y} size={34} color={ride >= 1 ? accent : ink} opacity={appear} strokeWidth={1.5} />
+      <Glyph
+        icon={House}
+        x={HOME.x}
+        y={HOME.y}
+        size={34}
+        color={ride >= 1 ? accent : ink}
+        opacity={appear}
+        strokeWidth={1.5}
+      />
 
       <g transform="translate(86 78)" opacity={seg(p, 0.5, 0.62)}>
         <circle r={CLOCK_R} fill="none" stroke={line} strokeWidth={4} />
-        <circle r={CLOCK_R} fill="none" stroke={accent} strokeWidth={4} strokeLinecap="round" strokeDasharray={`${CLOCK_LEN * time} ${CLOCK_LEN}`} transform="rotate(-90)" />
+        <circle
+          r={CLOCK_R}
+          fill="none"
+          stroke={accent}
+          strokeWidth={4}
+          strokeLinecap="round"
+          strokeDasharray={`${CLOCK_LEN * time} ${CLOCK_LEN}`}
+          transform="rotate(-90)"
+        />
         <Glyph icon={Timer} x={0} y={0} size={22} color={ink} strokeWidth={1.8} />
-        <text x={52} y={7} style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--scene-label, 20px)', fontWeight: 500, fill: ink2 }}>
+        <text
+          x={52}
+          y={7}
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 'var(--scene-label, 20px)',
+            fontWeight: 500,
+            fill: ink2,
+          }}
+        >
           Time to your door
         </text>
       </g>
 
       {STEPS.map((s, i) => (
-        <Label key={s} x={STEP_X[i]} y={466} anchor="start" fill={i === activeStep ? ink : ink3} weight={i === activeStep ? 600 : 500}>
+        <Label
+          key={s}
+          x={STEP_X[i]}
+          y={466}
+          anchor="start"
+          fill={i === activeStep ? ink : ink3}
+          weight={i === activeStep ? 600 : 500}
+        >
           {s}
         </Label>
       ))}

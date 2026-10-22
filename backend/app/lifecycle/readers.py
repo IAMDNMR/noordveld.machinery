@@ -5,6 +5,7 @@
 
 The context builder and the evaluator are identical on either; a test checks the files and the graph agree.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -50,7 +51,10 @@ class FileReader:
     def _rows(self, name: str) -> list[dict[str, Any]]:
         if name not in self._cache:
             spec = BY_NAME[name]
-            self._cache[name] = [_clean(spec.model.model_validate(r).model_dump()) for r in load_rows(spec, self.root)[0]]
+            self._cache[name] = [
+                _clean(spec.model.model_validate(r).model_dump())
+                for r in load_rows(spec, self.root)[0]
+            ]
         return self._cache[name]
 
     def _index(self, name: str, field: str) -> dict[str, dict[str, Any]]:
@@ -75,7 +79,10 @@ class FileReader:
         return self._index("machine_instances", "machine_instance_id").get(machine_instance_id)
 
     def installations(self, machine_instance_id):
-        return sorted(self._group("installations", "machine_instance_id").get(machine_instance_id, []), key=lambda i: (i["installation_date"], i["installation_id"]))
+        return sorted(
+            self._group("installations", "machine_instance_id").get(machine_instance_id, []),
+            key=lambda i: (i["installation_date"], i["installation_id"]),
+        )
 
     def installation(self, installation_id):
         return self._index("installations", "installation_id").get(installation_id)
@@ -84,8 +91,16 @@ class FileReader:
         return self._index("work_orders", "work_order_id").get(work_order_id)
 
     def work_order_events(self, work_order_id):
-        ids = [i["installation_id"] for i in self._rows("installations") if i["work_order_id"] == work_order_id]
-        ids += [r["replacement_id"] for r in self._rows("replacements") if r["work_order_id"] == work_order_id]
+        ids = [
+            i["installation_id"]
+            for i in self._rows("installations")
+            if i["work_order_id"] == work_order_id
+        ]
+        ids += [
+            r["replacement_id"]
+            for r in self._rows("replacements")
+            if r["work_order_id"] == work_order_id
+        ]
         return sorted(ids)
 
     def technician(self, technician_id):
@@ -104,10 +119,16 @@ class FileReader:
         return self._cache[key].get((machine_id, part_id))
 
     def approved_sources(self, part_id):
-        return sorted(self._group("approved_sources", "part_id").get(part_id, []), key=lambda s: s["approved_source_id"])
+        return sorted(
+            self._group("approved_sources", "part_id").get(part_id, []),
+            key=lambda s: s["approved_source_id"],
+        )
 
     def policies(self, part_id):
-        return sorted(self._group("warranty_policies", "part_id").get(part_id, []), key=lambda p: p["warranty_policy_id"])
+        return sorted(
+            self._group("warranty_policies", "part_id").get(part_id, []),
+            key=lambda p: p["warranty_policy_id"],
+        )
 
     def claim_ids(self):
         return sorted(r["claim_id"] for r in self._rows("warranty_claims"))
@@ -116,19 +137,36 @@ class FileReader:
         return self._index("warranty_claims", "claim_id").get(claim_id)
 
     def claims(self, machine_instance_id):
-        return sorted(self._group("warranty_claims", "machine_instance_id").get(machine_instance_id, []), key=lambda c: (c["claim_date"], c["claim_id"]))
+        return sorted(
+            self._group("warranty_claims", "machine_instance_id").get(machine_instance_id, []),
+            key=lambda c: (c["claim_date"], c["claim_id"]),
+        )
 
     def replacements(self, machine_instance_id):
-        return sorted(self._group("replacements", "machine_instance_id").get(machine_instance_id, []), key=lambda r: (r["replacement_date"], r["replacement_id"]))
+        return sorted(
+            self._group("replacements", "machine_instance_id").get(machine_instance_id, []),
+            key=lambda r: (r["replacement_date"], r["replacement_id"]),
+        )
 
     def evidence(self, entity_type, entity_id):
-        return sorted((e for e in self._rows("evidence") if e["entity_type"] == entity_type and e["entity_id"] == entity_id), key=lambda e: (e["created_at"] or "", e["evidence_id"]))
+        return sorted(
+            (
+                e
+                for e in self._rows("evidence")
+                if e["entity_type"] == entity_type and e["entity_id"] == entity_id
+            ),
+            key=lambda e: (e["created_at"] or "", e["evidence_id"]),
+        )
 
 
 # ── the graph ────────────────────────────────────────────────────────────────────────────────────
 def _prov(p: dict[str, Any]) -> dict[str, Any]:
-    return {"data_status": p.get("data_status"), "source_type": p.get("source_type") or ("SYNTHETIC_DEMO" if p.get("data_status") == "SYNTHETIC_DEMO" else None),
-            "source_record_id": p.get("source_record_id")}
+    return {
+        "data_status": p.get("data_status"),
+        "source_type": p.get("source_type")
+        or ("SYNTHETIC_DEMO" if p.get("data_status") == "SYNTHETIC_DEMO" else None),
+        "source_record_id": p.get("source_record_id"),
+    }
 
 
 def _list(v: Any) -> list[str]:
@@ -159,17 +197,30 @@ class GraphReader:
 
     def instance(self, machine_instance_id):
         r = self._one(q.INSTANCE, id=machine_instance_id)
-        return _row("machine_instances", r["p"], owner_id=r["owner_id"], location_id=r["location_id"]) if r else None
+        return (
+            _row("machine_instances", r["p"], owner_id=r["owner_id"], location_id=r["location_id"])
+            if r
+            else None
+        )
 
     @staticmethod
     def _installation(r: dict[str, Any]) -> dict[str, Any]:
-        row = _row("installations", r["p"], machine_instance_id=r["machine_instance_id"], part_id=r["part_id"], dealer_id=r["dealer_id"], technician_id=r["technician_id"],
-                   work_order_id=r["work_order_id"])
+        row = _row(
+            "installations",
+            r["p"],
+            machine_instance_id=r["machine_instance_id"],
+            part_id=r["part_id"],
+            dealer_id=r["dealer_id"],
+            technician_id=r["technician_id"],
+            work_order_id=r["work_order_id"],
+        )
         row["validation_issues"] = _list(row["validation_issues"])
         return row
 
     def installations(self, machine_instance_id):
-        return [self._installation(r) for r in self._g.read(q.INSTALLATIONS_OF, id=machine_instance_id)]
+        return [
+            self._installation(r) for r in self._g.read(q.INSTALLATIONS_OF, id=machine_instance_id)
+        ]
 
     def installation(self, installation_id):
         r = self._one(q.INSTALLATION, id=installation_id)
@@ -177,7 +228,17 @@ class GraphReader:
 
     def work_order(self, work_order_id):
         r = self._one(q.WORK_ORDER, id=work_order_id)
-        return _row("work_orders", r["p"], machine_instance_id=r["machine_instance_id"], dealer_id=r["dealer_id"], technician_id=r["technician_id"]) if r else None
+        return (
+            _row(
+                "work_orders",
+                r["p"],
+                machine_instance_id=r["machine_instance_id"],
+                dealer_id=r["dealer_id"],
+                technician_id=r["technician_id"],
+            )
+            if r
+            else None
+        )
 
     def work_order_events(self, work_order_id):
         return [r["id"] for r in self._g.read(q.WORK_ORDER_EVENTS, id=work_order_id)]
@@ -202,8 +263,16 @@ class GraphReader:
         out = []
         for r in self._g.read(q.APPROVED_SOURCES, id=part_id):
             p = r["p"]
-            out.append({"approved_source_id": str(p.get("rel_id", "")).removeprefix("APPROVED_SOURCE:"), "part_id": part_id, "source_id": r["source_id"],
-                        "source_kind": p.get("source_kind"), "approval_status": p.get("approval_status"), **_prov(p)})
+            out.append(
+                {
+                    "approved_source_id": str(p.get("rel_id", "")).removeprefix("APPROVED_SOURCE:"),
+                    "part_id": part_id,
+                    "source_id": r["source_id"],
+                    "source_kind": p.get("source_kind"),
+                    "approval_status": p.get("approval_status"),
+                    **_prov(p),
+                }
+            )
         return out
 
     def policies(self, part_id):
@@ -216,7 +285,14 @@ class GraphReader:
 
     @staticmethod
     def _claim(r: dict[str, Any]) -> dict[str, Any]:
-        return _row("warranty_claims", r["p"], machine_instance_id=r["machine_instance_id"], part_id=r["part_id"], installation_id=r["installation_id"], dealer_id=r["dealer_id"])
+        return _row(
+            "warranty_claims",
+            r["p"],
+            machine_instance_id=r["machine_instance_id"],
+            part_id=r["part_id"],
+            installation_id=r["installation_id"],
+            dealer_id=r["dealer_id"],
+        )
 
     def claim_ids(self):
         return [r["id"] for r in self._g.read(q.CLAIM_IDS)]
@@ -229,9 +305,22 @@ class GraphReader:
         return [self._claim(r) for r in self._g.read(q.CLAIMS_OF, id=machine_instance_id)]
 
     def replacements(self, machine_instance_id):
-        return [_row("replacements", r["p"], machine_instance_id=r["machine_instance_id"], removed_installation_id=r["removed_installation_id"], new_installation_id=r["new_installation_id"],
-                     removed_part_id=r["removed_part_id"], installed_part_id=r["installed_part_id"], work_order_id=r["work_order_id"])
-                for r in self._g.read(q.REPLACEMENTS_OF, id=machine_instance_id)]
+        return [
+            _row(
+                "replacements",
+                r["p"],
+                machine_instance_id=r["machine_instance_id"],
+                removed_installation_id=r["removed_installation_id"],
+                new_installation_id=r["new_installation_id"],
+                removed_part_id=r["removed_part_id"],
+                installed_part_id=r["installed_part_id"],
+                work_order_id=r["work_order_id"],
+            )
+            for r in self._g.read(q.REPLACEMENTS_OF, id=machine_instance_id)
+        ]
 
     def evidence(self, entity_type, entity_id):
-        return [_row("evidence", r["p"]) for r in self._g.read(q.EVIDENCE, type=entity_type, id=entity_id)]
+        return [
+            _row("evidence", r["p"])
+            for r in self._g.read(q.EVIDENCE, type=entity_type, id=entity_id)
+        ]

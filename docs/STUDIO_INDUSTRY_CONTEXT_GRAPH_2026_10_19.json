@@ -1,0 +1,26 @@
+{
+  "catalog_version": "2026.10.19.2",
+  "systems": 21,
+  "industries": 21,
+  "regions": [
+    "global",
+    "eu",
+    "india"
+  ],
+  "readback_matches": true,
+  "repeat_import_idempotent": true,
+  "immutable_overwrite_rejected": true,
+  "graph_links": [
+    {
+      "linked_system_profiles": 21
+    }
+  ],
+  "quality": {
+    "packs": 26,
+    "findings": 0,
+    "source_reference_packs": 2,
+    "reference_findings": 34,
+    "configuration_required": 2
+  },
+  "pack_versions": 49
+}

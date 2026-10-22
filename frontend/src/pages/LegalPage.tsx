@@ -23,7 +23,11 @@ const copy = {
 
 export default function LegalPage({ kind }: { kind: keyof typeof copy }) {
   const page = copy[kind]
-  usePageMeta({ title: page.title, description: `${page.title} information for the Noordveld Machinery B.V. demonstration website.`, path: page.path })
+  usePageMeta({
+    title: page.title,
+    description: `${page.title} information for the Noordveld Machinery B.V. demonstration website.`,
+    path: page.path,
+  })
   return (
     <section className="page-head" aria-labelledby="legal-title">
       <div className="container simple simple--text">

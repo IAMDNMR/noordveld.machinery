@@ -1,0 +1,21 @@
+{
+  "name": "dama-drinks-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts --public-dir=assets",
+    "render": "remotion render src/index.ts DamaPromo out/dama-drinks-9x16.mp4 --public-dir=assets --crf=18",
+    "still": "remotion still src/index.ts DamaPromo --public-dir=assets"
+  },
+  "dependencies": {
+    "@fontsource/dm-sans": "5.2.8",
+    "@remotion/cli": "4.0.532",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}

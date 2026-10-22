@@ -1,6 +1,27 @@
-import { CircleCheck, Euro, MapPin, PackageCheck, Puzzle, ScanSearch, Target, Truck } from 'lucide-react'
+import {
+  CircleCheck,
+  Euro,
+  MapPin,
+  PackageCheck,
+  Puzzle,
+  ScanSearch,
+  Target,
+  Truck,
+} from 'lucide-react'
 import { lerp, seg } from '../../lib/math'
-import { DrawPath, Glyph, Label, SCENE_H, SCENE_W, accent, accentInk, ink, ink2, ink3, line } from './primitives'
+import {
+  DrawPath,
+  Glyph,
+  Label,
+  SCENE_H,
+  SCENE_W,
+  accent,
+  accentInk,
+  ink,
+  ink2,
+  ink3,
+  line,
+} from './primitives'
 
 const REQUIREMENT = ['My machine is down.', 'Budget · Urgency', 'Availability · Location'] as const
 const CENTER = { x: 600, y: 250 }
@@ -28,10 +49,27 @@ export function AgenticScene({ p }: { p: number }) {
   const best = seg(p, 0.84, 0.95)
 
   return (
-    <svg viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} role="presentation" aria-hidden="true" width="100%" height="100%">
+    <svg
+      viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
+      role="presentation"
+      aria-hidden="true"
+      width="100%"
+      height="100%"
+    >
       <g transform={`translate(40 ${lerp(170, 126, settle)})`} opacity={lerp(1, 0.4, settle)}>
         {REQUIREMENT.map((t, i) => (
-          <text key={t} x={0} y={i * 44 + (1 - lines[i]) * 14} opacity={lines[i]} style={{ ...text, fontSize: 28, fontWeight: i === 0 ? 600 : 400, letterSpacing: '-0.02em' }}>
+          <text
+            key={t}
+            x={0}
+            y={i * 44 + (1 - lines[i]) * 14}
+            opacity={lines[i]}
+            style={{
+              ...text,
+              fontSize: 28,
+              fontWeight: i === 0 ? 600 : 400,
+              letterSpacing: '-0.02em',
+            }}
+          >
             {t}
           </text>
         ))}
@@ -45,7 +83,13 @@ export function AgenticScene({ p }: { p: number }) {
           const on = seg(p, 0.3 + i * 0.022, 0.38 + i * 0.022)
           return (
             <g key={f.name} opacity={on}>
-              <DrawPath d={`M${CENTER.x} ${CENTER.y} L${x} ${y}`} t={on} stroke={accent} width={1.5} opacity={0.6} />
+              <DrawPath
+                d={`M${CENTER.x} ${CENTER.y} L${x} ${y}`}
+                t={on}
+                stroke={accent}
+                width={1.5}
+                opacity={0.6}
+              />
               <circle cx={x} cy={y} r={30} fill="var(--scene-mask, var(--paper))" />
               <Glyph icon={f.icon} x={x} y={y} size={36} color={ink} strokeWidth={1.5} />
               <Label x={x} y={y + (Math.sin(a) < -0.2 ? -44 : 54)} size={19} fill={ink2}>
@@ -66,17 +110,47 @@ export function AgenticScene({ p }: { p: number }) {
           return (
             <g key={o.name} transform={`translate(440 ${y})`} opacity={o2}>
               <line x1={0} x2={320} y1={-34} y2={-34} stroke={line} strokeWidth={1} />
-              <text x={0} y={0} style={{ ...text, fontSize: 25, fontWeight: 600, letterSpacing: '-0.02em', fill: isBest && best > 0.5 ? accentInk : ink }}>
+              <text
+                x={0}
+                y={0}
+                style={{
+                  ...text,
+                  fontSize: 25,
+                  fontWeight: 600,
+                  letterSpacing: '-0.02em',
+                  fill: isBest && best > 0.5 ? accentInk : ink,
+                }}
+              >
                 Option {o.name}
               </text>
-              <text x={0} y={30} style={{ ...text, fontSize: 'var(--scene-meta, 19px)', fill: ink3 }}>
+              <text
+                x={0}
+                y={30}
+                style={{ ...text, fontSize: 'var(--scene-meta, 19px)', fill: ink3 }}
+              >
                 {o.meta}
               </text>
-              {isBest ? <Glyph icon={CircleCheck} x={300} y={-8} size={30} color={accent} strokeWidth={1.6} opacity={best} /> : null}
+              {isBest ? (
+                <Glyph
+                  icon={CircleCheck}
+                  x={300}
+                  y={-8}
+                  size={30}
+                  color={accent}
+                  strokeWidth={1.6}
+                  opacity={best}
+                />
+              ) : null}
             </g>
           )
         })}
-        <text x={760} y={78} textAnchor="end" opacity={best} style={{ ...text, fontSize: 19, fontWeight: 500, fill: accentInk }}>
+        <text
+          x={760}
+          y={78}
+          textAnchor="end"
+          opacity={best}
+          style={{ ...text, fontSize: 19, fontWeight: 500, fill: accentInk }}
+        >
           Best match for your requirement
         </text>
       </g>

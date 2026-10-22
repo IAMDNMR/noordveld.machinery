@@ -9,6 +9,7 @@ Rules (the same stock rules the direct-order flow enforces again at allocation):
   * The depot is chosen from the ones that can supply, by the fastest recorded route (days, then distance, then ids); never by "most stock".
   * Nothing here is guessed: no route means no delivery claim.
 """
+
 from __future__ import annotations
 
 import unicodedata
@@ -18,7 +19,13 @@ from typing import Any
 from app.core.geography import COUNTRY_NAMES
 from app.services.fulfilment import KNOWN_AVAILABLE, option_view, stock_state
 
-STATE_LABEL = {"IN_STOCK": "In stock", "LOW_STOCK": "Low stock", "ON_ORDER": "On order", "OUT_OF_STOCK": "Out of stock", "UNKNOWN": "Availability unknown"}
+STATE_LABEL = {
+    "IN_STOCK": "In stock",
+    "LOW_STOCK": "Low stock",
+    "ON_ORDER": "On order",
+    "OUT_OF_STOCK": "Out of stock",
+    "UNKNOWN": "Availability unknown",
+}
 STATE_RANK = {"IN_STOCK": 0, "LOW_STOCK": 1, "ON_ORDER": 2, "UNKNOWN": 3, "OUT_OF_STOCK": 4}
 
 
@@ -40,7 +47,9 @@ class Destination:
     city: str | None = None
     country_code: str | None = None
     shipto_ids: list[str] = field(default_factory=list)
-    choices: list[str] = field(default_factory=list)  # cities to offer when the place is not specific enough or not found
+    choices: list[str] = field(
+        default_factory=list
+    )  # cities to offer when the place is not specific enough or not found
 
 
 def resolve_destination(place: str, destinations: list[dict[str, Any]]) -> Destination:
@@ -48,32 +57,66 @@ def resolve_destination(place: str, destinations: list[dict[str, Any]]) -> Desti
     raw = " ".join((place or "").split())
     head, _, tail = raw.partition(",")
     key, tail_key = fold(head), fold(tail)
-    wanted_cc = next((cc for name, cc in COUNTRY_NAMES.items() if tail_key and tail_key in (fold(name), cc.lower())), None)
-    hits = [d for d in destinations if fold(d["city"]) == key and (wanted_cc is None or d["country_code"] == wanted_cc)]
+    wanted_cc = next(
+        (
+            cc
+            for name, cc in COUNTRY_NAMES.items()
+            if tail_key and tail_key in (fold(name), cc.lower())
+        ),
+        None,
+    )
+    hits = [
+        d
+        for d in destinations
+        if fold(d["city"]) == key and (wanted_cc is None or d["country_code"] == wanted_cc)
+    ]
     if hits:
         countries = sorted({d["country_code"] for d in hits})
         if len(countries) > 1:
-            return Destination("ambiguous", raw, choices=[f"{hits[0]['city']}, {c}" for c in countries])
-        return Destination("city", raw, city=hits[0]["city"], country_code=countries[0], shipto_ids=sorted(d["shipto_id"] for d in hits))
-    cc = next((c for name, c in COUNTRY_NAMES.items() if fold(name) == key or c.lower() == key), None)
+            return Destination(
+                "ambiguous", raw, choices=[f"{hits[0]['city']}, {c}" for c in countries]
+            )
+        return Destination(
+            "city",
+            raw,
+            city=hits[0]["city"],
+            country_code=countries[0],
+            shipto_ids=sorted(d["shipto_id"] for d in hits),
+        )
+    cc = next(
+        (c for name, c in COUNTRY_NAMES.items() if fold(name) == key or c.lower() == key), None
+    )
     if cc and any(d["country_code"] == cc for d in destinations):
-        return Destination("country", raw, country_code=cc, choices=sorted({d["city"] for d in destinations if d["country_code"] == cc}))
+        return Destination(
+            "country",
+            raw,
+            country_code=cc,
+            choices=sorted({d["city"] for d in destinations if d["country_code"] == cc}),
+        )
     return Destination("unknown", raw, choices=sorted({d["city"] for d in destinations}))
 
 
 # ── supply for one part ──────────────────────────────────────────────────────────────────────────
 def _fastest_first(o: dict[str, Any]) -> tuple:
-    return (o["estimated_days"] if o.get("estimated_days") is not None else 10**6, o.get("distance_km") or 0.0, o["route_id"])
+    return (
+        o["estimated_days"] if o.get("estimated_days") is not None else 10**6,
+        o.get("distance_km") or 0.0,
+        o["route_id"],
+    )
 
 
 @dataclass
 class Supply:
     availability: str = "UNKNOWN"  # best state across depots, spec vocabulary
     units: int | None = None  # known units across depots; None when nothing is known (never zero)
-    depots: list[dict[str, Any]] = field(default_factory=list)  # every depot row: id, name, city, state, available, can_supply
+    depots: list[dict[str, Any]] = field(
+        default_factory=list
+    )  # every depot row: id, name, city, state, available, can_supply
     stock_ok: bool = False  # some depot has known stock >= the quantity
     route_ok: bool | None = None  # None when no destination was asked for
-    depot: dict[str, Any] | None = None  # chosen depot (only when a destination makes the choice meaningful)
+    depot: dict[str, Any] | None = (
+        None  # chosen depot (only when a destination makes the choice meaningful)
+    )
     route: dict[str, Any] | None = None  # chosen route option
     shipto_id: str | None = None
 
@@ -82,17 +125,36 @@ class Supply:
         return self.stock_ok and self.route_ok is not False
 
 
-def part_supply(part_id: str, quantity: int, stock_rows: list[dict[str, Any]], route_rows: list[dict[str, Any]] | None) -> Supply:
+def part_supply(
+    part_id: str,
+    quantity: int,
+    stock_rows: list[dict[str, Any]],
+    route_rows: list[dict[str, Any]] | None,
+) -> Supply:
     """`route_rows` None = no destination asked for; [] = a destination with no route from any of these depots."""
     mine = [r for r in stock_rows if r["part_id"] == part_id]
     depots, states = [], []
     for r in mine:
         st = stock_state(r)
         states.append(st["state"])
-        depots.append({"depot_id": r["warehouse_id"], "name": r.get("name"), "city": r.get("city"), "country_code": r.get("country_code"), "state": st["state"],
-                       "available": st["available"], "data_status": r.get("data_status"),
-                       "can_supply": st["state"] in KNOWN_AVAILABLE and bool(st["known"]) and st["available"] >= quantity})
-    out = Supply(availability=min(states, key=lambda s: STATE_RANK[s]) if states else "UNKNOWN", depots=depots)
+        depots.append(
+            {
+                "depot_id": r["warehouse_id"],
+                "name": r.get("name"),
+                "city": r.get("city"),
+                "country_code": r.get("country_code"),
+                "state": st["state"],
+                "available": st["available"],
+                "data_status": r.get("data_status"),
+                "can_supply": st["state"] in KNOWN_AVAILABLE
+                and bool(st["known"])
+                and st["available"] >= quantity,
+            }
+        )
+    out = Supply(
+        availability=min(states, key=lambda s: STATE_RANK[s]) if states else "UNKNOWN",
+        depots=depots,
+    )
     known = [d["available"] for d in depots if d["available"] is not None]
     out.units = sum(known) if known else None
     able = [d for d in depots if d["can_supply"]]

@@ -1,0 +1,2047 @@
+{
+  "id": "cat_aftersales_warranty",
+  "version": "2026.10.22",
+  "layer": "business",
+  "title": "After-sales: installation, warranty claim, service visit and consumer remedies",
+  "description": "Recording an installation, handling a warranty claim with deterministic coverage conditions, carrying out service visits, and the EU consumer remedies for goods that do not conform, as documented by the ERPNext support manual and Directive (EU) 2019/771.",
+  "synthetic": false,
+  "status": "approved",
+  "provenance": {
+    "kind": "verified_source",
+    "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/installation-note; docs.frappe.io/erpnext/user/manual/en/warranty-claim; docs.frappe.io/erpnext/user/manual/en/maintenance-visit; eur-lex.europa.eu/eli/dir/2019/771/oj/eng; backend/app/lifecycle/rules.py",
+    "verification": "verified"
+  },
+  "depends_on": [],
+  "uses_capabilities": [
+    "audit_history",
+    "search_filter"
+  ],
+  "dependency_mode": "full",
+  "includes": [],
+  "business": {
+    "requirements": [
+      {
+        "id": "req_asv_install",
+        "statement": "After delivery, the installation of a product at the customer's site is recorded on an installation note created from the delivery note, with the customer, item and quantity, remarks, and the serial numbers of serialised items.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_install_1",
+            "statement": "The installation note refers to the delivery."
+          },
+          {
+            "id": "ac_asv_install_2",
+            "statement": "Serial numbers are recorded for serialised items."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_claim",
+        "statement": "A customer's request for a free repair of an item still under warranty or a maintenance contract is recorded as a warranty claim for a customer and the item's serial number, showing whether the item is under warranty, out of warranty, under a maintenance contract or out of one, with the issue described.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_claim_1",
+            "statement": "A claim names the customer and serial number."
+          },
+          {
+            "id": "ac_asv_claim_2",
+            "statement": "A claim starts open."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_eligibility",
+        "statement": "Warranty coverage is judged by fixed conditions on complete, evidenced facts: the installing dealer must be authorised; the part must be a verified catalogue part from an approved source; the part must be approved for the machine model; the failure must fall inside the coverage period; the installation must have a technician, a work order and their records; an earlier claim or replacement of the part on the machine sends the claim to review; the result is eligible, not eligible, needs review, or insufficient data.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_eligibility_1",
+            "statement": "A claim shows its outcome and the reasons."
+          },
+          {
+            "id": "ac_asv_eligibility_2",
+            "statement": "Missing facts are never invented."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_repair",
+        "statement": "An eligible claim is repaired or replaced, moves to work in progress while the fix is made, and is closed with the resolution date, the person who resolved it and the details; a claim that is invalid is cancelled.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_repair_1",
+            "statement": "A closed claim has a resolution date and details."
+          },
+          {
+            "id": "ac_asv_repair_2",
+            "statement": "An invalid claim is cancelled."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_visit",
+        "statement": "An engineer's visit to the customer's site for maintenance is recorded with its type (scheduled, unscheduled or breakdown), the item and serial number, the work done, and whether it was partially or fully completed; a visit can be created from a warranty claim.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_visit_1",
+            "statement": "A visit records its type and completion."
+          },
+          {
+            "id": "ac_asv_visit_2",
+            "statement": "A partial visit leads to a further visit."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_feedback",
+        "statement": "The customer's feedback about a visit is captured.",
+        "kind": "functional",
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_feedback_1",
+            "statement": "Feedback is stored on the visit."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_liability",
+        "statement": "For a consumer's purchase, the seller is liable for a lack of conformity that exists at delivery and becomes apparent within two years; a lack of conformity apparent within one year is presumed to have existed at delivery.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_liability_1",
+            "statement": "The claim shows the time since delivery."
+          },
+          {
+            "id": "ac_asv_liability_2",
+            "statement": "A lack of conformity within one year is presumed to have existed at delivery."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_remedy",
+        "statement": "A consumer can choose repair or replacement, which is free of charge, within a reasonable time and without significant inconvenience; if that is impossible, not completed, or the lack reappears or is serious, the consumer can have a proportionate price reduction or terminate the contract, but not terminate for a minor lack of conformity.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_remedy_1",
+            "statement": "The chosen remedy and its result are recorded."
+          },
+          {
+            "id": "ac_asv_remedy_2",
+            "statement": "A minor lack of conformity does not allow termination."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_alternative",
+        "statement": "The directive on the sale of goods applies to contracts between a consumer and a seller; a sale between businesses is handled under the warranty claim.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_alternative_1",
+            "statement": "A consumer sale is told apart from a business sale."
+          }
+        ]
+      },
+      {
+        "id": "req_asv_history",
+        "statement": "The status and resolution of each claim and visit are kept.",
+        "kind": "non_functional",
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_asv_history_1",
+            "statement": "Every claim shows its status and resolution."
+          }
+        ],
+        "category": "auditability"
+      }
+    ],
+    "roles": [
+      {
+        "id": "role_asv_customer",
+        "name": "Customer",
+        "responsibilities": [
+          "Raises warranty claims",
+          "Gives feedback on visits",
+          "Chooses a remedy"
+        ],
+        "permissions": [
+          "asv.claim_raise",
+          "asv.feedback_give",
+          "asv.remedy_choose"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_asv_technician",
+        "name": "Service technician",
+        "responsibilities": [
+          "Records installations",
+          "Performs repairs and visits"
+        ],
+        "permissions": [
+          "asv.install_record",
+          "asv.repair_perform",
+          "asv.visit_perform"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_asv_warranty",
+        "name": "Warranty manager",
+        "responsibilities": [
+          "Checks warranty coverage",
+          "Reviews claims",
+          "Closes claims",
+          "Handles consumer remedies"
+        ],
+        "permissions": [
+          "asv.coverage_check",
+          "asv.claim_review",
+          "asv.claim_close",
+          "asv.remedy_handle"
+        ],
+        "approval_authority": []
+      }
+    ],
+    "entities": [
+      {
+        "id": "ent_asv_machine",
+        "name": "Machine",
+        "description": "A product with a serial number at a customer.",
+        "attributes": [
+          {
+            "id": "machine_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "serial_number",
+            "name": "Serial number",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 80
+          },
+          {
+            "id": "item_name",
+            "name": "Item",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "delivered_on",
+            "name": "Delivered on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "warranty_status",
+            "name": "Warranty status",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "UNDER_WARRANTY",
+              "OUT_OF_WARRANTY",
+              "UNDER_AMC",
+              "OUT_OF_AMC"
+            ],
+            "description": "Warranty or annual maintenance contract status."
+          },
+          {
+            "id": "warranty_expiry",
+            "name": "Warranty expiry date",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "customer_type",
+            "name": "Customer type",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "CONSUMER",
+              "BUSINESS"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ent_asv_installation",
+        "name": "Installation",
+        "description": "The installation of a product at the customer's site.",
+        "attributes": [
+          {
+            "id": "installation_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "installed_on",
+            "name": "Installed on",
+            "type": "date",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "remarks",
+            "name": "Remarks",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 500
+          },
+          {
+            "id": "serialised",
+            "name": "Serial numbers needed",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "SERIALISED",
+              "NOT_SERIALISED"
+            ]
+          },
+          {
+            "id": "serial_numbers",
+            "name": "Serial numbers",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 500
+          },
+          {
+            "id": "technician",
+            "name": "Technician",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "work_order",
+            "name": "Work order",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 80
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_asv_installation_machine",
+            "name": "Machine",
+            "target": "ent_asv_machine",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_asv_claim",
+        "name": "Warranty claim",
+        "description": "A request for a free repair under warranty.",
+        "attributes": [
+          {
+            "id": "claim_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "issue",
+            "name": "Issue",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 1000
+          },
+          {
+            "id": "raised_on",
+            "name": "Issue date",
+            "type": "date",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "OPEN",
+              "WORK_IN_PROGRESS",
+              "CLOSED",
+              "CANCELLED"
+            ],
+            "default": "OPEN"
+          },
+          {
+            "id": "eligibility",
+            "name": "Coverage outcome",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "ELIGIBLE",
+              "NOT_ELIGIBLE",
+              "REQUIRES_REVIEW",
+              "INSUFFICIENT_DATA"
+            ]
+          },
+          {
+            "id": "reasons",
+            "name": "Reasons",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 1000
+          },
+          {
+            "id": "resolution_date",
+            "name": "Resolution date",
+            "type": "datetime",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "resolved_by",
+            "name": "Resolved by",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "resolved_details",
+            "name": "Resolution details",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 1000
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_asv_claim_machine",
+            "name": "Machine",
+            "target": "ent_asv_machine",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_asv_visit",
+        "name": "Service visit",
+        "description": "A visit to the customer's site for maintenance.",
+        "attributes": [
+          {
+            "id": "visit_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "visit_on",
+            "name": "Visit date",
+            "type": "datetime",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "maintenance_type",
+            "name": "Maintenance type",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "SCHEDULED",
+              "UNSCHEDULED",
+              "BREAKDOWN"
+            ]
+          },
+          {
+            "id": "work_done",
+            "name": "Work done",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 1000
+          },
+          {
+            "id": "completion",
+            "name": "Completion",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "FULLY_COMPLETED",
+              "PARTIALLY_COMPLETED"
+            ]
+          },
+          {
+            "id": "customer_feedback",
+            "name": "Customer feedback",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 1000
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_asv_visit_machine",
+            "name": "Machine",
+            "target": "ent_asv_machine",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_asv_visit_claim",
+            "name": "Warranty claim",
+            "target": "ent_asv_claim",
+            "cardinality": "many_to_one",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "ent_asv_remedy",
+        "name": "Consumer remedy",
+        "description": "A consumer's claim for a lack of conformity of goods.",
+        "attributes": [
+          {
+            "id": "remedy_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "consumer_sale",
+            "name": "Consumer sale",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "CONSUMER_SALE",
+              "BUSINESS_SALE"
+            ]
+          },
+          {
+            "id": "days_since_delivery",
+            "name": "Days since delivery",
+            "type": "integer",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0,
+            "value_source": "calculated",
+            "writable": false
+          },
+          {
+            "id": "liability_days",
+            "name": "Liability period (days)",
+            "type": "integer",
+            "required": true,
+            "sensitivity": "internal",
+            "minimum": 0,
+            "value_source": "calculated",
+            "writable": false,
+            "description": "Two years from delivery; a Member State may set a longer period (Directive (EU) 2019/771, Article 10)."
+          },
+          {
+            "id": "presumed_at_delivery",
+            "name": "Presumed to exist at delivery",
+            "type": "boolean",
+            "required": false,
+            "sensitivity": "internal",
+            "description": "True when the lack of conformity appeared within one year of delivery (Article 11)."
+          },
+          {
+            "id": "chosen_remedy",
+            "name": "Chosen remedy",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "REPAIR",
+              "REPLACEMENT"
+            ]
+          },
+          {
+            "id": "remedy_result",
+            "name": "Result",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "BROUGHT_INTO_CONFORMITY",
+              "NOT_REMEDIED"
+            ]
+          },
+          {
+            "id": "final_remedy",
+            "name": "Final remedy",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "PRICE_REDUCTION",
+              "TERMINATION"
+            ]
+          },
+          {
+            "id": "minor",
+            "name": "Minor lack of conformity",
+            "type": "boolean",
+            "required": false,
+            "sensitivity": "internal"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_asv_remedy_machine",
+            "name": "Machine",
+            "target": "ent_asv_machine",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule_asv_serial",
+        "description": "Serial numbers are recorded only for serialised items.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://docs.frappe.io/erpnext/user/manual/en/installation-note (Serial numbers are added in the Items table, but only if the item is serialized)"
+        },
+        "condition": "",
+        "outcomes": [
+          "SERIALISED",
+          "NOT_SERIALISED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_asv_installation.serialised",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_asv_eligibility",
+        "description": "A warranty claim is eligible, not eligible, requires review, or lacks the data to be judged.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "implemented_code",
+          "reference": "backend/app/lifecycle/rules.py (CONDITIONS and evaluate(): the outcomes and their precedence)"
+        },
+        "condition": "",
+        "outcomes": [
+          "ELIGIBLE",
+          "NOT_ELIGIBLE",
+          "REQUIRES_REVIEW",
+          "INSUFFICIENT_DATA"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_asv_claim.eligibility",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_asv_completion",
+        "description": "A visit is fully or partially completed.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://docs.frappe.io/erpnext/user/manual/en/maintenance-visit (Completion statuses: Partially Completed or Fully Completed)"
+        },
+        "condition": "",
+        "outcomes": [
+          "FULLY_COMPLETED",
+          "PARTIALLY_COMPLETED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_asv_visit.completion",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_asv_scope",
+        "description": "The consumer sale rules apply to contracts between a consumer and a seller.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2019/771/oj/eng (Article 3(1))"
+        },
+        "condition": "",
+        "outcomes": [
+          "CONSUMER_SALE",
+          "BUSINESS_SALE"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_asv_remedy.consumer_sale",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_asv_liability",
+        "description": "The seller is liable for a lack of conformity that becomes apparent within the liability period from delivery.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2019/771/oj/eng (Article 10(1) and 10(3))"
+        },
+        "condition": "",
+        "outcomes": [
+          "WITHIN_LIABILITY",
+          "OUTSIDE_LIABILITY"
+        ],
+        "execution": {
+          "kind": "compare",
+          "field": "ent_asv_remedy.days_since_delivery",
+          "operator": "lte",
+          "value": null,
+          "other_field": "ent_asv_remedy.liability_days",
+          "pass_outcome": "WITHIN_LIABILITY",
+          "fail_outcome": "OUTSIDE_LIABILITY"
+        }
+      },
+      {
+        "id": "rule_asv_remedy",
+        "description": "Repair or replacement either brings the goods into conformity or does not, in which case price reduction or termination is available.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://eur-lex.europa.eu/eli/dir/2019/771/oj/eng (Article 13(1), 13(4) and 14)"
+        },
+        "condition": "",
+        "outcomes": [
+          "BROUGHT_INTO_CONFORMITY",
+          "NOT_REMEDIED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_asv_remedy.remedy_result",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      }
+    ],
+    "exceptions": [
+      {
+        "id": "exc_asv_not_eligible",
+        "name": "Claim not eligible",
+        "trigger": "A condition that must hold definitely fails, for example an unauthorised dealer or an expired coverage period.",
+        "recovery": "The claim is cancelled with the reasons.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_asv_c_cancelled"
+      },
+      {
+        "id": "exc_asv_review",
+        "name": "Claim needs review",
+        "trigger": "The facts are complete but an earlier claim or replacement of the same part exists, or the policy is ambiguous.",
+        "recovery": "The warranty manager reviews the claim and records the outcome, then coverage is judged again.",
+        "resolution": "recover",
+        "resolution_state_id": "st_asv_c_check"
+      },
+      {
+        "id": "exc_asv_data",
+        "name": "Insufficient data",
+        "trigger": "A needed fact is missing, such as the technician, work order, evidence or policy.",
+        "recovery": "The missing records are collected and coverage is judged again; nothing is invented.",
+        "resolution": "recover",
+        "resolution_state_id": "st_asv_c_check"
+      },
+      {
+        "id": "exc_asv_partial_visit",
+        "name": "Visit partially completed",
+        "trigger": "The maintenance visit could not be fully completed.",
+        "recovery": "A further visit is arranged for the remaining work.",
+        "resolution": "recover",
+        "resolution_state_id": "st_asv_v_visit"
+      },
+      {
+        "id": "exc_asv_out_of_liability",
+        "name": "Outside the liability period",
+        "trigger": "The lack of conformity became apparent after the liability period.",
+        "recovery": "The seller is not liable under the directive.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_asv_r_closed"
+      },
+      {
+        "id": "exc_asv_business_sale",
+        "name": "Not a consumer sale",
+        "trigger": "The sale is between businesses.",
+        "recovery": "The directive on the sale of goods does not apply; the warranty claim process applies.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_asv_r_closed"
+      },
+      {
+        "id": "exc_asv_price_or_terminate",
+        "name": "Repair or replacement did not succeed",
+        "trigger": "The seller has not completed the repair or replacement, refused it, the lack reappears, or it is serious.",
+        "recovery": "The consumer chooses a proportionate price reduction or terminates the contract, except for a minor lack of conformity.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_asv_r_final"
+      }
+    ],
+    "decisions": [],
+    "integrations": [],
+    "terms": [
+      {
+        "id": "term_asv_warranty",
+        "term": "Warranty claim",
+        "definition": "A customer's request for free repairs on an item still covered by warranty or a maintenance contract."
+      },
+      {
+        "id": "term_asv_conformity",
+        "term": "Lack of conformity",
+        "definition": "Goods that do not conform to the sales contract."
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "version": 1,
+      "id": "wf_asv_install",
+      "name": "Installation",
+      "states": [
+        {
+          "id": "st_asv_i_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_i_create",
+          "label": "Create the installation note from the delivery",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.install_record",
+          "requirement_ids": [
+            "req_asv_install"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_machine"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_installation"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_i_serial",
+          "label": "Are serial numbers needed?",
+          "kind": "branch",
+          "outputs": [
+            "rule_asv_serial"
+          ],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": null,
+          "requirement_ids": [
+            "req_asv_install"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_asv_serial"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_i_numbers",
+          "label": "Record the serial numbers",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.install_record",
+          "requirement_ids": [
+            "req_asv_install"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_installation"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_installation"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_i_submit",
+          "label": "Submit the installation note",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.install_record",
+          "requirement_ids": [
+            "req_asv_install"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_installation"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_installation",
+            "ent_asv_machine"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_i_done",
+          "label": "Installation recorded",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_asv_i_1",
+          "source": "st_asv_i_start",
+          "target": "st_asv_i_create",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_i_2",
+          "source": "st_asv_i_create",
+          "target": "st_asv_i_serial",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_i_3",
+          "source": "st_asv_i_serial",
+          "target": "st_asv_i_numbers",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_serial",
+            "value": "SERIALISED"
+          }
+        },
+        {
+          "id": "tr_asv_i_4",
+          "source": "st_asv_i_serial",
+          "target": "st_asv_i_submit",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_serial",
+            "value": "NOT_SERIALISED"
+          }
+        },
+        {
+          "id": "tr_asv_i_5",
+          "source": "st_asv_i_numbers",
+          "target": "st_asv_i_submit",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_i_6",
+          "source": "st_asv_i_submit",
+          "target": "st_asv_i_done",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_asv_claim",
+      "name": "Warranty claim",
+      "states": [
+        {
+          "id": "st_asv_c_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_raise",
+          "label": "Raise the warranty claim",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_customer",
+          "permission": "asv.claim_raise",
+          "requirement_ids": [
+            "req_asv_claim"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_machine"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_check",
+          "label": "Judge the warranty coverage",
+          "kind": "branch",
+          "outputs": [
+            "rule_asv_eligibility"
+          ],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.coverage_check",
+          "requirement_ids": [
+            "req_asv_eligibility"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_claim",
+            "ent_asv_machine",
+            "ent_asv_installation"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "rule_ids": [
+            "rule_asv_eligibility"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_ineligible",
+          "label": "Cancel the claim with the reasons",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.claim_review",
+          "requirement_ids": [
+            "req_asv_eligibility"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_not_eligible"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_review",
+          "label": "Review the claim",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.claim_review",
+          "requirement_ids": [
+            "req_asv_eligibility"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_review"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_data",
+          "label": "Collect the missing records",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.claim_review",
+          "requirement_ids": [
+            "req_asv_eligibility"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_claim",
+            "ent_asv_installation"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim",
+            "ent_asv_installation"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_data"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_repair",
+          "label": "Repair or replace the item",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.repair_perform",
+          "requirement_ids": [
+            "req_asv_repair"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_claim",
+            "ent_asv_machine"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_close",
+          "label": "Close the claim with the resolution",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.claim_close",
+          "requirement_ids": [
+            "req_asv_repair",
+            "req_asv_history"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_claim"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_done",
+          "label": "Claim resolved",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_c_cancelled",
+          "label": "Claim cancelled",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_asv_c_1",
+          "source": "st_asv_c_start",
+          "target": "st_asv_c_raise",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_c_2",
+          "source": "st_asv_c_raise",
+          "target": "st_asv_c_check",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_c_3",
+          "source": "st_asv_c_check",
+          "target": "st_asv_c_repair",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_eligibility",
+            "value": "ELIGIBLE"
+          }
+        },
+        {
+          "id": "tr_asv_c_4",
+          "source": "st_asv_c_check",
+          "target": "st_asv_c_ineligible",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_eligibility",
+            "value": "NOT_ELIGIBLE"
+          }
+        },
+        {
+          "id": "tr_asv_c_5",
+          "source": "st_asv_c_ineligible",
+          "target": "st_asv_c_cancelled",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_c_6",
+          "source": "st_asv_c_check",
+          "target": "st_asv_c_review",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_eligibility",
+            "value": "REQUIRES_REVIEW"
+          }
+        },
+        {
+          "id": "tr_asv_c_7",
+          "source": "st_asv_c_review",
+          "target": "st_asv_c_check",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_c_8",
+          "source": "st_asv_c_check",
+          "target": "st_asv_c_data",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_eligibility",
+            "value": "INSUFFICIENT_DATA"
+          }
+        },
+        {
+          "id": "tr_asv_c_9",
+          "source": "st_asv_c_data",
+          "target": "st_asv_c_check",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_c_10",
+          "source": "st_asv_c_repair",
+          "target": "st_asv_c_close",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_c_11",
+          "source": "st_asv_c_close",
+          "target": "st_asv_c_done",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_asv_visit",
+      "name": "Service visit",
+      "states": [
+        {
+          "id": "st_asv_v_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_v_visit",
+          "label": "Carry out the maintenance visit",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.visit_perform",
+          "requirement_ids": [
+            "req_asv_visit"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_machine",
+            "ent_asv_claim"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_visit"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_v_done_check",
+          "label": "Was the visit fully completed?",
+          "kind": "branch",
+          "outputs": [
+            "rule_asv_completion"
+          ],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": null,
+          "requirement_ids": [
+            "req_asv_visit"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_asv_completion"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_v_partial",
+          "label": "Arrange a further visit",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.visit_perform",
+          "requirement_ids": [
+            "req_asv_visit"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_visit"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_visit"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_partial_visit"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_v_feedback",
+          "label": "Capture the customer's feedback",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_customer",
+          "permission": "asv.feedback_give",
+          "requirement_ids": [
+            "req_asv_feedback"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_visit"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_visit"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_v_end",
+          "label": "Visit completed",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_asv_v_1",
+          "source": "st_asv_v_start",
+          "target": "st_asv_v_visit",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_v_2",
+          "source": "st_asv_v_visit",
+          "target": "st_asv_v_done_check",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_v_3",
+          "source": "st_asv_v_done_check",
+          "target": "st_asv_v_feedback",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_completion",
+            "value": "FULLY_COMPLETED"
+          }
+        },
+        {
+          "id": "tr_asv_v_4",
+          "source": "st_asv_v_done_check",
+          "target": "st_asv_v_partial",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_completion",
+            "value": "PARTIALLY_COMPLETED"
+          }
+        },
+        {
+          "id": "tr_asv_v_5",
+          "source": "st_asv_v_partial",
+          "target": "st_asv_v_visit",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_v_6",
+          "source": "st_asv_v_feedback",
+          "target": "st_asv_v_end",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_asv_remedy",
+      "name": "Consumer remedy for non-conforming goods",
+      "states": [
+        {
+          "id": "st_asv_r_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_report",
+          "label": "Report the lack of conformity",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_customer",
+          "permission": "asv.remedy_choose",
+          "requirement_ids": [
+            "req_asv_liability"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_machine"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_scope",
+          "label": "Is it a consumer sale?",
+          "kind": "branch",
+          "outputs": [
+            "rule_asv_scope"
+          ],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": null,
+          "requirement_ids": [
+            "req_asv_alternative"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_asv_scope"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_business",
+          "label": "Refer to the warranty claim process",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.remedy_handle",
+          "requirement_ids": [
+            "req_asv_alternative"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_business_sale"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_period",
+          "label": "Is it within the liability period?",
+          "kind": "branch",
+          "outputs": [
+            "rule_asv_liability"
+          ],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": null,
+          "requirement_ids": [
+            "req_asv_liability"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_asv_liability"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_late",
+          "label": "Decline: outside the liability period",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": "asv.remedy_handle",
+          "requirement_ids": [
+            "req_asv_liability"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_out_of_liability"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_choose",
+          "label": "Choose repair or replacement",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_customer",
+          "permission": "asv.remedy_choose",
+          "requirement_ids": [
+            "req_asv_remedy"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_fix",
+          "label": "Repair or replace free of charge",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_technician",
+          "permission": "asv.repair_perform",
+          "requirement_ids": [
+            "req_asv_remedy"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_remedy",
+            "ent_asv_machine"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_result",
+          "label": "Were the goods brought into conformity?",
+          "kind": "branch",
+          "outputs": [
+            "rule_asv_remedy"
+          ],
+          "outcome": null,
+          "role_id": "role_asv_warranty",
+          "permission": null,
+          "requirement_ids": [
+            "req_asv_remedy"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_asv_remedy"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_final",
+          "label": "Price reduction or termination",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_asv_customer",
+          "permission": "asv.remedy_choose",
+          "requirement_ids": [
+            "req_asv_remedy"
+          ],
+          "reads_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "writes_entity_ids": [
+            "ent_asv_remedy"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_asv_price_or_terminate"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_done",
+          "label": "Goods in conformity",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_closed",
+          "label": "Not covered",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_asv_r_settled",
+          "label": "Price reduced or contract terminated",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_asv_r_1",
+          "source": "st_asv_r_start",
+          "target": "st_asv_r_report",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_r_2",
+          "source": "st_asv_r_report",
+          "target": "st_asv_r_scope",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_r_3",
+          "source": "st_asv_r_scope",
+          "target": "st_asv_r_period",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_scope",
+            "value": "CONSUMER_SALE"
+          }
+        },
+        {
+          "id": "tr_asv_r_4",
+          "source": "st_asv_r_scope",
+          "target": "st_asv_r_business",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_scope",
+            "value": "BUSINESS_SALE"
+          }
+        },
+        {
+          "id": "tr_asv_r_5",
+          "source": "st_asv_r_business",
+          "target": "st_asv_r_closed",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_r_6",
+          "source": "st_asv_r_period",
+          "target": "st_asv_r_choose",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_liability",
+            "value": "WITHIN_LIABILITY"
+          }
+        },
+        {
+          "id": "tr_asv_r_7",
+          "source": "st_asv_r_period",
+          "target": "st_asv_r_late",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_liability",
+            "value": "OUTSIDE_LIABILITY"
+          }
+        },
+        {
+          "id": "tr_asv_r_8",
+          "source": "st_asv_r_late",
+          "target": "st_asv_r_closed",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_r_9",
+          "source": "st_asv_r_choose",
+          "target": "st_asv_r_fix",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_r_10",
+          "source": "st_asv_r_fix",
+          "target": "st_asv_r_result",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_asv_r_11",
+          "source": "st_asv_r_result",
+          "target": "st_asv_r_done",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_remedy",
+            "value": "BROUGHT_INTO_CONFORMITY"
+          }
+        },
+        {
+          "id": "tr_asv_r_12",
+          "source": "st_asv_r_result",
+          "target": "st_asv_r_final",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_asv_remedy",
+            "value": "NOT_REMEDIED"
+          }
+        },
+        {
+          "id": "tr_asv_r_13",
+          "source": "st_asv_r_final",
+          "target": "st_asv_r_settled",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    }
+  ],
+  "process_contexts": [
+    {
+      "workflow_id": "wf_asv_install",
+      "family_id": "installation",
+      "variant": "Installation note after delivery",
+      "region": "Global",
+      "source_system": "ERPNext",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/installation-note",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_asv_claim",
+      "family_id": "warranty_claim",
+      "variant": "Warranty claim with coverage conditions",
+      "region": "Global",
+      "source_system": "ERPNext; Noordveld warranty evaluator",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/warranty-claim; backend/app/lifecycle/rules.py",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_asv_visit",
+      "family_id": "service_visit",
+      "variant": "Maintenance visit",
+      "region": "Global",
+      "source_system": "ERPNext",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: docs.frappe.io/erpnext/user/manual/en/maintenance-visit",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_asv_remedy",
+      "family_id": "consumer_remedy",
+      "variant": "EU remedies for lack of conformity",
+      "region": "European Union",
+      "source_system": "Directive (EU) 2019/771",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: eur-lex.europa.eu/eli/dir/2019/771/oj/eng",
+        "verification": "verified"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Warranty claim",
+      "definition": "A request for a free repair under warranty.",
+      "synonyms": [
+        "warranty request",
+        "guarantee claim"
+      ],
+      "refers_to": "ent_asv_claim"
+    },
+    {
+      "term": "Service visit",
+      "definition": "A visit to the customer's site for maintenance.",
+      "synonyms": [
+        "maintenance visit",
+        "field service"
+      ],
+      "refers_to": "ent_asv_visit"
+    }
+  ],
+  "overrides": [],
+  "domain_id": "aftersales_service",
+  "capability": {
+    "id": "warranty_service",
+    "name": "Warranty and service"
+  }
+}

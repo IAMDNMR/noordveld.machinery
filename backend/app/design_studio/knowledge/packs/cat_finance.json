@@ -1,0 +1,995 @@
+{
+ "id": "cat_finance",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "Finance, billing and reporting",
+ "description": "Invoices from draft to payment, with review of large invoices and follow-up of short payments.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_ecommerce"
+ ],
+ "uses_capabilities": [
+  "approval_workflow",
+  "audit_history",
+  "search_filter",
+  "reporting_dashboards",
+  "document_handling"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_fin_bill",
+    "statement": "Invoices are drafted, reviewed when large, issued and settled by payment.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_fin_bill_1",
+      "statement": "A clerk drafts an invoice for a customer."
+     },
+     {
+      "id": "ac_fin_bill_2",
+      "statement": "A large invoice is reviewed by the controller before it is issued."
+     },
+     {
+      "id": "ac_fin_bill_3",
+      "statement": "Payment is compared with the amount due."
+     }
+    ]
+   },
+   {
+    "id": "req_fin_report",
+    "statement": "Open and overdue invoices can be seen at a glance.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_fin_report_1",
+      "statement": "The home view shows invoices in progress and completed."
+     }
+    ]
+   },
+   {
+    "id": "req_fin_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_fin_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_fin_biller",
+    "name": "Billing clerk",
+    "responsibilities": [
+     "Drafts and issues invoices"
+    ],
+    "permissions": [
+     "fin.billing_draft",
+     "fin.billing_amend",
+     "fin.billing_issue"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_fin_controller",
+    "name": "Finance controller",
+    "responsibilities": [
+     "Reviews large invoices"
+    ],
+    "permissions": [
+     "fin.billing_approve"
+    ],
+    "approval_authority": [
+     "Invoices above the review limit"
+    ]
+   },
+   {
+    "id": "role_fin_receivables",
+    "name": "Receivables clerk",
+    "responsibilities": [
+     "Records payments and follows up"
+    ],
+    "permissions": [
+     "fin.billing_payment",
+     "fin.billing_follow_up",
+     "fin.billing_close"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_fin_invoice",
+    "name": "Invoice",
+    "description": "A request for payment sent to a customer.",
+    "attributes": [
+     {
+      "id": "invoice_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "amount",
+      "name": "Amount",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "currency",
+      "name": "Currency",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "EUR",
+       "USD",
+       "GBP"
+      ]
+     },
+     {
+      "id": "issue_date",
+      "name": "Issue date",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "due_date",
+      "name": "Due date",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "DRAFT",
+       "ISSUED",
+       "PAID",
+       "OVERDUE",
+       "CANCELLED"
+      ]
+     },
+     {
+      "id": "decision",
+      "name": "Review decision",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "owner_role_id": "role_fin_controller"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_fin_invoice_customer",
+      "name": "Customer",
+      "target": "ent_core_customer",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_fin_invoice_order",
+      "name": "Order",
+      "target": "ent_eco_order",
+      "cardinality": "many_to_one",
+      "required": false
+     }
+    ]
+   },
+   {
+    "id": "ent_fin_payment",
+    "name": "Payment",
+    "description": "Money received against an invoice.",
+    "attributes": [
+     {
+      "id": "payment_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "amount_received",
+      "name": "Amount received",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "received_on",
+      "name": "Received on",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "method",
+      "name": "Method",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "TRANSFER",
+       "CARD",
+       "DIRECT_DEBIT"
+      ]
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_fin_payment_invoice",
+      "name": "Invoice",
+      "target": "ent_fin_invoice",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_fin_credit_note",
+    "name": "Credit note",
+    "description": "A reduction of an invoice.",
+    "attributes": [
+     {
+      "id": "credit_note_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "amount",
+      "name": "Amount",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "reason",
+      "name": "Reason",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 300
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_fin_credit_note_invoice",
+      "name": "Invoice",
+      "target": "ent_fin_invoice",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_fin_review",
+    "description": "An invoice above 10,000 is reviewed by the controller before it is issued.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "AUTO_ISSUE",
+     "NEEDS_REVIEW"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_fin_invoice.amount",
+     "operator": "lte",
+     "value": 10000,
+     "other_field": null,
+     "pass_outcome": "AUTO_ISSUE",
+     "fail_outcome": "NEEDS_REVIEW"
+    }
+   },
+   {
+    "id": "rule_fin_decision",
+    "description": "The controller's recorded decision selects what happens to the invoice.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "APPROVED",
+     "REJECTED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_fin_invoice.decision",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_fin_due",
+    "description": "An invoice has a due date before it is issued.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_fin_invoice.due_date",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_fin_settlement",
+    "description": "An invoice is paid in full when the amount received covers it.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "PAID_IN_FULL",
+     "PARTIAL"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_fin_payment.amount_received",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_fin_invoice.amount",
+     "pass_outcome": "PAID_IN_FULL",
+     "fail_outcome": "PARTIAL"
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_fin_invoice_rejected",
+    "name": "Invoice rejected on review",
+    "trigger": "The controller rejects a large invoice.",
+    "recovery": "The clerk amends the invoice and it is reviewed again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_fin_billing_review"
+   },
+   {
+    "id": "exc_fin_short_payment",
+    "name": "Short payment",
+    "trigger": "The amount received is less than the invoice.",
+    "recovery": "The receivables clerk follows up and records the further payment.",
+    "resolution": "recover",
+    "resolution_state_id": "st_fin_billing_payment"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_fin_review",
+    "question": "What invoice amount needs the controller's review, and are credit notes reviewed the same way?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_fin_review"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_fin_invoice",
+    "term": "Invoice",
+    "definition": "A request for payment sent to a customer."
+   },
+   {
+    "id": "term_fin_payment",
+    "term": "Payment",
+    "definition": "Money received against an invoice."
+   },
+   {
+    "id": "term_fin_credit",
+    "term": "Credit note",
+    "definition": "A reduction of an invoice."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_fin_billing",
+   "name": "Invoice to payment",
+   "states": [
+    {
+     "id": "st_fin_billing_start",
+     "label": "Invoice due",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_fin_billing_draft",
+     "label": "Draft the invoice",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_biller",
+     "permission": "fin.billing_draft",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_core_customer"
+     ],
+     "writes_entity_ids": [
+      "ent_fin_invoice"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_invoice": [
+       "amount",
+       "currency",
+       "issue_date",
+       "due_date",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_invoice": [
+       "rel_fin_invoice_customer",
+       "rel_fin_invoice_order"
+      ]
+     }
+    },
+    {
+     "id": "st_fin_billing_review",
+     "label": "Does it need review?",
+     "kind": "branch",
+     "outputs": [
+      "rule_fin_review"
+     ],
+     "outcome": null,
+     "role_id": "role_fin_biller",
+     "permission": null,
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_fin_review"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_fin_billing_approve",
+     "label": "Review the invoice",
+     "kind": "approval",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_controller",
+     "permission": "fin.billing_approve",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_fin_invoice"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_invoice": [
+       "decision"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_invoice": []
+     }
+    },
+    {
+     "id": "st_fin_billing_verdict",
+     "label": "Controller's decision",
+     "kind": "branch",
+     "outputs": [
+      "rule_fin_decision"
+     ],
+     "outcome": null,
+     "role_id": "role_fin_controller",
+     "permission": null,
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_fin_decision"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_fin_billing_amend",
+     "label": "Amend the invoice",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_biller",
+     "permission": "fin.billing_amend",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_fin_invoice"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_fin_invoice_rejected"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_invoice": [
+       "amount",
+       "currency",
+       "due_date"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_invoice": []
+     }
+    },
+    {
+     "id": "st_fin_billing_issue",
+     "label": "Issue the invoice",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_biller",
+     "permission": "fin.billing_issue",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_fin_invoice"
+     ],
+     "rule_ids": [
+      "rule_fin_due"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_invoice": [
+       "issue_date",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_invoice": []
+     }
+    },
+    {
+     "id": "st_fin_billing_payment",
+     "label": "Record the payment",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_receivables",
+     "permission": "fin.billing_payment",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_fin_invoice"
+     ],
+     "writes_entity_ids": [
+      "ent_fin_payment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_payment": [
+       "amount_received",
+       "received_on",
+       "method"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_payment": [
+       "rel_fin_payment_invoice"
+      ]
+     }
+    },
+    {
+     "id": "st_fin_billing_settle",
+     "label": "Paid in full?",
+     "kind": "branch",
+     "outputs": [
+      "rule_fin_settlement"
+     ],
+     "outcome": null,
+     "role_id": "role_fin_receivables",
+     "permission": null,
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_fin_settlement"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_fin_billing_follow_up",
+     "label": "Follow up the short payment",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_receivables",
+     "permission": "fin.billing_follow_up",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_fin_payment"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_fin_short_payment"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_payment": [
+       "amount_received",
+       "received_on",
+       "method"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_payment": []
+     }
+    },
+    {
+     "id": "st_fin_billing_close",
+     "label": "Close the invoice",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_fin_receivables",
+     "permission": "fin.billing_close",
+     "requirement_ids": [
+      "req_fin_bill",
+      "req_fin_report",
+      "req_fin_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_fin_invoice"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_fin_invoice": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_fin_invoice": []
+     }
+    },
+    {
+     "id": "st_fin_billing_done",
+     "label": "Invoice settled",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_fin_billing_1",
+     "source": "st_fin_billing_start",
+     "target": "st_fin_billing_draft",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_2",
+     "source": "st_fin_billing_draft",
+     "target": "st_fin_billing_review",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_3",
+     "source": "st_fin_billing_review",
+     "target": "st_fin_billing_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fin_review",
+      "value": "AUTO_ISSUE"
+     }
+    },
+    {
+     "id": "tr_fin_billing_4",
+     "source": "st_fin_billing_review",
+     "target": "st_fin_billing_approve",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fin_review",
+      "value": "NEEDS_REVIEW"
+     }
+    },
+    {
+     "id": "tr_fin_billing_5",
+     "source": "st_fin_billing_approve",
+     "target": "st_fin_billing_verdict",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_6",
+     "source": "st_fin_billing_verdict",
+     "target": "st_fin_billing_issue",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fin_decision",
+      "value": "APPROVED"
+     }
+    },
+    {
+     "id": "tr_fin_billing_7",
+     "source": "st_fin_billing_verdict",
+     "target": "st_fin_billing_amend",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fin_decision",
+      "value": "REJECTED"
+     }
+    },
+    {
+     "id": "tr_fin_billing_8",
+     "source": "st_fin_billing_amend",
+     "target": "st_fin_billing_review",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_9",
+     "source": "st_fin_billing_issue",
+     "target": "st_fin_billing_payment",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_10",
+     "source": "st_fin_billing_payment",
+     "target": "st_fin_billing_settle",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_11",
+     "source": "st_fin_billing_settle",
+     "target": "st_fin_billing_close",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fin_settlement",
+      "value": "PAID_IN_FULL"
+     }
+    },
+    {
+     "id": "tr_fin_billing_12",
+     "source": "st_fin_billing_settle",
+     "target": "st_fin_billing_follow_up",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_fin_settlement",
+      "value": "PARTIAL"
+     }
+    },
+    {
+     "id": "tr_fin_billing_13",
+     "source": "st_fin_billing_follow_up",
+     "target": "st_fin_billing_payment",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_fin_billing_14",
+     "source": "st_fin_billing_close",
+     "target": "st_fin_billing_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Invoice",
+   "definition": "A request for payment sent to a customer.",
+   "synonyms": [
+    "bill",
+    "sales invoice",
+    "statement"
+   ],
+   "refers_to": "ent_fin_invoice"
+  },
+  {
+   "term": "Payment",
+   "definition": "Money received against an invoice.",
+   "synonyms": [
+    "remittance",
+    "receipt",
+    "settlement"
+   ],
+   "refers_to": "ent_fin_payment"
+  },
+  {
+   "term": "Credit note",
+   "definition": "A reduction of an invoice.",
+   "synonyms": [
+    "credit memo",
+    "refund note"
+   ],
+   "refers_to": "ent_fin_credit_note"
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "finance_billing",
+   "name": "Finance, billing and operational reporting",
+   "subdomains": [
+    "Invoicing",
+    "Review",
+    "Payments",
+    "Receivables"
+   ],
+   "keywords": [
+    "finance",
+    "billing",
+    "invoice",
+    "invoices",
+    "invoicing",
+    "payment",
+    "payments",
+    "receivable",
+    "receivables",
+    "accounts receivable",
+    "credit note",
+    "reporting",
+    "revenue",
+    "collection"
+   ],
+   "description": "Getting paid correctly and seeing where the money is."
+  }
+ ],
+ "domain_id": "finance_billing",
+ "capability": {
+  "id": "finance_billing",
+  "name": "Billing and collection"
+ }
+}

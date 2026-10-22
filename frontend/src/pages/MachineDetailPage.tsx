@@ -73,7 +73,10 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
             </h1>
             <p className="lead">{machine.description}</p>
             <div className="mhero__actions">
-              <ButtonLink to={`mailto:${company.email}?subject=${encodeURIComponent(`${machine.model} ${machine.name}`)}`} external>
+              <ButtonLink
+                to={`mailto:${company.email}?subject=${encodeURIComponent(`${machine.model} ${machine.name}`)}`}
+                external
+              >
                 Contact Noordveld
               </ButtonLink>
               <a className="text-link" href="#related-parts">
@@ -96,7 +99,9 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
           </Reveal>
           <Reveal delay={100} className="detail__body">
             <p className="lead">
-              {machine.model} is part of the {machine.brand === 'Noordveld' ? 'Noordveld' : `${machine.brand} (a Noordveld brand)`} range, in the {machine.family}, built at the {machine.plant} plant.
+              {machine.model} is part of the{' '}
+              {machine.brand === 'Noordveld' ? 'Noordveld' : `${machine.brand} (a Noordveld brand)`}{' '}
+              range, in the {machine.family}, built at the {machine.plant} plant.
             </p>
             <ul className="facts-inline">
               <li>
@@ -133,7 +138,10 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
                 </div>
               ))}
             </dl>
-            <p className="note">Detailed technical data is not part of the demonstration catalogue, so none is shown here.</p>
+            <p className="note">
+              Detailed technical data is not part of the demonstration catalogue, so none is shown
+              here.
+            </p>
           </Reveal>
         </div>
       </section>
@@ -150,9 +158,18 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
               <>
                 <p className="lead">
                   {machine.application.text}
-                  {machine.application.context ? `, typically in ${machine.application.context.charAt(0).toLowerCase()}${machine.application.context.slice(1)}` : ''}.
+                  {machine.application.context
+                    ? `, typically in ${machine.application.context.charAt(0).toLowerCase()}${machine.application.context.slice(1)}`
+                    : ''}
+                  .
                 </p>
-                <p className="note">Application profile: synthetic demo data in the Noordveld graph{machine.application.introduced ? `, introduced ${machine.application.introduced} (demo)` : ''}.</p>
+                <p className="note">
+                  Application profile: synthetic demo data in the Noordveld graph
+                  {machine.application.introduced
+                    ? `, introduced ${machine.application.introduced} (demo)`
+                    : ''}
+                  .
+                </p>
               </>
             ) : (
               <p className="lead">No application profile is recorded for the {machine.model}.</p>
@@ -196,7 +213,12 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
             </ul>
           ) : null}
           {machine.relatedParts.length > PREVIEW ? (
-            <button type="button" className="text-link partlist__more" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+            <button
+              type="button"
+              className="text-link partlist__more"
+              aria-expanded={showAll}
+              onClick={() => setShowAll((v) => !v)}
+            >
               {showAll ? 'Show fewer parts' : `Show all ${machine.relatedParts.length} parts`}
             </button>
           ) : null}
@@ -220,7 +242,10 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
             Talk to Noordveld about {machine.model}.
           </h2>
           <div className="mcta__actions">
-            <ButtonLink to={`mailto:${company.email}?subject=${encodeURIComponent(machine.model)}`} external>
+            <ButtonLink
+              to={`mailto:${company.email}?subject=${encodeURIComponent(machine.model)}`}
+              external
+            >
               Contact
             </ButtonLink>
             <ButtonLink to="/machines" variant="secondary" arrow={false}>

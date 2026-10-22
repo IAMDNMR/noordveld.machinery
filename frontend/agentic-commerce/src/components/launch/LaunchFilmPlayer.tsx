@@ -1,5 +1,23 @@
-import { Maximize2, Minimize2, Pause, Play, RotateCcw, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
+import {
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+} from 'lucide-react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
 import { Hook, Narration } from './acts0'
 import { ActMachine, ActNeed, ActUnderstand } from './acts1'
@@ -8,14 +26,25 @@ import { ActAgentic, ActReveal, ActService, ActTransaction } from './acts3'
 import { filmData } from './launchData'
 import { fall, lerp } from './motion'
 import { enableSound, playClick, playConfirm } from './sound'
-import { CHAPTERS, CLICKS, DURATION, HOOK, POSTER_TIME, STORY, WORLD_H, WORLD_W, cameraAt } from './timeline'
+import {
+  CHAPTERS,
+  CLICKS,
+  DURATION,
+  HOOK,
+  POSTER_TIME,
+  STORY,
+  WORLD_H,
+  WORLD_W,
+  cameraAt,
+} from './timeline'
 import { Cursor, Ripples } from './ui'
 import './launch.css'
 
 /** In viewer time */
 const CONFIRM_AT = 36.6 + HOOK
 
-const fmt = (s: number): string => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+const fmt = (s: number): string =>
+  `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 const actIndex = (t: number): number => CHAPTERS.reduce((idx, a, i) => (t >= a.start ? i : idx), 0)
 
 /**
@@ -26,8 +55,14 @@ function World({ time }: { time: number }) {
   const t = time - HOOK
   const glow = Math.max(0, t) / STORY
   return (
-    <div className="lf-world" style={{ width: WORLD_W, height: WORLD_H, opacity: fall(t, 47.1, 47.95) }}>
-      <div className="lf-glow" style={{ left: `${lerp(14, 82, glow)}%`, top: `${lerp(78, 30, glow)}%` }} />
+    <div
+      className="lf-world"
+      style={{ width: WORLD_W, height: WORLD_H, opacity: fall(t, 47.1, 47.95) }}
+    >
+      <div
+        className="lf-glow"
+        style={{ left: `${lerp(14, 82, glow)}%`, top: `${lerp(78, 30, glow)}%` }}
+      />
       <Hook t={time} />
       {t < 9.8 ? <ActNeed t={t} /> : null}
       {t > 6.9 && t < 9.7 ? <ActUnderstand t={t} /> : null}
@@ -53,14 +88,16 @@ export function LaunchFilmPlayer() {
   const userPaused = useRef(false)
   const idleTimer = useRef<number>(0)
 
-  const [t, setT] = useState(tRef.current)
+  const [t, setT] = useState(reduced ? POSTER_TIME : 0)
   const [playing, setPlaying] = useState(false)
   const [sound, setSound] = useState(false)
   const [full, setFull] = useState(false)
   const [awake, setAwake] = useState(true)
   const [size, setSize] = useState({ w: 1280, h: 720 })
   const soundRef = useRef(false)
-  soundRef.current = sound
+  useEffect(() => {
+    soundRef.current = sound
+  }, [sound])
 
   const ended = t >= DURATION - 0.001
   const portrait = size.w / size.h < 1.2
@@ -73,7 +110,7 @@ export function LaunchFilmPlayer() {
     ro.observe(el)
     setSize({ w: el.clientWidth, h: el.clientHeight })
     return () => ro.disconnect()
-  }, [full])
+  }, [])
 
   // The clock
   useEffect(() => {
@@ -127,7 +164,9 @@ export function LaunchFilmPlayer() {
   }
   const prev = () => {
     const i = actIndex(tRef.current)
-    seek(tRef.current - CHAPTERS[i].start > 1.5 || i === 0 ? CHAPTERS[i].start : CHAPTERS[i - 1].start)
+    seek(
+      tRef.current - CHAPTERS[i].start > 1.5 || i === 0 ? CHAPTERS[i].start : CHAPTERS[i - 1].start,
+    )
   }
 
   // Autoplay when the film is on screen; pause when it leaves (unless the viewer paused it themselves)
@@ -136,7 +175,8 @@ export function LaunchFilmPlayer() {
     if (!el || reduced) return
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !userPaused.current && tRef.current < DURATION - 0.05) setPlaying(true)
+        if (entry.isIntersecting && !userPaused.current && tRef.current < DURATION - 0.05)
+          setPlaying(true)
         else if (!entry.isIntersecting) setPlaying(false)
       },
       { threshold: 0.55 },
@@ -155,9 +195,8 @@ export function LaunchFilmPlayer() {
   useEffect(() => {
     if (!playing) {
       window.clearTimeout(idleTimer.current)
-      setAwake(true)
-    } else wake()
-  }, [playing, wake])
+    } else idleTimer.current = window.setTimeout(() => setAwake(false), 2600)
+  }, [playing])
 
   useEffect(() => {
     const onChange = () => setFull(document.fullscreenElement === root.current)
@@ -194,7 +233,9 @@ export function LaunchFilmPlayer() {
 
   const cam = cameraAt(Math.max(0, t - HOOK), portrait)
   const k = portrait ? size.w / cam.w : Math.min(size.w / WORLD_W, size.h / WORLD_H)
-  const worldStyle: CSSProperties = { transform: `translate(${size.w / 2}px, ${size.h / 2}px) scale(${k * cam.z}) translate(${-cam.cx}px, ${-cam.cy}px)` }
+  const worldStyle: CSSProperties = {
+    transform: `translate(${size.w / 2}px, ${size.h / 2}px) scale(${k * cam.z}) translate(${-cam.cx}px, ${-cam.cy}px)`,
+  }
   const started = t > 0.05
   const act = CHAPTERS[actIndex(t)]
 
@@ -204,34 +245,62 @@ export function LaunchFilmPlayer() {
         Agentic Commerce, a film
       </h2>
       <p className="sr-only">
-        A {DURATION}-second film. A customer says that their {filmData.machine.model} is down and they need a {(filmData.part.subcategory || filmData.part.name).toLowerCase()}. The system understands the need, matches the machine, identifies the compatible part, finds stock and a delivery route, prepares the order and continues into service. All data shown is read from the Noordveld graph; {filmData.provenance}
+        A {DURATION}-second film. A customer says that their {filmData.machine.model} is down and
+        they need a {(filmData.part.subcategory || filmData.part.name).toLowerCase()}. The system
+        understands the need, matches the machine, identifies the compatible part, finds stock and a
+        delivery route, prepares the order and continues into service. All data shown is read from
+        the Noordveld graph; {filmData.provenance}
       </p>
 
       <div
         ref={root}
         className={`lf ${full ? 'is-full' : ''} ${awake || !playing ? 'is-awake' : ''}`}
-        tabIndex={0}
         role="group"
         aria-roledescription="film player"
         aria-label="Agentic Commerce film"
-        onKeyDown={onKey}
-        onPointerMove={wake}
-        onPointerDown={wake}
       >
-        <div ref={frame} className="lf-frame" onClick={(e) => (e.target as HTMLElement).closest('button') || toggle()}>
+        <div ref={frame} className="lf-frame">
+          <button
+            type="button"
+            className="lf-play-surface"
+            onKeyDown={onKey}
+            onPointerMove={wake}
+            onPointerDown={wake}
+            aria-label={playing ? 'Pause film' : 'Play film'}
+            onClick={toggle}
+          />
           <div className="lf-stage" style={worldStyle} aria-hidden="true">
             <World time={t} />
           </div>
           {!playing && (!started || ended) ? (
-            <button type="button" className="lf-big" onClick={ended ? replay : play} aria-label={ended ? 'Replay film' : 'Play film'}>
-              {ended ? <RotateCcw size={30} strokeWidth={1.6} aria-hidden="true" /> : <Play size={30} strokeWidth={1.6} aria-hidden="true" />}
+            <button
+              type="button"
+              className="lf-big"
+              onClick={ended ? replay : play}
+              aria-label={ended ? 'Replay film' : 'Play film'}
+            >
+              {ended ? (
+                <RotateCcw size={30} strokeWidth={1.6} aria-hidden="true" />
+              ) : (
+                <Play size={30} strokeWidth={1.6} aria-hidden="true" />
+              )}
             </button>
           ) : null}
         </div>
 
         <div className="lf-bar">
-          <button type="button" onClick={toggle} aria-label={playing ? 'Pause' : ended ? 'Replay' : 'Play'}>
-            {playing ? <Pause size={20} aria-hidden="true" /> : ended ? <RotateCcw size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={playing ? 'Pause' : ended ? 'Replay' : 'Play'}
+          >
+            {playing ? (
+              <Pause size={20} aria-hidden="true" />
+            ) : ended ? (
+              <RotateCcw size={20} aria-hidden="true" />
+            ) : (
+              <Play size={20} aria-hidden="true" />
+            )}
           </button>
           <button type="button" onClick={prev} aria-label="Previous scene">
             <SkipBack size={18} aria-hidden="true" />
@@ -257,7 +326,11 @@ export function LaunchFilmPlayer() {
           >
             <i className="lf-track__fill" style={{ width: `${(t / DURATION) * 100}%` }} />
             {CHAPTERS.slice(1).map((a) => (
-              <b key={a.id} className="lf-track__tick" style={{ left: `${(a.start / DURATION) * 100}%` }} />
+              <b
+                key={a.id}
+                className="lf-track__tick"
+                style={{ left: `${(a.start / DURATION) * 100}%` }}
+              />
             ))}
             <i className="lf-track__knob" style={{ left: `${(t / DURATION) * 100}%` }} />
           </div>
@@ -267,11 +340,28 @@ export function LaunchFilmPlayer() {
           <button type="button" onClick={replay} aria-label="Replay from the start">
             <RotateCcw size={18} aria-hidden="true" />
           </button>
-          <button type="button" onClick={toggleSound} aria-label={sound ? 'Turn sound off' : 'Turn sound on'} aria-pressed={sound}>
-            {sound ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-label={sound ? 'Turn sound off' : 'Turn sound on'}
+            aria-pressed={sound}
+          >
+            {sound ? (
+              <Volume2 size={18} aria-hidden="true" />
+            ) : (
+              <VolumeX size={18} aria-hidden="true" />
+            )}
           </button>
-          <button type="button" onClick={toggleFull} aria-label={full ? 'Exit full screen' : 'Full screen'}>
-            {full ? <Minimize2 size={18} aria-hidden="true" /> : <Maximize2 size={18} aria-hidden="true" />}
+          <button
+            type="button"
+            onClick={toggleFull}
+            aria-label={full ? 'Exit full screen' : 'Full screen'}
+          >
+            {full ? (
+              <Minimize2 size={18} aria-hidden="true" />
+            ) : (
+              <Maximize2 size={18} aria-hidden="true" />
+            )}
           </button>
         </div>
       </div>

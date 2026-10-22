@@ -1,11 +1,14 @@
 """Response models for the catalogue API. Optional means the graph does not hold the value; it is never filled with a default."""
+
 from __future__ import annotations
 
 from typing import Literal
 
 from pydantic import BaseModel
 
-DataStatus = str  # SOURCE_DERIVED | DERIVED | USER_PROVIDED | SYNTHETIC_DEMO, passed through unchanged
+DataStatus = (
+    str  # SOURCE_DERIVED | DERIVED | USER_PROVIDED | SYNTHETIC_DEMO, passed through unchanged
+)
 
 
 class Money(BaseModel):

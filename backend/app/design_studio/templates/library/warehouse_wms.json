@@ -1,0 +1,86 @@
+{
+  "id": "warehouse_wms",
+  "version": "1.0.0",
+  "name": "Warehouse Floor",
+  "category": "Warehouse",
+  "summary": "Receiving, put-away, picking, cycle counts and dispatch for floor staff.",
+  "description": "A task-first warehouse app for tablets and handhelds. Staff see one clear queue of work, large buttons and unmistakable status; supervisors see stock by location, movements and exceptions.",
+  "status": "stable",
+  "domain_ids": ["warehouse_management", "inventory_supply_chain", "transport_warehouse"],
+  "app_type": "Floor operations",
+  "users": ["Warehouse operator", "Picker", "Warehouse supervisor"],
+  "keywords": ["warehouse", "receiving", "receive", "put-away", "putaway", "pick", "picking", "pack", "packing", "location", "bin", "count", "stock", "dispatch", "movement", "task"],
+  "theme": {
+    "id": "high_readability",
+    "label": "High readability",
+    "direction": "White and near-black with a safety-yellow accent; large type, big touch targets and bold status bars for the warehouse floor.",
+    "colors": {
+      "primary": "#111827", "primary_text": "#FFFFFF", "accent": "#FACC15",
+      "background": "#F5F5F4", "surface": "#FFFFFF", "surface_alt": "#E7E5E4",
+      "text": "#0C0A09", "muted": "#44403C", "border": "#A8A29E",
+      "nav_background": "#111827", "nav_text": "#F5F5F4",
+      "success": "#166534", "warning": "#A16207", "danger": "#B91C1C"
+    },
+    "font_heading": "grotesk", "font_body": "system", "density": "spacious",
+    "radius": 8, "shadow": "none", "card_style": "outlined", "table_style": "striped", "touch": true
+  },
+  "nav_style": "bottom_tabs",
+  "profile": "operations",
+  "entity_roles": [
+    {"id": "task", "label": "Task", "matches": ["task", "job", "work"], "fields": ["kind", "item", "location", "quantity", "status", "priority"]},
+    {"id": "stock", "label": "Stock", "matches": ["stock", "inventory", "item", "location", "bin"], "fields": ["item", "location", "quantity", "status"]},
+    {"id": "receipt", "label": "Receipt", "matches": ["receipt", "receiving", "inbound", "delivery"], "fields": ["number", "supplier", "lines", "status"]},
+    {"id": "movement", "label": "Movement", "matches": ["movement", "transfer", "move"], "fields": ["time", "item", "from_location", "to_location", "quantity"]}
+  ],
+  "pages": [
+    {"id": "my_tasks", "title": "My tasks", "icon": "ListChecks", "layout": "queue", "purpose": "The next job to do, one tap to start.", "users": ["Warehouse operator", "Picker"],
+     "components": [
+       {"type": "task_queue", "title": "Next tasks", "role": "task", "fields": ["kind", "item", "location", "quantity"], "group_by": "priority", "span": 3}
+     ]},
+    {"id": "receiving", "title": "Receiving", "icon": "PackageOpen", "layout": "queue", "purpose": "Check in deliveries and put them away.", "users": ["Warehouse operator"],
+     "components": [
+       {"type": "task_queue", "title": "Arriving today", "role": "receipt", "fields": ["number", "supplier", "lines"], "span": 2},
+       {"type": "record_form", "title": "Record receipt", "role": "receipt", "fields": ["number", "lines"], "span": 1}
+     ]},
+    {"id": "picking", "title": "Picking", "icon": "Hand", "layout": "queue", "purpose": "Pick by location in walking order.", "users": ["Picker"],
+     "components": [
+       {"type": "task_queue", "title": "Pick list", "role": "task", "fields": ["location", "item", "quantity"], "span": 3}
+     ]},
+    {"id": "locations", "title": "Stock", "icon": "Boxes", "layout": "table", "purpose": "Stock by location for supervisors.", "users": ["Warehouse supervisor"],
+     "components": [
+       {"type": "metric_strip", "title": "Stock status", "role": "stock", "group_by": "status", "span": 3},
+       {"type": "data_table", "title": "Stock by location", "role": "stock", "fields": ["location", "item", "quantity", "status"], "span": 3}
+     ]},
+    {"id": "movements", "title": "Movements", "icon": "ArrowLeftRight", "layout": "timeline", "purpose": "Every stock movement in order.", "users": ["Warehouse supervisor"],
+     "components": [
+       {"type": "timeline", "title": "Stock movements", "role": "movement", "fields": ["time", "item", "from_location", "to_location", "quantity"], "span": 3}
+     ]}
+  ],
+  "modules": [
+    {"id": "tasks", "name": "Task queues", "status": "supported", "keywords": ["task", "queue", "job", "work"]},
+    {"id": "receiving", "name": "Receiving and put-away", "status": "supported", "keywords": ["receive", "receiving", "inbound", "put-away", "putaway"]},
+    {"id": "picking", "name": "Picking and packing", "status": "supported", "keywords": ["pick", "picking", "pack", "packing"]},
+    {"id": "stock", "name": "Stock by location", "status": "supported", "keywords": ["stock", "inventory", "location", "bin"]},
+    {"id": "counts", "name": "Cycle counts", "status": "configurable", "keywords": ["count", "cycle", "stocktake", "reconcile"]},
+    {"id": "scanning", "name": "Barcode scanning", "status": "requires_integration", "keywords": ["barcode", "scan", "scanner", "rfid"], "note": "Hardware scanners connect through an integration delivered by our partner; manual entry works without it."}
+  ],
+  "limitations": ["Barcode and RFID hardware connect through an integration from our partner.", "Label printing needs a printer integration from our partner."],
+  "sample": {
+    "task": [
+      {"id": "k1", "kind": "Pick", "item": "Hydraulic filter", "location": "A-03-2", "quantity": 4, "status": "Open", "priority": "Urgent"},
+      {"id": "k2", "kind": "Put away", "item": "Brake pad set", "location": "B-11-1", "quantity": 20, "status": "Open", "priority": "Normal"},
+      {"id": "k3", "kind": "Count", "item": "Fan belt", "location": "C-02-4", "quantity": 15, "status": "Open", "priority": "Normal"}
+    ],
+    "stock": [
+      {"id": "s1", "item": "Hydraulic filter", "location": "A-03-2", "quantity": 38, "status": "OK"},
+      {"id": "s2", "item": "Lift chain", "location": "D-01-1", "quantity": 2, "status": "Low"},
+      {"id": "s3", "item": "Fan belt", "location": "C-02-4", "quantity": 15, "status": "OK"}
+    ],
+    "receipt": [
+      {"id": "r1", "number": "GR-5512", "supplier": "Sample Supplier", "lines": 6, "status": "Arriving"}
+    ],
+    "movement": [
+      {"id": "v1", "time": "09:20", "item": "Hydraulic filter", "from_location": "Dock 2", "to_location": "A-03-2", "quantity": 24}
+    ]
+  }
+}

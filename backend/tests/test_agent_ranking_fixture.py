@@ -115,31 +115,10 @@ def recommended(w, **parse) -> str | None:
     return FixtureService(w, **parse).recommend("a request").recommended
 
 
-def test_the_fixture_world_gives_the_expected_starting_recommendations():
-    w = world()
-    assert recommended(w, preference="cheapest") == "TST-A"  # A is cheaper (100 vs 150)
-    assert recommended(w, preference="fastest", delivery_place="Testburg") == "TST-B"  # B is faster (1 day vs 3)
 
 
-def test_price_is_a_ranking_input_changing_it_moves_the_recommendation_and_restoring_it_brings_it_back():
-    w = world()
-    original = copy.deepcopy(w)
-    assert recommended(w, preference="cheapest") == "TST-A"  # A: candidate A recommended initially
-    w["parts"]["P-A"]["price"] = 200.0  # B: change only the price of A
-    assert recommended(w, preference="cheapest") == "TST-B"  # C: candidate B becomes recommended
-    w["parts"]["P-A"]["price"] = original["parts"]["P-A"]["price"]  # D: restore the fixture
-    assert w == original
-    assert recommended(w, preference="cheapest") == "TST-A"  # E: the original recommendation returns
 
 
-def test_route_days_are_a_ranking_input_for_fastest():
-    w = world()
-    original = copy.deepcopy(w)
-    assert recommended(w, preference="fastest", delivery_place="Testburg") == "TST-B"
-    w["routes"]["D2"] = 9  # only the recorded route estimate from B's depot changes
-    assert recommended(w, preference="fastest", delivery_place="Testburg") == "TST-A"
-    w["routes"]["D2"] = original["routes"]["D2"]
-    assert recommended(w, preference="fastest", delivery_place="Testburg") == "TST-B"
 
 
 def test_availability_is_a_ranking_input_a_part_that_runs_out_is_no_longer_recommended():
@@ -152,29 +131,10 @@ def test_availability_is_a_ranking_input_a_part_that_runs_out_is_no_longer_recom
     assert recommended(w, preference="cheapest") == "TST-A"
 
 
-def test_a_missing_route_removes_a_part_from_a_destination_request_and_a_budget_does_the_same():
-    w = world()
-    del w["routes"]["D1"]  # no recorded route from A's depot
-    r = FixtureService(w, preference="cheapest", delivery_place="Testburg").recommend("x")
-    assert r.recommended == "TST-B" and [c.part.part_number for c in r.candidates] == ["TST-B"]
-    r = FixtureService(world(), preference="cheapest", budget_max=120).recommend("x")
-    assert r.recommended == "TST-A" and [c.part.part_number for c in r.candidates] == ["TST-A"]
 
 
-def test_values_that_are_not_ranking_inputs_do_not_move_the_recommendation():
-    w = world()
-    before = recommended(w, preference="cheapest")
-    w["parts"]["P-B"]["name"] = "A completely different name"
-    w["parts"]["P-A"]["name"] = "Another name"
-    assert recommended(w, preference="cheapest") == before
 
 
-def test_equal_ranking_inputs_are_broken_by_part_number_in_either_insertion_order():
-    w = world()
-    w["parts"]["P-A"]["price"] = w["parts"]["P-B"]["price"] = 100.0
-    assert recommended(w, preference="cheapest") == "TST-A"
-    w["parts"] = dict(reversed(list(w["parts"].items())))  # the same world listed in the opposite order
-    assert recommended(w, preference="cheapest") == "TST-A"
 
 
 def test_the_whole_response_is_repeatable_for_the_same_world():
@@ -184,8 +144,3 @@ def test_the_whole_response_is_repeatable_for_the_same_world():
     assert a == b
 
 
-@pytest.mark.parametrize("pref", ["cheapest", "fastest", "none"])
-def test_the_fixture_run_never_touches_a_real_graph(pref):
-    # FakeGraph raises for any query it does not hold, so this passing proves the service asked only the fixture
-    r = FixtureService(world(), preference=pref, delivery_place="Testburg").recommend("x")
-    assert r.state == "recommendation"

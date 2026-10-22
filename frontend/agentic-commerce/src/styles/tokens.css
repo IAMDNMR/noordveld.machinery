@@ -34,7 +34,7 @@
   --accent-right: #00ab94;
 
   /* Typography */
-  --font-sans: -apple-system, "SF Pro Display", "Inter Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: -apple-system, 'SF Pro Display', 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
   --text-display: clamp(2.75rem, 1.2rem + 6.4vw, 7.25rem);
   --text-h1: clamp(2.25rem, 1.2rem + 4.2vw, 5rem);
   --text-h2: clamp(1.875rem, 1.1rem + 2.8vw, 3.5rem);

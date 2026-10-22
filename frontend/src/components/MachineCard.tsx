@@ -14,7 +14,11 @@ interface MachineCardProps {
 /** One machine: image, model, name, category and origin. The whole card is one link to its page. */
 export function MachineCard({ machine, ratio = '4 / 3', index = 0 }: MachineCardProps) {
   return (
-    <Link className="mcard" to={`/machines/${machine.slug}`} aria-label={`${machine.model}, ${machine.name}`}>
+    <Link
+      className="mcard"
+      to={`/machines/${machine.slug}`}
+      aria-label={`${machine.model}, ${machine.name}`}
+    >
       <div className="mcard__media">
         <MachineImage machine={machine} ratio={ratio} reveal revealDelay={(index % 4) * 90} />
         <span className="mcard__go" aria-hidden="true">

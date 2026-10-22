@@ -18,9 +18,27 @@ const FilmVertical = () => <Film format="vertical" />
 export function RemotionRoot() {
   return (
     <>
-      <Composition id="EvolutionFilm" component={FilmLandscape} durationInFrames={FILM_FRAMES} fps={FILM_FPS} {...FORMATS.landscape} />
-      <Composition id="EvolutionFilmSquare" component={FilmSquare} durationInFrames={FILM_FRAMES} fps={FILM_FPS} {...FORMATS.square} />
-      <Composition id="EvolutionFilmVertical" component={FilmVertical} durationInFrames={FILM_FRAMES} fps={FILM_FPS} {...FORMATS.vertical} />
+      <Composition
+        id="EvolutionFilm"
+        component={FilmLandscape}
+        durationInFrames={FILM_FRAMES}
+        fps={FILM_FPS}
+        {...FORMATS.landscape}
+      />
+      <Composition
+        id="EvolutionFilmSquare"
+        component={FilmSquare}
+        durationInFrames={FILM_FRAMES}
+        fps={FILM_FPS}
+        {...FORMATS.square}
+      />
+      <Composition
+        id="EvolutionFilmVertical"
+        component={FilmVertical}
+        durationInFrames={FILM_FRAMES}
+        fps={FILM_FPS}
+        {...FORMATS.vertical}
+      />
     </>
   )
 }

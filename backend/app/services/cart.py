@@ -1,4 +1,5 @@
 """Cart pricing. Stateless: the browser sends part ids and quantities, the graph supplies parts and prices."""
+
 from __future__ import annotations
 
 from app.graph.repositories.parts import PartRepository
@@ -8,8 +9,7 @@ from app.services.part_status import is_orderable, rejection_reason, status_labe
 from app.services.parts import to_summary
 
 NOTE = (
-    "Prices are synthetic demo list prices from the Noordveld demo dataset, excluding VAT and delivery. They are not an order cost: "
-    "part cost and transportation cost are not available until a pricing source is connected."
+    "Demo catalogue prices exclude VAT and delivery. Choose transport during checkout to see the combined estimate. No payment is taken."
 )
 
 
@@ -31,21 +31,34 @@ class CartService:
                 continue
             status = part.availability.part_status if part.availability else None
             orderable = part.availability.orderable if part.availability else None
-            if not is_orderable(status, orderable):  # the order gate: never priced, never in the subtotal
-                rejected.append(RejectedLine(part=part.model_copy(update={"price": None}), quantity=qty, status=status,
-                                             status_label=status_label(status), reason=rejection_reason(status, orderable)))
+            if not is_orderable(
+                status, orderable
+            ):  # the order gate: never priced, never in the subtotal
+                rejected.append(
+                    RejectedLine(
+                        part=part.model_copy(update={"price": None}),
+                        quantity=qty,
+                        status=status,
+                        status_label=status_label(status),
+                        reason=rejection_reason(status, orderable),
+                    )
+                )
                 continue
             total = None
             if part.price is not None:
-                total = Money(amount=round(part.price.amount * qty, 2), currency=part.price.currency, data_status=part.price.data_status)
+                total = Money(
+                    amount=round(part.price.amount * qty, 2),
+                    currency=part.price.currency,
+                    data_status=part.price.data_status,
+                )
             lines.append(QuoteLine(part=part, quantity=qty, line_total=total))
 
-        unpriced = [l.part.part_id for l in lines if l.line_total is None]
-        currencies = {l.line_total.currency for l in lines if l.line_total}
+        unpriced = [line.part.part_id for line in lines if line.line_total is None]
+        currencies = {line.line_total.currency for line in lines if line.line_total}
         subtotal = None
         if lines and not unpriced and len(currencies) == 1:
             subtotal = Money(
-                amount=round(sum(l.line_total.amount for l in lines if l.line_total), 2),
+                amount=round(sum(line.line_total.amount for line in lines if line.line_total), 2),
                 currency=currencies.pop(),
                 data_status=lines[0].line_total.data_status if lines[0].line_total else None,
             )

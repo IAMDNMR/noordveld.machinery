@@ -1,25 +1,131 @@
 /* The part picture and its placeholder, shared by the Parts Store and Parts Intelligence.
    The placeholder is a quiet technical-drawing plate: warm grey ground, a fine grid, the part number set like a drawing title. */
-.pvis { position: relative; aspect-ratio: 4 / 3; overflow: hidden; color: #7d827e;
-  background: linear-gradient(rgb(32 35 34 / 0.05) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(90deg, rgb(32 35 34 / 0.05) 1px, transparent 1px) 0 0 / 22px 22px, #e6e5df; }
-.pvis--large { aspect-ratio: 5 / 4; }
-.pvis--large .pvis__cat { font-size: 0.74rem; left: 1.4rem; top: 1.2rem; }
-.pvis--large .pvis__no { font-size: 0.95rem; left: 1.4rem; bottom: 1.2rem; }
-.pvis--mini { flex: none; width: 4.25rem; height: 4.25rem; aspect-ratio: 1; }
-.pvis--mini .pvis__cat, .pvis--mini .pvis__no, .pvis--mini .pvis__mark, .pvis--mini .pvis__soon { display: none; }
-.pvis--mini .pvis__icon { width: 50%; height: 50%; }
-.pimg { position: relative; aspect-ratio: 4 / 3; background: #fff; overflow: hidden; }
+.pvis {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  color: #7d827e;
+  background:
+    linear-gradient(rgb(32 35 34 / 0.05) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(90deg, rgb(32 35 34 / 0.05) 1px, transparent 1px) 0 0 / 22px 22px,
+    #e6e5df;
+}
+.pvis--large {
+  aspect-ratio: 5 / 4;
+}
+.pvis--large .pvis__cat {
+  font-size: 0.74rem;
+  left: 1.4rem;
+  top: 1.2rem;
+}
+.pvis--large .pvis__no {
+  font-size: 0.95rem;
+  left: 1.4rem;
+  bottom: 1.2rem;
+}
+.pvis--mini {
+  flex: none;
+  width: 4.25rem;
+  height: 4.25rem;
+  aspect-ratio: 1;
+}
+.pvis--mini .pvis__cat,
+.pvis--mini .pvis__no,
+.pvis--mini .pvis__mark,
+.pvis--mini .pvis__soon {
+  display: none;
+}
+.pvis--mini .pvis__icon {
+  width: 50%;
+  height: 50%;
+}
+.pimg {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #fff;
+  overflow: hidden;
+}
 /* absolutely sized so the picture always fits the box (a percentage height does not resolve inside a box whose height comes from aspect-ratio or a fixed height) */
-.pimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.pimg--large { aspect-ratio: 5 / 4; }
-.pimg--mini { flex: none; width: 4.25rem; height: 4.25rem; aspect-ratio: 1; }
-.pvis--large .pvis__soon { right: 1.4rem; bottom: 1.2rem; font-size: 0.72rem; }
-.pvis__icon { position: absolute; left: 50%; top: 50%; width: 38%; height: 38%; transform: translate(-50%, -52%); opacity: 0.6; }
-.pvis__cat { position: absolute; left: 0.85rem; top: 0.75rem; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #7d827e; }
-.pvis__no { position: absolute; left: 0.85rem; bottom: 0.75rem; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.74rem; color: #3f4341; }
-.pvis__mark { position: absolute; width: 0.7rem; height: 0.7rem; border-color: rgb(32 35 34 / 0.35); border-style: solid; border-width: 0; }
-.pvis__mark--tl { right: 0.7rem; top: 0.7rem; border-top-width: 1px; border-right-width: 1px; }
-.pvis__mark--tr { display: none; }
-.pvis__mark--bl { right: 0.7rem; bottom: 0.7rem; border-bottom-width: 1px; border-right-width: 1px; }
-.pvis__mark--br { display: none; }
-.pvis__soon { position: absolute; right: 0.85rem; bottom: 0.75rem; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: #7d827e; }
+.pimg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.pimg--large {
+  aspect-ratio: 5 / 4;
+}
+.pimg--mini {
+  flex: none;
+  width: 4.25rem;
+  height: 4.25rem;
+  aspect-ratio: 1;
+}
+.pvis--large .pvis__soon {
+  right: 1.4rem;
+  bottom: 1.2rem;
+  font-size: 0.72rem;
+}
+.pvis__icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38%;
+  height: 38%;
+  transform: translate(-50%, -52%);
+  opacity: 0.6;
+}
+.pvis__cat {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.75rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7d827e;
+}
+.pvis__no {
+  position: absolute;
+  left: 0.85rem;
+  bottom: 0.75rem;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  color: #3f4341;
+}
+.pvis__mark {
+  position: absolute;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-color: rgb(32 35 34 / 0.35);
+  border-style: solid;
+  border-width: 0;
+}
+.pvis__mark--tl {
+  right: 0.7rem;
+  top: 0.7rem;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+.pvis__mark--tr {
+  display: none;
+}
+.pvis__mark--bl {
+  right: 0.7rem;
+  bottom: 0.7rem;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+.pvis__mark--br {
+  display: none;
+}
+.pvis__soon {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.75rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7d827e;
+}

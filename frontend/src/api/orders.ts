@@ -21,10 +21,25 @@ export interface DemoUser {
 }
 
 export type OrderStatus =
-  | 'NEW' | 'CONFIRMED' | 'PROCESSING' | 'ALLOCATED' | 'SHIPPED' | 'DELIVERED'
-  | 'FULFILMENT_PENDING' | 'FULFILLING' | 'READY_TO_SHIP' | 'COMPLETED'
-  | 'REJECTED' | 'ALLOCATION_FAILED' | 'ALLOCATION_RELEASED' | 'CANCELLED' | 'SHIPMENT_EXCEPTION' | 'DELIVERY_FAILED' | 'SERVICE_CANCELLED'
-export type Queue = 'pending_review' | 'needs_fulfilment' | 'ready_to_ship' | 'shipped' | 'completed' | 'exceptions'
+  | 'NEW'
+  | 'CONFIRMED'
+  | 'PROCESSING'
+  | 'ALLOCATED'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'FULFILMENT_PENDING'
+  | 'FULFILLING'
+  | 'READY_TO_SHIP'
+  | 'COMPLETED'
+  | 'REJECTED'
+  | 'ALLOCATION_FAILED'
+  | 'ALLOCATION_RELEASED'
+  | 'CANCELLED'
+  | 'SHIPMENT_EXCEPTION'
+  | 'DELIVERY_FAILED'
+  | 'SERVICE_CANCELLED'
+export type Queue =
+  'pending_review' | 'needs_fulfilment' | 'ready_to_ship' | 'shipped' | 'completed' | 'exceptions'
 export const DIRECT_ORDER = 'DIRECT_ORDER'
 
 export interface OrderRow {
@@ -67,9 +82,26 @@ export interface OrderLine {
   part_status?: string | null
   orderable?: boolean | null
   price?: { list_price_ex_vat: number; currency: string; data_status: string | null } | null
-  warehouses?: { warehouse_id: string; name: string; city: string | null; available: number | null; stock_status?: string | null; data_status: string | null }[]
-  suppliers?: { name: string; lead_time_days: number | null; primary: boolean | null; data_status: string | null }[]
-  evidence?: { fitment: string; inventory: string | null; price: string | null; line: string | null }
+  warehouses?: {
+    warehouse_id: string
+    name: string
+    city: string | null
+    available: number | null
+    stock_status?: string | null
+    data_status: string | null
+  }[]
+  suppliers?: {
+    name: string
+    lead_time_days: number | null
+    primary: boolean | null
+    data_status: string | null
+  }[]
+  evidence?: {
+    fitment: string
+    inventory: string | null
+    price: string | null
+    line: string | null
+  }
 }
 
 export interface TrackingEvent {
@@ -137,22 +169,66 @@ export interface OrderDetail {
   channel: string | null
   currency: string
   data_status: string | null
-  totals: { subtotal_ex_vat: number | null; shipping_ex_vat: number | null; vat_amount: number | null; total_incl_vat: number | null; note: string | null }
+  totals: {
+    subtotal_ex_vat: number | null
+    shipping_ex_vat: number | null
+    vat_amount: number | null
+    total_incl_vat: number | null
+    note: string | null
+  }
   lines: OrderLine[]
   shipments: Shipment[]
-  history: { sequence: number | null; status: string | null; status_label: string | null; previous_status: string | null; action: string | null; occurred_at: string | null; by: string | null; role: string | null; recorded: string | null }[]
+  history: {
+    sequence: number | null
+    status: string | null
+    status_label: string | null
+    previous_status: string | null
+    action: string | null
+    occurred_at: string | null
+    by: string | null
+    role: string | null
+    recorded: string | null
+  }[]
   payment: string
   /** direct orders: what the customer entered at checkout, and the lifecycle as recorded in the graph */
-  requester?: { name: string | null; email: string | null; phone: string | null; company: string | null }
-  delivery?: { ship_to_id: string | null; street: string | null; city: string | null; postal_code: string | null; country_code: string | null }
+  requester?: {
+    name: string | null
+    email: string | null
+    phone: string | null
+    company: string | null
+  }
+  delivery?: {
+    ship_to_id: string | null
+    street: string | null
+    city: string | null
+    postal_code: string | null
+    country_code: string | null
+  }
   receiver?: { name: string | null; phone: string | null }
-  dealer?: { dealer_id: string; name: string; city: string | null; country_code: string | null; dealer_type: string | null } | null
+  dealer?: {
+    dealer_id: string
+    name: string
+    city: string | null
+    country_code: string | null
+    dealer_type: string | null
+  } | null
   dealer_service_required?: boolean
   fulfilment?: {
-    depot: { warehouse_id: string; name: string; city: string | null; country_code: string | null } | null
+    depot: {
+      warehouse_id: string
+      name: string
+      city: string | null
+      country_code: string | null
+    } | null
     allocation_status: string | null
     allocation_updated_at: string | null
-    lines: { part_number: string; quantity: number; reserved_quantity: number | null; allocation_status: string | null; machine: string | null }[]
+    lines: {
+      part_number: string
+      quantity: number
+      reserved_quantity: number | null
+      allocation_status: string | null
+      machine: string | null
+    }[]
   }
   transport?: {
     route_id: string | null
@@ -164,13 +240,30 @@ export interface OrderDetail {
     data_status: string | null
     freight_estimate: Freight | null
   }
-  cost?: { part_cost: number | null; transport_cost: number | null; total: number | null; currency: string; status: string; note: string }
+  cost?: {
+    part_cost: number | null
+    transport_cost: number | null
+    total: number | null
+    currency: string
+    status: string
+    note: string
+  }
   service?: DealerService | null
-  provenance?: { order: string | null; transport: string | null; tracking: string; inventory: string }
+  provenance?: {
+    order: string | null
+    transport: string | null
+    tracking: string
+    inventory: string
+  }
   stages?: Stage[]
   actions?: OrderAction[]
   /** processor only */
-  customer?: { customer_id: string | null; name: string | null; city: string | null; country_code: string | null }
+  customer?: {
+    customer_id: string | null
+    name: string | null
+    city: string | null
+    country_code: string | null
+  }
   delivery_address?: { city: string | null; country_code: string | null } | null
   next?: { status: OrderStatus; label: string; allowed: boolean; reason: string | null } | null
 }
@@ -203,6 +296,7 @@ export interface DealerRow {
 }
 
 export interface TransportOption {
+  cost?: CheckoutReview['cost']
   route_id: string
   option_id: string | null
   option_code: string | null
@@ -224,7 +318,14 @@ export interface DepotPlan {
   name: string | null
   city: string | null
   country_code: string | null
-  lines: { part_id: string; part_number: string; quantity: number; state: 'IN_STOCK' | 'LOW_STOCK' | 'ON_ORDER' | 'OUT_OF_STOCK' | 'UNKNOWN'; available: number | null; can_supply: boolean }[]
+  lines: {
+    part_id: string
+    part_number: string
+    quantity: number
+    state: 'IN_STOCK' | 'LOW_STOCK' | 'ON_ORDER' | 'OUT_OF_STOCK' | 'UNKNOWN'
+    available: number | null
+    can_supply: boolean
+  }[]
   selectable: boolean
   reasons: string[]
   options: TransportOption[]
@@ -233,11 +334,31 @@ export interface DepotPlan {
 }
 
 export interface CheckoutReview {
-  lines: { line_no: number; part_id: string; part_number: string; part_name: string; quantity: number; machine: string | null }[]
-  destination: { ship_to_id: string; street: string | null; city: string | null; postal_code: string | null; country_code: string }
+  lines: {
+    line_no: number
+    part_id: string
+    part_number: string
+    part_name: string
+    quantity: number
+    machine: string | null
+  }[]
+  destination: {
+    ship_to_id: string
+    street: string | null
+    city: string | null
+    postal_code: string | null
+    country_code: string
+  }
   depots: DepotPlan[]
   can_order: boolean
-  cost: { part_cost: number | null; transport_cost: number | null; total: number | null; currency: string; status: string; note: string }
+  cost: {
+    part_cost: number | null
+    transport_cost: number | null
+    total: number | null
+    currency: string
+    status: string
+    note: string
+  }
 }
 
 export interface PlaceOrderBody {
@@ -253,23 +374,35 @@ export interface PlaceOrderBody {
 }
 
 export const getMe = (signal?: AbortSignal) => apiGet<Me>('/me', {}, signal)
-export const getDemoUsers = (signal?: AbortSignal) => apiGet<DemoUser[]>('/auth/demo-users', {}, signal)
+export const getDemoUsers = (signal?: AbortSignal) =>
+  apiGet<DemoUser[]>('/auth/demo-users', {}, signal)
 export const signIn = (userId: string) => apiPost<Me>('/auth/login', { user_id: userId })
 export const signOut = () => apiPost<{ signed_out: boolean }>('/auth/logout', {})
 
 export const getOrders = (signal?: AbortSignal) => apiGet<OrderRow[]>('/orders', {}, signal)
-export const getOrder = (id: string, signal?: AbortSignal) => apiGet<OrderDetail>(`/orders/${encodeURIComponent(id)}`, {}, signal)
+export const getOrder = (id: string, signal?: AbortSignal) =>
+  apiGet<OrderDetail>(`/orders/${encodeURIComponent(id)}`, {}, signal)
 /** Earlier-channel orders only. */
 export const updateStatus = (id: string, status: OrderStatus, expected: OrderStatus) =>
-  apiPost<OrderDetail>(`/orders/${encodeURIComponent(id)}/status`, { status, expected_status: expected })
+  apiPost<OrderDetail>(`/orders/${encodeURIComponent(id)}/status`, {
+    status,
+    expected_status: expected,
+  })
 /** One lifecycle action on a direct order. The server decides whether it is valid now. */
 export const orderAction = (id: string, action: string, expected: OrderStatus) =>
-  apiPost<OrderDetail>(`/orders/${encodeURIComponent(id)}/actions`, { action, expected_status: expected })
+  apiPost<OrderDetail>(`/orders/${encodeURIComponent(id)}/actions`, {
+    action,
+    expected_status: expected,
+  })
 
-export const getCountries = (signal?: AbortSignal) => apiGet<{ country_code: string; destinations: number }[]>('/checkout/countries', {}, signal)
-export const getDestinations = (country: string, signal?: AbortSignal) => apiGet<Destination[]>('/checkout/destinations', { country }, signal)
-export const getDealers = (country: string | null, signal?: AbortSignal) => apiGet<DealerRow[]>('/checkout/dealers', { country }, signal)
-export const reviewCheckout = (items: CartItem[], shipToId: string, signal?: AbortSignal) => apiPost<CheckoutReview>('/checkout/review', { items, ship_to_id: shipToId }, signal)
+export const getCountries = (signal?: AbortSignal) =>
+  apiGet<{ country_code: string; destinations: number }[]>('/checkout/countries', {}, signal)
+export const getDestinations = (country: string, signal?: AbortSignal) =>
+  apiGet<Destination[]>('/checkout/destinations', { country }, signal)
+export const getDealers = (country: string | null, signal?: AbortSignal) =>
+  apiGet<DealerRow[]>('/checkout/dealers', { country }, signal)
+export const reviewCheckout = (items: CartItem[], shipToId: string, signal?: AbortSignal) =>
+  apiPost<CheckoutReview>('/checkout/review', { items, ship_to_id: shipToId }, signal)
 export const placeOrder = (body: PlaceOrderBody) => apiPost<OrderDetail>('/orders', body)
 
 export interface ServerCartLine {
@@ -280,4 +413,6 @@ export interface ServerCartLine {
   machine: string | null
 }
 export const getMyCart = (signal?: AbortSignal) => apiGet<ServerCartLine[]>('/me/cart', {}, signal)
-export const putMyCart = (lines: { part_id: string; quantity: number; machine?: string | null }[]) => apiPut<ServerCartLine[]>('/me/cart', { lines })
+export const putMyCart = (
+  lines: { part_id: string; quantity: number; machine?: string | null }[],
+) => apiPut<ServerCartLine[]>('/me/cart', { lines })

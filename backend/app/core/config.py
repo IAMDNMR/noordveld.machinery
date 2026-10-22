@@ -1,4 +1,5 @@
 """Backend configuration, read from environment variables (and backend/.env when it exists). Secrets are never printed or logged."""
+
 from __future__ import annotations
 
 import os
@@ -42,6 +43,11 @@ class Settings:
     groq_model: str = "qwen/qwen3.8-27b"
     gemini_api_key: str = field(default="", repr=False)  # optional provider
     gemini_model: str = "gemini-3.5-flash"
+    #: language model for the Design Studio conversation (AI_PROVIDER: nvidia | groq | gemini); falls back to llm_provider when unset
+    ai_provider: str = ""
+    nvidia_api_key: str = field(default="", repr=False)
+    nvidia_planner_model: str = ""
+    nvidia_fast_model: str = ""
     llm_requests_per_minute: int = 25
     llm_timeout: float = 20.0
     #: signs the demo session cookie; when SESSION_SECRET is not set a random one is made per process (sign in again after a restart)
@@ -51,7 +57,9 @@ class Settings:
     @property
     def llm_configured(self) -> bool:
         """True when the selected provider has its key. An empty key disables the language model (its routes return 503)."""
-        return bool({"groq": self.groq_api_key, "gemini": self.gemini_api_key}.get(self.llm_provider))
+        return bool(
+            {"groq": self.groq_api_key, "gemini": self.gemini_api_key}.get(self.llm_provider)
+        )
 
     @property
     def graph_configured(self) -> bool:
@@ -67,13 +75,21 @@ def get_settings() -> Settings:
         neo4j_password=os.environ.get("NEO4J_PASSWORD", ""),
         neo4j_database=os.environ.get("NEO4J_DATABASE", "neo4j"),
         neo4j_query_timeout=float(os.environ.get("NEO4J_QUERY_TIMEOUT", "15")),
-        cors_origins=tuple(o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5180").split(",") if o.strip()),
+        cors_origins=tuple(
+            o.strip()
+            for o in os.environ.get("CORS_ORIGINS", "http://localhost:5180").split(",")
+            if o.strip()
+        ),
         log_level=os.environ.get("LOG_LEVEL", "INFO").upper(),
         llm_provider=(os.environ.get("LLM_PROVIDER", "") or "groq").strip().lower(),
         groq_api_key=os.environ.get("GROQ_API_KEY", ""),
         groq_model=os.environ.get("GROQ_MODEL", "") or "qwen/qwen3.8-27b",
         gemini_api_key=os.environ.get("GEMINI_API_KEY", ""),
         gemini_model=os.environ.get("GEMINI_MODEL", "") or "gemini-3.5-flash",
+        ai_provider=os.environ.get("AI_PROVIDER", "").strip().lower(),
+        nvidia_api_key=os.environ.get("NVIDIA_API_KEY", ""),
+        nvidia_planner_model=os.environ.get("NVIDIA_PLANNER_MODEL", "").strip(),
+        nvidia_fast_model=os.environ.get("NVIDIA_FAST_MODEL", "").strip(),
         llm_requests_per_minute=int(os.environ.get("LLM_REQUESTS_PER_MINUTE", "25")),
         llm_timeout=float(os.environ.get("LLM_TIMEOUT", "20")),
         session_secret=os.environ.get("SESSION_SECRET", "") or secrets.token_urlsafe(32),

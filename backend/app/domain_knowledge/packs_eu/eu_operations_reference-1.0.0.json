@@ -1,0 +1,1545 @@
+{
+  "schema_version": 1,
+  "id": "eu_operations_reference",
+  "version": "1.0.0",
+  "status": "approved",
+  "title": "EU business operations reference",
+  "description": "EU-focused reference vocabulary for transport, warehouse, machinery, spare parts, procurement, suppliers, commerce and after-sales. Regulatory references reviewed 2026-10-15. This is a reference-model release, not certification or company-policy approval. Member-state, route, vehicle and transaction applicability must be reviewed. Euro is not assumed to be the currency of every EU member state.",
+  "synthetic": false,
+  "domains": [
+    {
+      "id": "eu_transport",
+      "name": "Transport management · EU",
+      "description": "European Union transport management reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "TMS",
+        "transport",
+        "shipment",
+        "dispatch",
+        "carrier",
+        "delivery",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_warehouse",
+      "name": "Warehouse management · EU",
+      "description": "European Union warehouse management reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "WMS",
+        "warehouse",
+        "inventory",
+        "stock",
+        "receipt",
+        "picking",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_machinery",
+      "name": "Machinery and spare parts · EU",
+      "description": "European Union machinery and spare parts reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "machine",
+        "machinery",
+        "spare parts",
+        "fitment",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_procurement",
+      "name": "Procurement · EU",
+      "description": "European Union procurement reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "purchase",
+        "procurement",
+        "order",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_suppliers",
+      "name": "Supplier management · EU",
+      "description": "European Union supplier management reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "supplier",
+        "vendor",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_commerce",
+      "name": "Commerce · EU",
+      "description": "European Union commerce reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "commerce",
+        "sales",
+        "customer",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_service",
+      "name": "After-sales service · EU",
+      "description": "European Union after-sales service reference domain.",
+      "scope": "EU operations; member-state and cross-border applicability reviewed per project.",
+      "parent_id": null,
+      "depends_on": [],
+      "dependencies": [],
+      "capabilities": [],
+      "keywords": [
+        "after-sales",
+        "warranty",
+        "maintenance",
+        "service",
+        "EU",
+        "European Union"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    }
+  ],
+  "concepts": [],
+  "entities": [
+    {
+      "id": "eu_consignment",
+      "canonical_name": "Consignment",
+      "domain_id": "eu_transport",
+      "concept_id": null,
+      "description": "Consignment for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "origin_country",
+          "name": "Origin country",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "destination_country",
+          "name": "Destination country",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "mass_kg",
+          "name": "Gross mass (kg)",
+          "type": "decimal",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "planned_departure",
+          "name": "Planned departure",
+          "type": "datetime",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "time_zone",
+          "name": "Time zone",
+          "type": "string",
+          "semantic_type": "",
+          "description": "Explicit IANA time-zone identifier; do not assume one EU-wide time zone.",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "currency",
+          "name": "Currency",
+          "type": "string",
+          "semantic_type": "",
+          "description": "Explicit currency code; no universal EUR assumption.",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "efti_reference",
+          "name": "eFTI platform reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "A reference does not establish platform certification.",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_carrier",
+      "canonical_name": "Carrier",
+      "domain_id": "eu_transport",
+      "concept_id": null,
+      "description": "Carrier for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "legal_name",
+          "name": "Legal name",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "establishment_country",
+          "name": "Country of establishment",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "eori",
+          "name": "EORI",
+          "type": "string",
+          "semantic_type": "",
+          "description": "Relevant to customs operations; not a blanket requirement for all intra-EU movements.",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "licence_reference",
+          "name": "Operator licence reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_vehicle",
+      "canonical_name": "Vehicle",
+      "domain_id": "eu_transport",
+      "concept_id": null,
+      "description": "Vehicle for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "registration_country",
+          "name": "Registration country",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "capacity_kg",
+          "name": "Capacity (kg)",
+          "type": "decimal",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "tachograph_reference",
+          "name": "Tachograph reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_inventory",
+      "canonical_name": "Stock item",
+      "domain_id": "eu_warehouse",
+      "concept_id": null,
+      "description": "Stock item for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "location",
+          "name": "Storage location",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "quantity",
+          "name": "Quantity",
+          "type": "decimal",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "unit",
+          "name": "Unit of measure",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "batch",
+          "name": "Batch or lot",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_machine",
+      "canonical_name": "Machine asset",
+      "domain_id": "eu_machinery",
+      "concept_id": null,
+      "description": "Machine asset for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "serial_number",
+          "name": "Serial number",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "manufacturer",
+          "name": "Manufacturer",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "model",
+          "name": "Model",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "documentation_reference",
+          "name": "Conformity documentation reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_spare_part",
+      "canonical_name": "Spare part",
+      "domain_id": "eu_machinery",
+      "concept_id": null,
+      "description": "Spare part for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "part_number",
+          "name": "Part number",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "unit",
+          "name": "Unit of measure",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "compatibility_reference",
+          "name": "Fitment evidence",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_purchase_order",
+      "canonical_name": "Purchase order",
+      "domain_id": "eu_procurement",
+      "concept_id": null,
+      "description": "Purchase order for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "order_date",
+          "name": "Order date",
+          "type": "date",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "currency",
+          "name": "Currency",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "delivery_country",
+          "name": "Delivery country",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_supplier",
+      "canonical_name": "Supplier",
+      "domain_id": "eu_suppliers",
+      "concept_id": null,
+      "description": "Supplier for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "legal_name",
+          "name": "Legal name",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "country",
+          "name": "Establishment country",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "vat_identifier",
+          "name": "VAT identifier",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "eori",
+          "name": "EORI",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_sales_order",
+      "canonical_name": "Sales order",
+      "domain_id": "eu_commerce",
+      "concept_id": null,
+      "description": "Sales order for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "customer_reference",
+          "name": "Customer reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "currency",
+          "name": "Currency",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "destination_country",
+          "name": "Destination country",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "tax_treatment_reference",
+          "name": "Reviewed tax treatment",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_service_case",
+      "canonical_name": "Service case",
+      "domain_id": "eu_service",
+      "concept_id": null,
+      "description": "Service case for EU business operations; requirements remain project-specific.",
+      "attributes": [
+        {
+          "id": "reference",
+          "name": "Reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": true,
+          "key": true,
+          "unique": true,
+          "value_source": "user_entered",
+          "mutability": "immutable",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "issue",
+          "name": "Reported issue",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "opened_at",
+          "name": "Opened at",
+          "type": "datetime",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        },
+        {
+          "id": "warranty_reference",
+          "name": "Warranty terms reference",
+          "type": "string",
+          "semantic_type": "",
+          "description": "",
+          "required": false,
+          "key": false,
+          "unique": false,
+          "value_source": "user_entered",
+          "mutability": "user_updated",
+          "default": null,
+          "code_list_id": null,
+          "sensitivity": "internal",
+          "provenance": {
+            "kind": "derived",
+            "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+            "verification": "needs_review"
+          }
+        }
+      ],
+      "natural_keys": [
+        "reference"
+      ],
+      "extends_id": null,
+      "operational_label": null,
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "eu_rel_carrier",
+      "source_id": "eu_consignment",
+      "type": "RELATES_TO",
+      "target_id": "eu_carrier",
+      "cardinality": "many_to_one",
+      "meaning": "Consignment assigned to a carrier",
+      "required": false,
+      "acyclic": false,
+      "constraints": [],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      },
+      "valid_from_version": ""
+    },
+    {
+      "id": "eu_rel_vehicle",
+      "source_id": "eu_consignment",
+      "type": "RELATES_TO",
+      "target_id": "eu_vehicle",
+      "cardinality": "many_to_one",
+      "meaning": "Consignment planned on a vehicle",
+      "required": false,
+      "acyclic": false,
+      "constraints": [],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      },
+      "valid_from_version": ""
+    },
+    {
+      "id": "eu_rel_supplier",
+      "source_id": "eu_purchase_order",
+      "type": "RELATES_TO",
+      "target_id": "eu_supplier",
+      "cardinality": "many_to_one",
+      "meaning": "Purchase order placed with supplier",
+      "required": false,
+      "acyclic": false,
+      "constraints": [],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      },
+      "valid_from_version": ""
+    },
+    {
+      "id": "eu_rel_part",
+      "source_id": "eu_inventory",
+      "type": "RELATES_TO",
+      "target_id": "eu_spare_part",
+      "cardinality": "many_to_one",
+      "meaning": "Stock records identify a spare part",
+      "required": false,
+      "acyclic": false,
+      "constraints": [],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      },
+      "valid_from_version": ""
+    },
+    {
+      "id": "eu_rel_service",
+      "source_id": "eu_service_case",
+      "type": "RELATES_TO",
+      "target_id": "eu_machine",
+      "cardinality": "many_to_one",
+      "meaning": "Service case concerns a machine",
+      "required": false,
+      "acyclic": false,
+      "constraints": [],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      },
+      "valid_from_version": ""
+    }
+  ],
+  "events": [],
+  "rules": [
+    {
+      "id": "eu_rule_efti",
+      "description": "eFTI governs electronic freight information sharing with authorities. Certified platforms and applicable data requirements must be reviewed; storing a consignment here is not eFTI certification.",
+      "type": "policy",
+      "status": "confirmed",
+      "entity_ids": [
+        "eu_consignment"
+      ],
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "https://transport.ec.europa.eu/transport-themes/logistics-and-multimodal-transport/efti-regulation_en",
+        "verification": "verified"
+      }
+    },
+    {
+      "id": "eu_rule_drivers",
+      "description": "EU driving and rest-time rules have specified scope, exceptions and national derogations. Vehicle and route applicability require review before scheduling automation.",
+      "type": "policy",
+      "status": "confirmed",
+      "entity_ids": [
+        "eu_vehicle",
+        "eu_carrier"
+      ],
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "https://transport.ec.europa.eu/transport-modes/road/social-provisions/driving-time-and-rest-periods_en",
+        "verification": "verified"
+      }
+    },
+    {
+      "id": "eu_rule_eori",
+      "description": "EORI identifies economic operators for EU customs procedures. Determine whether the shipment involves a customs operation before requiring it.",
+      "type": "policy",
+      "status": "confirmed",
+      "entity_ids": [
+        "eu_supplier",
+        "eu_carrier"
+      ],
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "https://taxation-customs.ec.europa.eu/customs/customs-procedures-import-and-export/customs-operations/economic-operators-registration-and-identification-number-eori_en",
+        "verification": "verified"
+      }
+    }
+  ],
+  "processes": [],
+  "decisions": [
+    {
+      "id": "eu_decision_jurisdiction",
+      "question": "Which EU member states, third-country legs, goods and vehicle categories are in scope?",
+      "status": "open",
+      "answer": "",
+      "affects": [
+        "eu_consignment",
+        "eu_vehicle"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_decision_compliance",
+      "question": "Who reviews regulatory applicability, national derogations and effective dates before executable rules are approved?",
+      "status": "open",
+      "answer": "",
+      "affects": [
+        "eu_rule_drivers",
+        "eu_rule_efti",
+        "eu_rule_eori"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_decision_privacy",
+      "question": "Which personal fields, lawful purposes, retention periods and access roles apply to this project?",
+      "status": "open",
+      "answer": "",
+      "affects": [
+        "eu_service_case",
+        "eu_sales_order"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    },
+    {
+      "id": "eu_decision_units",
+      "question": "Which measurement units, currency codes, languages and time zones are supported?",
+      "status": "open",
+      "answer": "",
+      "affects": [
+        "eu_consignment",
+        "eu_inventory"
+      ],
+      "provenance": {
+        "kind": "derived",
+        "reference": "EU operations reference model, 2026-10-15; implementation vocabulary, not verified company policy",
+        "verification": "needs_review"
+      }
+    }
+  ],
+  "mappings": [],
+  "app_roles": []
+}

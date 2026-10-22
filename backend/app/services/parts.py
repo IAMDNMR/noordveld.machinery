@@ -1,4 +1,5 @@
 """Part search and detail. Maps graph rows to API models without adding, inferring or defaulting any value."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -36,7 +37,10 @@ def to_summary(row: dict[str, Any]) -> PartSummary:
         name=row["name"],
         category=row.get("category"),
         subcategory=row.get("subcategory"),
-        fitment=[FitmentBrief(**f) for f in sorted(row.get("fitment") or [], key=lambda f: f["model_code"])],
+        fitment=[
+            FitmentBrief(**f)
+            for f in sorted(row.get("fitment") or [], key=lambda f: f["model_code"])
+        ],
         price=Money(**price) if price and price.get("amount") is not None else None,
         availability=availability,
     )
@@ -65,8 +69,14 @@ class PartService:
         limit: int,
     ) -> PartPage:
         total, ids = self._repo.search(
-            text=q, category=category, machine=machine, availability=availability, orderable=orderable,
-            sort=sort, offset=offset, limit=limit,
+            text=q,
+            category=category,
+            machine=machine,
+            availability=availability,
+            orderable=orderable,
+            sort=sort,
+            offset=offset,
+            limit=limit,
         )
         items = [to_summary(r) for r in self._repo.summaries(ids)]
         return PartPage(items=items, total=total, offset=offset, limit=limit)
@@ -77,7 +87,7 @@ class PartService:
             raise NotFoundError("Part", key)
         part = dict(row["part"])
         part["note"] = part.pop("spec_note_source", None)
-        legacy = [{**l, "note": l.get("legacy_source_note")} for l in row["legacy"]]
+        legacy = [{**line, "note": line.get("legacy_source_note")} for line in row["legacy"]]
         seen: set[tuple[str, str]] = set()
         related = []
         for r in row["related"]:

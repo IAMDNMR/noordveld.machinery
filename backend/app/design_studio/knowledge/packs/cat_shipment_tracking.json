@@ -1,0 +1,1720 @@
+{
+  "id": "cat_shipment_tracking",
+  "version": "2026.10.22",
+  "layer": "business",
+  "title": "Shipment from label to delivery, with tracking events",
+  "description": "How a parcel moves from label creation to delivery or return and how carrier tracking events are handled, as documented by Sendcloud and the DHL Shipment Tracking API.",
+  "synthetic": false,
+  "status": "approved",
+  "provenance": {
+    "kind": "verified_source",
+    "reference": "Official documentation, read and checked 2026-10-21: sendcloud.dev/docs/archive/tracking/tracking-statuses; support-developer.dhl.com/support/solutions/articles/47001197243-what-are-the-different-status-codes-available-in-the-dhl-shipment-tracking-unified-api-; support-developer.dhl.com/support/solu",
+    "verification": "verified"
+  },
+  "depends_on": [],
+  "uses_capabilities": [
+    "audit_history",
+    "search_filter"
+  ],
+  "dependency_mode": "full",
+  "includes": [],
+  "business": {
+    "requirements": [
+      {
+        "id": "req_shp_create",
+        "statement": "A shipment is created for an order with its parcels and a shipping label for the chosen carrier.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_create_1",
+            "statement": "A shipment has one or more parcels and a carrier."
+          },
+          {
+            "id": "ac_shp_create_2",
+            "statement": "The label exists before the parcel is handed over."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_announce",
+        "statement": "The label is announced to the carrier; if the carrier does not accept the announcement it is corrected and announced again.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_announce_1",
+            "statement": "The shipment shows whether it is announced."
+          },
+          {
+            "id": "ac_shp_announce_2",
+            "statement": "A failed announcement can be corrected."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_handover",
+        "statement": "A parcel that is ready to send is handed over: collected by the carrier's driver or dropped at a service point; if it is not collected another collection is arranged.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_handover_1",
+            "statement": "The handover is recorded."
+          },
+          {
+            "id": "ac_shp_handover_2",
+            "statement": "An uncollected parcel is flagged."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_transit",
+        "statement": "The carrier carries the parcel through sorting to the recipient; its progress, including customs checks, is reported as status events.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_transit_1",
+            "statement": "Each event has a status, a time and a place."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_deliver",
+        "statement": "The delivery outcome is recorded: delivered, delivery attempt failed, waiting at a service point, or undeliverable.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_deliver_1",
+            "statement": "The outcome of the last delivery attempt is stored."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_fail",
+        "statement": "When the recipient cannot be reached, a new delivery date is arranged; when the parcel waits at a service point the recipient collects it, and an uncollected parcel is returned.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_fail_1",
+            "statement": "A failed attempt leads to a new delivery date."
+          },
+          {
+            "id": "ac_shp_fail_2",
+            "statement": "An uncollected parcel at a service point is returned."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_return",
+        "statement": "An undeliverable parcel because it is refused, the address is invalid or it cannot be delivered is returned to the sender.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_return_1",
+            "statement": "The shipment is marked as returned to the sender."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_event",
+        "statement": "Each carrier event is recorded; where the carrier reports no simplified status or sends a late earlier-stage event, the shipment's status is taken from the carrier's status details rather than the event history.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_event_1",
+            "statement": "An event the carrier cannot classify is kept as received."
+          },
+          {
+            "id": "ac_shp_event_2",
+            "statement": "A late pre-transit event does not move the shipment backwards."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_notify",
+        "statement": "The recipient is notified of the shipment's progress.",
+        "kind": "functional",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_notify_1",
+            "statement": "A status change triggers a notification to the recipient."
+          }
+        ]
+      },
+      {
+        "id": "req_shp_history",
+        "statement": "The full history of status events of every shipment is kept and can be searched.",
+        "kind": "non_functional",
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_shp_history_1",
+            "statement": "Every event of a shipment is visible in order."
+          }
+        ],
+        "category": "auditability"
+      }
+    ],
+    "roles": [
+      {
+        "id": "role_shp_warehouse",
+        "name": "Warehouse operator",
+        "responsibilities": [
+          "Creates shipments and labels",
+          "Announces labels to the carrier",
+          "Hands parcels over for collection"
+        ],
+        "permissions": [
+          "shp.shipment_create",
+          "shp.label_announce",
+          "shp.handover"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_shp_carrier",
+        "name": "Carrier",
+        "responsibilities": [
+          "Collects, sorts and carries parcels",
+          "Delivers parcels and reports status events"
+        ],
+        "permissions": [
+          "shp.event_report",
+          "shp.deliver"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_shp_service",
+        "name": "Customer service agent",
+        "responsibilities": [
+          "Arranges new delivery dates",
+          "Handles undeliverable parcels and returns",
+          "Notifies recipients"
+        ],
+        "permissions": [
+          "shp.reschedule",
+          "shp.return_handle",
+          "shp.notify",
+          "shp.shipment_review"
+        ],
+        "approval_authority": []
+      },
+      {
+        "id": "role_shp_recipient",
+        "name": "Recipient",
+        "responsibilities": [
+          "Receives or collects the parcel"
+        ],
+        "permissions": [
+          "shp.collect"
+        ],
+        "approval_authority": []
+      }
+    ],
+    "entities": [
+      {
+        "id": "ent_shp_carrier",
+        "name": "Carrier",
+        "description": "A company that carries parcels.",
+        "attributes": [
+          {
+            "id": "carrier_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "carrier_name",
+            "name": "Carrier name",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "service_name",
+            "name": "Service",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 140
+          }
+        ]
+      },
+      {
+        "id": "ent_shp_shipment",
+        "name": "Shipment",
+        "description": "The shipping of an order's parcels with one carrier.",
+        "attributes": [
+          {
+            "id": "shipment_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "tracking_number",
+            "name": "Tracking number",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 80
+          },
+          {
+            "id": "status",
+            "name": "Parcel status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "BEING_ANNOUNCED",
+              "ANNOUNCED",
+              "ANNOUNCEMENT_FAILED",
+              "READY_TO_SEND",
+              "ANNOUNCED_NOT_COLLECTED",
+              "ERROR_COLLECTING",
+              "SHIPMENT_PICKED_UP_BY_DRIVER",
+              "EN_ROUTE_TO_SORTING_CENTER",
+              "AT_SORTING_CENTRE",
+              "BEING_SORTED",
+              "SORTED",
+              "PARCEL_EN_ROUTE",
+              "AT_CUSTOMS",
+              "DRIVER_EN_ROUTE",
+              "DELIVERED",
+              "DELIVERY_ATTEMPT_FAILED",
+              "DELIVERY_DELAYED",
+              "DELIVERY_DATE_CHANGED",
+              "DELIVERY_ADDRESS_CHANGED",
+              "AWAITING_CUSTOMER_PICKUP",
+              "SHIPMENT_COLLECTED_BY_CUSTOMER",
+              "REFUSED_BY_RECIPIENT",
+              "ADDRESS_INVALID",
+              "UNABLE_TO_DELIVER",
+              "RETURNED_TO_SENDER",
+              "CANCELLED",
+              "EXCEPTION"
+            ],
+            "default": "BEING_ANNOUNCED",
+            "description": "The normalised parcel statuses of the Sendcloud tracking list."
+          },
+          {
+            "id": "carrier_status",
+            "name": "Carrier status",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "PRE_TRANSIT",
+              "TRANSIT",
+              "DELIVERED",
+              "FAILURE",
+              "UNKNOWN"
+            ],
+            "description": "The simplified status codes of the DHL Shipment Tracking Unified API."
+          },
+          {
+            "id": "announcement",
+            "name": "Announcement",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "ANNOUNCED",
+              "ANNOUNCEMENT_FAILED"
+            ]
+          },
+          {
+            "id": "handover",
+            "name": "Handover",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "COLLECTED",
+              "NOT_COLLECTED"
+            ]
+          },
+          {
+            "id": "delivery_outcome",
+            "name": "Delivery outcome",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "DELIVERED",
+              "ATTEMPT_FAILED",
+              "AT_SERVICE_POINT",
+              "UNDELIVERABLE"
+            ]
+          },
+          {
+            "id": "pickup_result",
+            "name": "Service point result",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "COLLECTED",
+              "EXPIRED"
+            ]
+          },
+          {
+            "id": "return_flag",
+            "name": "Return shipment",
+            "type": "boolean",
+            "required": false,
+            "sensitivity": "internal",
+            "description": "A return travels back to the original sender, who becomes the final recipient (DHL)."
+          },
+          {
+            "id": "expected_delivery",
+            "name": "Expected delivery date",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "delivered_on",
+            "name": "Delivered on",
+            "type": "date",
+            "required": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "recipient_name",
+            "name": "Recipient",
+            "type": "string",
+            "required": true,
+            "sensitivity": "personal",
+            "max_length": 140
+          },
+          {
+            "id": "delivery_address",
+            "name": "Delivery address",
+            "type": "string",
+            "required": true,
+            "sensitivity": "personal",
+            "max_length": 300
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_shp_shipment_carrier",
+            "name": "Carrier",
+            "target": "ent_shp_carrier",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_shp_parcel",
+        "name": "Parcel",
+        "description": "One physical parcel of a shipment.",
+        "attributes": [
+          {
+            "id": "parcel_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "weight_kg",
+            "name": "Weight (kg)",
+            "type": "decimal",
+            "required": false,
+            "sensitivity": "internal",
+            "minimum": 0
+          },
+          {
+            "id": "description",
+            "name": "Contents",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 300
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_shp_parcel_shipment",
+            "name": "Shipment",
+            "target": "ent_shp_shipment",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "ent_shp_event",
+        "name": "Tracking event",
+        "description": "One status event reported by the carrier.",
+        "attributes": [
+          {
+            "id": "event_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "value_source": "system_generated",
+            "writable": false,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "occurred_at",
+            "name": "Occurred at",
+            "type": "datetime",
+            "required": true,
+            "sensitivity": "internal"
+          },
+          {
+            "id": "event_status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "BEING_ANNOUNCED",
+              "ANNOUNCED",
+              "ANNOUNCEMENT_FAILED",
+              "READY_TO_SEND",
+              "ANNOUNCED_NOT_COLLECTED",
+              "ERROR_COLLECTING",
+              "SHIPMENT_PICKED_UP_BY_DRIVER",
+              "EN_ROUTE_TO_SORTING_CENTER",
+              "AT_SORTING_CENTRE",
+              "BEING_SORTED",
+              "SORTED",
+              "PARCEL_EN_ROUTE",
+              "AT_CUSTOMS",
+              "DRIVER_EN_ROUTE",
+              "DELIVERED",
+              "DELIVERY_ATTEMPT_FAILED",
+              "DELIVERY_DELAYED",
+              "DELIVERY_DATE_CHANGED",
+              "DELIVERY_ADDRESS_CHANGED",
+              "AWAITING_CUSTOMER_PICKUP",
+              "SHIPMENT_COLLECTED_BY_CUSTOMER",
+              "REFUSED_BY_RECIPIENT",
+              "ADDRESS_INVALID",
+              "UNABLE_TO_DELIVER",
+              "RETURNED_TO_SENDER",
+              "CANCELLED",
+              "EXCEPTION"
+            ]
+          },
+          {
+            "id": "carrier_status",
+            "name": "Carrier status",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "enum": [
+              "PRE_TRANSIT",
+              "TRANSIT",
+              "DELIVERED",
+              "FAILURE",
+              "UNKNOWN"
+            ]
+          },
+          {
+            "id": "location",
+            "name": "Location",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 140
+          },
+          {
+            "id": "description",
+            "name": "Description",
+            "type": "string",
+            "required": false,
+            "sensitivity": "internal",
+            "max_length": 300
+          },
+          {
+            "id": "handling",
+            "name": "Handling",
+            "type": "string",
+            "required": true,
+            "sensitivity": "internal",
+            "enum": [
+              "CURRENT",
+              "UNKNOWN_STATUS",
+              "LATE_EVENT"
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_shp_event_shipment",
+            "name": "Shipment",
+            "target": "ent_shp_shipment",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule_shp_announce",
+        "description": "A label is announced to the carrier, or the announcement fails.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://sendcloud.dev/docs/archive/tracking/tracking-statuses (Announced; Being announced; Announcement failed)"
+        },
+        "condition": "",
+        "outcomes": [
+          "ANNOUNCED",
+          "ANNOUNCEMENT_FAILED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_shp_shipment.announcement",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_shp_handover",
+        "description": "The parcel is collected by the driver or dropped at a service point, or it is announced but not collected.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://sendcloud.dev/docs/archive/tracking/tracking-statuses (Shipment picked up by driver; Announced: not collected; Error collecting)"
+        },
+        "condition": "",
+        "outcomes": [
+          "COLLECTED",
+          "NOT_COLLECTED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_shp_shipment.handover",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_shp_outcome",
+        "description": "Delivery ends as delivered, a failed attempt (recipient unavailable), a wait at a service point, or undeliverable (refused, invalid address, unable to deliver).",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://sendcloud.dev/docs/archive/tracking/tracking-statuses (Delivered; Delivery attempt failed; Awaiting customer pickup; Refused by recipient; Address invalid; Unable to deliver)"
+        },
+        "condition": "",
+        "outcomes": [
+          "DELIVERED",
+          "ATTEMPT_FAILED",
+          "AT_SERVICE_POINT",
+          "UNDELIVERABLE"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_shp_shipment.delivery_outcome",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_shp_pickup",
+        "description": "A parcel waiting at a service point is collected by the customer, or it expires and is returned.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://support-developer.dhl.com/support/solutions/articles/47001197243-what-are-the-different-status-codes-available-in-the-dhl-shipment-tracking-unified-api- (Failure includes expiry when a recipient does not collect from a service point; Sendcloud: Shipment collected by customer)"
+        },
+        "condition": "",
+        "outcomes": [
+          "COLLECTED",
+          "EXPIRED"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_shp_shipment.pickup_result",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_shp_event",
+        "description": "A carrier event is current, has no simplified status, or arrives late from an earlier stage.",
+        "type": "decision",
+        "status": "confirmed",
+        "source": {
+          "kind": "document",
+          "reference": "https://support-developer.dhl.com/support/solutions/articles/47001271948-i-m-receiving-a-delayed-pre-transit-status-event-once-the-shipment-is-already-in-transit-or-deli (Delayed pre-transit event; use the status details for the final outcome)"
+        },
+        "condition": "",
+        "outcomes": [
+          "CURRENT",
+          "UNKNOWN_STATUS",
+          "LATE_EVENT"
+        ],
+        "execution": {
+          "kind": "value",
+          "field": "ent_shp_event.handling",
+          "operator": "present",
+          "value": null,
+          "other_field": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      }
+    ],
+    "exceptions": [
+      {
+        "id": "exc_shp_announce_failed",
+        "name": "Announcement failed",
+        "trigger": "The carrier did not accept the label announcement.",
+        "recovery": "The shipment details are corrected and the label is announced again.",
+        "resolution": "recover",
+        "resolution_state_id": "st_shp_d_create"
+      },
+      {
+        "id": "exc_shp_not_collected",
+        "name": "Parcel not collected",
+        "trigger": "The parcel was announced but the driver did not collect it, or collecting failed.",
+        "recovery": "Another collection is arranged and the handover is recorded again.",
+        "resolution": "recover",
+        "resolution_state_id": "st_shp_d_handover"
+      },
+      {
+        "id": "exc_shp_attempt_failed",
+        "name": "Delivery attempt failed",
+        "trigger": "The recipient was not available to receive the parcel.",
+        "recovery": "A new delivery date is arranged and the carrier delivers again.",
+        "resolution": "recover",
+        "resolution_state_id": "st_shp_d_deliver"
+      },
+      {
+        "id": "exc_shp_service_point",
+        "name": "Parcel waiting at a service point",
+        "trigger": "The parcel is at a service point waiting for the customer.",
+        "recovery": "The recipient collects the parcel; if it is not collected it is returned.",
+        "resolution": "recover",
+        "resolution_state_id": "st_shp_d_pickup"
+      },
+      {
+        "id": "exc_shp_undeliverable",
+        "name": "Parcel undeliverable",
+        "trigger": "The recipient refused the parcel, the address is invalid, the parcel cannot be delivered, or it was not collected from a service point.",
+        "recovery": "The parcel is returned to the sender and the shipment ends.",
+        "resolution": "terminate",
+        "resolution_state_id": "st_shp_d_returned"
+      },
+      {
+        "id": "exc_shp_unknown_status",
+        "name": "Status not classified",
+        "trigger": "The carrier reports no simplified status for an event.",
+        "recovery": "The event is kept as received and the shipment status is taken from the carrier's status details.",
+        "resolution": "recover",
+        "resolution_state_id": "st_shp_t_update"
+      },
+      {
+        "id": "exc_shp_late_event",
+        "name": "Late earlier-stage event",
+        "trigger": "A pre-transit event arrives after the shipment is already in transit or delivered.",
+        "recovery": "The event is stored; the shipment's status is taken from the carrier's status details, not the event history.",
+        "resolution": "recover",
+        "resolution_state_id": "st_shp_t_update"
+      }
+    ],
+    "decisions": [],
+    "integrations": [],
+    "terms": [
+      {
+        "id": "term_shp_service_point",
+        "term": "Service point",
+        "definition": "A location where a parcel can be dropped off for sending or waits for the recipient to collect it."
+      },
+      {
+        "id": "term_shp_announce",
+        "term": "Announced",
+        "definition": "The shipping label has been announced at the carrier."
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "version": 1,
+      "id": "wf_shp_delivery",
+      "name": "Shipment from label to delivery",
+      "states": [
+        {
+          "id": "st_shp_d_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_create",
+          "label": "Create the shipment and its label",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": "shp.shipment_create",
+          "requirement_ids": [
+            "req_shp_create"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_carrier"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment",
+            "ent_shp_parcel"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_announce",
+          "label": "Announce the label to the carrier",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": "shp.label_announce",
+          "requirement_ids": [
+            "req_shp_announce"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_announced",
+          "label": "Did the carrier accept the announcement?",
+          "kind": "branch",
+          "outputs": [
+            "rule_shp_announce"
+          ],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": null,
+          "requirement_ids": [
+            "req_shp_announce"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_shp_announce"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_ann_fail",
+          "label": "Correct the shipment and announce again",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": "shp.label_announce",
+          "requirement_ids": [
+            "req_shp_announce"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_announce_failed"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_handover",
+          "label": "Hand the parcel over to the carrier",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": "shp.handover",
+          "requirement_ids": [
+            "req_shp_handover"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_collected",
+          "label": "Was the parcel collected?",
+          "kind": "branch",
+          "outputs": [
+            "rule_shp_handover"
+          ],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": null,
+          "requirement_ids": [
+            "req_shp_handover"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_shp_handover"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_not_collected",
+          "label": "Arrange another collection",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_warehouse",
+          "permission": "shp.handover",
+          "requirement_ids": [
+            "req_shp_handover"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_not_collected"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_transit",
+          "label": "Carry the parcel through sorting to the recipient",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_carrier",
+          "permission": "shp.event_report",
+          "requirement_ids": [
+            "req_shp_transit"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment",
+            "ent_shp_event"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_deliver",
+          "label": "Deliver the parcel",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_carrier",
+          "permission": "shp.deliver",
+          "requirement_ids": [
+            "req_shp_deliver"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment",
+            "ent_shp_event"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_outcome",
+          "label": "What was the delivery outcome?",
+          "kind": "branch",
+          "outputs": [
+            "rule_shp_outcome"
+          ],
+          "outcome": null,
+          "role_id": "role_shp_carrier",
+          "permission": null,
+          "requirement_ids": [
+            "req_shp_deliver"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_shp_outcome"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_attempt",
+          "label": "Arrange a new delivery date",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.reschedule",
+          "requirement_ids": [
+            "req_shp_fail"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_attempt_failed"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_waiting",
+          "label": "Hold the parcel at the service point",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.reschedule",
+          "requirement_ids": [
+            "req_shp_fail"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_service_point"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_pickup",
+          "label": "Did the recipient collect the parcel?",
+          "kind": "branch",
+          "outputs": [
+            "rule_shp_pickup"
+          ],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": null,
+          "requirement_ids": [
+            "req_shp_fail"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_shp_pickup"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_return",
+          "label": "Return the parcel to the sender",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.return_handle",
+          "requirement_ids": [
+            "req_shp_return"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_undeliverable"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_confirm",
+          "label": "Record the delivery and notify the recipient",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.notify",
+          "requirement_ids": [
+            "req_shp_notify"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_review",
+          "label": "Review shipment history",
+          "kind": "search",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.shipment_review",
+          "requirement_ids": [
+            "req_shp_history"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment",
+            "ent_shp_event"
+          ],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_delivered",
+          "label": "Parcel delivered",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_d_returned",
+          "label": "Parcel returned to sender",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_shp_d_1",
+          "source": "st_shp_d_start",
+          "target": "st_shp_d_create",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_2",
+          "source": "st_shp_d_create",
+          "target": "st_shp_d_announce",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_3",
+          "source": "st_shp_d_announce",
+          "target": "st_shp_d_announced",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_4",
+          "source": "st_shp_d_announced",
+          "target": "st_shp_d_handover",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_announce",
+            "value": "ANNOUNCED"
+          }
+        },
+        {
+          "id": "tr_shp_d_5",
+          "source": "st_shp_d_announced",
+          "target": "st_shp_d_ann_fail",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_announce",
+            "value": "ANNOUNCEMENT_FAILED"
+          }
+        },
+        {
+          "id": "tr_shp_d_6",
+          "source": "st_shp_d_ann_fail",
+          "target": "st_shp_d_create",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_7",
+          "source": "st_shp_d_handover",
+          "target": "st_shp_d_collected",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_8",
+          "source": "st_shp_d_collected",
+          "target": "st_shp_d_transit",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_handover",
+            "value": "COLLECTED"
+          }
+        },
+        {
+          "id": "tr_shp_d_9",
+          "source": "st_shp_d_collected",
+          "target": "st_shp_d_not_collected",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_handover",
+            "value": "NOT_COLLECTED"
+          }
+        },
+        {
+          "id": "tr_shp_d_10",
+          "source": "st_shp_d_not_collected",
+          "target": "st_shp_d_handover",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_11",
+          "source": "st_shp_d_transit",
+          "target": "st_shp_d_deliver",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_12",
+          "source": "st_shp_d_deliver",
+          "target": "st_shp_d_outcome",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_13",
+          "source": "st_shp_d_outcome",
+          "target": "st_shp_d_confirm",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_outcome",
+            "value": "DELIVERED"
+          }
+        },
+        {
+          "id": "tr_shp_d_14",
+          "source": "st_shp_d_outcome",
+          "target": "st_shp_d_attempt",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_outcome",
+            "value": "ATTEMPT_FAILED"
+          }
+        },
+        {
+          "id": "tr_shp_d_15",
+          "source": "st_shp_d_attempt",
+          "target": "st_shp_d_deliver",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_16",
+          "source": "st_shp_d_outcome",
+          "target": "st_shp_d_waiting",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_outcome",
+            "value": "AT_SERVICE_POINT"
+          }
+        },
+        {
+          "id": "tr_shp_d_17",
+          "source": "st_shp_d_waiting",
+          "target": "st_shp_d_pickup",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_18",
+          "source": "st_shp_d_pickup",
+          "target": "st_shp_d_confirm",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_pickup",
+            "value": "COLLECTED"
+          }
+        },
+        {
+          "id": "tr_shp_d_19",
+          "source": "st_shp_d_pickup",
+          "target": "st_shp_d_return",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_pickup",
+            "value": "EXPIRED"
+          }
+        },
+        {
+          "id": "tr_shp_d_20",
+          "source": "st_shp_d_outcome",
+          "target": "st_shp_d_return",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_outcome",
+            "value": "UNDELIVERABLE"
+          }
+        },
+        {
+          "id": "tr_shp_d_21",
+          "source": "st_shp_d_return",
+          "target": "st_shp_d_returned",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_22",
+          "source": "st_shp_d_confirm",
+          "target": "st_shp_d_review",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_d_23",
+          "source": "st_shp_d_review",
+          "target": "st_shp_d_delivered",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "id": "wf_shp_tracking",
+      "name": "Tracking events and notification",
+      "states": [
+        {
+          "id": "st_shp_t_start",
+          "label": "Start",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_record",
+          "label": "Record the carrier's tracking event",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_carrier",
+          "permission": "shp.event_report",
+          "requirement_ids": [
+            "req_shp_event"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_event"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_check",
+          "label": "How should the event be handled?",
+          "kind": "branch",
+          "outputs": [
+            "rule_shp_event"
+          ],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": null,
+          "requirement_ids": [
+            "req_shp_event"
+          ],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [
+            "rule_shp_event"
+          ],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_unknown",
+          "label": "Keep the event and use the carrier's status details",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.shipment_review",
+          "requirement_ids": [
+            "req_shp_event"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_event"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_event"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_unknown_status"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_late",
+          "label": "Store the late event without changing the status",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.shipment_review",
+          "requirement_ids": [
+            "req_shp_event"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_event"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_event"
+          ],
+          "rule_ids": [],
+          "exception_ids": [
+            "exc_shp_late_event"
+          ],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_update",
+          "label": "Update the shipment status",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.shipment_review",
+          "requirement_ids": [
+            "req_shp_event"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_event"
+          ],
+          "writes_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_notify",
+          "label": "Notify the recipient of the new status",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_shp_service",
+          "permission": "shp.notify",
+          "requirement_ids": [
+            "req_shp_notify"
+          ],
+          "reads_entity_ids": [
+            "ent_shp_shipment"
+          ],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_shp_t_done",
+          "label": "Event processed",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_shp_t_1",
+          "source": "st_shp_t_start",
+          "target": "st_shp_t_record",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_t_2",
+          "source": "st_shp_t_record",
+          "target": "st_shp_t_check",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_t_3",
+          "source": "st_shp_t_check",
+          "target": "st_shp_t_update",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_event",
+            "value": "CURRENT"
+          }
+        },
+        {
+          "id": "tr_shp_t_4",
+          "source": "st_shp_t_check",
+          "target": "st_shp_t_unknown",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_event",
+            "value": "UNKNOWN_STATUS"
+          }
+        },
+        {
+          "id": "tr_shp_t_5",
+          "source": "st_shp_t_unknown",
+          "target": "st_shp_t_update",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_t_6",
+          "source": "st_shp_t_check",
+          "target": "st_shp_t_late",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_shp_event",
+            "value": "LATE_EVENT"
+          }
+        },
+        {
+          "id": "tr_shp_t_7",
+          "source": "st_shp_t_late",
+          "target": "st_shp_t_update",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_t_8",
+          "source": "st_shp_t_update",
+          "target": "st_shp_t_notify",
+          "condition": {
+            "kind": "always"
+          }
+        },
+        {
+          "id": "tr_shp_t_9",
+          "source": "st_shp_t_notify",
+          "target": "st_shp_t_done",
+          "condition": {
+            "kind": "always"
+          }
+        }
+      ]
+    }
+  ],
+  "process_contexts": [
+    {
+      "workflow_id": "wf_shp_delivery",
+      "family_id": "shipment_to_delivery",
+      "variant": "Parcel statuses from announcement to delivery or return",
+      "region": "Europe",
+      "source_system": "Sendcloud; DHL",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: sendcloud.dev/docs/archive/tracking/tracking-statuses; support-developer.dhl.com/support/solutions/articles/47001197243-what-are-the-different-status-codes-available-in-the-dhl-shipment-tracking-unified-api-; support-developer.dhl.com/support/solu",
+        "verification": "verified"
+      }
+    },
+    {
+      "workflow_id": "wf_shp_tracking",
+      "family_id": "tracking_events",
+      "variant": "Carrier tracking events and simplified status codes",
+      "region": "Europe",
+      "source_system": "DHL Shipment Tracking Unified API",
+      "provenance": {
+        "kind": "verified_source",
+        "reference": "Official documentation, read and checked 2026-10-21: support-developer.dhl.com/support/solutions/articles/47001197243-what-are-the-different-status-codes-available-in-the-dhl-shipment-tracking-unified-api-; support-developer.dhl.com/support/solutions/articles/47001271948-i-m-receiving-a-delayed-pre-",
+        "verification": "verified"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Shipment",
+      "definition": "The shipping of an order's parcels with one carrier.",
+      "synonyms": [
+        "consignment",
+        "delivery"
+      ],
+      "refers_to": "ent_shp_shipment"
+    },
+    {
+      "term": "Tracking event",
+      "definition": "A status update reported by the carrier.",
+      "synonyms": [
+        "scan"
+      ],
+      "refers_to": "ent_shp_event"
+    }
+  ],
+  "overrides": [],
+  "domain_id": "transport_management",
+  "capability": {
+    "id": "shipment_tracking",
+    "name": "Shipment tracking"
+  }
+}

@@ -8,5 +8,14 @@ interface LogoProps {
 }
 
 export function Logo({ tone, height = 34 }: LogoProps) {
-  return <img src={tone === 'light' ? logoLight : logoDark} alt="Noordveld Machinery B.V." height={height} width={Math.round(height * 4.46)} style={{ height, width: 'auto' }} decoding="async" />
+  return (
+    <img
+      src={tone === 'light' ? logoLight : logoDark}
+      alt="Noordveld Machinery B.V."
+      height={height}
+      width={Math.round(height * 4.46)}
+      style={{ height, width: 'auto' }}
+      decoding="async"
+    />
+  )
 }

@@ -3,6 +3,7 @@
 There is no password and no identity provider: the demo signs in as one of the seeded demo users. The role is never read from the
 cookie or the browser; it is looked up on the user record for every request.
 """
+
 from __future__ import annotations
 
 import base64
@@ -24,7 +25,11 @@ def _unb64(text: str) -> bytes:
 
 
 def sign(user_id: str, secret: str, now: float | None = None) -> str:
-    payload = _b64(json.dumps({"uid": user_id, "exp": int((now or time.time()) + MAX_AGE)}, separators=(",", ":")).encode())
+    payload = _b64(
+        json.dumps(
+            {"uid": user_id, "exp": int((now or time.time()) + MAX_AGE)}, separators=(",", ":")
+        ).encode()
+    )
     mac = _b64(hmac.new(secret.encode(), payload.encode(), hashlib.sha256).digest())
     return f"{payload}.{mac}"
 
@@ -41,6 +46,10 @@ def verify(token: str | None, secret: str, now: float | None = None) -> str | No
         data = json.loads(_unb64(payload))
     except ValueError:
         return None
-    if not isinstance(data, dict) or not isinstance(data.get("uid"), str) or int(data.get("exp", 0)) < (now or time.time()):
+    if (
+        not isinstance(data, dict)
+        or not isinstance(data.get("uid"), str)
+        or int(data.get("exp", 0)) < (now or time.time())
+    ):
         return None
     return data["uid"]

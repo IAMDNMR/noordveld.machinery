@@ -1,4 +1,4 @@
-import type { ResultItem } from '../../api'
+import type { ResultItem } from '../../api/index'
 import { humanize } from '../../lib/format'
 import { NOT_AVAILABLE, ProvenanceBadge } from './provenance'
 
@@ -18,7 +18,12 @@ export function ResultCard({ item, onInvestigate }: ResultCardProps) {
       <header className="rcard__head">
         {isPart ? (
           <h3 className="rcard__key mono">
-            <button type="button" className="rcard__open" onClick={() => onInvestigate(item.part_number!)} aria-label={`Open ${item.title} in Part Intelligence`}>
+            <button
+              type="button"
+              className="rcard__open"
+              onClick={() => onInvestigate(item.part_number!)}
+              aria-label={`Open ${item.title} in Part Intelligence`}
+            >
               {item.title}
             </button>
           </h3>
@@ -54,7 +59,11 @@ export function ResultCard({ item, onInvestigate }: ResultCardProps) {
       <footer className="rcard__foot">
         <ProvenanceBadge value={item.data_class} />
         {isPart ? (
-          <button type="button" className="rcard__action" onClick={() => onInvestigate(item.part_number!)}>
+          <button
+            type="button"
+            className="rcard__action"
+            onClick={() => onInvestigate(item.part_number!)}
+          >
             View Part Intelligence
           </button>
         ) : null}

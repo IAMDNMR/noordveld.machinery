@@ -1,0 +1,58 @@
+{
+ "pack": "core_foundations",
+ "records": [
+  {
+   "name": "cust1",
+   "entity": "ent_core_customer",
+   "role": "role_core_steward",
+   "values": {
+    "name": "Northwind Works (synthetic)",
+    "email": "buyer@northwind.example",
+    "country": "NL",
+    "segment": "MID"
+   },
+   "refs": {},
+   "shared": true
+  },
+  {
+   "name": "sup1",
+   "entity": "ent_core_supplier",
+   "role": "role_core_steward",
+   "values": {
+    "name": "Delta Components (synthetic)",
+    "country": "DE",
+    "status": "ACTIVE"
+   },
+   "refs": {},
+   "shared": true
+  },
+  {
+   "name": "item1",
+   "entity": "ent_core_item",
+   "role": "role_core_steward",
+   "values": {
+    "sku": "HYD-HOSE-12",
+    "name": "Hydraulic hose 12 mm",
+    "uom": "EA",
+    "unit_cost": 18.5,
+    "status": "ACTIVE"
+   },
+   "refs": {},
+   "shared": true
+  },
+  {
+   "name": "loc1",
+   "entity": "ent_core_location",
+   "role": "role_core_steward",
+   "values": {
+    "name": "Central warehouse",
+    "kind": "WAREHOUSE",
+    "city": "Rotterdam",
+    "country": "NL"
+   },
+   "refs": {},
+   "shared": true
+  }
+ ],
+ "flows": []
+}

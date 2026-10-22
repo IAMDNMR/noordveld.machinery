@@ -1,5 +1,6 @@
 """Google Gemini provider (optional; LLM_PROVIDER=gemini). REST with structured JSON output. The key is sent in a header, never in a
 URL, and never logged. Prompts, schemas and validation are shared with every provider (app/llm/structured.py)."""
+
 from __future__ import annotations
 
 import logging
@@ -11,7 +12,7 @@ import httpx
 
 from app.core.config import Settings
 from app.llm.base import LLMInvalidResponse, LLMUnavailable
-from app.llm.structured import MAX_OUTPUT_TOKENS, StructuredLLM, record
+from app.llm.structured import JSON_KINDS, MAX_OUTPUT_TOKENS, StructuredLLM, record
 
 log = logging.getLogger("app.llm")
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -48,17 +49,44 @@ class GeminiClient(StructuredLLM):
     def _complete(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
         # newer models (3.5+) reject thinkingBudget and take thinkingLevel; both mean "answer directly, no long reasoning"
         version = re.match(r"gemini-(\d+(?:\.\d+)?)", self._model)
-        thinking = {"thinkingLevel": "minimal"} if version and float(version.group(1)) >= 3.5 else {"thinkingBudget": 0}
-        config: dict[str, Any] = {"temperature": 0, "maxOutputTokens": MAX_OUTPUT_TOKENS.get(kind, 250), "thinkingConfig": thinking}
+        thinking = (
+            {"thinkingLevel": "minimal"}
+            if version and float(version.group(1)) >= 3.5
+            else {"thinkingBudget": 0}
+        )
+        config: dict[str, Any] = {
+            "temperature": 0,
+            "maxOutputTokens": MAX_OUTPUT_TOKENS.get(kind, 250),
+            "thinkingConfig": thinking,
+        }
         if schema:
             config.update(responseMimeType="application/json", responseSchema=gemini_schema(schema))
-        body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": config}
+        elif kind in JSON_KINDS:
+            config["responseMimeType"] = "application/json"
+        body = {
+            "systemInstruction": {"parts": [{"text": system}]},
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            "generationConfig": config,
+        }
         started = time.perf_counter()
-        for attempt in range(3):  # Google's 500/503 ("overloaded") are usually gone within seconds; quota (429) is never retried
+        for attempt in range(
+            3
+        ):  # Google's 500/503 ("overloaded") are usually gone within seconds; quota (429) is never retried
             try:
-                response = self._http.post(ENDPOINT.format(model=self._model), json=body, headers={"x-goog-api-key": self._key})
+                response = self._http.post(
+                    ENDPOINT.format(model=self._model),
+                    json=body,
+                    headers={"x-goog-api-key": self._key},
+                )
             except httpx.HTTPError as exc:
-                record(self.name, self._model, kind, started, f"connection:{type(exc).__name__}", attempt)
+                record(
+                    self.name,
+                    self._model,
+                    kind,
+                    started,
+                    f"connection:{type(exc).__name__}",
+                    attempt,
+                )
                 raise LLMUnavailable(type(exc).__name__) from exc
             if response.status_code not in (500, 503) or attempt == 2:
                 break
@@ -72,5 +100,13 @@ class GeminiClient(StructuredLLM):
         except (KeyError, IndexError, ValueError) as exc:
             record(self.name, self._model, kind, started, "bad_shape", attempt)
             raise LLMInvalidResponse("unexpected response shape") from exc
-        record(self.name, self._model, kind, started, "ok", attempt, (data.get("usageMetadata") or {}).get("totalTokenCount"))
+        record(
+            self.name,
+            self._model,
+            kind,
+            started,
+            "ok",
+            attempt,
+            (data.get("usageMetadata") or {}).get("totalTokenCount"),
+        )
         return text

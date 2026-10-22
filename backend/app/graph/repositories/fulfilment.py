@@ -62,14 +62,14 @@ class GraphFulfilmentRepository:
 
     # ── place order ────────────────────────────────────────────────────────────────────────────
     def create_order(self, *, key: str, user_id: str, actor: dict[str, str], at: str, today: str, requester: dict, receiver: dict, shipto_id: str, dealer_id: str, depot_id: str, route_id: str,
-                     service_required: bool, freight: dict, lines: list[dict]) -> str:
+                     service_required: bool, freight: dict, cost: dict, lines: list[dict]) -> str:
         """Order number, order, lines, relationships: one transaction. A second call with the same key hits the unique constraint and raises GraphConflictError."""
 
         def work(tx):
             n = tx.run(q.NEXT_ORDER_NUMBER).single()["n"]
-            order_id = f"HCME-ORD-{n:06d}"
+            order_id = f"NM-ORD{n:03d}"
             made = tx.run(q.CREATE_ORDER, order_id=order_id, key=key, user_id=user_id, today=today, requester=requester, receiver=receiver, shipto_id=shipto_id,
-                          dealer_id=dealer_id, depot_id=depot_id, route_id=route_id, service_required=service_required, freight=freight,
+                          dealer_id=dealer_id, depot_id=depot_id, route_id=route_id, service_required=service_required, freight=freight, cost=cost,
                           lines=[{**ln, "order_line_id": f"{order_id}-L{ln['line_no']}"} for ln in lines]).single()
             if not made or made["lines"] != len(lines):
                 raise ValueError("the order could not be created: a referenced record is missing")

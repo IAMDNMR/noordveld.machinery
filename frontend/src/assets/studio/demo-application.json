@@ -1,0 +1,5269 @@
+{
+  "version": 2,
+  "id": "app_transport_operations_20261019",
+  "metadata": {
+    "name": "Transport Operations",
+    "description": "Plan shipments, assign carriers and vehicles, track deliveries, and resolve exceptions.",
+    "purpose": "",
+    "domain": "logistics"
+  },
+  "screens": [
+    {
+      "id": "gen_st_tms_shipment_plan",
+      "title": "Plan the shipment",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_plan_text",
+          "props": {
+            "content": "Step: Plan the shipment. Performed by: Transport planner. Requires permission: tms.shipment_plan."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_plan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_plan_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_plan_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_plan_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_plan_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_plan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "table",
+          "id": "gen_st_tms_shipment_plan_ent_eco_order_table",
+          "props": {
+            "title": "Customer order",
+            "columns": [
+              {
+                "id": "order_no",
+                "label": "Number"
+              },
+              {
+                "id": "channel",
+                "label": "Channel"
+              },
+              {
+                "id": "status",
+                "label": "Status"
+              },
+              {
+                "id": "payment_status",
+                "label": "Payment status"
+              },
+              {
+                "id": "total_amount",
+                "label": "Total amount"
+              },
+              {
+                "id": "currency",
+                "label": "Currency"
+              },
+              {
+                "id": "order_date",
+                "label": "Order date"
+              }
+            ],
+            "searchable": false,
+            "filters": [],
+            "page_size": 20
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_plan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_eco_order",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_plan_ent_tms_shipment_section",
+          "props": {
+            "title": "Plan the shipment",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_destination",
+              "props": {
+                "field_type": "text",
+                "label": "Destination",
+                "help_text": "Required.",
+                "options": [],
+                "validations": [
+                  {
+                    "kind": "required",
+                    "value": true,
+                    "message": "Destination is required."
+                  },
+                  {
+                    "kind": "max_length",
+                    "value": 200,
+                    "message": null
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "destination",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_weight_kg",
+              "props": {
+                "field_type": "number",
+                "label": "Load weight (kg)",
+                "help_text": "Required.",
+                "options": [],
+                "validations": [
+                  {
+                    "kind": "required",
+                    "value": true,
+                    "message": "Load weight (kg) is required."
+                  },
+                  {
+                    "kind": "minimum",
+                    "value": 1.0,
+                    "message": "Load weight (kg) is at least 1."
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "weight_kg",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_planned_departure",
+              "props": {
+                "field_type": "date",
+                "label": "Planned departure",
+                "help_text": null,
+                "options": [],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "planned_departure",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_planned_arrival",
+              "props": {
+                "field_type": "date",
+                "label": "Planned arrival",
+                "help_text": null,
+                "options": [],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "planned_arrival",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_status",
+              "props": {
+                "field_type": "select",
+                "label": "Status",
+                "help_text": "Required.",
+                "options": ["PLANNED", "DISPATCHED", "IN_TRANSIT", "DELIVERED", "FAILED"],
+                "validations": [
+                  {
+                    "kind": "required",
+                    "value": true,
+                    "message": "Status is required."
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "status",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_rel_tms_shipment_order",
+              "props": {
+                "field_type": "select",
+                "label": "Order",
+                "help_text": "Choose an existing record in the running application.",
+                "options": [],
+                "validations": [
+                  {
+                    "kind": "required",
+                    "value": true,
+                    "message": "Order is required."
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": null,
+                "relationship_id": "rel_tms_shipment_order",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_plan_ent_tms_shipment_rel_tms_shipment_pack_unit",
+              "props": {
+                "field_type": "select",
+                "label": "Pack unit",
+                "help_text": "Choose an existing record in the running application.",
+                "options": [],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_plan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": null,
+                "relationship_id": "rel_tms_shipment_pack_unit",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_plan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_plan_to_st_tms_shipment_assign",
+          "props": {
+            "label": "Assign carrier and vehicle"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_assign",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_plan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_plan",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "6f407386aede024c063d8c0b10053d8c8cea5c4f2d3cdfc5d5ade3d744c72c49"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_assign",
+      "title": "Assign carrier and vehicle",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_assign_text",
+          "props": {
+            "content": "Step: Assign carrier and vehicle. Performed by: Transport planner. Requires permission: tms.shipment_assign."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_assign_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_assign_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_assign_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_assign_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_assign_rules_section",
+          "props": {
+            "title": "Business rules applied",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_assign_rule_tms_carrier_active_text",
+              "props": {
+                "content": "Only an active carrier may be assigned. (assumption, not confirmed)"
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": "rule_tms_carrier_active",
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "table",
+          "id": "gen_st_tms_shipment_assign_ent_tms_carrier_table",
+          "props": {
+            "title": "Carrier",
+            "columns": [
+              {
+                "id": "carrier_no",
+                "label": "Number"
+              },
+              {
+                "id": "name",
+                "label": "Name"
+              },
+              {
+                "id": "mode",
+                "label": "Mode"
+              },
+              {
+                "id": "status",
+                "label": "Status"
+              }
+            ],
+            "searchable": false,
+            "filters": [],
+            "page_size": 20
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_carrier",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "table",
+          "id": "gen_st_tms_shipment_assign_ent_tms_vehicle_table",
+          "props": {
+            "title": "Vehicle",
+            "columns": [
+              {
+                "id": "vehicle_no",
+                "label": "Number"
+              },
+              {
+                "id": "plate",
+                "label": "Registration"
+              },
+              {
+                "id": "capacity_kg",
+                "label": "Capacity (kg)"
+              }
+            ],
+            "searchable": false,
+            "filters": [],
+            "page_size": 20
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_vehicle",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_assign_ent_tms_shipment_section",
+          "props": {
+            "title": "Assign carrier and vehicle",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_assign_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_assign_ent_tms_shipment_rel_tms_shipment_carrier",
+              "props": {
+                "field_type": "select",
+                "label": "Carrier",
+                "help_text": "Choose an existing record in the running application.",
+                "options": [],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": null,
+                "relationship_id": "rel_tms_shipment_carrier",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_assign_ent_tms_shipment_rel_tms_shipment_vehicle",
+              "props": {
+                "field_type": "select",
+                "label": "Vehicle",
+                "help_text": "Choose an existing record in the running application.",
+                "options": [],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_assign",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": null,
+                "relationship_id": "rel_tms_shipment_vehicle",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_assign_to_st_tms_shipment_dispatch",
+          "props": {
+            "label": "If rule_tms_capacity = FITS: Dispatch the shipment"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_dispatch",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_capacity",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_assign_to_st_tms_shipment_replan",
+          "props": {
+            "label": "If rule_tms_capacity = OVER_CAPACITY: Resolve the overload"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_replan",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_assign",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_capacity",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_assign",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "2fc890702617c5440d5a159c61acfe011bf15d8aaba29a041f4e016061db379b"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_dispatch",
+      "title": "Dispatch the shipment",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_dispatch_text",
+          "props": {
+            "content": "Step: Dispatch the shipment. Performed by: Dispatcher. Requires permission: tms.shipment_dispatch."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_dispatch",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_dispatch_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_dispatch_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_dispatch",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_dispatch_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_dispatch",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_dispatch_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_dispatch",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_dispatch",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "table",
+          "id": "gen_st_tms_shipment_dispatch_ent_tms_carrier_table",
+          "props": {
+            "title": "Carrier",
+            "columns": [
+              {
+                "id": "carrier_no",
+                "label": "Number"
+              },
+              {
+                "id": "name",
+                "label": "Name"
+              },
+              {
+                "id": "mode",
+                "label": "Mode"
+              },
+              {
+                "id": "status",
+                "label": "Status"
+              }
+            ],
+            "searchable": false,
+            "filters": [],
+            "page_size": 20
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_dispatch",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_carrier",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "table",
+          "id": "gen_st_tms_shipment_dispatch_ent_tms_vehicle_table",
+          "props": {
+            "title": "Vehicle",
+            "columns": [
+              {
+                "id": "vehicle_no",
+                "label": "Number"
+              },
+              {
+                "id": "plate",
+                "label": "Registration"
+              },
+              {
+                "id": "capacity_kg",
+                "label": "Capacity (kg)"
+              }
+            ],
+            "searchable": false,
+            "filters": [],
+            "page_size": 20
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_dispatch",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_vehicle",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_dispatch_ent_tms_shipment_section",
+          "props": {
+            "title": "Dispatch the shipment",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_dispatch_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_dispatch",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_dispatch_ent_tms_shipment_status",
+              "props": {
+                "field_type": "select",
+                "label": "Status",
+                "help_text": "Required.",
+                "options": ["PLANNED", "DISPATCHED", "IN_TRANSIT", "DELIVERED", "FAILED"],
+                "validations": [
+                  {
+                    "kind": "required",
+                    "value": true,
+                    "message": "Status is required."
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_dispatch",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "status",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_dispatch",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_dispatch_to_st_tms_shipment_track",
+          "props": {
+            "label": "Record a tracking update"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_track",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_dispatch",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_dispatch",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "6006afb5479e07890f7d4deefb4839653b8521c81859108432005d3ad5621a6d"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_replan",
+      "title": "Resolve the overload",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_replan_text",
+          "props": {
+            "content": "Step: Resolve the overload. Performed by: Transport planner. Requires permission: tms.shipment_replan."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_replan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_replan_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_replan_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_replan_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_replan_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_replan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_replan_exc_tms_overload_section",
+          "props": {
+            "title": "Load exceeds vehicle capacity",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_replan_exc_tms_overload_trigger_text",
+              "props": {
+                "content": "When: The assigned vehicle cannot carry the shipment."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": "exc_tms_overload",
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_replan_exc_tms_overload_recovery_text",
+              "props": {
+                "content": "What happens: The planner changes the vehicle or the load and capacity is checked again."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": "exc_tms_overload",
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_replan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": "exc_tms_overload",
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_replan_ent_tms_shipment_section",
+          "props": {
+            "title": "Resolve the overload",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_replan_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_replan_ent_tms_shipment_weight_kg",
+              "props": {
+                "field_type": "number",
+                "label": "Load weight (kg)",
+                "help_text": "Required.",
+                "options": [],
+                "validations": [
+                  {
+                    "kind": "required",
+                    "value": true,
+                    "message": "Load weight (kg) is required."
+                  },
+                  {
+                    "kind": "minimum",
+                    "value": 1.0,
+                    "message": "Load weight (kg) is at least 1."
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "weight_kg",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_replan_ent_tms_shipment_rel_tms_shipment_vehicle",
+              "props": {
+                "field_type": "select",
+                "label": "Vehicle",
+                "help_text": "Choose an existing record in the running application.",
+                "options": [],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_replan",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": null,
+                "relationship_id": "rel_tms_shipment_vehicle",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_replan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_replan_to_st_tms_shipment_assign",
+          "props": {
+            "label": "Assign carrier and vehicle"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_assign",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_replan",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_replan",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "a0e366721cec1dc409f239d886da8474b1f39931bf4cf02db047ea41b0ce393b"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_track",
+      "title": "Record a tracking update",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_track_text",
+          "props": {
+            "content": "Step: Record a tracking update. Performed by: Dispatcher. Requires permission: tms.shipment_track."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_track_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_track_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_track",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_track_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_track",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_track_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_track",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_track_ent_tms_shipment_section",
+          "props": {
+            "title": "Record a tracking update",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_track_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_track",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_track_ent_tms_shipment_tracking_status",
+              "props": {
+                "field_type": "select",
+                "label": "Tracking status",
+                "help_text": null,
+                "options": ["IN_TRANSIT", "DELIVERED", "DELAYED", "FAILED"],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_track",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "tracking_status",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_track_to_st_tms_shipment_track",
+          "props": {
+            "label": "If rule_tms_tracking = IN_TRANSIT: Record a tracking update"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_track",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_tracking",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_track_to_st_tms_shipment_pod",
+          "props": {
+            "label": "If rule_tms_tracking = DELIVERED: Confirm delivery and proof"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_pod",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_tracking",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_track_to_st_tms_shipment_resolve",
+          "props": {
+            "label": "If rule_tms_tracking = DELAYED: Resolve the delivery exception"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_resolve",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_tracking",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_track_to_st_tms_shipment_resolve_2",
+          "props": {
+            "label": "If rule_tms_tracking = FAILED: Resolve the delivery exception"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_resolve",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_track",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_tracking",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_track",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "1775ee49809c581d35e037fc2edba6a18c1ae77bf61c243c269e6e657e89db57"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_pod",
+      "title": "Confirm delivery and proof",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_pod_text",
+          "props": {
+            "content": "Step: Confirm delivery and proof. Performed by: Driver or carrier partner. Requires permission: tms.shipment_pod."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_pod",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_pod_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_pod_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_pod_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_pod_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_pod",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_pod_rules_section",
+          "props": {
+            "title": "Business rules applied",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_pod_rule_tms_receiver_text",
+              "props": {
+                "content": "The receiver is recorded before delivery is confirmed. (assumption, not confirmed)"
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": "rule_tms_receiver",
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_pod_rule_tms_pod_text",
+              "props": {
+                "content": "Proof of delivery is recorded before delivery is confirmed. (assumption, not confirmed)"
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": "rule_tms_pod",
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_pod",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_pod_ent_tms_shipment_section",
+          "props": {
+            "title": "Confirm delivery and proof",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_pod_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_pod_ent_tms_shipment_received_by",
+              "props": {
+                "field_type": "text",
+                "label": "Received by",
+                "help_text": null,
+                "options": [],
+                "validations": [
+                  {
+                    "kind": "max_length",
+                    "value": 120,
+                    "message": null
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "received_by",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_pod_ent_tms_shipment_pod_reference",
+              "props": {
+                "field_type": "text",
+                "label": "Proof of delivery reference",
+                "help_text": null,
+                "options": [],
+                "validations": [
+                  {
+                    "kind": "max_length",
+                    "value": 120,
+                    "message": null
+                  }
+                ]
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_pod",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "pod_reference",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_pod",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_pod_to_st_tms_shipment_done",
+          "props": {
+            "label": "Delivered with proof"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_done",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_pod",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_pod",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "30622404625d6e2cec76eb6e1584e2e2a2ae07808d4dc4c3a458597dbca5c22c"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_resolve",
+      "title": "Resolve the delivery exception",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_resolve_text",
+          "props": {
+            "content": "Step: Resolve the delivery exception. Performed by: Dispatcher. Requires permission: tms.shipment_resolve."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_resolve_req_section",
+          "props": {
+            "title": "Requirements this screen satisfies",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_req_tms_deliver_text",
+              "props": {
+                "content": "req_tms_deliver: Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_deliver"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_req_tms_recover_text",
+              "props": {
+                "content": "req_tms_recover: Delayed or failed deliveries are resolved explicitly."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_recover"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_req_tms_audit_text",
+              "props": {
+                "content": "req_tms_audit: Every change to a record and every process step is recorded with who did it and when."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_resolve_rules_section",
+          "props": {
+            "title": "Business rules applied",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_rule_tms_resolution_text",
+              "props": {
+                "content": "A dispatcher's recorded choice selects retry or cancellation. (assumption, not confirmed)"
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": "rule_tms_resolution",
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_resolve_exc_tms_failed_delivery_section",
+          "props": {
+            "title": "Delivery delayed or failed",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_exc_tms_failed_delivery_trigger_text",
+              "props": {
+                "content": "When: Tracking reports a delay or a failed delivery."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": "exc_tms_failed_delivery",
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_exc_tms_failed_delivery_recovery_text",
+              "props": {
+                "content": "What happens: The dispatcher records a retry or cancels the shipment."
+              },
+              "placement": {
+                "span": 12
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": null,
+                "attribute_id": null,
+                "rule_id": null,
+                "exception_id": "exc_tms_failed_delivery",
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": "exc_tms_failed_delivery",
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "container",
+          "id": "gen_st_tms_shipment_resolve_ent_tms_shipment_section",
+          "props": {
+            "title": "Resolve the delivery exception",
+            "layout": {
+              "mobile": {
+                "mode": "stack",
+                "columns": 1
+              },
+              "tablet": {
+                "mode": "grid",
+                "columns": 2
+              },
+              "desktop": {
+                "mode": "grid",
+                "columns": 2
+              }
+            }
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "gen_st_tms_shipment_resolve_ent_tms_shipment_shipment_no",
+              "props": {
+                "content": "Number: assigned by the system (read-only)."
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "shipment_no",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            },
+            {
+              "kind": "field",
+              "id": "gen_st_tms_shipment_resolve_ent_tms_shipment_resolution",
+              "props": {
+                "field_type": "select",
+                "label": "Exception resolution",
+                "help_text": null,
+                "options": ["RETRY", "CANCEL"],
+                "validations": []
+              },
+              "placement": {
+                "span": 6
+              },
+              "children": null,
+              "binding": null,
+              "events": [],
+              "trace": {
+                "generated": true,
+                "workflow_id": "wf_tms_shipment",
+                "step_id": "st_tms_shipment_resolve",
+                "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+                "entity_id": "ent_tms_shipment",
+                "attribute_id": "resolution",
+                "rule_id": null,
+                "exception_id": null,
+                "source_sha256": null
+              }
+            }
+          ],
+          "binding": null,
+          "events": null,
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": "ent_tms_shipment",
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_resolve_to_st_tms_shipment_track",
+          "props": {
+            "label": "If rule_tms_resolution = RETRY: Record a tracking update"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_track",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_resolution",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "button",
+          "id": "gen_st_tms_shipment_resolve_to_st_tms_shipment_cancelled",
+          "props": {
+            "label": "If rule_tms_resolution = CANCEL: Shipment cancelled"
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [
+            {
+              "trigger": "click",
+              "action": "navigate",
+              "target": "gen_st_tms_shipment_cancelled",
+              "value": null
+            }
+          ],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_resolve",
+            "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": "rule_tms_resolution",
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_resolve",
+        "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "e60a5bb7b737f9f4e141636b2ecdf049aeaca123e210849346ec35d358ef0d33"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_done",
+      "title": "Delivered with proof",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_done_text",
+          "props": {
+            "content": "Step: Delivered with proof."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_done",
+            "requirement_ids": [],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_done_outcome_text",
+          "props": {
+            "content": "Delivered with proof. Completed successfully."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_done",
+            "requirement_ids": [],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_done",
+        "requirement_ids": [],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "2d174d116d1158ebf37fbe19a60fb01ffa1fc7e26b531e42e3381d18fb843520"
+      }
+    },
+    {
+      "id": "gen_st_tms_shipment_cancelled",
+      "title": "Shipment cancelled",
+      "components": [
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_cancelled_text",
+          "props": {
+            "content": "Step: Shipment cancelled."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_cancelled",
+            "requirement_ids": [],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        },
+        {
+          "kind": "text",
+          "id": "gen_st_tms_shipment_cancelled_outcome_text",
+          "props": {
+            "content": "Shipment cancelled. Cancelled."
+          },
+          "placement": {
+            "span": 12
+          },
+          "children": null,
+          "binding": null,
+          "events": [],
+          "trace": {
+            "generated": true,
+            "workflow_id": "wf_tms_shipment",
+            "step_id": "st_tms_shipment_cancelled",
+            "requirement_ids": [],
+            "entity_id": null,
+            "attribute_id": null,
+            "rule_id": null,
+            "exception_id": null,
+            "source_sha256": null
+          }
+        }
+      ],
+      "trace": {
+        "generated": true,
+        "workflow_id": "wf_tms_shipment",
+        "step_id": "st_tms_shipment_cancelled",
+        "requirement_ids": [],
+        "entity_id": null,
+        "attribute_id": null,
+        "rule_id": null,
+        "exception_id": null,
+        "source_sha256": "f70b6525c764a7db37148cfaeb14d7d6fedd510e45cf45426916ac30214fc96e"
+      }
+    }
+  ],
+  "theme": {
+    "primary": "#00756A",
+    "background": "#FFFFFF",
+    "surface": "#F7F5F0",
+    "text": "#14181A",
+    "font": "inter",
+    "logo": null
+  },
+  "fixtures": [],
+  "local_state": [],
+  "navigation": [
+    {
+      "screen_id": "gen_st_tms_shipment_plan",
+      "label": "Plan the shipment"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_assign",
+      "label": "Assign carrier and vehicle"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_dispatch",
+      "label": "Dispatch the shipment"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_replan",
+      "label": "Resolve the overload"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_track",
+      "label": "Record a tracking update"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_pod",
+      "label": "Confirm delivery and proof"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_resolve",
+      "label": "Resolve the delivery exception"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_done",
+      "label": "Delivered with proof"
+    },
+    {
+      "screen_id": "gen_st_tms_shipment_cancelled",
+      "label": "Shipment cancelled"
+    }
+  ],
+  "workflows": ["wf_tms_shipment"],
+  "workflow_definitions": [
+    {
+      "version": 1,
+      "id": "wf_tms_shipment",
+      "name": "Shipment delivery",
+      "states": [
+        {
+          "id": "st_tms_shipment_start",
+          "label": "Shipment requested",
+          "kind": "start",
+          "outputs": [],
+          "outcome": null,
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_plan",
+          "label": "Plan the shipment",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_tms_planner",
+          "permission": "tms.shipment_plan",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": ["ent_eco_order"],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": [
+              "destination",
+              "weight_kg",
+              "planned_departure",
+              "planned_arrival",
+              "status"
+            ]
+          },
+          "input_relationships": {
+            "ent_tms_shipment": ["rel_tms_shipment_order", "rel_tms_shipment_pack_unit"]
+          },
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_assign",
+          "label": "Assign carrier and vehicle",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_tms_planner",
+          "permission": "tms.shipment_assign",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": ["ent_tms_carrier", "ent_tms_vehicle"],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": []
+          },
+          "input_relationships": {
+            "ent_tms_shipment": ["rel_tms_shipment_carrier", "rel_tms_shipment_vehicle"]
+          },
+          "rule_ids": ["rule_tms_carrier_active"],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_cap",
+          "label": "Does the load fit?",
+          "kind": "branch",
+          "outputs": ["rule_tms_capacity"],
+          "outcome": null,
+          "role_id": "role_tms_planner",
+          "permission": null,
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": ["rule_tms_capacity"],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_replan",
+          "label": "Resolve the overload",
+          "kind": "exception",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_tms_planner",
+          "permission": "tms.shipment_replan",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": [],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": ["weight_kg"]
+          },
+          "input_relationships": {
+            "ent_tms_shipment": ["rel_tms_shipment_vehicle"]
+          },
+          "rule_ids": [],
+          "exception_ids": ["exc_tms_overload"],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_dispatch",
+          "label": "Dispatch the shipment",
+          "kind": "action",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_tms_dispatcher",
+          "permission": "tms.shipment_dispatch",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": ["ent_tms_carrier", "ent_tms_vehicle"],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": ["status"]
+          },
+          "input_relationships": {
+            "ent_tms_shipment": []
+          },
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_track",
+          "label": "Record a tracking update",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_tms_dispatcher",
+          "permission": "tms.shipment_track",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": [],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": ["tracking_status"]
+          },
+          "input_relationships": {
+            "ent_tms_shipment": []
+          },
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_delivery",
+          "label": "Delivery outcome",
+          "kind": "branch",
+          "outputs": ["rule_tms_tracking"],
+          "outcome": null,
+          "role_id": "role_tms_dispatcher",
+          "permission": null,
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": ["rule_tms_tracking"],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_resolve",
+          "label": "Resolve the delivery exception",
+          "kind": "exception",
+          "outputs": ["rule_tms_resolution"],
+          "outcome": null,
+          "role_id": "role_tms_dispatcher",
+          "permission": "tms.shipment_resolve",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": [],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": ["resolution"]
+          },
+          "input_relationships": {
+            "ent_tms_shipment": []
+          },
+          "rule_ids": ["rule_tms_resolution"],
+          "exception_ids": ["exc_tms_failed_delivery"],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_pod",
+          "label": "Confirm delivery and proof",
+          "kind": "form",
+          "outputs": [],
+          "outcome": null,
+          "role_id": "role_tms_driver",
+          "permission": "tms.shipment_pod",
+          "requirement_ids": ["req_tms_deliver", "req_tms_recover", "req_tms_audit"],
+          "reads_entity_ids": [],
+          "writes_entity_ids": ["ent_tms_shipment"],
+          "input_fields": {
+            "ent_tms_shipment": ["received_by", "pod_reference"]
+          },
+          "input_relationships": {
+            "ent_tms_shipment": []
+          },
+          "rule_ids": ["rule_tms_receiver", "rule_tms_pod"],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_done",
+          "label": "Delivered with proof",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "success",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        },
+        {
+          "id": "st_tms_shipment_cancelled",
+          "label": "Shipment cancelled",
+          "kind": "end",
+          "outputs": [],
+          "outcome": "cancelled",
+          "role_id": null,
+          "permission": null,
+          "requirement_ids": [],
+          "reads_entity_ids": [],
+          "writes_entity_ids": [],
+          "rule_ids": [],
+          "exception_ids": [],
+          "preconditions": [],
+          "postconditions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "tr_tms_shipment_1",
+          "source": "st_tms_shipment_start",
+          "target": "st_tms_shipment_plan",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        },
+        {
+          "id": "tr_tms_shipment_2",
+          "source": "st_tms_shipment_plan",
+          "target": "st_tms_shipment_assign",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        },
+        {
+          "id": "tr_tms_shipment_3",
+          "source": "st_tms_shipment_assign",
+          "target": "st_tms_shipment_cap",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        },
+        {
+          "id": "tr_tms_shipment_4",
+          "source": "st_tms_shipment_cap",
+          "target": "st_tms_shipment_dispatch",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_capacity",
+            "value": "FITS"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_5",
+          "source": "st_tms_shipment_cap",
+          "target": "st_tms_shipment_replan",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_capacity",
+            "value": "OVER_CAPACITY"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_6",
+          "source": "st_tms_shipment_replan",
+          "target": "st_tms_shipment_assign",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        },
+        {
+          "id": "tr_tms_shipment_7",
+          "source": "st_tms_shipment_dispatch",
+          "target": "st_tms_shipment_track",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        },
+        {
+          "id": "tr_tms_shipment_8",
+          "source": "st_tms_shipment_track",
+          "target": "st_tms_shipment_delivery",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        },
+        {
+          "id": "tr_tms_shipment_9",
+          "source": "st_tms_shipment_delivery",
+          "target": "st_tms_shipment_track",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_tracking",
+            "value": "IN_TRANSIT"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_10",
+          "source": "st_tms_shipment_delivery",
+          "target": "st_tms_shipment_pod",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_tracking",
+            "value": "DELIVERED"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_11",
+          "source": "st_tms_shipment_delivery",
+          "target": "st_tms_shipment_resolve",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_tracking",
+            "value": "DELAYED"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_12",
+          "source": "st_tms_shipment_delivery",
+          "target": "st_tms_shipment_resolve",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_tracking",
+            "value": "FAILED"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_13",
+          "source": "st_tms_shipment_resolve",
+          "target": "st_tms_shipment_track",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_resolution",
+            "value": "RETRY"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_14",
+          "source": "st_tms_shipment_resolve",
+          "target": "st_tms_shipment_cancelled",
+          "condition": {
+            "kind": "equals",
+            "field": "rule_tms_resolution",
+            "value": "CANCEL"
+          }
+        },
+        {
+          "id": "tr_tms_shipment_15",
+          "source": "st_tms_shipment_pod",
+          "target": "st_tms_shipment_done",
+          "condition": {
+            "kind": "always",
+            "field": null,
+            "value": null
+          }
+        }
+      ]
+    }
+  ],
+  "business": {
+    "brief": {
+      "intake": null,
+      "goal": "Manage transport requests through planning, carrier and vehicle assignment, dispatch, tracking, delivery confirmation and exception recovery.",
+      "problem": "Transport planners and dispatchers need one shared record of shipment progress, ownership and delivery exceptions.",
+      "domain_id": "transport_management",
+      "subdomain": "",
+      "capability": "Shipment management",
+      "purpose": "",
+      "user_types": [
+        "Master data steward",
+        "Stock clerk",
+        "Inventory manager",
+        "Order agent",
+        "Payments clerk",
+        "Transport planner",
+        "Dispatcher",
+        "Driver or carrier partner"
+      ],
+      "outcomes": [],
+      "constraints": [],
+      "dependencies": []
+    },
+    "requirements": [
+      {
+        "id": "req_tms_deliver",
+        "statement": "Shipments are planned, assigned, dispatched, tracked and confirmed with proof of delivery.",
+        "kind": "functional",
+        "category": null,
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_tms_deliver_1",
+            "statement": "A planner assigns an active carrier and a vehicle that fits the load."
+          },
+          {
+            "id": "ac_tms_deliver_2",
+            "statement": "A dispatcher records tracking updates."
+          },
+          {
+            "id": "ac_tms_deliver_3",
+            "statement": "Delivery is confirmed with a receiver and a proof reference."
+          }
+        ],
+        "deferral_reason": "",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "req_tms_deliver"
+        }
+      },
+      {
+        "id": "req_tms_recover",
+        "statement": "Delayed or failed deliveries are resolved explicitly.",
+        "kind": "functional",
+        "category": null,
+        "priority": "should",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_tms_recover_1",
+            "statement": "A delay or failure leads to a recorded retry or cancellation."
+          }
+        ],
+        "deferral_reason": "",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "req_tms_recover"
+        }
+      },
+      {
+        "id": "req_tms_audit",
+        "statement": "Every change to a record and every process step is recorded with who did it and when.",
+        "kind": "non_functional",
+        "category": "auditability",
+        "priority": "must",
+        "status": "agreed",
+        "acceptance_criteria": [
+          {
+            "id": "ac_tms_audit_1",
+            "statement": "The history of a process shows each step with its actor and time."
+          }
+        ],
+        "deferral_reason": "",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "req_tms_audit"
+        }
+      }
+    ],
+    "roles": [
+      {
+        "id": "role_core_steward",
+        "name": "Master data steward",
+        "responsibilities": ["Keeps customers, suppliers, items and locations correct"],
+        "permissions": ["core.maintain"],
+        "approval_authority": [],
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "role_core_steward"
+        }
+      },
+      {
+        "id": "role_eco_agent",
+        "name": "Order agent",
+        "responsibilities": ["Enters and confirms orders"],
+        "permissions": ["eco.order_enter", "eco.order_backorder", "eco.order_confirm"],
+        "approval_authority": [],
+        "origin": {
+          "pack_id": "cat_ecommerce",
+          "pack_version": "2026.10.19",
+          "item_id": "role_eco_agent"
+        }
+      },
+      {
+        "id": "role_eco_payments",
+        "name": "Payments clerk",
+        "responsibilities": ["Records and chases payment"],
+        "permissions": ["eco.order_payment", "eco.order_chase"],
+        "approval_authority": [],
+        "origin": {
+          "pack_id": "cat_ecommerce",
+          "pack_version": "2026.10.19",
+          "item_id": "role_eco_payments"
+        }
+      },
+      {
+        "id": "role_tms_planner",
+        "name": "Transport planner",
+        "responsibilities": ["Plans shipments and maintains carriers and vehicles"],
+        "permissions": ["tms.shipment_plan", "tms.shipment_assign", "tms.shipment_replan"],
+        "approval_authority": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "role_tms_planner"
+        }
+      },
+      {
+        "id": "role_tms_dispatcher",
+        "name": "Dispatcher",
+        "responsibilities": ["Dispatches, tracks and resolves delivery exceptions"],
+        "permissions": ["tms.shipment_dispatch", "tms.shipment_track", "tms.shipment_resolve"],
+        "approval_authority": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "role_tms_dispatcher"
+        }
+      },
+      {
+        "id": "role_tms_driver",
+        "name": "Driver or carrier partner",
+        "responsibilities": ["Confirms delivery with proof"],
+        "permissions": ["tms.shipment_pod"],
+        "approval_authority": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "role_tms_driver"
+        }
+      }
+    ],
+    "entities": [
+      {
+        "id": "ent_core_customer",
+        "name": "Customer",
+        "description": "A person or organization that buys from the company.",
+        "owner_role_id": "role_core_steward",
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "customer_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "name",
+            "name": "Name",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 120,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "email",
+            "name": "Email",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": "email",
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "personal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "phone",
+            "name": "Phone",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": "phone",
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "personal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "country",
+            "name": "Country",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 60,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "segment",
+            "name": "Segment",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["SMALL", "MID", "ENTERPRISE"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [],
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "ent_core_customer"
+        }
+      },
+      {
+        "id": "ent_core_location",
+        "name": "Location",
+        "description": "A place where the company keeps or handles things.",
+        "owner_role_id": "role_core_steward",
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "location_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "name",
+            "name": "Name",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 120,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "kind",
+            "name": "Kind",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["WAREHOUSE", "SITE", "DEPOT", "STORE"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "city",
+            "name": "City",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 80,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "country",
+            "name": "Country",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 60,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [],
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "ent_core_location"
+        }
+      },
+      {
+        "id": "ent_eco_order",
+        "name": "Customer order",
+        "description": "A customer's request to buy items.",
+        "owner_role_id": "role_eco_agent",
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "order_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "channel",
+            "name": "Channel",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["WEB", "PHONE", "EMAIL", "MARKETPLACE"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["NEW", "CONFIRMED", "IN_FULFILMENT", "COMPLETED", "CANCELLED"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "payment_status",
+            "name": "Payment status",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["PENDING", "PAID", "FAILED"],
+            "sensitivity": "internal",
+            "owner_role_id": "role_eco_payments",
+            "reference": null
+          },
+          {
+            "id": "total_amount",
+            "name": "Total amount",
+            "type": "decimal",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": 0.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "currency",
+            "name": "Currency",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["EUR", "USD", "GBP"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "order_date",
+            "name": "Order date",
+            "type": "date",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_eco_order_customer",
+            "name": "Customer",
+            "target": "ent_core_customer",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ],
+        "origin": {
+          "pack_id": "cat_ecommerce",
+          "pack_version": "2026.10.19",
+          "item_id": "ent_eco_order"
+        }
+      },
+      {
+        "id": "ent_wms_pick_list",
+        "name": "Pick list",
+        "description": "The work of picking one customer order from one warehouse location.",
+        "owner_role_id": null,
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "pick_list_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["OPEN", "PICKING", "PICKED", "PACKED", "HANDED_OFF"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "created_on",
+            "name": "Created on",
+            "type": "date",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_wms_pick_list_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_wms_pick_list_location",
+            "name": "Warehouse location",
+            "target": "ent_core_location",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ],
+        "origin": {
+          "pack_id": "cat_warehouse",
+          "pack_version": "2026.10.19",
+          "item_id": "ent_wms_pick_list"
+        }
+      },
+      {
+        "id": "ent_wms_pack_unit",
+        "name": "Pack unit",
+        "description": "A parcel, carton or pallet packed for one pick list.",
+        "owner_role_id": null,
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "pack_unit_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "packages",
+            "name": "Number of packages",
+            "type": "integer",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "gross_weight_kg",
+            "name": "Gross weight (kg)",
+            "type": "decimal",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": 0.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "packed_on",
+            "name": "Packed on",
+            "type": "date",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_wms_pack_unit_pick_list",
+            "name": "Pick list",
+            "target": "ent_wms_pick_list",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ],
+        "origin": {
+          "pack_id": "cat_warehouse",
+          "pack_version": "2026.10.19",
+          "item_id": "ent_wms_pack_unit"
+        }
+      },
+      {
+        "id": "ent_tms_carrier",
+        "name": "Carrier",
+        "description": "A company or fleet that moves goods.",
+        "owner_role_id": "role_tms_planner",
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "carrier_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "name",
+            "name": "Name",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 120,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "mode",
+            "name": "Mode",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["ROAD", "RAIL", "SEA", "AIR"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["ACTIVE", "SUSPENDED"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "ent_tms_carrier"
+        }
+      },
+      {
+        "id": "ent_tms_vehicle",
+        "name": "Vehicle",
+        "description": "A vehicle a carrier uses, with its load capacity.",
+        "owner_role_id": "role_tms_planner",
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "vehicle_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "plate",
+            "name": "Registration",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 20,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "capacity_kg",
+            "name": "Capacity (kg)",
+            "type": "decimal",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_tms_vehicle_carrier",
+            "name": "Carrier",
+            "target": "ent_tms_carrier",
+            "cardinality": "many_to_one",
+            "required": true
+          }
+        ],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "ent_tms_vehicle"
+        }
+      },
+      {
+        "id": "ent_tms_shipment",
+        "name": "Shipment",
+        "description": "One movement of goods for a customer order.",
+        "owner_role_id": null,
+        "source_system": "",
+        "attributes": [
+          {
+            "id": "shipment_no",
+            "name": "Number",
+            "type": "integer",
+            "required": true,
+            "key": true,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "system_generated",
+            "writable": false,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "destination",
+            "name": "Destination",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 200,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "weight_kg",
+            "name": "Load weight (kg)",
+            "type": "decimal",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "planned_departure",
+            "name": "Planned departure",
+            "type": "datetime",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "planned_arrival",
+            "name": "Planned arrival",
+            "type": "datetime",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "status",
+            "name": "Status",
+            "type": "string",
+            "required": true,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["PLANNED", "DISPATCHED", "IN_TRANSIT", "DELIVERED", "FAILED"],
+            "sensitivity": "internal",
+            "owner_role_id": null,
+            "reference": null
+          },
+          {
+            "id": "tracking_status",
+            "name": "Tracking status",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["IN_TRANSIT", "DELIVERED", "DELAYED", "FAILED"],
+            "sensitivity": "internal",
+            "owner_role_id": "role_tms_dispatcher",
+            "reference": null
+          },
+          {
+            "id": "resolution",
+            "name": "Exception resolution",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "pattern": null,
+            "enum": ["RETRY", "CANCEL"],
+            "sensitivity": "internal",
+            "owner_role_id": "role_tms_dispatcher",
+            "reference": null
+          },
+          {
+            "id": "received_by",
+            "name": "Received by",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 120,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": "role_tms_driver",
+            "reference": null
+          },
+          {
+            "id": "pod_reference",
+            "name": "Proof of delivery reference",
+            "type": "string",
+            "required": false,
+            "key": false,
+            "allow_unknown": false,
+            "description": "",
+            "validations": [],
+            "value_source": "user_entered",
+            "writable": true,
+            "default": null,
+            "format": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": 120,
+            "pattern": null,
+            "enum": [],
+            "sensitivity": "internal",
+            "owner_role_id": "role_tms_driver",
+            "reference": null
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_tms_shipment_order",
+            "name": "Order",
+            "target": "ent_eco_order",
+            "cardinality": "many_to_one",
+            "required": true
+          },
+          {
+            "id": "rel_tms_shipment_pack_unit",
+            "name": "Pack unit",
+            "target": "ent_wms_pack_unit",
+            "cardinality": "many_to_one",
+            "required": false
+          },
+          {
+            "id": "rel_tms_shipment_carrier",
+            "name": "Carrier",
+            "target": "ent_tms_carrier",
+            "cardinality": "many_to_one",
+            "required": false
+          },
+          {
+            "id": "rel_tms_shipment_vehicle",
+            "name": "Vehicle",
+            "target": "ent_tms_vehicle",
+            "cardinality": "many_to_one",
+            "required": false
+          }
+        ],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "ent_tms_shipment"
+        }
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule_tms_carrier_active",
+        "description": "Only an active carrier may be assigned.",
+        "type": "validation",
+        "status": "assumption",
+        "source": {
+          "kind": "synthetic_assumption",
+          "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+        },
+        "condition": "",
+        "outcomes": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "rule_tms_carrier_active"
+        },
+        "execution": {
+          "kind": "compare",
+          "field": "ent_tms_carrier.status",
+          "operator": "eq",
+          "other_field": null,
+          "value": "ACTIVE",
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_tms_capacity",
+        "description": "The assigned vehicle must cover the shipment weight.",
+        "type": "decision",
+        "status": "assumption",
+        "source": {
+          "kind": "synthetic_assumption",
+          "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+        },
+        "condition": "",
+        "outcomes": ["FITS", "OVER_CAPACITY"],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "rule_tms_capacity"
+        },
+        "execution": {
+          "kind": "compare",
+          "field": "ent_tms_vehicle.capacity_kg",
+          "operator": "gte",
+          "other_field": "ent_tms_shipment.weight_kg",
+          "value": null,
+          "pass_outcome": "FITS",
+          "fail_outcome": "OVER_CAPACITY"
+        }
+      },
+      {
+        "id": "rule_tms_tracking",
+        "description": "The recorded tracking status selects the delivery path.",
+        "type": "decision",
+        "status": "assumption",
+        "source": {
+          "kind": "synthetic_assumption",
+          "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+        },
+        "condition": "",
+        "outcomes": ["IN_TRANSIT", "DELIVERED", "DELAYED", "FAILED"],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "rule_tms_tracking"
+        },
+        "execution": {
+          "kind": "value",
+          "field": "ent_tms_shipment.tracking_status",
+          "operator": "present",
+          "other_field": null,
+          "value": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_tms_receiver",
+        "description": "The receiver is recorded before delivery is confirmed.",
+        "type": "validation",
+        "status": "assumption",
+        "source": {
+          "kind": "synthetic_assumption",
+          "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+        },
+        "condition": "",
+        "outcomes": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "rule_tms_receiver"
+        },
+        "execution": {
+          "kind": "compare",
+          "field": "ent_tms_shipment.received_by",
+          "operator": "present",
+          "other_field": null,
+          "value": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_tms_pod",
+        "description": "Proof of delivery is recorded before delivery is confirmed.",
+        "type": "validation",
+        "status": "assumption",
+        "source": {
+          "kind": "synthetic_assumption",
+          "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+        },
+        "condition": "",
+        "outcomes": [],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "rule_tms_pod"
+        },
+        "execution": {
+          "kind": "compare",
+          "field": "ent_tms_shipment.pod_reference",
+          "operator": "present",
+          "other_field": null,
+          "value": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      },
+      {
+        "id": "rule_tms_resolution",
+        "description": "A dispatcher's recorded choice selects retry or cancellation.",
+        "type": "decision",
+        "status": "assumption",
+        "source": {
+          "kind": "synthetic_assumption",
+          "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+        },
+        "condition": "",
+        "outcomes": ["RETRY", "CANCEL"],
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "rule_tms_resolution"
+        },
+        "execution": {
+          "kind": "value",
+          "field": "ent_tms_shipment.resolution",
+          "operator": "present",
+          "other_field": null,
+          "value": null,
+          "pass_outcome": null,
+          "fail_outcome": null
+        }
+      }
+    ],
+    "exceptions": [
+      {
+        "id": "exc_tms_overload",
+        "name": "Load exceeds vehicle capacity",
+        "trigger": "The assigned vehicle cannot carry the shipment.",
+        "recovery": "The planner changes the vehicle or the load and capacity is checked again.",
+        "resolution": "recover",
+        "resolution_state_id": "st_tms_shipment_assign",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "exc_tms_overload"
+        }
+      },
+      {
+        "id": "exc_tms_failed_delivery",
+        "name": "Delivery delayed or failed",
+        "trigger": "Tracking reports a delay or a failed delivery.",
+        "recovery": "The dispatcher records a retry or cancels the shipment.",
+        "resolution": "recover",
+        "resolution_state_id": "st_tms_shipment_track",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "exc_tms_failed_delivery"
+        }
+      }
+    ],
+    "decisions": [],
+    "integrations": [],
+    "terms": [
+      {
+        "id": "term_core_customer",
+        "term": "Customer",
+        "definition": "A person or organization that buys from the company.",
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "term_core_customer"
+        }
+      },
+      {
+        "id": "term_core_supplier",
+        "term": "Supplier",
+        "definition": "An organization the company buys from.",
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "term_core_supplier"
+        }
+      },
+      {
+        "id": "term_core_item",
+        "term": "Item",
+        "definition": "Something the company stocks, sells, buys or services.",
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "term_core_item"
+        }
+      },
+      {
+        "id": "term_core_location",
+        "term": "Location",
+        "definition": "A place where the company keeps or handles things.",
+        "origin": {
+          "pack_id": "core_foundations",
+          "pack_version": "2026.10.1",
+          "item_id": "term_core_location"
+        }
+      },
+      {
+        "id": "term_inv_stock",
+        "term": "Stock level",
+        "definition": "How much of an item is on hand at a location.",
+        "origin": {
+          "pack_id": "cat_inventory",
+          "pack_version": "2026.10.19",
+          "item_id": "term_inv_stock"
+        }
+      },
+      {
+        "id": "term_inv_count",
+        "term": "Stock count",
+        "definition": "A physical count compared with the system.",
+        "origin": {
+          "pack_id": "cat_inventory",
+          "pack_version": "2026.10.19",
+          "item_id": "term_inv_count"
+        }
+      },
+      {
+        "id": "term_inv_reorder",
+        "term": "Reorder point",
+        "definition": "The stock level at which replenishment is triggered.",
+        "origin": {
+          "pack_id": "cat_inventory",
+          "pack_version": "2026.10.19",
+          "item_id": "term_inv_reorder"
+        }
+      },
+      {
+        "id": "term_eco_order",
+        "term": "Customer order",
+        "definition": "A customer's request to buy items.",
+        "origin": {
+          "pack_id": "cat_ecommerce",
+          "pack_version": "2026.10.19",
+          "item_id": "term_eco_order"
+        }
+      },
+      {
+        "id": "term_eco_line",
+        "term": "Order line",
+        "definition": "One item and quantity on an order.",
+        "origin": {
+          "pack_id": "cat_ecommerce",
+          "pack_version": "2026.10.19",
+          "item_id": "term_eco_line"
+        }
+      },
+      {
+        "id": "term_wms_pick",
+        "term": "Pick list",
+        "definition": "The work of picking one order.",
+        "origin": {
+          "pack_id": "cat_warehouse",
+          "pack_version": "2026.10.19",
+          "item_id": "term_wms_pick"
+        }
+      },
+      {
+        "id": "term_wms_pack",
+        "term": "Pack unit",
+        "definition": "A parcel, carton or pallet packed for shipping.",
+        "origin": {
+          "pack_id": "cat_warehouse",
+          "pack_version": "2026.10.19",
+          "item_id": "term_wms_pack"
+        }
+      },
+      {
+        "id": "term_wms_handoff",
+        "term": "Handoff",
+        "definition": "The point where packed goods are released to transport.",
+        "origin": {
+          "pack_id": "cat_warehouse",
+          "pack_version": "2026.10.19",
+          "item_id": "term_wms_handoff"
+        }
+      },
+      {
+        "id": "term_tms_shipment",
+        "term": "Shipment",
+        "definition": "One movement of goods for a customer order.",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "term_tms_shipment"
+        }
+      },
+      {
+        "id": "term_tms_carrier",
+        "term": "Carrier",
+        "definition": "A company or fleet that moves goods.",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "term_tms_carrier"
+        }
+      },
+      {
+        "id": "term_tms_pod",
+        "term": "Proof of delivery",
+        "definition": "Confirmation that a shipment reached the receiver.",
+        "origin": {
+          "pack_id": "cat_transport",
+          "pack_version": "2026.10.2",
+          "item_id": "term_tms_pod"
+        }
+      }
+    ],
+    "questions": [],
+    "knowledge": []
+  },
+  "approvals": [],
+  "revision": 12
+}

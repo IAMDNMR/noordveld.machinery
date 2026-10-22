@@ -25,7 +25,10 @@ export function Service() {
             </h2>
           </Reveal>
           <Reveal delay={120}>
-            <p className="lead">A machine is only as good as the support behind it. Service, maintenance, parts and support work together to keep Noordveld machinery running.</p>
+            <p className="lead">
+              A machine is only as good as the support behind it. Service, maintenance, parts and
+              support work together to keep Noordveld machinery running.
+            </p>
           </Reveal>
           <ul className="concepts">
             {concepts.map((c, i) => (
@@ -45,7 +48,13 @@ export function Service() {
           </Reveal>
         </div>
         <Reveal className="service__media" delay={160}>
-          <EditorialImage name="service" subject="Service" ratio="4 / 5" alt="A Noordveld service engineer at work" position="74% 50%" />
+          <EditorialImage
+            name="service"
+            subject="Service"
+            ratio="4 / 5"
+            alt="A Noordveld service engineer at work"
+            position="74% 50%"
+          />
         </Reveal>
       </div>
       <div className="container service__film">
@@ -71,7 +80,10 @@ export function PartsSection() {
             </h2>
           </Reveal>
           <Reveal delay={120}>
-            <p className="lead">Every machine depends on the parts behind it. Noordveld brings machine and parts information together to make finding the right component easier.</p>
+            <p className="lead">
+              Every machine depends on the parts behind it. Noordveld brings machine and parts
+              information together to make finding the right component easier.
+            </p>
           </Reveal>
           <Reveal>
             <ButtonLink to="/parts-store">Shop Parts</ButtonLink>
@@ -81,7 +93,8 @@ export function PartsSection() {
           <p className="parts__count">
             {data ? (
               <>
-                <strong>{data.partCount}</strong> parts catalogued across {partCategories.length} categories
+                <strong>{data.partCount}</strong> parts catalogued across {partCategories.length}{' '}
+                categories
               </>
             ) : (
               'Loading the catalogue…'

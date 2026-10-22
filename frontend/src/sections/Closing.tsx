@@ -15,7 +15,10 @@ export function AgenticTeaser() {
         </Reveal>
         <div className="teaser__side">
           <Reveal delay={120}>
-            <p className="lead">Describe what you need. The next generation of commerce can help you find the right solution.</p>
+            <p className="lead">
+              Describe what you need. The next generation of commerce can help you find the right
+              solution.
+            </p>
           </Reveal>
           <Reveal delay={200}>
             <blockquote className="teaser__quote">

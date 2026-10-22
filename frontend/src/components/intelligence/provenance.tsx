@@ -1,4 +1,4 @@
-import type { DataClass, ProvenanceSummary } from '../../api'
+import type { DataClass, ProvenanceSummary } from '../../api/index'
 
 /** How each data class reads in the interface. The classes themselves come from the API. */
 export const DATA_CLASS_LABEL: Record<DataClass, string> = {
@@ -40,7 +40,10 @@ const MARK: Record<DataClass, string> = {
 
 export function ProvenanceBadge({ value }: { value: DataClass }) {
   return (
-    <span className={`prov prov--${value.toLowerCase().replace(/_/g, '-')}`} title={DATA_CLASS_MEANING[value]}>
+    <span
+      className={`prov prov--${value.toLowerCase().replace(/_/g, '-')}`}
+      title={DATA_CLASS_MEANING[value]}
+    >
       <span aria-hidden="true">{MARK[value]}</span> {DATA_CLASS_LABEL[value]}
     </span>
   )

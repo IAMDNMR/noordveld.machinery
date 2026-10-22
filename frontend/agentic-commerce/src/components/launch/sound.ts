@@ -3,13 +3,21 @@
 let ctx: AudioContext | null = null
 
 export const enableSound = (): void => {
-  const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!Ctor) return
   ctx ??= new Ctor()
   void ctx.resume()
 }
 
-const tone = (freq: number, start: number, length: number, peak: number, type: OscillatorType = 'sine'): void => {
+const tone = (
+  freq: number,
+  start: number,
+  length: number,
+  peak: number,
+  type: OscillatorType = 'sine',
+): void => {
   if (!ctx) return
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()

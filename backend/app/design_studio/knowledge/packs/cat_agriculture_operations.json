@@ -1,0 +1,424 @@
+{
+ "id": "cat_agriculture_operations",
+ "version": "2026.10.19.1",
+ "layer": "business",
+ "title": "Agriculture operations",
+ "description": "Harvest batch handling. Operational starting point; specialist, clinical, statutory and automated eligibility decisions are outside this blueprint.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [],
+ "uses_capabilities": [],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_agr_delivery",
+    "statement": "Harvest batch handling is traceable from request to closure.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_agr_delivery_1",
+      "statement": "The responsible role completes each stage."
+     },
+     {
+      "id": "ac_agr_delivery_2",
+      "statement": "Completion evidence is recorded before closure."
+     }
+    ]
+   },
+   {
+    "id": "req_agr_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_agr_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_agr_coordinator",
+    "name": "Agriculture operations coordinator",
+    "responsibilities": [
+     "Register requests and coordinate delivery"
+    ],
+    "permissions": [
+     "agr.delivery_capture",
+     "agr.delivery_close"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_agr_specialist",
+    "name": "Agriculture operations specialist",
+    "responsibilities": [
+     "Plan and deliver assigned work"
+    ],
+    "permissions": [
+     "agr.delivery_plan",
+     "agr.delivery_deliver"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_agr_harvest_batch",
+    "name": "Agriculture operations record",
+    "description": "Harvest batch handling",
+    "attributes": [
+     {
+      "id": "harvest_batch_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "summary",
+      "name": "Summary",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "crop",
+      "name": "Crop",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "harvest_date",
+      "name": "Harvest date",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_agr_specialist"
+     },
+     {
+      "id": "storage_location",
+      "name": "Storage location",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_agr_specialist"
+     },
+     {
+      "id": "closure_note",
+      "name": "Closure note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "owner_role_id": "role_agr_coordinator"
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_agr_coordinator"
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_agr_summary",
+    "description": "A request summary is captured before planning.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_agr_harvest_batch.summary",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_agr_completion",
+    "description": "Completion evidence is recorded before closing.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_agr_harvest_batch.storage_location",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_agr_incomplete",
+    "name": "Completion details missing",
+    "trigger": "Required completion evidence is missing.",
+    "recovery": "The specialist adds or corrects completion details.",
+    "resolution": "recover",
+    "resolution_state_id": "st_agr_delivery_deliver"
+   }
+  ],
+  "decisions": [],
+  "integrations": [],
+  "terms": []
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_agr_delivery",
+   "name": "Harvest batch handling",
+   "states": [
+    {
+     "id": "st_agr_delivery_start",
+     "label": "Request received",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_agr_delivery_capture",
+     "label": "Register the harvest batch",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_agr_coordinator",
+     "permission": "agr.delivery_capture",
+     "requirement_ids": [
+      "req_agr_delivery",
+      "req_agr_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_agr_harvest_batch"
+     ],
+     "rule_ids": [
+      "rule_agr_summary"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_agr_harvest_batch": [
+       "summary",
+       "crop"
+      ]
+     },
+     "input_relationships": {
+      "ent_agr_harvest_batch": []
+     }
+    },
+    {
+     "id": "st_agr_delivery_plan",
+     "label": "Plan harvest handling",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_agr_specialist",
+     "permission": "agr.delivery_plan",
+     "requirement_ids": [
+      "req_agr_delivery",
+      "req_agr_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_agr_harvest_batch"
+     ],
+     "writes_entity_ids": [
+      "ent_agr_harvest_batch"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_agr_harvest_batch": [
+       "harvest_date"
+      ]
+     },
+     "input_relationships": {
+      "ent_agr_harvest_batch": []
+     }
+    },
+    {
+     "id": "st_agr_delivery_deliver",
+     "label": "Record collection and storage",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_agr_specialist",
+     "permission": "agr.delivery_deliver",
+     "requirement_ids": [
+      "req_agr_delivery",
+      "req_agr_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_agr_harvest_batch"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_agr_incomplete"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_agr_harvest_batch": [
+       "storage_location"
+      ]
+     },
+     "input_relationships": {
+      "ent_agr_harvest_batch": []
+     }
+    },
+    {
+     "id": "st_agr_delivery_close",
+     "label": "Close the batch handoff",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_agr_coordinator",
+     "permission": "agr.delivery_close",
+     "requirement_ids": [
+      "req_agr_delivery",
+      "req_agr_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_agr_harvest_batch"
+     ],
+     "writes_entity_ids": [
+      "ent_agr_harvest_batch"
+     ],
+     "rule_ids": [
+      "rule_agr_completion"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_agr_harvest_batch": [
+       "closure_note"
+      ]
+     },
+     "input_relationships": {
+      "ent_agr_harvest_batch": []
+     }
+    },
+    {
+     "id": "st_agr_delivery_done",
+     "label": "Completed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_agr_delivery_1",
+     "source": "st_agr_delivery_start",
+     "target": "st_agr_delivery_capture",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_agr_delivery_2",
+     "source": "st_agr_delivery_capture",
+     "target": "st_agr_delivery_plan",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_agr_delivery_3",
+     "source": "st_agr_delivery_plan",
+     "target": "st_agr_delivery_deliver",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_agr_delivery_4",
+     "source": "st_agr_delivery_deliver",
+     "target": "st_agr_delivery_close",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_agr_delivery_5",
+     "source": "st_agr_delivery_close",
+     "target": "st_agr_delivery_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "agriculture_operations",
+   "name": "Agriculture operations",
+   "keywords": [
+    "agriculture",
+    "farm",
+    "harvest",
+    "crop",
+    "grower"
+   ],
+   "subdomains": [
+    "Harvest batch handling"
+   ]
+  }
+ ],
+ "domain_id": "agriculture_operations"
+}

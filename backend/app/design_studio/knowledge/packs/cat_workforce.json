@@ -1,0 +1,756 @@
+{
+ "id": "cat_workforce",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "Workforce, tasks and approvals",
+ "description": "Leave requests approved by a manager, plus task management for the team.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cap_task_management"
+ ],
+ "uses_capabilities": [
+  "approval_workflow",
+  "task_management",
+  "audit_history",
+  "search_filter"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [
+  "cap_task_management"
+ ],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_wfm_leave",
+    "statement": "Leave is requested, checked against the balance, decided by a manager and recorded.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_wfm_leave_1",
+      "statement": "An employee requests leave for a period."
+     },
+     {
+      "id": "ac_wfm_leave_2",
+      "statement": "A request that exceeds the balance is sent back."
+     },
+     {
+      "id": "ac_wfm_leave_3",
+      "statement": "Only a manager can approve or reject."
+     }
+    ]
+   },
+   {
+    "id": "req_wfm_tasks",
+    "statement": "The team's work is tracked as tasks.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_wfm_tasks_1",
+      "statement": "Tasks can be created, assigned and completed."
+     }
+    ]
+   },
+   {
+    "id": "req_wfm_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_wfm_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_wfm_employee",
+    "name": "Employee",
+    "responsibilities": [
+     "Requests leave"
+    ],
+    "permissions": [
+     "wfm.leave_submit",
+     "wfm.leave_adjust"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_wfm_manager",
+    "name": "Team manager",
+    "responsibilities": [
+     "Decides leave requests"
+    ],
+    "permissions": [
+     "wfm.leave_decide"
+    ],
+    "approval_authority": [
+     "Leave requests"
+    ]
+   },
+   {
+    "id": "role_wfm_hr",
+    "name": "HR administrator",
+    "responsibilities": [
+     "Maintains employees and records approved leave"
+    ],
+    "permissions": [
+     "wfm.leave_record"
+    ],
+    "approval_authority": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_wfm_employee",
+    "name": "Employee",
+    "description": "A person who works for the company.",
+    "attributes": [
+     {
+      "id": "employee_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "name",
+      "name": "Name",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 120
+     },
+     {
+      "id": "job_title",
+      "name": "Job title",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 120
+     },
+     {
+      "id": "team",
+      "name": "Team",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 80
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "ACTIVE",
+       "ON_LEAVE",
+       "LEFT"
+      ]
+     },
+     {
+      "id": "leave_balance_days",
+      "name": "Leave balance (days)",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     }
+    ],
+    "relationships": [],
+    "owner_role_id": "role_wfm_hr"
+   },
+   {
+    "id": "ent_wfm_leave_request",
+    "name": "Leave request",
+    "description": "A request for time off.",
+    "attributes": [
+     {
+      "id": "leave_request_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "start_date",
+      "name": "First day",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "end_date",
+      "name": "Last day",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "days",
+      "name": "Working days",
+      "type": "decimal",
+      "required": true,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "kind",
+      "name": "Kind",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "ANNUAL",
+       "SICK",
+       "UNPAID",
+       "OTHER"
+      ]
+     },
+     {
+      "id": "decision",
+      "name": "Decision",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "owner_role_id": "role_wfm_manager"
+     },
+     {
+      "id": "note",
+      "name": "Note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 300
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_wfm_leave_request_employee",
+      "name": "Employee",
+      "target": "ent_wfm_employee",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_wfm_dates",
+    "description": "The last day is not before the first day.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_wfm_leave_request.end_date",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_wfm_leave_request.start_date",
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_wfm_balance",
+    "description": "Leave can be approved only if the employee's balance covers the days requested.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "SUFFICIENT",
+     "INSUFFICIENT"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_wfm_employee.leave_balance_days",
+     "operator": "gte",
+     "value": null,
+     "other_field": "ent_wfm_leave_request.days",
+     "pass_outcome": "SUFFICIENT",
+     "fail_outcome": "INSUFFICIENT"
+    }
+   },
+   {
+    "id": "rule_wfm_decision",
+    "description": "The manager's recorded decision selects what happens to the request.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "APPROVED",
+     "REJECTED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_wfm_leave_request.decision",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_wfm_balance_short",
+    "name": "Balance too low",
+    "trigger": "The days requested exceed the leave balance.",
+    "recovery": "The employee changes the request and it is checked again.",
+    "resolution": "recover",
+    "resolution_state_id": "st_wfm_leave_submit"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_wfm_carryover",
+    "question": "May unused leave be carried over, and how many days?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_wfm_balance"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_wfm_leave",
+    "term": "Leave",
+    "definition": "Time off work."
+   },
+   {
+    "id": "term_wfm_employee",
+    "term": "Employee",
+    "definition": "A person who works for the company."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_wfm_leave",
+   "name": "Leave request",
+   "states": [
+    {
+     "id": "st_wfm_leave_start",
+     "label": "Leave needed",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wfm_leave_submit",
+     "label": "Submit the request",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wfm_employee",
+     "permission": "wfm.leave_submit",
+     "requirement_ids": [
+      "req_wfm_leave",
+      "req_wfm_tasks",
+      "req_wfm_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_wfm_employee"
+     ],
+     "writes_entity_ids": [
+      "ent_wfm_leave_request"
+     ],
+     "rule_ids": [
+      "rule_wfm_dates"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wfm_leave_request": [
+       "start_date",
+       "end_date",
+       "days",
+       "kind"
+      ]
+     },
+     "input_relationships": {
+      "ent_wfm_leave_request": [
+       "rel_wfm_leave_request_employee"
+      ]
+     }
+    },
+    {
+     "id": "st_wfm_leave_balance",
+     "label": "Does the balance cover it?",
+     "kind": "branch",
+     "outputs": [
+      "rule_wfm_balance"
+     ],
+     "outcome": null,
+     "role_id": "role_wfm_employee",
+     "permission": null,
+     "requirement_ids": [
+      "req_wfm_leave",
+      "req_wfm_tasks",
+      "req_wfm_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_wfm_balance"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wfm_leave_adjust",
+     "label": "Adjust the request",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wfm_employee",
+     "permission": "wfm.leave_adjust",
+     "requirement_ids": [
+      "req_wfm_leave",
+      "req_wfm_tasks",
+      "req_wfm_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_wfm_leave_request"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_wfm_balance_short"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wfm_leave_request": [
+       "start_date",
+       "end_date",
+       "days",
+       "kind"
+      ]
+     },
+     "input_relationships": {
+      "ent_wfm_leave_request": []
+     }
+    },
+    {
+     "id": "st_wfm_leave_decide",
+     "label": "Decide the request",
+     "kind": "approval",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wfm_manager",
+     "permission": "wfm.leave_decide",
+     "requirement_ids": [
+      "req_wfm_leave",
+      "req_wfm_tasks",
+      "req_wfm_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_wfm_leave_request"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wfm_leave_request": [
+       "decision",
+       "note"
+      ]
+     },
+     "input_relationships": {
+      "ent_wfm_leave_request": []
+     }
+    },
+    {
+     "id": "st_wfm_leave_verdict",
+     "label": "Manager's decision",
+     "kind": "branch",
+     "outputs": [
+      "rule_wfm_decision"
+     ],
+     "outcome": null,
+     "role_id": "role_wfm_manager",
+     "permission": null,
+     "requirement_ids": [
+      "req_wfm_leave",
+      "req_wfm_tasks",
+      "req_wfm_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_wfm_decision"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wfm_leave_record",
+     "label": "Record the leave",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_wfm_hr",
+     "permission": "wfm.leave_record",
+     "requirement_ids": [
+      "req_wfm_leave",
+      "req_wfm_tasks",
+      "req_wfm_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_wfm_leave_request"
+     ],
+     "writes_entity_ids": [
+      "ent_wfm_employee"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_wfm_employee": [
+       "leave_balance_days"
+      ]
+     },
+     "input_relationships": {
+      "ent_wfm_employee": []
+     }
+    },
+    {
+     "id": "st_wfm_leave_done",
+     "label": "Leave recorded",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_wfm_leave_rejected",
+     "label": "Request rejected",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "cancelled",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_wfm_leave_1",
+     "source": "st_wfm_leave_start",
+     "target": "st_wfm_leave_submit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_2",
+     "source": "st_wfm_leave_submit",
+     "target": "st_wfm_leave_balance",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_3",
+     "source": "st_wfm_leave_balance",
+     "target": "st_wfm_leave_decide",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wfm_balance",
+      "value": "SUFFICIENT"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_4",
+     "source": "st_wfm_leave_balance",
+     "target": "st_wfm_leave_adjust",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wfm_balance",
+      "value": "INSUFFICIENT"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_5",
+     "source": "st_wfm_leave_adjust",
+     "target": "st_wfm_leave_submit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_6",
+     "source": "st_wfm_leave_decide",
+     "target": "st_wfm_leave_verdict",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_7",
+     "source": "st_wfm_leave_verdict",
+     "target": "st_wfm_leave_record",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wfm_decision",
+      "value": "APPROVED"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_8",
+     "source": "st_wfm_leave_verdict",
+     "target": "st_wfm_leave_rejected",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_wfm_decision",
+      "value": "REJECTED"
+     }
+    },
+    {
+     "id": "tr_wfm_leave_9",
+     "source": "st_wfm_leave_record",
+     "target": "st_wfm_leave_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Leave",
+   "definition": "Time off work.",
+   "synonyms": [
+    "holiday",
+    "vacation",
+    "absence",
+    "time off",
+    "PTO"
+   ],
+   "refers_to": "ent_wfm_leave_request"
+  },
+  {
+   "term": "Employee",
+   "definition": "A person who works for the company.",
+   "synonyms": [
+    "staff member",
+    "colleague",
+    "team member",
+    "worker"
+   ],
+   "refers_to": "ent_wfm_employee"
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "workforce_tasks",
+   "name": "Workforce, task management and approvals",
+   "subdomains": [
+    "Leave",
+    "Tasks",
+    "Approvals"
+   ],
+   "keywords": [
+    "workforce",
+    "employee",
+    "employees",
+    "leave",
+    "holiday",
+    "absence",
+    "timesheet",
+    "hr",
+    "human resources",
+    "task",
+    "tasks",
+    "to-do",
+    "team",
+    "approval",
+    "approvals",
+    "onboarding"
+   ],
+   "description": "Managing people's time and the work the team has to do."
+  }
+ ],
+ "domain_id": "workforce_tasks",
+ "capability": {
+  "id": "workforce_tasks",
+  "name": "Leave and task management"
+ }
+}

@@ -1,7 +1,7 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { searchParts } from '../../api'
+import { searchParts } from '../../api/index'
 import { useApi } from '../../hooks/useApi'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { formatMoney } from '../../lib/format'
@@ -31,11 +31,27 @@ function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: str
     (signal) =>
       term.length < 2
         ? Promise.resolve(null)
-        : searchParts({ q: term, category: '', machine: '', availability: [], orderable: false, sort: 'relevance', offset: 0, limit: SUGGESTIONS }, signal),
+        : searchParts(
+            {
+              q: term,
+              category: '',
+              machine: '',
+              availability: [],
+              orderable: false,
+              sort: 'relevance',
+              offset: 0,
+              limit: SUGGESTIONS,
+            },
+            signal,
+          ),
     term,
   )
   const items = suggest.data?.items ?? []
-  const showList = open && term.length >= 2 && term === text.trim() && (suggest.data !== null || suggest.error !== null)
+  const showList =
+    open &&
+    term.length >= 2 &&
+    term === text.trim() &&
+    (suggest.data !== null || suggest.error !== null)
 
   useEffect(() => {
     const close = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
@@ -50,7 +66,8 @@ function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: str
     navigate(resultsUrl(text))
   }
 
-  const links = () => Array.from(root.current?.querySelectorAll<HTMLAnchorElement>(`#${CSS.escape(listId)} a`) ?? [])
+  const links = () =>
+    Array.from(root.current?.querySelectorAll<HTMLAnchorElement>(`#${CSS.escape(listId)} a`) ?? [])
   const move = (e: KeyboardEvent, from: number, step: number) => {
     const all = links()
     if (!all.length) return
@@ -75,14 +92,24 @@ function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: str
 
   return (
     <div className={`ssearch ssearch--${variant}`} ref={root}>
-      <form role="search" onSubmit={submit} className={variant === 'hero' ? 'search-box' : undefined}>
-        {variant === 'bar' ? <Search className="ssearch__icon" size={18} strokeWidth={1.8} aria-hidden="true" /> : null}
+      <form
+        role="search"
+        onSubmit={submit}
+        className={variant === 'hero' ? 'search-box' : undefined}
+      >
+        {variant === 'bar' ? (
+          <Search className="ssearch__icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+        ) : null}
         <input
           ref={input}
           type="search"
           aria-label="Search parts, machines or part numbers"
           aria-controls={listId}
-          placeholder={variant === 'hero' ? 'Search by part number, description or machine' : 'Search parts, machines or part numbers...'}
+          placeholder={
+            variant === 'hero'
+              ? 'Search by part number, description or machine'
+              : 'Search parts, machines or part numbers...'
+          }
           value={text}
           autoComplete="off"
           onChange={(e) => {
@@ -121,7 +148,11 @@ function SearchBox({ variant, initial }: { variant: 'hero' | 'bar'; initial: str
           <>
             {items.map((p) => (
               <li key={p.part_id}>
-                <Link to={partPath(p.part_number)} onClick={() => setOpen(false)} onKeyDown={onLinkKey}>
+                <Link
+                  to={partPath(p.part_number)}
+                  onClick={() => setOpen(false)}
+                  onKeyDown={onLinkKey}
+                >
                   <span className="ssearch__name">{p.name}</span>
                   <span className="ssearch__sub">{p.part_number}</span>
                   {p.price ? <span className="ssearch__price">{formatMoney(p.price)}</span> : null}

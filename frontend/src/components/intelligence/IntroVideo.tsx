@@ -27,16 +27,33 @@ export function IntroVideo() {
         <span className="pih-play__icon" aria-hidden="true">
           <Play size={13} strokeWidth={2.4} fill="currentColor" />
         </span>
-        Watch the introduction
+        Watch Spark’s introduction
       </button>
-      <dialog ref={dialog} className="pih-film" aria-label="Parts Intelligence introduction" onClose={() => setOpen(false)}>
+      <dialog
+        ref={dialog}
+        className="pih-film"
+        aria-label="Meet Spark — Parts Intelligence introduction"
+        onClose={() => setOpen(false)}
+      >
         <div className="pih-film__frame">
-          <button type="button" className="pih-film__close" onClick={() => setOpen(false)} aria-label="Close the introduction">
+          <button
+            type="button"
+            className="pih-film__close"
+            onClick={() => setOpen(false)}
+            aria-label="Close the introduction"
+          >
             <X size={20} strokeWidth={2} aria-hidden="true" />
           </button>
           {/* the introduction film has no caption file yet; its narration is summarised on the page itself */}
           {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
-          <video ref={video} src="/parts-intelligence-intro.mp4" poster="/parts-intelligence-intro.jpg" controls playsInline preload="none">
+          <video
+            ref={video}
+            src="/parts-intelligence-intro.mp4"
+            poster="/parts-intelligence-intro.jpg"
+            controls
+            playsInline
+            preload="none"
+          >
             Your browser cannot play this video.
           </video>
         </div>

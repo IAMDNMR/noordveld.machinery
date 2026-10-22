@@ -3,6 +3,7 @@
 Status comes from the part's catalogue profile in the graph (`PartCatalogProfile.part_status`). Only a VERIFIED part that the
 profile marks orderable may be priced into a cart or reach checkout.
 """
+
 from __future__ import annotations
 
 STATUS_LABELS: dict[str, str] = {

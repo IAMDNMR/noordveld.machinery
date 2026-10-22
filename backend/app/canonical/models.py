@@ -8,6 +8,7 @@ Conventions
     SYNTHETIC_DEMO, REFERENCE and TEST.
   * CSV cells arrive as text: blanks become None, list fields are written 'a|b|c'.
 """
+
 from __future__ import annotations
 
 import re
@@ -22,22 +23,70 @@ from pydantic import (
     model_validator,
 )
 
-DataStatus = Literal["REAL", "SYNTHETIC_DEMO", "REFERENCE", "TEST", "SOURCE_DERIVED", "DERIVED", "USER_PROVIDED"]
-SourceType = Literal["OEM_MASTER", "ERP", "PLM", "MES", "SERVICE", "DEALER", "LOGISTICS", "SYNTHETIC_DEMO", "REFERENCE"]
+DataStatus = Literal[
+    "REAL", "SYNTHETIC_DEMO", "REFERENCE", "TEST", "SOURCE_DERIVED", "DERIVED", "USER_PROVIDED"
+]
+SourceType = Literal[
+    "OEM_MASTER",
+    "ERP",
+    "PLM",
+    "MES",
+    "SERVICE",
+    "DEALER",
+    "LOGISTICS",
+    "SYNTHETIC_DEMO",
+    "REFERENCE",
+]
 FitmentStatus = Literal["APPROVED", "CONDITIONAL", "DEPRECATED", "NOT_APPROVED"]
 # The brief names SEA, AIR, ROAD and SEA_PLUS_ROAD as the initial modes; the existing network also uses these, so they are valid too (never remapped).
-TransportMode = Literal["SEA", "AIR", "ROAD", "SEA_PLUS_ROAD", "SHORT_SEA", "RAIL", "MULTIMODAL", "INLAND_WATERWAY"]
+TransportMode = Literal[
+    "SEA", "AIR", "ROAD", "SEA_PLUS_ROAD", "SHORT_SEA", "RAIL", "MULTIMODAL", "INLAND_WATERWAY"
+]
 SourceKind = Literal["OEM", "SUPPLIER", "DEALER"]
 ApprovalStatus = Literal["APPROVED", "CONDITIONAL", "DEPRECATED", "NOT_APPROVED"]
 StartRule = Literal["INSTALLATION_DATE", "DELIVERY_DATE", "PURCHASE_DATE"]
-EvidenceType = Literal["SERVICE_REPORT", "INSTALLATION_RECORD", "INSPECTION_RECORD", "WORK_ORDER", "DEALER_RECORD", "TECHNICIAN_RECORD", "PART_RECORD", "SHIPMENT_RECORD", "ORDER_RECORD"]
+EvidenceType = Literal[
+    "SERVICE_REPORT",
+    "INSTALLATION_RECORD",
+    "INSPECTION_RECORD",
+    "WORK_ORDER",
+    "DEALER_RECORD",
+    "TECHNICIAN_RECORD",
+    "PART_RECORD",
+    "SHIPMENT_RECORD",
+    "ORDER_RECORD",
+]
 ValidationStatus = Literal["VALID", "INCOMPLETE"]
-LocationKind = Literal["PLANT", "DEPOT", "SHIP_TO", "CITY", "COUNTRY", "DEALER", "TERMINAL", "SUPPLIER"]  # structural kind: what sort of graph record holds it
-LogisticsType = Literal["WAREHOUSE", "DISTRIBUTION_CENTER", "DEALER", "PORT", "AIRPORT", "TERMINAL", "CUSTOMS", "SUPPLIER", "PLANT"]  # what it is in a logistics network
+LocationKind = Literal[
+    "PLANT", "DEPOT", "SHIP_TO", "CITY", "COUNTRY", "DEALER", "TERMINAL", "SUPPLIER"
+]  # structural kind: what sort of graph record holds it
+LogisticsType = Literal[
+    "WAREHOUSE",
+    "DISTRIBUTION_CENTER",
+    "DEALER",
+    "PORT",
+    "AIRPORT",
+    "TERMINAL",
+    "CUSTOMS",
+    "SUPPLIER",
+    "PLANT",
+]  # what it is in a logistics network
 Region = Literal["EUROPE", "USA", "AFRICA", "ASIA"]
 TerminalType = Literal["SEAPORT", "AIRPORTCARGOTERMINAL", "CROSSDOCK", "INLANDPORT", "RAILTERMINAL"]
 # PICKED is the legacy first event of the seeded shipments; the rest is the lifecycle of a managed shipment (see app/logistics/rules.py for the allowed order)
-TrackingType = Literal["PICKED", "ORDER_CONFIRMED", "BOOKED", "DEPARTED_ORIGIN", "IN_TRANSIT", "ARRIVED_PORT", "CUSTOMS", "DEPARTED_PORT", "ARRIVED_DC", "OUT_FOR_DELIVERY", "DELIVERED"]
+TrackingType = Literal[
+    "PICKED",
+    "ORDER_CONFIRMED",
+    "BOOKED",
+    "DEPARTED_ORIGIN",
+    "IN_TRANSIT",
+    "ARRIVED_PORT",
+    "CUSTOMS",
+    "DEPARTED_PORT",
+    "ARRIVED_DC",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+]
 RouteResolution = Literal["LINKED", "ROUTE_NOT_DETERMINABLE"]
 OemStatus = Literal["OEM", "NON_OEM", "UNKNOWN"]
 
@@ -204,17 +253,23 @@ class Location(Canon):
     location_id: Id
     name: Opt
     location_kind: LocationKind
-    graph_label: Literal["Warehouse", "ShipTo", "Plant", "Location", "TransportTerminal", "Dealer", "Supplier"]
+    graph_label: Literal[
+        "Warehouse", "ShipTo", "Plant", "Location", "TransportTerminal", "Dealer", "Supplier"
+    ]
     country_code: Opt = None
     city: Opt = None
     latitude: OptFloat = None
     longitude: OptFloat = None
     geo_basis: Opt = None
-    location_type: Annotated[LogisticsType | None, Blank] = None  # set for logistics-relevant places; None for ship-tos, cities and countries
+    location_type: Annotated[LogisticsType | None, Blank] = (
+        None  # set for logistics-relevant places; None for ship-tos, cities and countries
+    )
     country: Opt = None
     region: Annotated[Region | None, Blank] = None
     timezone: Opt = None
-    terminal_type: Annotated[TerminalType | None, Blank] = None  # for terminals: also becomes the node's second label
+    terminal_type: Annotated[TerminalType | None, Blank] = (
+        None  # for terminals: also becomes the node's second label
+    )
     modes: Pipe = []
 
 
@@ -509,7 +564,11 @@ class Evidence(Canon):
 
     @model_validator(mode="after")
     def _no_fake_references(self):
-        if self.reference and re.match(r"^(https?|ftp)://", self.reference, re.IGNORECASE) and self.data_status != "REAL":
+        if (
+            self.reference
+            and re.match(r"^(https?|ftp)://", self.reference, re.IGNORECASE)
+            and self.data_status != "REAL"
+        ):
             raise ValueError("a non-REAL evidence record must not carry a URL reference")
         return self
 

@@ -6,7 +6,10 @@ interface Options {
   rootMargin?: string
 }
 
-export function useInView<T extends Element>(ref: RefObject<T | null>, { once = false, threshold = 0.15, rootMargin = '0px' }: Options = {}): boolean {
+export function useInView<T extends Element>(
+  ref: RefObject<T | null>,
+  { once = false, threshold = 0.15, rootMargin = '0px' }: Options = {},
+): boolean {
   const [inView, setInView] = useState(false)
   useEffect(() => {
     const el = ref.current

@@ -16,7 +16,7 @@
   --teal-ink: #00756a;
   --teal-hover: #00a892;
 
-  --font-sans: "Inter Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --text-h2: clamp(2rem, 1.2rem + 3vw, 3.75rem);
   --text-small: 0.9375rem;
   --tracking-heading: -0.025em;

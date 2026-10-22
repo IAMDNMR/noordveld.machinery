@@ -1,7 +1,9 @@
 import { CircleAlert } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import type { IntelligenceAction, QueryResponse, Suggestion } from '../../api'
+import type { IntelligenceAction, QueryResponse, Suggestion } from '../../api/index'
 import type { Subject } from '../../api/intelligenceTypes'
+import { GraphExplorer } from './GraphExplorer'
+import { evidenceGraph } from './graphModel'
 import { EvidencePanel } from './EvidencePanel'
 import { ProvenanceBadge, ProvenanceLine } from './provenance'
 import { ResultCard } from './ResultCard'
@@ -19,7 +21,15 @@ interface ResultViewProps {
   onClear?: () => void
 }
 
-function ActionButton({ action, onInvestigate, onAsk }: { action: IntelligenceAction; onInvestigate: (pn: string) => void; onAsk: (q: string) => void }) {
+function ActionButton({
+  action,
+  onInvestigate,
+  onAsk,
+}: {
+  action: IntelligenceAction
+  onInvestigate: (pn: string) => void
+  onAsk: (q: string) => void
+}) {
   if (action.kind === 'ask' && action.question) {
     const question = action.question
     return (
@@ -31,7 +41,11 @@ function ActionButton({ action, onInvestigate, onAsk }: { action: IntelligenceAc
   if (action.kind === 'investigate' && action.href) {
     const part = new URL(action.href, 'http://x').searchParams.get('part')
     return (
-      <button type="button" className="btn btn-secondary btn-sm" onClick={() => part && onInvestigate(part)}>
+      <button
+        type="button"
+        className="btn btn-secondary btn-sm"
+        onClick={() => part && onInvestigate(part)}
+      >
         {action.label}
       </button>
     )
@@ -47,14 +61,24 @@ function ActionButton({ action, onInvestigate, onAsk }: { action: IntelligenceAc
 }
 
 /** Which part, machine, supplier... the answer is about: its identity in a few facts, before the results that belong to it */
-function SubjectLine({ subject, onInvestigate }: { subject: Subject; onInvestigate: (pn: string) => void }) {
+function SubjectLine({
+  subject,
+  onInvestigate,
+}: {
+  subject: Subject
+  onInvestigate: (pn: string) => void
+}) {
   const kind = subject.kind.charAt(0) + subject.kind.slice(1).toLowerCase()
   return (
     <div className="pr__subject" aria-label={`About ${kind.toLowerCase()} ${subject.label}`}>
       <p className="pr__subject-id">
         <span className="pr__subject-kind">{kind}</span>
         {subject.kind === 'PART' ? (
-          <button type="button" className="pr__subject-label" onClick={() => onInvestigate(subject.label)}>
+          <button
+            type="button"
+            className="pr__subject-label"
+            onClick={() => onInvestigate(subject.label)}
+          >
             {subject.label}
           </button>
         ) : (
@@ -77,7 +101,17 @@ function SubjectLine({ subject, onInvestigate }: { subject: Subject; onInvestiga
   )
 }
 
-export function ResultView({ response, suggestions, limit, maxLimit, onInvestigate, onAsk, onSelect, onMore, onClear }: ResultViewProps) {
+export function ResultView({
+  response,
+  suggestions,
+  limit,
+  maxLimit,
+  onInvestigate,
+  onAsk,
+  onSelect,
+  onMore,
+  onClear,
+}: ResultViewProps) {
   const { clarification } = response
   const canShowMore = response.results.length < response.total && limit < maxLimit
   const unsupported = response.intent === 'UNSUPPORTED'
@@ -89,7 +123,8 @@ export function ResultView({ response, suggestions, limit, maxLimit, onInvestiga
         <span className="pr__chip">{response.intent_label}</span>
         {response.entities.map((e) => (
           <span key={`${e.kind}-${e.key}`} className="pr__chip">
-            <span>{e.kind.charAt(0) + e.kind.slice(1).toLowerCase()}</span> <strong>{e.label}</strong>
+            <span>{e.kind.charAt(0) + e.kind.slice(1).toLowerCase()}</span>{' '}
+            <strong>{e.label}</strong>
           </span>
         ))}
         {onClear ? (
@@ -100,15 +135,22 @@ export function ResultView({ response, suggestions, limit, maxLimit, onInvestiga
       </div>
 
       <div className="pr__answer">
-        <h2 className="pr__title">{unsupported ? 'Outside Parts Intelligence' : response.intent_label}</h2>
-        {response.subject && !clarification ? <SubjectLine subject={response.subject} onInvestigate={onInvestigate} /> : null}
+        <h2 className="pr__title">
+          {unsupported ? 'Outside Parts Intelligence' : response.intent_label}
+        </h2>
+        {response.subject && !clarification ? (
+          <SubjectLine subject={response.subject} onInvestigate={onInvestigate} />
+        ) : null}
         <p className="pr__summary">{response.answer.summary}</p>
         {response.answer.demo ? (
           <p className="pr__demo" role="note">
-            <strong>Demo data.</strong> This answer includes synthetic demonstration data, not live enterprise data.
+            <strong>Demo data.</strong> This answer includes synthetic demonstration data, not live
+            enterprise data.
           </p>
         ) : null}
-        {response.answer.source === 'llm' ? <p className="pr__source">Worded by the language model from the evidence below.</p> : null}
+        {response.answer.source === 'llm' ? (
+          <p className="pr__source">Worded by the language model from the evidence below.</p>
+        ) : null}
       </div>
 
       {response.warnings.map((w) => (
@@ -151,7 +193,9 @@ export function ResultView({ response, suggestions, limit, maxLimit, onInvestiga
           <div className="pr__count">
             <h3>
               {response.total} {response.total === 1 ? 'result' : 'results'}
-              {response.results.length < response.total ? <span> · showing {response.results.length}</span> : null}
+              {response.results.length < response.total ? (
+                <span> · showing {response.results.length}</span>
+              ) : null}
             </h3>
             <ProvenanceLine items={response.provenance} />
           </div>
@@ -173,11 +217,30 @@ export function ResultView({ response, suggestions, limit, maxLimit, onInvestiga
       {response.actions.length > 0 ? (
         <div className="pr__actions">
           {response.actions.map((a) => (
-            <ActionButton key={`${a.kind}-${a.label}`} action={a} onInvestigate={onInvestigate} onAsk={onAsk} />
+            <ActionButton
+              key={`${a.kind}-${a.label}`}
+              action={a}
+              onInvestigate={onInvestigate}
+              onAsk={onAsk}
+            />
           ))}
         </div>
       ) : null}
 
+      {!clarification && response.evidence.length > 0 ? (
+        <details className="gx-answer">
+          <summary>
+            Explore answer relationships · {response.evidence.length}{' '}
+            {response.evidence.length === 1 ? 'connection' : 'connections'}
+          </summary>
+          <GraphExplorer
+            key={response.question}
+            view={evidenceGraph(response.evidence)}
+            onOpen={onInvestigate}
+            label="Answer relationships"
+          />
+        </details>
+      ) : null}
       {!clarification ? <EvidencePanel response={response} /> : null}
     </section>
   )

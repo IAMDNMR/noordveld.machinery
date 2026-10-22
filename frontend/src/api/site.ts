@@ -27,7 +27,13 @@ export interface SiteMachine {
   parts: SitePart[]
   attachments: string[]
   /** Synthetic demo profile (application, lifecycle, introduction year); labelled as demo data in the UI */
-  profile: { application: string | null; operating_context: string | null; lifecycle_status: string | null; introduction_year: number | null; data_status: string | null } | null
+  profile: {
+    application: string | null
+    operating_context: string | null
+    lifecycle_status: string | null
+    introduction_year: number | null
+    data_status: string | null
+  } | null
 }
 
 export interface SitePlant {
@@ -53,4 +59,5 @@ export interface SiteOverview {
   part_categories: { name: string; count: number }[]
 }
 
-export const getSiteOverview = (signal?: AbortSignal): Promise<SiteOverview> => apiGet<SiteOverview>('/site/overview', {}, signal)
+export const getSiteOverview = (signal?: AbortSignal): Promise<SiteOverview> =>
+  apiGet<SiteOverview>('/site/overview', {}, signal)

@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ApiError } from '../api'
+import { ApiError } from '../api/index'
 import { DIRECT_ORDER, getOrder, updateStatus, type OrderDetail } from '../api/orders'
 import { DirectDetail } from '../components/orders/DirectOrder'
 import { Restricted } from '../components/orders/Restricted'
@@ -11,48 +11,88 @@ import { roleLabel, useSession } from '../store/session'
 import { statusTone } from './OrdersPage'
 import '../styles/wf.css'
 import '../components/orders/orders.css'
+import './ProcurementPage.css'
 
 const money = (amount: number | null | undefined, currency = 'EUR') =>
-  amount == null ? 'Not recorded' : new Intl.NumberFormat('en-NL', { style: 'currency', currency }).format(amount)
-const fitText = (s: string | null) => (s === 'CONFIRMED' ? 'Confirmed fit' : s === 'CONDITIONAL' ? 'Conditional fit · verification required' : 'Fitment not verified')
-const DATA: Record<string, string> = { SYNTHETIC_DEMO: 'Synthetic demo', SOURCE_DERIVED: 'Source-derived', USER_PROVIDED: 'Recorded in the app', DERIVED: 'Derived' }
+  amount == null
+    ? 'Not recorded'
+    : new Intl.NumberFormat('en-NL', { style: 'currency', currency }).format(amount)
+const fitText = (s: string | null) =>
+  s === 'CONFIRMED'
+    ? 'Confirmed fit'
+    : s === 'CONDITIONAL'
+      ? 'Conditional fit · verification required'
+      : 'Fitment not verified'
+const DATA: Record<string, string> = {
+  SYNTHETIC_DEMO: 'Synthetic demo',
+  SOURCE_DERIVED: 'Source-derived',
+  USER_PROVIDED: 'Recorded in the app',
+  DERIVED: 'Derived',
+}
 
 /** One order. Both roles see the same facts about their order; only the Order Processor gets the operational detail and actions. */
 export default function OrderDetailPage() {
   const { orderId = '' } = useParams()
   const { user, ready } = useSession()
   const [params] = useSearchParams()
-  usePageMeta({ title: orderId, description: 'Order status, fulfilment, shipment and tracking.', path: `/orders/${orderId}` })
-  const state = useApi((s) => (user ? getOrder(orderId, s) : Promise.resolve(null)), `order:${orderId}:${user?.id ?? 'none'}`)
+  usePageMeta({
+    title: orderId,
+    description: 'Order status, fulfilment, shipment and tracking.',
+    path: `/orders/${orderId}`,
+  })
+  const state = useApi(
+    (s) => (user ? getOrder(orderId, s) : Promise.resolve(null)),
+    `order:${orderId}:${user?.id ?? 'none'}`,
+  )
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const shown = order && order.order_id === orderId ? order : state.data
 
   if (!ready) return <div className="wf ord-page" />
   return (
-    <div className="wf ord-page">
+    <div className={`wf ord-page ${user?.role === 'ORDER_PROCESSOR' ? 'ord-page--processor' : ''}`}>
       <div className="wf-container">
         <Link className="back-link" to="/orders">
-          <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" /> {user?.role === 'ORDER_PROCESSOR' ? 'Order processing' : 'My orders'}
+          <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" />{' '}
+          {user?.role === 'ORDER_PROCESSOR' ? 'Order processing' : 'My orders'}
         </Link>
         {!user ? (
           <Restricted reason="signed_out" />
         ) : state.error ? (
-          <Restricted reason={state.error.status === 401 ? 'signed_out' : state.error.status === 404 ? 'not_found' : 'forbidden'} />
+          <Restricted
+            reason={
+              state.error.status === 401
+                ? 'signed_out'
+                : state.error.status === 404
+                  ? 'not_found'
+                  : 'forbidden'
+            }
+          />
         ) : !shown ? (
           <p className="muted">Loading order…</p>
+        ) : shown.channel === DIRECT_ORDER ? (
+          <DirectDetail
+            o={shown}
+            processor={user.role === 'ORDER_PROCESSOR'}
+            placed={params.get('placed') === '1'}
+            onChange={setOrder}
+          />
         ) : (
-          shown.channel === DIRECT_ORDER ? (
-            <DirectDetail o={shown} processor={user.role === 'ORDER_PROCESSOR'} placed={params.get('placed') === '1'} onChange={setOrder} />
-          ) : (
-            <Detail o={shown} processor={user.role === 'ORDER_PROCESSOR'} onChange={setOrder} />
-          )
+          <Detail o={shown} processor={user.role === 'ORDER_PROCESSOR'} onChange={setOrder} />
         )}
       </div>
     </div>
   )
 }
 
-function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean; onChange: (o: OrderDetail) => void }) {
+function Detail({
+  o,
+  processor,
+  onChange,
+}: {
+  o: OrderDetail
+  processor: boolean
+  onChange: (o: OrderDetail) => void
+}) {
   return (
     <>
       <header className="ord-head">
@@ -61,7 +101,9 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
           <h1>{o.order_id}</h1>
           <p className="muted">
             {o.order_date ? `Created ${o.order_date}` : 'Creation date not recorded'}
-            {processor && o.customer ? ` · ${o.customer.name}${o.delivery_address?.city ? `, delivers to ${o.delivery_address.city}` : ''}` : ''}
+            {processor && o.customer
+              ? ` · ${o.customer.name}${o.delivery_address?.city ? `, delivers to ${o.delivery_address.city}` : ''}`
+              : ''}
           </p>
         </div>
         <span className={`tag ${statusTone(o.status)} ord-status`}>{o.status_label}</span>
@@ -86,7 +128,10 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
                 {o.lines.map((l) => (
                   <tr key={l.part_id}>
                     <th scope="row">
-                      <Link className="link-more" to={`/parts-store/${encodeURIComponent(l.part_number)}`}>
+                      <Link
+                        className="link-more"
+                        to={`/parts-store/${encodeURIComponent(l.part_number)}`}
+                      >
                         {l.part_number}
                       </Link>
                       <small>{l.name}</small>
@@ -129,18 +174,30 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
               <div className="chip-row">
                 {l.fitment.length ? (
                   l.fitment.map((f) => (
-                    <span key={f.model_code} className={`tag ${f.status === 'CONFIRMED' ? 'tag-good' : 'tag-warn'}`}>
+                    <span
+                      key={f.model_code}
+                      className={`tag ${f.status === 'CONFIRMED' ? 'tag-good' : 'tag-warn'}`}
+                    >
                       {f.model_code} · {fitText(f.status)}
                     </span>
                   ))
                 ) : (
-                  <span className="tag tag-warn">No fitment recorded · identification required</span>
+                  <span className="tag tag-warn">
+                    No fitment recorded · identification required
+                  </span>
                 )}
               </div>
               <dl className="kv-list">
                 <div className="kv-row">
                   <dt>Availability</dt>
-                  <dd>{l.availability_state ? l.availability_state.replace(/_/g, ' ').toLowerCase().replace(/^./, (c) => c.toUpperCase()) : 'Not recorded'}</dd>
+                  <dd>
+                    {l.availability_state
+                      ? l.availability_state
+                          .replace(/_/g, ' ')
+                          .toLowerCase()
+                          .replace(/^./, (c) => c.toUpperCase())
+                      : 'Not recorded'}
+                  </dd>
                 </div>
                 <div className="kv-row">
                   <dt>Fulfilment</dt>
@@ -150,11 +207,19 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
                   <>
                     <div className="kv-row">
                       <dt>Part status</dt>
-                      <dd>{l.part_status ? `${l.part_status.replace(/_/g, ' ').toLowerCase()}${l.orderable ? ' · orderable' : ' · not orderable'}` : 'Not recorded'}</dd>
+                      <dd>
+                        {l.part_status
+                          ? `${l.part_status.replace(/_/g, ' ').toLowerCase()}${l.orderable ? ' · orderable' : ' · not orderable'}`
+                          : 'Not recorded'}
+                      </dd>
                     </div>
                     <div className="kv-row">
                       <dt>Recorded price</dt>
-                      <dd>{l.price ? `${money(l.price.list_price_ex_vat, l.price.currency)} ex VAT` : 'Not recorded'}</dd>
+                      <dd>
+                        {l.price
+                          ? `${money(l.price.list_price_ex_vat, l.price.currency)} ex VAT`
+                          : 'Not recorded'}
+                      </dd>
                     </div>
                     <div className="kv-row">
                       <dt>Stock</dt>
@@ -175,7 +240,9 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
                               <small key={s.name}>
                                 {s.name}
                                 {s.primary ? ' · primary' : ''}
-                                {s.lead_time_days != null ? ` · lead time ${s.lead_time_days} days` : ''}
+                                {s.lead_time_days != null
+                                  ? ` · lead time ${s.lead_time_days} days`
+                                  : ''}
                               </small>
                             ))
                           : 'No supplier relationship recorded'}
@@ -197,16 +264,28 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
               <div key={s.shipment_id} className="ord-line">
                 <p className="spread">
                   <strong>{s.shipment_id}</strong>
-                  <span className={`tag ${s.status === 'DELIVERED' ? 'tag-good' : 'tag-info'}`}>{s.status ? s.status.toLowerCase().replace(/^./, (c) => c.toUpperCase()) : 'Status not recorded'}</span>
+                  <span className={`tag ${s.status === 'DELIVERED' ? 'tag-good' : 'tag-info'}`}>
+                    {s.status
+                      ? s.status.toLowerCase().replace(/^./, (c) => c.toUpperCase())
+                      : 'Status not recorded'}
+                  </span>
                 </p>
                 <p className="small muted">
-                  {[s.carrier, s.dispatched_from ? `from ${s.dispatched_from}` : null, s.tracking_ref ? `tracking ${s.tracking_ref}` : 'tracking number not recorded'].filter(Boolean).join(' · ')}
+                  {[
+                    s.carrier,
+                    s.dispatched_from ? `from ${s.dispatched_from}` : null,
+                    s.tracking_ref ? `tracking ${s.tracking_ref}` : 'tracking number not recorded',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </p>
                 <ol className="ord-timeline">
                   {s.events.map((e) => (
                     <li key={`${s.shipment_id}-${e.event_seq}`}>
                       <strong>{e.event_status ?? 'Event'}</strong>
-                      <span className="small muted">{[e.event_date, e.event_location].filter(Boolean).join(' · ')}</span>
+                      <span className="small muted">
+                        {[e.event_date, e.event_location].filter(Boolean).join(' · ')}
+                      </span>
                     </li>
                   ))}
                 </ol>
@@ -225,7 +304,15 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
                 <li key={`${e.sequence}-${n}`}>
                   <strong>{e.status_label}</strong>
                   <span className="small muted">
-                    {[e.occurred_at ? e.occurred_at.replace('T', ' ').replace('+00:00', ' UTC') : null, e.by ? `by ${e.by}${e.role ? ` (${roleLabel(e.role as 'END_USER' | 'ORDER_PROCESSOR')})` : ''}` : null, e.recorded ? DATA[e.recorded] ?? e.recorded : null]
+                    {[
+                      e.occurred_at
+                        ? e.occurred_at.replace('T', ' ').replace('+00:00', ' UTC')
+                        : null,
+                      e.by
+                        ? `by ${e.by}${e.role ? ` (${roleLabel(e.role as 'END_USER' | 'ORDER_PROCESSOR')})` : ''}`
+                        : null,
+                      e.recorded ? (DATA[e.recorded] ?? e.recorded) : null,
+                    ]
                       .filter(Boolean)
                       .join(' · ') || 'Recorded in the demo dataset'}
                   </span>
@@ -248,12 +335,18 @@ function Detail({ o, processor, onChange }: { o: OrderDetail; processor: boolean
                   <dt>{l.part_number}</dt>
                   <dd>
                     Fitment: {l.evidence?.fitment}
-                    <small>Inventory: {DATA[l.evidence?.inventory ?? ''] ?? 'not stated'} · Price: {DATA[l.evidence?.price ?? ''] ?? 'not stated'}</small>
+                    <small>
+                      Inventory: {DATA[l.evidence?.inventory ?? ''] ?? 'not stated'} · Price:{' '}
+                      {DATA[l.evidence?.price ?? ''] ?? 'not stated'}
+                    </small>
                   </dd>
                 </div>
               ))}
             </dl>
-            <Link className="link-more" to={`/parts-intelligence?part=${encodeURIComponent(o.lines[0]?.part_number ?? '')}`}>
+            <Link
+              className="link-more"
+              to={`/parts-intelligence?part=${encodeURIComponent(o.lines[0]?.part_number ?? '')}`}
+            >
               Investigate in Parts Intelligence →
             </Link>
           </section>
@@ -291,9 +384,20 @@ function Actions({ o, onChange }: { o: OrderDetail; onChange: (o: OrderDetail) =
             <p>
               Move from <strong>{o.status_label}</strong> to <strong>{next.label}</strong>
             </p>
-            {!next.allowed && next.reason ? <p className="small ord-blocked">{next.reason}</p> : <p className="small muted">The change is recorded in the status history with your name and the time.</p>}
+            {!next.allowed && next.reason ? (
+              <p className="small ord-blocked">{next.reason}</p>
+            ) : (
+              <p className="small muted">
+                The change is recorded in the status history with your name and the time.
+              </p>
+            )}
           </div>
-          <button type="button" className="btn btn-accent" disabled={!next.allowed || busy} onClick={go}>
+          <button
+            type="button"
+            className="btn btn-accent"
+            disabled={!next.allowed || busy}
+            onClick={go}
+          >
             {busy ? 'Saving…' : `Mark as ${next.label.toLowerCase()}`}
           </button>
         </div>

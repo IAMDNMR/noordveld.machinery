@@ -1,4 +1,5 @@
 """Agentic Shopping API models. Every value comes from the graph; the model only reads the request."""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -18,13 +19,27 @@ class Interpretation(BaseModel):
     preference: Literal["cheapest", "fastest", "none"] = "none"
     delivery_place: str | None = None
     quantity: int | None = None
-    budget_max: float | None = None  # as the user stated it; compared with graph prices, never used to invent one
+    budget_max: float | None = (
+        None  # as the user stated it; compared with graph prices, never used to invent one
+    )
     budget_currency: str | None = None
-    availability: Literal["require", "prefer", "future", "none"] = "none"  # future: the user accepts waiting for on-order stock
+    availability: Literal["require", "prefer", "future", "none"] = (
+        "none"  # future: the user accepts waiting for on-order stock
+    )
 
 
 class Step(BaseModel):
-    key: Literal["request", "understand", "machine", "part", "fitment", "availability", "fulfilment", "compare", "recommend"]
+    key: Literal[
+        "request",
+        "understand",
+        "machine",
+        "part",
+        "fitment",
+        "availability",
+        "fulfilment",
+        "compare",
+        "recommend",
+    ]
     label: str
     status: Literal["done", "blocked", "skipped"]
     message: str
@@ -38,7 +53,18 @@ class Option(BaseModel):
 
 
 class EvidenceItem(BaseModel):
-    key: Literal["fit", "verified", "budget", "availability", "inventory", "supplier", "delivery", "transport", "dealer", "ranking"]
+    key: Literal[
+        "fit",
+        "verified",
+        "budget",
+        "availability",
+        "inventory",
+        "supplier",
+        "delivery",
+        "transport",
+        "dealer",
+        "ranking",
+    ]
     ok: bool
     label: str
     detail: str
@@ -64,10 +90,16 @@ class Candidate(BaseModel):
     recommended: bool
     availability_label: str  # "In stock" / "Limited" / "Backorder" / "Availability not recorded"
     fitment_status: str | None = None
-    fitment_label: str = "Fitment not verified"  # "Confirmed fit" / "Conditional fit · verification required"
-    inventory: str = "Not recorded"  # "81 units across 4 warehouses"; unknown is never shown as zero
+    fitment_label: str = (
+        "Fitment not verified"  # "Confirmed fit" / "Conditional fit · verification required"
+    )
+    inventory: str = (
+        "Not recorded"  # "81 units across 4 warehouses"; unknown is never shown as zero
+    )
     stock_locations: list[StockLocation] = []
-    fulfilment: str = "Fulfilment not recorded"  # how it is supplied: from stock, or after the supplier lead time
+    fulfilment: str = (
+        "Fulfilment not recorded"  # how it is supplied: from stock, or after the supplier lead time
+    )
     delivery: str = "Estimate not recorded"  # when it reaches the requested place, only from a recorded estimate
     supplier_label: str = "Not recorded"
     suppliers: list[SupplierRef] = []
@@ -76,9 +108,13 @@ class Candidate(BaseModel):
     order_note: str | None = None
     supplier: str | None = None  # primary supplier recorded in the graph
     supplier_lead_days: int | None = None
-    fulfilment_days: int | None = None  # recorded delivery estimate, or supplier lead time when nothing is in stock
+    fulfilment_days: int | None = (
+        None  # recorded delivery estimate, or supplier lead time when nothing is in stock
+    )
     within_budget: bool | None = None  # None when no budget was given
-    tradeoffs: list[str] = []  # how an alternative differs from the recommendation, only where both values are recorded
+    tradeoffs: list[
+        str
+    ] = []  # how an alternative differs from the recommendation, only where both values are recorded
     can_add_to_cart: bool = False  # verified, orderable, confirmed fitment and a recorded price
 
 
@@ -94,7 +130,9 @@ class Delivery(BaseModel):
     city: str
     warehouse: str
     warehouse_city: str | None = None
-    standard_days: int | None = None  # kept for older clients: the recorded estimate of the chosen route
+    standard_days: int | None = (
+        None  # kept for older clients: the recorded estimate of the chosen route
+    )
     express_days: int | None = None
     estimated_days: int | None = None
     option: str | None = None
@@ -125,7 +163,16 @@ class ProvenanceRow(BaseModel):
 
 class AgentResponse(BaseModel):
     request: str
-    state: Literal["recommendation", "need_part", "need_machine", "need_detail", "choose_machine", "choose_type", "no_match", "out_of_scope"]
+    state: Literal[
+        "recommendation",
+        "need_part",
+        "need_machine",
+        "need_detail",
+        "choose_machine",
+        "choose_type",
+        "no_match",
+        "out_of_scope",
+    ]
     interpretation: Interpretation
     steps: list[Step]
     question: str | None = None  # what the agent needs to know, for the clarification states

@@ -1,0 +1,1042 @@
+{
+ "id": "cat_aftersales",
+ "version": "2026.10.19",
+ "layer": "business",
+ "title": "After-sales service and warranty",
+ "description": "Service cases for machines in the field, warranty claims and technician visits.",
+ "synthetic": true,
+ "status": "in_review",
+ "provenance": {
+  "kind": "synthetic",
+  "reference": "Authored for the reference catalog from common industry practice; no company or customer source.",
+  "verification": "unverified"
+ },
+ "depends_on": [
+  "core_foundations",
+  "cat_manufacturing"
+ ],
+ "uses_capabilities": [
+  "approval_workflow",
+  "audit_history",
+  "search_filter",
+  "document_handling",
+  "notifications"
+ ],
+ "dependency_mode": "data_model",
+ "includes": [],
+ "business": {
+  "requirements": [
+   {
+    "id": "req_svc_resolve",
+    "statement": "Service cases are logged, checked for warranty, scheduled, visited and closed.",
+    "kind": "functional",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_svc_resolve_1",
+      "statement": "A case records the customer, the machine and the problem."
+     },
+     {
+      "id": "ac_svc_resolve_2",
+      "statement": "Warranty status is decided from the machine's warranty end date."
+     },
+     {
+      "id": "ac_svc_resolve_3",
+      "statement": "A technician records the outcome of each visit."
+     }
+    ]
+   },
+   {
+    "id": "req_svc_claims",
+    "statement": "Warranty claims are decided by a warranty administrator.",
+    "kind": "functional",
+    "priority": "should",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_svc_claims_1",
+      "statement": "A claim is approved or rejected and the decision is recorded."
+     }
+    ]
+   },
+   {
+    "id": "req_svc_audit",
+    "statement": "Every change to a record and every process step is recorded with who did it and when.",
+    "kind": "non_functional",
+    "category": "auditability",
+    "priority": "must",
+    "status": "agreed",
+    "acceptance_criteria": [
+     {
+      "id": "ac_svc_audit_1",
+      "statement": "The history of a process shows each step with its actor and time."
+     }
+    ]
+   }
+  ],
+  "roles": [
+   {
+    "id": "role_svc_agent",
+    "name": "Service desk agent",
+    "responsibilities": [
+     "Logs, triages and closes cases"
+    ],
+    "permissions": [
+     "svc.case_log",
+     "svc.case_triage",
+     "svc.case_quote",
+     "svc.case_schedule",
+     "svc.case_close"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_svc_technician",
+    "name": "Field technician",
+    "responsibilities": [
+     "Visits the customer and records the outcome"
+    ],
+    "permissions": [
+     "svc.case_visit",
+     "svc.case_part_wait"
+    ],
+    "approval_authority": []
+   },
+   {
+    "id": "role_svc_warranty",
+    "name": "Warranty administrator",
+    "responsibilities": [
+     "Decides warranty claims"
+    ],
+    "permissions": [
+     "svc.case_claim"
+    ],
+    "approval_authority": [
+     "Warranty claims"
+    ]
+   }
+  ],
+  "entities": [
+   {
+    "id": "ent_svc_service_case",
+    "name": "Service case",
+    "description": "A customer's problem with a machine.",
+    "attributes": [
+     {
+      "id": "service_case_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "description",
+      "name": "Problem",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "max_length": 600
+     },
+     {
+      "id": "priority",
+      "name": "Priority",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "LOW",
+       "NORMAL",
+       "URGENT"
+      ]
+     },
+     {
+      "id": "status",
+      "name": "Status",
+      "type": "string",
+      "required": true,
+      "sensitivity": "internal",
+      "enum": [
+       "OPEN",
+       "TRIAGED",
+       "SCHEDULED",
+       "RESOLVED",
+       "CLOSED"
+      ]
+     },
+     {
+      "id": "opened_on",
+      "name": "Opened on",
+      "type": "date",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "service_date",
+      "name": "Service date",
+      "type": "date",
+      "required": false,
+      "sensitivity": "internal"
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_svc_service_case_customer",
+      "name": "Customer",
+      "target": "ent_core_customer",
+      "cardinality": "many_to_one",
+      "required": true
+     },
+     {
+      "id": "rel_svc_service_case_machine",
+      "name": "Machine",
+      "target": "ent_mfg_machine",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_svc_warranty_claim",
+    "name": "Warranty claim",
+    "description": "A request to cover a repair under warranty.",
+    "attributes": [
+     {
+      "id": "warranty_claim_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "claim_amount",
+      "name": "Claim amount",
+      "type": "decimal",
+      "required": false,
+      "sensitivity": "internal",
+      "minimum": 0
+     },
+     {
+      "id": "decision",
+      "name": "Decision",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "owner_role_id": "role_svc_warranty"
+     },
+     {
+      "id": "note",
+      "name": "Note",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 500
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_svc_warranty_claim_service_case",
+      "name": "Service case",
+      "target": "ent_svc_service_case",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   },
+   {
+    "id": "ent_svc_service_visit",
+    "name": "Service visit",
+    "description": "A technician's visit to repair a machine.",
+    "attributes": [
+     {
+      "id": "service_visit_no",
+      "name": "Number",
+      "type": "integer",
+      "required": true,
+      "key": true,
+      "value_source": "system_generated",
+      "writable": false,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "scheduled_at",
+      "name": "Scheduled for",
+      "type": "datetime",
+      "required": true,
+      "sensitivity": "internal"
+     },
+     {
+      "id": "outcome",
+      "name": "Outcome",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "enum": [
+       "FIXED",
+       "PART_NEEDED",
+       "NO_FAULT"
+      ],
+      "owner_role_id": "role_svc_technician"
+     },
+     {
+      "id": "parts_used",
+      "name": "Parts used",
+      "type": "string",
+      "required": false,
+      "sensitivity": "internal",
+      "max_length": 300
+     }
+    ],
+    "relationships": [
+     {
+      "id": "rel_svc_service_visit_service_case",
+      "name": "Service case",
+      "target": "ent_svc_service_case",
+      "cardinality": "many_to_one",
+      "required": true
+     }
+    ]
+   }
+  ],
+  "rules": [
+   {
+    "id": "rule_svc_description",
+    "description": "A case describes the problem.",
+    "type": "validation",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_svc_service_case.description",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_svc_warranty",
+    "description": "A repair is in warranty when the service date is on or before the machine's warranty end.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "IN_WARRANTY",
+     "OUT_OF_WARRANTY"
+    ],
+    "execution": {
+     "kind": "compare",
+     "field": "ent_svc_service_case.service_date",
+     "operator": "lte",
+     "value": null,
+     "other_field": "ent_mfg_machine.warranty_end",
+     "pass_outcome": "IN_WARRANTY",
+     "fail_outcome": "OUT_OF_WARRANTY"
+    }
+   },
+   {
+    "id": "rule_svc_claim_decision",
+    "description": "The warranty administrator's recorded decision selects what happens to the claim.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "APPROVED",
+     "REJECTED"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_svc_warranty_claim.decision",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   },
+   {
+    "id": "rule_svc_outcome",
+    "description": "The technician's recorded outcome selects how the case continues.",
+    "type": "decision",
+    "status": "assumption",
+    "source": {
+     "kind": "synthetic_assumption",
+     "reference": "Catalog design assumption: the business has not stated this rule. It lets the demonstration run and is not company policy."
+    },
+    "condition": "",
+    "outcomes": [
+     "FIXED",
+     "PART_NEEDED",
+     "NO_FAULT"
+    ],
+    "execution": {
+     "kind": "value",
+     "field": "ent_svc_service_visit.outcome",
+     "operator": "present",
+     "value": null,
+     "other_field": null,
+     "pass_outcome": null,
+     "fail_outcome": null
+    }
+   }
+  ],
+  "exceptions": [
+   {
+    "id": "exc_svc_part_unavailable",
+    "name": "Part not available",
+    "trigger": "The visit found a fault that needs a part that is not on hand.",
+    "recovery": "The agent schedules a new visit once the part is available.",
+    "resolution": "recover",
+    "resolution_state_id": "st_svc_case_schedule"
+   }
+  ],
+  "decisions": [
+   {
+    "id": "dec_svc_goodwill",
+    "question": "Does the company repair out-of-warranty faults as goodwill, and who may grant it?",
+    "status": "open",
+    "answer": "",
+    "deferral_reason": "",
+    "affects": [
+     "rule_svc_warranty"
+    ]
+   }
+  ],
+  "integrations": [],
+  "terms": [
+   {
+    "id": "term_svc_case",
+    "term": "Service case",
+    "definition": "A customer's problem with a machine."
+   },
+   {
+    "id": "term_svc_warranty",
+    "term": "Warranty",
+    "definition": "Cover for repairs during a period after the sale."
+   },
+   {
+    "id": "term_svc_visit",
+    "term": "Service visit",
+    "definition": "A technician's visit to repair a machine."
+   }
+  ]
+ },
+ "workflows": [
+  {
+   "version": 1,
+   "id": "wf_svc_case",
+   "name": "Service case",
+   "states": [
+    {
+     "id": "st_svc_case_start",
+     "label": "Customer reports a problem",
+     "kind": "start",
+     "outputs": [],
+     "outcome": null,
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_svc_case_log",
+     "label": "Log the case",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_agent",
+     "permission": "svc.case_log",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_core_customer",
+      "ent_mfg_machine"
+     ],
+     "writes_entity_ids": [
+      "ent_svc_service_case"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_case": [
+       "description",
+       "priority",
+       "opened_on",
+       "service_date",
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_case": [
+       "rel_svc_service_case_customer",
+       "rel_svc_service_case_machine"
+      ]
+     }
+    },
+    {
+     "id": "st_svc_case_triage",
+     "label": "Triage the case",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_agent",
+     "permission": "svc.case_triage",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_mfg_machine"
+     ],
+     "writes_entity_ids": [
+      "ent_svc_service_case"
+     ],
+     "rule_ids": [
+      "rule_svc_description"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_case": [
+       "priority",
+       "description"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_case": []
+     }
+    },
+    {
+     "id": "st_svc_case_warranty",
+     "label": "Is the machine in warranty?",
+     "kind": "branch",
+     "outputs": [
+      "rule_svc_warranty"
+     ],
+     "outcome": null,
+     "role_id": "role_svc_agent",
+     "permission": null,
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_svc_warranty"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_svc_case_claim",
+     "label": "Decide the warranty claim",
+     "kind": "approval",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_warranty",
+     "permission": "svc.case_claim",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_svc_service_case"
+     ],
+     "writes_entity_ids": [
+      "ent_svc_warranty_claim"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_warranty_claim": [
+       "claim_amount",
+       "decision",
+       "note"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_warranty_claim": [
+       "rel_svc_warranty_claim_service_case"
+      ]
+     }
+    },
+    {
+     "id": "st_svc_case_claim_check",
+     "label": "Claim decision",
+     "kind": "branch",
+     "outputs": [
+      "rule_svc_claim_decision"
+     ],
+     "outcome": null,
+     "role_id": "role_svc_warranty",
+     "permission": null,
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_svc_claim_decision"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_svc_case_quote",
+     "label": "Quote a paid repair",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_agent",
+     "permission": "svc.case_quote",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_svc_service_case"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_case": [
+       "description"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_case": []
+     }
+    },
+    {
+     "id": "st_svc_case_schedule",
+     "label": "Schedule the visit",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_agent",
+     "permission": "svc.case_schedule",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [
+      "ent_svc_service_case"
+     ],
+     "writes_entity_ids": [
+      "ent_svc_service_visit"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_visit": [
+       "scheduled_at"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_visit": [
+       "rel_svc_service_visit_service_case"
+      ]
+     }
+    },
+    {
+     "id": "st_svc_case_visit",
+     "label": "Carry out the visit",
+     "kind": "form",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_technician",
+     "permission": "svc.case_visit",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_svc_service_visit"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_visit": [
+       "outcome",
+       "parts_used"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_visit": []
+     }
+    },
+    {
+     "id": "st_svc_case_outcome",
+     "label": "Visit outcome",
+     "kind": "branch",
+     "outputs": [
+      "rule_svc_outcome"
+     ],
+     "outcome": null,
+     "role_id": "role_svc_technician",
+     "permission": null,
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [
+      "rule_svc_outcome"
+     ],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    },
+    {
+     "id": "st_svc_case_part_wait",
+     "label": "Wait for the part",
+     "kind": "exception",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_technician",
+     "permission": "svc.case_part_wait",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_svc_service_visit"
+     ],
+     "rule_ids": [],
+     "exception_ids": [
+      "exc_svc_part_unavailable"
+     ],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_visit": [
+       "parts_used",
+       "outcome"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_visit": []
+     }
+    },
+    {
+     "id": "st_svc_case_close",
+     "label": "Close the case",
+     "kind": "action",
+     "outputs": [],
+     "outcome": null,
+     "role_id": "role_svc_agent",
+     "permission": "svc.case_close",
+     "requirement_ids": [
+      "req_svc_resolve",
+      "req_svc_claims",
+      "req_svc_audit"
+     ],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [
+      "ent_svc_service_case"
+     ],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": [],
+     "input_fields": {
+      "ent_svc_service_case": [
+       "status"
+      ]
+     },
+     "input_relationships": {
+      "ent_svc_service_case": []
+     }
+    },
+    {
+     "id": "st_svc_case_done",
+     "label": "Case closed",
+     "kind": "end",
+     "outputs": [],
+     "outcome": "success",
+     "role_id": null,
+     "permission": null,
+     "requirement_ids": [],
+     "reads_entity_ids": [],
+     "writes_entity_ids": [],
+     "rule_ids": [],
+     "exception_ids": [],
+     "preconditions": [],
+     "postconditions": []
+    }
+   ],
+   "transitions": [
+    {
+     "id": "tr_svc_case_1",
+     "source": "st_svc_case_start",
+     "target": "st_svc_case_log",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_2",
+     "source": "st_svc_case_log",
+     "target": "st_svc_case_triage",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_3",
+     "source": "st_svc_case_triage",
+     "target": "st_svc_case_warranty",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_4",
+     "source": "st_svc_case_warranty",
+     "target": "st_svc_case_claim",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_warranty",
+      "value": "IN_WARRANTY"
+     }
+    },
+    {
+     "id": "tr_svc_case_5",
+     "source": "st_svc_case_warranty",
+     "target": "st_svc_case_quote",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_warranty",
+      "value": "OUT_OF_WARRANTY"
+     }
+    },
+    {
+     "id": "tr_svc_case_6",
+     "source": "st_svc_case_claim",
+     "target": "st_svc_case_claim_check",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_7",
+     "source": "st_svc_case_claim_check",
+     "target": "st_svc_case_schedule",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_claim_decision",
+      "value": "APPROVED"
+     }
+    },
+    {
+     "id": "tr_svc_case_8",
+     "source": "st_svc_case_claim_check",
+     "target": "st_svc_case_quote",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_claim_decision",
+      "value": "REJECTED"
+     }
+    },
+    {
+     "id": "tr_svc_case_9",
+     "source": "st_svc_case_quote",
+     "target": "st_svc_case_schedule",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_10",
+     "source": "st_svc_case_schedule",
+     "target": "st_svc_case_visit",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_11",
+     "source": "st_svc_case_visit",
+     "target": "st_svc_case_outcome",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_12",
+     "source": "st_svc_case_outcome",
+     "target": "st_svc_case_close",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_outcome",
+      "value": "FIXED"
+     }
+    },
+    {
+     "id": "tr_svc_case_13",
+     "source": "st_svc_case_outcome",
+     "target": "st_svc_case_part_wait",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_outcome",
+      "value": "PART_NEEDED"
+     }
+    },
+    {
+     "id": "tr_svc_case_14",
+     "source": "st_svc_case_outcome",
+     "target": "st_svc_case_close",
+     "condition": {
+      "kind": "equals",
+      "field": "rule_svc_outcome",
+      "value": "NO_FAULT"
+     }
+    },
+    {
+     "id": "tr_svc_case_15",
+     "source": "st_svc_case_part_wait",
+     "target": "st_svc_case_schedule",
+     "condition": {
+      "kind": "always"
+     }
+    },
+    {
+     "id": "tr_svc_case_16",
+     "source": "st_svc_case_close",
+     "target": "st_svc_case_done",
+     "condition": {
+      "kind": "always"
+     }
+    }
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Service case",
+   "definition": "A customer's problem with a machine.",
+   "synonyms": [
+    "ticket",
+    "incident",
+    "support case",
+    "complaint"
+   ],
+   "refers_to": "ent_svc_service_case"
+  },
+  {
+   "term": "Warranty",
+   "definition": "Cover for repairs during a period after the sale.",
+   "synonyms": [
+    "guarantee",
+    "coverage",
+    "in-warranty"
+   ]
+  },
+  {
+   "term": "Service visit",
+   "definition": "A technician's visit to repair a machine.",
+   "synonyms": [
+    "field visit",
+    "site visit",
+    "call-out",
+    "repair visit"
+   ],
+   "refers_to": "ent_svc_service_visit"
+  }
+ ],
+ "overrides": [],
+ "domains": [
+  {
+   "id": "aftersales_service",
+   "name": "After-sales service, maintenance and warranty",
+   "subdomains": [
+    "Service cases",
+    "Warranty claims",
+    "Field visits"
+   ],
+   "keywords": [
+    "service",
+    "after-sales",
+    "aftersales",
+    "warranty",
+    "claim",
+    "claims",
+    "repair",
+    "field service",
+    "service case",
+    "ticket",
+    "support",
+    "technician visit",
+    "rma",
+    "complaint"
+   ],
+   "description": "Looking after machines and customers after the sale."
+  }
+ ],
+ "domain_id": "aftersales_service",
+ "capability": {
+  "id": "aftersales_service",
+  "name": "Service and warranty"
+ }
+}

@@ -12,7 +12,9 @@ export function Plants() {
   const [chosen, setActive] = useState<PlantId | null>(null)
   const active = chosen ?? plants[0]?.id ?? ''
   const countries = [...new Set(plants.map((p) => p.country))]
-  const title = data ? `${capitalise(countWord(plants.length))} plants. ${capitalise(countWord(countries.length))} ${countries.length === 1 ? 'country' : 'countries'}.` : 'Our plants.'
+  const title = data
+    ? `${capitalise(countWord(plants.length))} plants. ${capitalise(countWord(countries.length))} ${countries.length === 1 ? 'country' : 'countries'}.`
+    : 'Our plants.'
 
   return (
     <section id="plants" className="section on-mist plants" aria-labelledby="plants-title">
@@ -23,7 +25,8 @@ export function Plants() {
           </h2>
           {data ? (
             <p className="lead">
-              Every Noordveld machine comes from one of {countWord(plants.length)} plants in {countries.map(inText).join(' and ')}.
+              Every Noordveld machine comes from one of {countWord(plants.length)} plants in{' '}
+              {countries.map(inText).join(' and ')}.
             </p>
           ) : null}
         </Reveal>
@@ -36,7 +39,12 @@ export function Plants() {
             {plants.map((plant) => {
               const list = data ? machinesAt(data, plant.id) : []
               return (
-                <li key={plant.id} className={`plant ${active === plant.id ? 'is-active' : ''}`} onPointerEnter={() => setActive(plant.id)} onFocusCapture={() => setActive(plant.id)}>
+                <li
+                  key={plant.id}
+                  className={`plant ${active === plant.id ? 'is-active' : ''}`}
+                  onPointerEnter={() => setActive(plant.id)}
+                  onFocusCapture={() => setActive(plant.id)}
+                >
                   <PlantImage plant={plant} ratio="16 / 8" />
                   <div className="plant__body">
                     <div className="plant__title">

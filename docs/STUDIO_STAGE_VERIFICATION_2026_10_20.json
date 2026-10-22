@@ -1,0 +1,213 @@
+{
+  "project": "app_transport_operations_20261019",
+  "revision": 12,
+  "project_unchanged": true,
+  "runtime_before_and_after": {
+    "running": false
+  },
+  "generated_tests": {
+    "revision": 12,
+    "release_id": "9863e149712d3e48054bebe6214ac861898e9e0da51ad7abd723655edabfbf06",
+    "run_id": "ee5d16a3b5294c148d01bb27446267a0",
+    "passed": true,
+    "ran": 50,
+    "seconds": 5.3,
+    "passed_count": 43,
+    "failed_count": 0,
+    "skipped_count": 7,
+    "cases": [
+      "test_all_workflow_actions_require_a_role_and_permission (test_runtime.GeneratedRuntimeTests.test_all_workflow_actions_require_a_role_and_permission) ... ok",
+      "test_entity_00_ent_core_customer_permissions (test_runtime.GeneratedRuntimeTests.test_entity_00_ent_core_customer_permissions) ... ok",
+      "test_entity_00_ent_core_customer_persistence (test_runtime.GeneratedRuntimeTests.test_entity_00_ent_core_customer_persistence) ... ok",
+      "test_entity_00_ent_core_customer_validation (test_runtime.GeneratedRuntimeTests.test_entity_00_ent_core_customer_validation) ... ok",
+      "test_entity_01_ent_core_location_permissions (test_runtime.GeneratedRuntimeTests.test_entity_01_ent_core_location_permissions) ... ok",
+      "test_entity_01_ent_core_location_persistence (test_runtime.GeneratedRuntimeTests.test_entity_01_ent_core_location_persistence) ... ok",
+      "test_entity_01_ent_core_location_validation (test_runtime.GeneratedRuntimeTests.test_entity_01_ent_core_location_validation) ... ok",
+      "test_entity_02_ent_eco_order_permissions (test_runtime.GeneratedRuntimeTests.test_entity_02_ent_eco_order_permissions) ... ok",
+      "test_entity_02_ent_eco_order_persistence (test_runtime.GeneratedRuntimeTests.test_entity_02_ent_eco_order_persistence) ... ok",
+      "test_entity_02_ent_eco_order_validation (test_runtime.GeneratedRuntimeTests.test_entity_02_ent_eco_order_validation) ... ok",
+      "test_entity_03_ent_wms_pick_list_permissions (test_runtime.GeneratedRuntimeTests.test_entity_03_ent_wms_pick_list_permissions) ... ok",
+      "test_entity_03_ent_wms_pick_list_persistence (test_runtime.GeneratedRuntimeTests.test_entity_03_ent_wms_pick_list_persistence) ... skipped 'Pick list: no role may create a fixture; configure its data source'",
+      "test_entity_03_ent_wms_pick_list_validation (test_runtime.GeneratedRuntimeTests.test_entity_03_ent_wms_pick_list_validation) ... skipped 'Pick list: no role may create a fixture; configure its data source'",
+      "test_entity_04_ent_wms_pack_unit_permissions (test_runtime.GeneratedRuntimeTests.test_entity_04_ent_wms_pack_unit_permissions) ... ok",
+      "test_entity_04_ent_wms_pack_unit_persistence (test_runtime.GeneratedRuntimeTests.test_entity_04_ent_wms_pack_unit_persistence) ... skipped 'Pack unit: no role may create a fixture; configure its data source'",
+      "test_entity_04_ent_wms_pack_unit_validation (test_runtime.GeneratedRuntimeTests.test_entity_04_ent_wms_pack_unit_validation) ... skipped 'Pack unit: no role may create a fixture; configure its data source'",
+      "test_entity_05_ent_tms_carrier_permissions (test_runtime.GeneratedRuntimeTests.test_entity_05_ent_tms_carrier_permissions) ... ok",
+      "test_entity_05_ent_tms_carrier_persistence (test_runtime.GeneratedRuntimeTests.test_entity_05_ent_tms_carrier_persistence) ... ok",
+      "test_entity_05_ent_tms_carrier_validation (test_runtime.GeneratedRuntimeTests.test_entity_05_ent_tms_carrier_validation) ... ok",
+      "test_entity_06_ent_tms_vehicle_permissions (test_runtime.GeneratedRuntimeTests.test_entity_06_ent_tms_vehicle_permissions) ... ok",
+      "test_entity_06_ent_tms_vehicle_persistence (test_runtime.GeneratedRuntimeTests.test_entity_06_ent_tms_vehicle_persistence) ... ok",
+      "test_entity_06_ent_tms_vehicle_validation (test_runtime.GeneratedRuntimeTests.test_entity_06_ent_tms_vehicle_validation) ... ok",
+      "test_entity_07_ent_tms_shipment_permissions (test_runtime.GeneratedRuntimeTests.test_entity_07_ent_tms_shipment_permissions) ... ok",
+      "test_entity_07_ent_tms_shipment_persistence (test_runtime.GeneratedRuntimeTests.test_entity_07_ent_tms_shipment_persistence) ... ok",
+      "test_entity_07_ent_tms_shipment_validation (test_runtime.GeneratedRuntimeTests.test_entity_07_ent_tms_shipment_validation) ... ok",
+      "test_records_persist_and_tenants_cannot_read_each_other (test_runtime.GeneratedRuntimeTests.test_records_persist_and_tenants_cannot_read_each_other) ... ok",
+      "test_reference_00_required (test_runtime.GeneratedRuntimeTests.test_reference_00_required) ... ok",
+      "test_reference_01_required (test_runtime.GeneratedRuntimeTests.test_reference_01_required) ... skipped 'Pick list: no role may create a fixture; configure its data source'",
+      "test_reference_02_required (test_runtime.GeneratedRuntimeTests.test_reference_02_required) ... skipped 'Pick list: no role may create a fixture; configure its data source'",
+      "test_reference_03_required (test_runtime.GeneratedRuntimeTests.test_reference_03_required) ... skipped 'Pack unit: no role may create a fixture; configure its data source'",
+      "test_reference_04_required (test_runtime.GeneratedRuntimeTests.test_reference_04_required) ... ok",
+      "test_reference_05_required (test_runtime.GeneratedRuntimeTests.test_reference_05_required) ... ok",
+      "test_rule_00_rule_tms_carrier_active_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_00_rule_tms_carrier_active_outcomes) ... ok",
+      "test_rule_01_rule_tms_capacity_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_01_rule_tms_capacity_outcomes) ... ok",
+      "test_rule_02_rule_tms_tracking_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_02_rule_tms_tracking_outcomes) ... ok",
+      "test_rule_03_rule_tms_receiver_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_03_rule_tms_receiver_outcomes) ... ok",
+      "test_rule_04_rule_tms_pod_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_04_rule_tms_pod_outcomes) ... ok",
+      "test_rule_05_rule_tms_resolution_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_05_rule_tms_resolution_outcomes) ... ok",
+      "test_sessions_are_server_owned_and_unknown_identity_is_rejected (test_runtime.GeneratedRuntimeTests.test_sessions_are_server_owned_and_unknown_identity_is_rejected) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_10 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_10) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_11 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_11) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_12 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_12) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_13 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_13) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_14 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_14) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_4 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_4) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_5 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_5) ... ok",
+      "test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_9 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_9) ... ok",
+      "test_workflow_00_wf_tms_shipment_permissions (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_permissions) ... ok",
+      "test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_cancelled (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_cancelled) ... ok",
+      "test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_done (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_done) ... ok"
+    ],
+    "output_tail": "test_reference_04_required (test_runtime.GeneratedRuntimeTests.test_reference_04_required) ... ok\ntest_reference_05_required (test_runtime.GeneratedRuntimeTests.test_reference_05_required) ... ok\ntest_rule_00_rule_tms_carrier_active_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_00_rule_tms_carrier_active_outcomes) ... ok\ntest_rule_01_rule_tms_capacity_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_01_rule_tms_capacity_outcomes) ... ok\ntest_rule_02_rule_tms_tracking_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_02_rule_tms_tracking_outcomes) ... ok\ntest_rule_03_rule_tms_receiver_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_03_rule_tms_receiver_outcomes) ... ok\ntest_rule_04_rule_tms_pod_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_04_rule_tms_pod_outcomes) ... ok\ntest_rule_05_rule_tms_resolution_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_05_rule_tms_resolution_outcomes) ... ok\ntest_sessions_are_server_owned_and_unknown_identity_is_rejected (test_runtime.GeneratedRuntimeTests.test_sessions_are_server_owned_and_unknown_identity_is_rejected) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_10 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_10) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_11 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_11) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_12 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_12) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_13 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_13) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_14 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_14) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_4 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_4) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_5 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_5) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_9 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_9) ... ok\ntest_workflow_00_wf_tms_shipment_permissions (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_permissions) ... ok\ntest_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_cancelled (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_cancelled) ... ok\ntest_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_done (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_done) ... ok\n\n----------------------------------------------------------------------\nRan 50 tests in 4.755s\n\nOK (skipped=7)",
+    "output": "test_all_workflow_actions_require_a_role_and_permission (test_runtime.GeneratedRuntimeTests.test_all_workflow_actions_require_a_role_and_permission) ... ok\ntest_entity_00_ent_core_customer_permissions (test_runtime.GeneratedRuntimeTests.test_entity_00_ent_core_customer_permissions) ... ok\ntest_entity_00_ent_core_customer_persistence (test_runtime.GeneratedRuntimeTests.test_entity_00_ent_core_customer_persistence) ... ok\ntest_entity_00_ent_core_customer_validation (test_runtime.GeneratedRuntimeTests.test_entity_00_ent_core_customer_validation) ... ok\ntest_entity_01_ent_core_location_permissions (test_runtime.GeneratedRuntimeTests.test_entity_01_ent_core_location_permissions) ... ok\ntest_entity_01_ent_core_location_persistence (test_runtime.GeneratedRuntimeTests.test_entity_01_ent_core_location_persistence) ... ok\ntest_entity_01_ent_core_location_validation (test_runtime.GeneratedRuntimeTests.test_entity_01_ent_core_location_validation) ... ok\ntest_entity_02_ent_eco_order_permissions (test_runtime.GeneratedRuntimeTests.test_entity_02_ent_eco_order_permissions) ... ok\ntest_entity_02_ent_eco_order_persistence (test_runtime.GeneratedRuntimeTests.test_entity_02_ent_eco_order_persistence) ... ok\ntest_entity_02_ent_eco_order_validation (test_runtime.GeneratedRuntimeTests.test_entity_02_ent_eco_order_validation) ... ok\ntest_entity_03_ent_wms_pick_list_permissions (test_runtime.GeneratedRuntimeTests.test_entity_03_ent_wms_pick_list_permissions) ... ok\ntest_entity_03_ent_wms_pick_list_persistence (test_runtime.GeneratedRuntimeTests.test_entity_03_ent_wms_pick_list_persistence) ... skipped 'Pick list: no role may create a fixture; configure its data source'\ntest_entity_03_ent_wms_pick_list_validation (test_runtime.GeneratedRuntimeTests.test_entity_03_ent_wms_pick_list_validation) ... skipped 'Pick list: no role may create a fixture; configure its data source'\ntest_entity_04_ent_wms_pack_unit_permissions (test_runtime.GeneratedRuntimeTests.test_entity_04_ent_wms_pack_unit_permissions) ... ok\ntest_entity_04_ent_wms_pack_unit_persistence (test_runtime.GeneratedRuntimeTests.test_entity_04_ent_wms_pack_unit_persistence) ... skipped 'Pack unit: no role may create a fixture; configure its data source'\ntest_entity_04_ent_wms_pack_unit_validation (test_runtime.GeneratedRuntimeTests.test_entity_04_ent_wms_pack_unit_validation) ... skipped 'Pack unit: no role may create a fixture; configure its data source'\ntest_entity_05_ent_tms_carrier_permissions (test_runtime.GeneratedRuntimeTests.test_entity_05_ent_tms_carrier_permissions) ... ok\ntest_entity_05_ent_tms_carrier_persistence (test_runtime.GeneratedRuntimeTests.test_entity_05_ent_tms_carrier_persistence) ... ok\ntest_entity_05_ent_tms_carrier_validation (test_runtime.GeneratedRuntimeTests.test_entity_05_ent_tms_carrier_validation) ... ok\ntest_entity_06_ent_tms_vehicle_permissions (test_runtime.GeneratedRuntimeTests.test_entity_06_ent_tms_vehicle_permissions) ... ok\ntest_entity_06_ent_tms_vehicle_persistence (test_runtime.GeneratedRuntimeTests.test_entity_06_ent_tms_vehicle_persistence) ... ok\ntest_entity_06_ent_tms_vehicle_validation (test_runtime.GeneratedRuntimeTests.test_entity_06_ent_tms_vehicle_validation) ... ok\ntest_entity_07_ent_tms_shipment_permissions (test_runtime.GeneratedRuntimeTests.test_entity_07_ent_tms_shipment_permissions) ... ok\ntest_entity_07_ent_tms_shipment_persistence (test_runtime.GeneratedRuntimeTests.test_entity_07_ent_tms_shipment_persistence) ... ok\ntest_entity_07_ent_tms_shipment_validation (test_runtime.GeneratedRuntimeTests.test_entity_07_ent_tms_shipment_validation) ... ok\ntest_records_persist_and_tenants_cannot_read_each_other (test_runtime.GeneratedRuntimeTests.test_records_persist_and_tenants_cannot_read_each_other) ... ok\ntest_reference_00_required (test_runtime.GeneratedRuntimeTests.test_reference_00_required) ... ok\ntest_reference_01_required (test_runtime.GeneratedRuntimeTests.test_reference_01_required) ... skipped 'Pick list: no role may create a fixture; configure its data source'\ntest_reference_02_required (test_runtime.GeneratedRuntimeTests.test_reference_02_required) ... skipped 'Pick list: no role may create a fixture; configure its data source'\ntest_reference_03_required (test_runtime.GeneratedRuntimeTests.test_reference_03_required) ... skipped 'Pack unit: no role may create a fixture; configure its data source'\ntest_reference_04_required (test_runtime.GeneratedRuntimeTests.test_reference_04_required) ... ok\ntest_reference_05_required (test_runtime.GeneratedRuntimeTests.test_reference_05_required) ... ok\ntest_rule_00_rule_tms_carrier_active_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_00_rule_tms_carrier_active_outcomes) ... ok\ntest_rule_01_rule_tms_capacity_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_01_rule_tms_capacity_outcomes) ... ok\ntest_rule_02_rule_tms_tracking_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_02_rule_tms_tracking_outcomes) ... ok\ntest_rule_03_rule_tms_receiver_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_03_rule_tms_receiver_outcomes) ... ok\ntest_rule_04_rule_tms_pod_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_04_rule_tms_pod_outcomes) ... ok\ntest_rule_05_rule_tms_resolution_outcomes (test_runtime.GeneratedRuntimeTests.test_rule_05_rule_tms_resolution_outcomes) ... ok\ntest_sessions_are_server_owned_and_unknown_identity_is_rejected (test_runtime.GeneratedRuntimeTests.test_sessions_are_server_owned_and_unknown_identity_is_rejected) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_10 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_10) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_11 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_11) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_12 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_12) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_13 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_13) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_14 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_14) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_4 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_4) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_5 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_5) ... ok\ntest_workflow_00_wf_tms_shipment_path_tr_tms_shipment_9 (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_path_tr_tms_shipment_9) ... ok\ntest_workflow_00_wf_tms_shipment_permissions (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_permissions) ... ok\ntest_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_cancelled (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_cancelled) ... ok\ntest_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_done (test_runtime.GeneratedRuntimeTests.test_workflow_00_wf_tms_shipment_reaches_st_tms_shipment_done) ... ok\n\n----------------------------------------------------------------------\nRan 50 tests in 4.755s\n\nOK (skipped=7)",
+    "output_truncated": false
+  },
+  "compile_checks": [
+    {
+      "check": "json_parses",
+      "status": "pass",
+      "detail": "33 JSON files parse"
+    },
+    {
+      "check": "openapi_refs_resolve",
+      "status": "pass",
+      "detail": "every $ref resolves to a generated schema"
+    },
+    {
+      "check": "reference_targets_have_schemas",
+      "status": "pass",
+      "detail": "9 reference(s) resolve"
+    },
+    {
+      "check": "writes_have_permissions",
+      "status": "pass",
+      "detail": "every write operation names a permission"
+    },
+    {
+      "check": "permissions_held_by_roles",
+      "status": "pass",
+      "detail": "every required permission is held by a role"
+    },
+    {
+      "check": "manifest_digests",
+      "status": "pass",
+      "detail": "every file matches its recorded digest"
+    },
+    {
+      "check": "files_traced",
+      "status": "pass",
+      "detail": "every generated file names its sources"
+    },
+    {
+      "check": "generated_code_not_executed",
+      "status": "pass",
+      "detail": "TypeScript compilation and the generated tests run via BUILD.md, not during compilation"
+    },
+    {
+      "check": "runtime_source_parses",
+      "status": "pass",
+      "detail": "Python runtime source syntax check; behavior requires the independent runtime tests"
+    },
+    {
+      "check": "runtime_business_coverage",
+      "status": "warn",
+      "detail": "Integration int_tms_tracking_feed: signed inbound record API is generated; customer field mapping and connection are not configured. Outbound delivery and file bytes require a provider adapter.",
+      "items": [
+        {
+          "category": "external_integration",
+          "decision": null,
+          "detail": "Carrier tracking feed",
+          "item": "int_tms_tracking_feed",
+          "text": "Integration int_tms_tracking_feed: signed inbound record API is generated; customer field mapping and connection are not configured. Outbound delivery and file bytes require a provider adapter."
+        }
+      ]
+    },
+    {
+      "check": "runtime_records_creatable",
+      "status": "pass",
+      "detail": "every required related record can be created by a role in this application"
+    }
+  ],
+  "validation": {
+    "process": {
+      "error": 0,
+      "warning": 6,
+      "info": 9
+    },
+    "design": {
+      "error": 0,
+      "warning": 6,
+      "info": 9
+    }
+  },
+  "stages": {
+    "brief": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {
+        "open_questions": 4
+      }
+    },
+    "knowledge": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {}
+    },
+    "workflow": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {}
+    },
+    "data": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {}
+    },
+    "rules": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {
+        "warnings": 6
+      }
+    },
+    "roles": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {
+        "open_questions": 1
+      }
+    },
+    "screen": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {}
+    },
+    "checks": {
+      "status": "completed",
+      "reason": "Draft reviewed. Formal approvals are checked before generation.",
+      "counts": {
+        "warnings": 6
+      }
+    },
+    "export": {
+      "status": "ready_for_review",
+      "reason": "Approved. Generate to build the application and check it.",
+      "counts": {}
+    }
+  },
+  "entities": 8,
+  "relationships": 9,
+  "screens": 9,
+  "roles": 6,
+  "rules": 6,
+  "reference_archive_sha256": "831db03e6ff3ba9320d88f02f89fef637d427943fe6551a1fdb9ee7000bcdfc3"
+}

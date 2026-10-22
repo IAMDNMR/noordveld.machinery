@@ -1,15 +1,34 @@
 """Parts Intelligence endpoints. Handlers parse the request and call a service; nothing else."""
+
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.api.app_access import require_app
 from app.api.dependencies import EntityDetails, Overviews, Questions, Workspaces
 from app.schemas.intelligence import (
-    AssemblyItem, ComplianceItem, DealerItem, EntityDetail, FitmentItem, GraphView, Insight, InventoryView, Kpis, PartOverview, ProvenanceReport, QueryRequest, QueryResponse,
-    RelatedItem, SupplierItem,
+    AssemblyItem,
+    ComplianceItem,
+    DealerItem,
+    EntityDetail,
+    FitmentItem,
+    GraphView,
+    Insight,
+    InventoryView,
+    Kpis,
+    PartOverview,
+    ProvenanceReport,
+    QueryRequest,
+    QueryResponse,
+    RelatedItem,
+    SupplierItem,
 )
 
-router = APIRouter(prefix="/intelligence", tags=["intelligence"])
+router = APIRouter(
+    prefix="/intelligence",
+    tags=["intelligence"],
+    dependencies=[Depends(require_app("parts_intelligence"))],
+)
 
 
 @router.post("/query", response_model=QueryResponse)

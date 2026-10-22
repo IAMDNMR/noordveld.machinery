@@ -1,5 +1,6 @@
 """Parts Store checkout: reference data for the screens, the order review, and Place Order. Every rule is enforced in app/services/checkout.py;
 this module only validates the request shape and maps the service's errors to HTTP."""
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -7,11 +8,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
+from app.api.app_access import require_app
 from app.api.dependencies import CheckoutSvc, require
 from app.api.routes.orders import Item, _call
 from app.services.orders import User
 
-router = APIRouter(tags=["checkout"])
+router = APIRouter(tags=["checkout"], dependencies=[Depends(require_app("parts_store"))])
 Buyer = Annotated[User, Depends(require("orders.place"))]
 
 
@@ -51,12 +53,18 @@ def countries(user: Buyer, checkout: CheckoutSvc) -> list[dict]:
 
 
 @router.get("/checkout/destinations")
-def destinations(user: Buyer, checkout: CheckoutSvc, country: Annotated[str, Query(min_length=2, max_length=2)]) -> list[dict]:
+def destinations(
+    user: Buyer, checkout: CheckoutSvc, country: Annotated[str, Query(min_length=2, max_length=2)]
+) -> list[dict]:
     return _call(checkout.destinations, user, country)
 
 
 @router.get("/checkout/dealers")
-def dealers(user: Buyer, checkout: CheckoutSvc, country: Annotated[str | None, Query(min_length=2, max_length=2)] = None) -> list[dict]:
+def dealers(
+    user: Buyer,
+    checkout: CheckoutSvc,
+    country: Annotated[str | None, Query(min_length=2, max_length=2)] = None,
+) -> list[dict]:
     return _call(checkout.dealers, user, country)
 
 

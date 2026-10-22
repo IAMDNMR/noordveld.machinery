@@ -10,7 +10,8 @@ import './media.css'
 type Connection = { saveData?: boolean }
 
 /** True when the visitor asked the browser to save data. Read once; it rarely changes mid-visit. */
-const prefersSavedData = (): boolean => (navigator as Navigator & { connection?: Connection }).connection?.saveData === true
+const prefersSavedData = (): boolean =>
+  (navigator as Navigator & { connection?: Connection }).connection?.saveData === true
 
 interface FilmSlotProps {
   film: Film
@@ -43,7 +44,17 @@ export function FilmSlot({ film, ratio, size = 'standard' }: FilmSlotProps) {
   const staticOnly = (reduced || saveData) && poster !== undefined
   const src = compact && mobile ? mobile : desktop
 
-  return <FilmFrame key={staticOnly ? 'still' : src} film={film} src={src} poster={poster} ratio={ratio} hero={size === 'hero'} staticOnly={staticOnly} />
+  return (
+    <FilmFrame
+      key={staticOnly ? 'still' : src}
+      film={film}
+      src={src}
+      poster={poster}
+      ratio={ratio}
+      hero={size === 'hero'}
+      staticOnly={staticOnly}
+    />
+  )
 }
 
 interface FilmFrameProps {
@@ -74,7 +85,15 @@ function FilmFrame({ film, src, poster, ratio, hero, staticOnly }: FilmFrameProp
   const content =
     staticOnly || failed ? (
       <div ref={frameRef} className="film" style={style}>
-        {poster ? <img className="film__video" src={poster} alt={film.title} loading={hero ? 'eager' : 'lazy'} decoding="async" /> : null}
+        {poster ? (
+          <img
+            className="film__video"
+            src={poster}
+            alt={film.title}
+            loading={hero ? 'eager' : 'lazy'}
+            decoding="async"
+          />
+        ) : null}
       </div>
     ) : (
       <div ref={frameRef} className="film" style={style}>

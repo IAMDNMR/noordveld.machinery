@@ -1,0 +1,55 @@
+{
+ "pack": "cat_workforce",
+ "records": [
+  {
+   "name": "emp1",
+   "entity": "ent_wfm_employee",
+   "role": "role_wfm_hr",
+   "values": {
+    "name": "Alex Jansen (synthetic)",
+    "job_title": "Service engineer",
+    "team": "Field service",
+    "status": "ACTIVE",
+    "leave_balance_days": 20
+   },
+   "refs": {},
+   "shared": false
+  },
+  {
+   "name": "lr1",
+   "entity": "ent_wfm_leave_request",
+   "role": "role_wfm_employee",
+   "values": {
+    "start_date": "2026-11-02",
+    "end_date": "2026-11-06",
+    "days": 5,
+    "kind": "ANNUAL"
+   },
+   "refs": {
+    "ent_wfm_employee": "emp1"
+   },
+   "shared": false
+  }
+ ],
+ "flows": [
+  {
+   "flow": "wf_wfm_leave",
+   "bind": {
+    "ent_wfm_employee": "emp1",
+    "ent_wfm_leave_request": "lr1"
+   },
+   "set": {
+    "decide": [
+     {
+      "record": "lr1",
+      "role": "role_wfm_manager",
+      "values": {
+       "decision": "APPROVED"
+      }
+     }
+    ]
+   },
+   "ends": "done"
+  }
+ ]
+}
