@@ -898,7 +898,14 @@ def _execute(
                 f"Saved {len(applied)} design repair changes. The {label.lower()} content changed after review, so review it again before continuing.",
             )
         open_decisions = [d for d in saved.business.decisions if d.status == "open"]
-        if key != "export" and open_decisions and not (request_text.strip() and "?" in said):
+        from app.assistant.studio_actions import decision_words
+
+        def asked_already(decision) -> bool:
+            # The reply already asks this decision when it repeats most of the decision's own words.
+            wanted, spoken = decision_words(decision.question), decision_words(said)
+            return bool(wanted) and len(wanted & spoken) / len(wanted) >= 0.6
+
+        if key != "export" and open_decisions and not (request_text.strip() and asked_already(open_decisions[0])):
             # Business questions are asked while the application is being built, not left for Validation. Stated from the saved
             # design, never by the model, when the assistant's own reply did not already ask: what is waiting for the person.
             many = len(open_decisions) != 1
