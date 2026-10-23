@@ -91,6 +91,35 @@ def test_a_process_written_for_one_legal_region_joins_only_when_that_region_was_
     assert "left_out_for_region" not in added
 
 
+def test_a_change_asked_in_chat_for_the_screens_is_applied_to_the_application_the_preview_and_the_download():
+    import base64
+    import re
+
+    from app.assistant.studio_actions import apply_actions, parse_actions
+    from app.design_studio.knowledge.provider import LocalKnowledgeProvider
+    from app.design_studio.runtime_generation import preview_document
+
+    definition = build(SCENARIOS["after-sales"])
+    # What the model really sent: "color" for the colour, and a word instead of a code; hiding the steps has its own action.
+    actions, rejected = parse_actions(
+        [{"type": "set_theme", "color": "blue"}, {"type": "set_screen_sections", "hide": ["steps", "finished"]}, {"type": "set_theme", "primary": "sparkly"}]
+    )
+    assert [a.type for a in actions] == ["set_theme", "set_screen_sections"]
+    assert rejected and "not recognised" in rejected[0]["reason"] and "Field required" not in rejected[0]["reason"]
+    changed, applied, _ = apply_actions(definition, actions, LocalKnowledgeProvider())
+    assert changed.theme.primary == "#245f8b" and changed.theme.hidden_sections == ["steps", "finished"]
+    assert any("hidden the step list" in item["summary"] for item in applied)
+
+    # The preview (and so the live demo and the generated app, which read the same settings) carries what was hidden.
+    outer = preview_document(changed)
+    inner = base64.b64decode(re.search(r"base64,([^\"]+)\"", outer).group(1)).decode()
+    assert '"hidden_sections": ["steps", "finished"]' in inner
+    # Showing a section again takes it back out.
+    again, _ = parse_actions([{"type": "set_screen_sections", "show": ["steps"]}])
+    restored, _, _ = apply_actions(changed, again, LocalKnowledgeProvider())
+    assert restored.theme.hidden_sections == ["finished"]
+
+
 def test_a_workflow_of_only_look_up_and_check_steps_is_a_dashboard_not_a_process_to_start():
     from types import SimpleNamespace as Step
 

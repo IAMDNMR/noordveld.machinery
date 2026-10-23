@@ -21,7 +21,7 @@ from app.design_studio.knowledge.provider import (
     PackUnavailable,
     apply_pack,
 )
-from app.schemas.application_definition import ApplicationDefinition, RuleExecution, RuleSource
+from app.schemas.application_definition import ApplicationDefinition, RuleExecution, RuleSource, ScreenSection
 
 
 class ActionError(ValueError):
@@ -36,9 +36,46 @@ Text = Annotated[str, Field(min_length=1, max_length=300)]
 LongText = Annotated[str, Field(min_length=1, max_length=1000)]
 
 
+SECTION_NAMES = {
+    "stats": "the number cards",
+    "pipelines": "the where-work-is overview",
+    "steps": "the step list",
+    "exceptions": "the when-something-goes-wrong list",
+    "records": "the records a process produces",
+    "finished": "recently finished work",
+}
+# The colours the Screens stage offers by name, and the plain words people use for them in chat.
+THEME_COLOURS = {
+    "forest green": "#24583e", "ocean blue": "#245f8b", "indigo": "#5b4bb1",
+    "teal": "#0c6b70", "copper": "#9a4f28", "slate": "#37475b",
+}
+COLOUR_WORDS = {
+    "blue": "#245f8b", "green": "#24583e", "purple": "#5b4bb1", "violet": "#5b4bb1", "orange": "#b8570f",
+    "brown": "#9a4f28", "grey": "#37475b", "gray": "#37475b", "red": "#a33a32", "pink": "#a8427a",
+    "yellow": "#9a7b0a", "black": "#1f2933",
+}
+
+
+def colour_hex(value: Any) -> str | None:
+    """A #RRGGBB code for what the model sent as the colour (a code, a menu name or a plain word like "blue"), or None."""
+    text = str(value or "").strip().lower()
+    if re.fullmatch(r"#?[0-9a-f]{6}", text):
+        return "#" + text.lstrip("#")
+    if not re.fullmatch(r"[a-z ]{1,30}", text):
+        return None  # only plain colour words; anything with punctuation (CSS, markup) is not a colour name
+    names = {**COLOUR_WORDS, **THEME_COLOURS}
+    return names.get(text) or next((code for word, code in names.items() if word in text), None)
+
+
 class SetTheme(Strict):
     type: Literal["set_theme"]
     primary: Annotated[str, Field(pattern=r"^#[0-9a-fA-F]{6}$")]
+
+
+class SetScreenSections(Strict):
+    type: Literal["set_screen_sections"]
+    hide: list[ScreenSection] = Field(default_factory=list, max_length=6)
+    show: list[ScreenSection] = Field(default_factory=list, max_length=6)
 
 
 class SetBrief(Strict):
@@ -298,6 +335,7 @@ class SetStepData(Strict):
 Action = Annotated[
     SetIntakeContext
     | SetTheme
+    | SetScreenSections
     | SetBrief
     | AnswerQuestion
     | AddRequirement
@@ -368,17 +406,20 @@ def parse_actions(raw: Any) -> tuple[list[Any], list[dict]]:
             and isinstance(next(iter(item.values())), dict)
         ):
             item = {"type": next(iter(item)), **next(iter(item.values()))}
+        if isinstance(item, dict) and item.get("type") == "set_theme":
+            # The model sometimes names the field "color" or gives a word ("blue") instead of a code: the same request, spelled differently.
+            chosen = next((item[k] for k in ("primary", "color", "colour", "value", "hex") if item.get(k)), None)
+            code = colour_hex(chosen)
+            item = {"type": "set_theme", "primary": code} if code else item
         try:
             valid.append(ACTIONS.validate_python(item))
         except ValidationError as exc:
             kind = item.get("type") if isinstance(item, dict) else None
             first = exc.errors()[0]
-            rejected.append(
-                {
-                    "type": str(kind),
-                    "reason": f"{'.'.join(str(p) for p in first['loc'][1:]) or 'action'}: {first['msg']}",
-                }
-            )
+            reason = f"{'.'.join(str(p) for p in first['loc'][1:]) or 'action'}: {first['msg']}"
+            if kind == "set_theme":
+                reason = "that colour was not recognised; choose Forest green, Ocean blue, Indigo, Teal, Copper or Slate, or give a #RRGGBB code"
+            rejected.append({"type": str(kind), "reason": reason})
     return valid, rejected
 
 
@@ -1409,7 +1450,21 @@ def _set_theme(raw, action: SetTheme, changes, provider):
     changes.append({"area": "screens", "kind": "changed", "item_id": "theme", "summary": f"Application colour changed to {primary}"})
 
 
+def _set_screen_sections(raw, action: SetScreenSections, changes, provider):
+    current = list(raw["theme"].get("hidden_sections") or [])
+    wanted = [s for s in dict.fromkeys([*current, *action.hide]) if s not in action.show]
+    if wanted == current:
+        return
+    raw["theme"]["hidden_sections"] = wanted
+    hidden, shown = [s for s in wanted if s not in current], [s for s in current if s not in wanted]
+    parts = ([f"hidden {', '.join(SECTION_NAMES[s] for s in hidden)}"] if hidden else []) + (
+        [f"shown {', '.join(SECTION_NAMES[s] for s in shown)}"] if shown else []
+    )
+    changes.append({"area": "screens", "kind": "changed", "item_id": "theme", "summary": "Screens: " + "; ".join(parts)})
+
+
 HANDLERS: dict[str, Callable] = {
+    "set_screen_sections": _set_screen_sections,
     "set_theme": _set_theme,
     "set_intake_context": _set_intake_context,
     "set_brief": _set_brief,

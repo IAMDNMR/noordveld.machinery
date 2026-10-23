@@ -196,6 +196,8 @@ const areaOfEntity = entity => isDocument(entity) ? areaOfWorkflow(writers(entit
 const referenceData = () => application.entities.filter(e => !isDocument(e) && !parentOf(e))
 const firstStep = workflow => { const start = workflow.states.find(s => s.kind === 'start'); const edge = workflow.transitions.find(e => e.source === start?.id); return workflow.states.find(s => s.id === edge?.target) }
 const KIND = { form: 'Enter', action: 'Do', review: 'Check', approval: 'Approve', search: 'Look up', exception: 'Needs attention' }
+// Sections of the screens a person asked to hide in the Studio ("remove the steps"): presentation.hidden_sections.
+const hidden = section => (application.presentation?.hidden_sections || []).includes(section)
 const entityName = id => application.entities.find(e => e.id === id)?.name || application.entity_names?.[id] || 'a record you cannot open'
 
 /* ── sign in ─────────────────────────────────────────────────────────── */
@@ -356,7 +358,7 @@ async function home(body) {
   for (const [label, value, tone] of [['In progress', open.length, ''], [p.tasks, instances.filter(i => i.can_act).length, 'action'], ['Exceptions', open.filter(i => i.step.kind === 'exception').length, 'danger'], ['Completed', instances.filter(i => i.step.kind === 'end').length, 'done']]) {
     stats.append(append(el('article', null, { class: 'stat', role: 'listitem', 'data-tone': value ? tone : '' }), el('span', label), el('strong', String(value))))
   }
-  body.append(stats)
+  if (!hidden('stats')) body.append(stats)
   const grid = el('div', null, { class: 'home-grid' })
   const queue = append(el('section', null, { class: 'card' }), el('h2', p.tasks))
   const mine = instances.filter(i => i.can_act).slice(0, 6)
@@ -368,7 +370,7 @@ async function home(body) {
     if (areas().length > 1) flows.append(el('h3', area.name, { class: 'area-title' }))
     for (const workflow of area.workflows) flows.append(pipeline(workflow))
   }
-  append(grid, queue, flows)
+  append(grid, queue, hidden('pipelines') ? null : flows)
   body.append(grid)
   if (application.unsupported.length) body.append(gaps())
 }
@@ -438,21 +440,23 @@ async function workflowPage(body, workflow) {
   const stats = el('div', null, { class: 'stats', role: 'list' })
   for (const [label, value, tone] of [['Open', open.length, ''], ['Waiting for you', open.filter(i => i.can_act).length, 'action'], ['Needs attention', open.filter(i => i.step.kind === 'exception').length, 'danger'], ['Finished', mine.length - open.length, 'done']])
     stats.append(append(el('article', null, { class: 'stat', role: 'listitem', 'data-tone': value ? tone : '' }), el('span', label), el('strong', String(value))))
-  body.append(stats)
+  if (!hidden('stats')) body.append(stats)
   if (canStart(workflow)) body.append(await startPanel(workflow, first))
   const attention = open.filter(i => i.step.kind === 'exception')
   if (attention.length) { const card = append(el('section', null, { class: 'card attention' }), el('h2', 'Needs attention')); for (const instance of attention) card.append(instanceRow(instance)); body.append(card) }
-  const lanes = el('ol', null, { class: 'lanes', 'aria-label': 'Steps of ' + workflow.name })
-  for (const [index, step] of steps.entries()) lanes.append(await lane(step, index + 1, mine.filter(i => i.state === step.id)))
-  body.append(append(el('section', null, { class: 'workspace-steps' }), el('h2', 'Steps'), lanes))
-  if (exceptions.length) {
+  if (!hidden('steps')) {
+    const lanes = el('ol', null, { class: 'lanes', 'aria-label': 'Steps of ' + workflow.name })
+    for (const [index, step] of steps.entries()) lanes.append(await lane(step, index + 1, mine.filter(i => i.state === step.id)))
+    body.append(append(el('section', null, { class: 'workspace-steps' }), el('h2', 'Steps'), lanes))
+  }
+  if (exceptions.length && !hidden('exceptions')) {
     const card = append(el('section', null, { class: 'card' }), el('h2', 'When something goes wrong'))
     const list = el('ul', null, { class: 'exception-list' })
     for (const step of exceptions) list.append(append(el('li'), el('strong', step.label), el('span', `${roleName(step.role_id)} · ${mine.filter(i => i.state === step.id).length} waiting`, { class: 'muted' })))
     body.append(append(card, list))
   }
   const documents = [...new Set(stepsOf(workflow).flatMap(s => s.writes_entity_ids || []))].map(id => application.entities.find(e => e.id === id)).filter(e => e && isDocument(e) && !parentOf(e))
-  if (documents.length) {
+  if (documents.length && !hidden('records')) {
     const card = append(el('section', null, { class: 'card' }), el('h2', 'Records this process produces'))
     const chips = el('div', null, { class: 'chips' })
     for (const entity of documents) {
@@ -463,7 +467,7 @@ async function workflowPage(body, workflow) {
     body.append(append(card, chips))
   }
   const finished = mine.filter(i => i.step.kind === 'end').slice(-5).reverse()
-  if (finished.length) { const card = append(el('section', null, { class: 'card list' }), el('h2', 'Recently finished')); for (const instance of finished) card.append(instanceRow(instance)); body.append(card) }
+  if (finished.length && !hidden('finished')) { const card = append(el('section', null, { class: 'card list' }), el('h2', 'Recently finished')); for (const instance of finished) card.append(instanceRow(instance)); body.append(card) }
 }
 /* The first step, done right here: its record's form when the step writes one, otherwise a single start action. */
 async function startPanel(workflow, first) {
