@@ -90,8 +90,18 @@ it('isolates actual generated code and exposes source as text', async () => {
     revision: 4,
     checks: [],
   })
-  render(<GeneratedFrontendView definition={project()} refresh={vi.fn()} />)
+  render(
+    <GeneratedFrontendView
+      definition={project()}
+      refresh={vi.fn()}
+      fullScreenHref="/api/v1/design-studio/projects/p/live-demo"
+    />,
+  )
   const iframe = await screen.findByTitle('Untitled application generated application')
+  // "Full screen" is a link that opens the application in its own tab, rebuilt from the saved design at every load.
+  const full = screen.getByRole('link', { name: /Full screen/ })
+  expect(full.getAttribute('href')).toBe('/api/v1/design-studio/projects/p/live-demo')
+  expect(full.getAttribute('target')).toBe('_blank')
   expect(screen.queryByRole('textbox')).toBeNull()
   expect(screen.queryByText('Design your application')).toBeNull()
   expect(generateFrontend).not.toHaveBeenCalled()

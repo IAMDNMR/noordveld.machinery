@@ -34,7 +34,7 @@ function readState(data: unknown): PreviewState | null {
 export function ScreenWorkbench({
   definition,
   refresh,
-  onExpand,
+  fullScreenHref,
   canGenerate,
   recent,
   ask,
@@ -43,7 +43,7 @@ export function ScreenWorkbench({
 }: {
   definition: StudioState['definition']
   refresh?: () => Promise<unknown>
-  onExpand?: () => void
+  fullScreenHref?: string
   canGenerate: boolean
   /** Ids the assistant just changed. */
   recent: ReadonlySet<string>
@@ -171,7 +171,7 @@ export function ScreenWorkbench({
       <GeneratedFrontendView
         definition={definition as ApplicationDefinition}
         refresh={refresh}
-        onExpand={onExpand}
+        fullScreenHref={fullScreenHref}
         canGenerate={canGenerate}
         designRequest={designRequest}
         onDesignRequestHandled={onDesignRequestHandled}

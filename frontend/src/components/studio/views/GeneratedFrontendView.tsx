@@ -26,7 +26,7 @@ export function GeneratedFrontendView({
   definition,
   refresh,
   previewOnly = false,
-  onExpand,
+  fullScreenHref,
   canGenerate = true,
   designRequest,
   onDesignRequestHandled,
@@ -35,7 +35,8 @@ export function GeneratedFrontendView({
   definition: ApplicationDefinition
   refresh?: () => Promise<unknown>
   previewOnly?: boolean
-  onExpand?: () => void
+  /** Where "Full screen" opens the application, in its own tab. */
+  fullScreenHref?: string
   canGenerate?: boolean
   designRequest?: { id: number; projectId: string; brief: string } | null
   onDesignRequestHandled?: () => void
@@ -289,10 +290,15 @@ export function GeneratedFrontendView({
                   <Code2 size={14} /> {source ? 'Show application' : 'View source'}
                 </button>
               ) : null}
-              {onExpand ? (
-                <button type="button" className="sw-link-button" onClick={onExpand}>
+              {fullScreenHref ? (
+                <a
+                  className="sw-link-button"
+                  href={fullScreenHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Maximize2 size={14} /> Full screen
-                </button>
+                </a>
               ) : null}
             </div>
           </div>

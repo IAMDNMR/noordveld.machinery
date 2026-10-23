@@ -1,7 +1,6 @@
 import type { ViewProps } from './types'
 import { ScreenWorkbench } from './ScreenWorkbench'
-import { useState } from 'react'
-import { ApplicationPreviewDialog } from './ApplicationPreviewDialog'
+import { liveDemoUrl } from '../../../api/studio'
 import { ApplicationStructure } from './ApplicationStructure'
 import { ThemePicker } from './ThemePicker'
 
@@ -18,7 +17,6 @@ export function ScreensView({
   act,
   busy,
 }: ViewProps) {
-  const [expanded, setExpanded] = useState(false)
   const definition = studio.definition
   return (
     <div className="sw-screens">
@@ -27,20 +25,13 @@ export function ScreensView({
       <ScreenWorkbench
         definition={definition}
         refresh={refresh}
-        onExpand={() => setExpanded(true)}
+        fullScreenHref={liveDemoUrl(definition.id)}
         canGenerate={access?.can.edit ?? false}
         recent={recent}
         ask={ask}
         designRequest={designRequest}
         onDesignRequestHandled={onDesignRequestHandled}
       />
-      {expanded ? (
-        <ApplicationPreviewDialog
-          definition={studio.definition}
-          refresh={refresh}
-          onClose={() => setExpanded(false)}
-        />
-      ) : null}
     </div>
   )
 }
