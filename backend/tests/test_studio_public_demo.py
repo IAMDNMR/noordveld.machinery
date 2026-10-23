@@ -54,6 +54,9 @@ def test_each_visitor_gets_a_private_workspace_with_no_sign_in_and_cannot_reach_
         me = first.post("/api/v1/studio-session/demo")
         assert me.status_code == 200 and me.json()["id"].startswith("visitor-") and me.json()["role"] == "END_USER"
         assert first.post("/api/v1/studio-session/demo").json()["id"] == me.json()["id"], "the same browser keeps its workspace"
+        # The workspace is the only way back to a visitor's projects, so it lasts a year and is renewed at every visit (not 12 hours).
+        assert "Max-Age=31536000" in me.headers["set-cookie"]
+        assert "Max-Age=31536000" in first.get("/api/v1/studio-session/me").headers["set-cookie"]
         assert second.post("/api/v1/studio-session/demo").json()["id"] != me.json()["id"]
 
         body = blank_definition().model_dump(mode="json")

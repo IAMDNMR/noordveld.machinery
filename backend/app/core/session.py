@@ -24,10 +24,10 @@ def _unb64(text: str) -> bytes:
     return base64.urlsafe_b64decode(text + "=" * (-len(text) % 4))
 
 
-def sign(user_id: str, secret: str, now: float | None = None) -> str:
+def sign(user_id: str, secret: str, now: float | None = None, max_age: int = MAX_AGE) -> str:
     payload = _b64(
         json.dumps(
-            {"uid": user_id, "exp": int((now or time.time()) + MAX_AGE)}, separators=(",", ":")
+            {"uid": user_id, "exp": int((now or time.time()) + max_age)}, separators=(",", ":")
         ).encode()
     )
     mac = _b64(hmac.new(secret.encode(), payload.encode(), hashlib.sha256).digest())

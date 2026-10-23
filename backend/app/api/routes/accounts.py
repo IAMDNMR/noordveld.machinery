@@ -31,6 +31,24 @@ class SignIn(BaseModel):
     user_id: str
 
 
+WORKSPACE_MAX_AGE = 365 * 24 * 3600  # an anonymous workspace is the only way back to its projects, so it must outlast a day
+
+
+def _keep_workspace(response: Response, visitor_id: str) -> None:
+    """Remember this browser's anonymous workspace for a year (and again at every visit). The projects themselves are stored in the
+    database either way; this cookie is what shows them to their owner."""
+    settings = get_settings()
+    response.set_cookie(
+        "nv_studio_session",
+        sign(visitor_id, "studio:" + settings.session_secret, max_age=WORKSPACE_MAX_AGE),
+        max_age=WORKSPACE_MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=settings.session_cookie_secure,
+        path="/api/v1",
+    )
+
+
 def _me(user) -> dict:
     return {
         "id": user.id,
@@ -98,15 +116,7 @@ def studio_demo(
         settings = get_settings()
         existing = verify(nv_studio_session, "studio:" + settings.session_secret)
         visitor_id = existing if is_visitor(existing) else new_visitor_id()
-        response.set_cookie(
-            "nv_studio_session",
-            sign(visitor_id, "studio:" + settings.session_secret),
-            max_age=MAX_AGE,
-            httponly=True,
-            samesite="lax",
-            secure=settings.session_cookie_secure,
-            path="/api/v1",
-        )
+        _keep_workspace(response, visitor_id)
         return _me(visitor_user(visitor_id))
 
     user = cached()
@@ -136,7 +146,11 @@ def studio_demo(
 
 
 @router.get("/studio-session/me", dependencies=[Depends(require_studio_demo_context)])
-def studio_me(user: CurrentUser) -> dict:
+def studio_me(user: CurrentUser, response: Response) -> dict:
+    from app.design_studio.visitors import is_visitor
+
+    if is_visitor(user.id):
+        _keep_workspace(response, user.id)  # every visit renews it, so a workspace in use never expires
     return _me(user)
 
 
