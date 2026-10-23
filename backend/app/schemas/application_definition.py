@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator, ValidationIn
 
 from app.schemas.design_studio import ScreenSpec
 from app.schemas.generated_frontend import GeneratedFrontend
+from app.schemas.studio_task import StudioTask
 
 Identifier = str
 ID_PATTERN = r"^[a-z][a-z0-9_-]{1,79}$"
@@ -926,6 +927,7 @@ class ApplicationDefinition(Strict):
         default=None, exclude_if=lambda value: value is None
     )
     studio_flow: StudioFlow | None = None
+    assistant_context: StudioTask | None = Field(default=None, exclude_if=lambda value: value is None)
     revision: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")

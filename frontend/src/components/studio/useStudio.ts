@@ -14,9 +14,11 @@ import {
   getStudioState,
   studioAct,
   studioApply,
+  studioDismiss,
   studioRevert,
   studioResolve,
   studioTurn,
+  testRuntime,
   type AppliedChange,
   type StageKey,
   type StudioAccess,
@@ -191,7 +193,24 @@ export function useStudio(signedIn: boolean) {
           if (request === opening.current) setAccess(null)
         },
       ) // late access from another project must not shape this project
-      const stored = read(id).map((message) =>
+      const recovered: ChatMessage[] = (state.task?.history ?? []).map(
+        (message, index) =>
+          ({
+            id: `saved-${message.request_id}-${message.role}`,
+            role: message.role,
+            text: message.text,
+            at: index,
+            ...(message.role === 'user'
+              ? { via: 'text' as const }
+              : index === (state.task?.history.length ?? 0) - 1 && state.task?.last_turn
+                ? {
+                    turn: state.task.last_turn,
+                    proposal: state.task.pending_proposal ? ('pending' as const) : undefined,
+                  }
+                : {}),
+          }) as ChatMessage,
+      )
+      const stored = (recovered.length ? recovered : read(id)).map((message) =>
         message.role === 'assistant' &&
         message.proposal === 'pending' &&
         message.turn?.proposal?.base_sha256 !== state.base_sha256
@@ -201,14 +220,14 @@ export function useStudio(signedIn: boolean) {
       current.current = {
         projectId: id,
         revision: state.revision,
-        asked: null,
+        asked: state.task?.asked_question_id ?? null,
         messages: stored,
         hasState: true,
       }
       setProjectId(id)
       setStudio(state)
       setMessages(stored)
-      setAsked(null)
+      setAsked(state.task?.asked_question_id ?? null)
       setRecent(new Set())
     } catch (cause) {
       if (request !== opening.current) return
@@ -256,7 +275,7 @@ export function useStudio(signedIn: boolean) {
       adopt(result.state, result.turn.applied)
       setAsked(result.turn.asked_question_id)
       const undo =
-        result.turn.revision > result.turn.previous_revision
+        result.turn.applied.length > 0 && result.turn.revision > result.turn.previous_revision
           ? { from: result.turn.revision, to: result.turn.previous_revision, done: false }
           : undefined
       push(id, {
@@ -282,7 +301,7 @@ export function useStudio(signedIn: boolean) {
         role: 'assistant',
         at: Date.now(),
         notice: true,
-        text: 'The project changed while I was working, so I reloaded it. Please say that again.',
+        text: 'The project changed while I was working, so I reloaded its saved state. Your instruction remains in this conversation; inspect the result before retrying it.',
       })
     },
     [push, refresh],
@@ -341,6 +360,7 @@ export function useStudio(signedIn: boolean) {
           asked_question_id: current.current.asked,
           selected,
           input_mode: via,
+          request_id: userMessage.id,
         })
         return settle(id, result)
       } catch (cause) {
@@ -351,9 +371,9 @@ export function useStudio(signedIn: boolean) {
             role: 'assistant',
             at: Date.now(),
             notice: true,
-            text: `${failure(cause, 'I could not reach the design service. Nothing was changed.')} Your message is above; you can send it again.`,
+            text: `${failure(cause, 'I could not confirm the result from the design service.')} I will reload the saved project so you can inspect what completed before retrying.`,
           })
-          if (!current.current.hasState) await refresh() // a brand-new project still needs its (empty) state to be shown
+          await refresh()
         }
         return null
       } finally {
@@ -362,6 +382,35 @@ export function useStudio(signedIn: boolean) {
     },
     [busy, conflict, push, refresh, remember, settle],
   )
+
+  const runTests = useCallback(async () => {
+    const id = current.current.projectId
+    if (!id || busy !== 'idle') return
+    setBusy('applying')
+    try {
+      const result = await testRuntime(id)
+      push(id, {
+        id: uid(),
+        role: 'assistant',
+        at: Date.now(),
+        notice: true,
+        text: `${result.passed ? 'Passed' : 'Failed'}: ${result.ran} generated tests ran. Open Generate Application for the recorded test details.`,
+      })
+    } catch (cause) {
+      push(id, {
+        id: uid(),
+        role: 'assistant',
+        at: Date.now(),
+        notice: true,
+        text: failure(
+          cause,
+          'The generated tests could not finish. No successful run was confirmed.',
+        ),
+      })
+    }
+    await refresh()
+    setBusy('idle')
+  }, [busy, push, refresh])
 
   const continueStage = useCallback(
     async (stage: StageKey) => {
@@ -469,9 +518,20 @@ export function useStudio(signedIn: boolean) {
   )
 
   const dismissProposal = useCallback(
-    (messageId: string) => {
+    async (messageId: string) => {
       const id = current.current.projectId
-      if (!id) return
+      const message = current.current.messages.find((item) => item.id === messageId)
+      if (!id || busy !== 'idle' || message?.role !== 'assistant' || !message.turn?.proposal) return
+      setBusy('applying')
+      try {
+        adopt(await studioDismiss(id, current.current.revision, message.turn.proposal.id))
+      } catch (cause) {
+        setError(failure(cause, 'The proposal could not be dismissed.'))
+        await refresh()
+        return
+      } finally {
+        setBusy('idle')
+      }
       setMessages((list) =>
         remember(
           id,
@@ -483,7 +543,7 @@ export function useStudio(signedIn: boolean) {
         ),
       )
     },
-    [remember],
+    [adopt, busy, refresh, remember],
   )
 
   /** Undo restores the earlier content as a new revision; history is kept. */
@@ -643,6 +703,7 @@ export function useStudio(signedIn: boolean) {
     act,
     applyProposal,
     dismissProposal,
+    runTests,
     undo,
     restore,
     resolve,

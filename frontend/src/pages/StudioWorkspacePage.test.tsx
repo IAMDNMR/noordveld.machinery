@@ -24,6 +24,7 @@ vi.mock('../api/studio', async (importOriginal) => ({
   studioAct: vi.fn(),
   studioApply: vi.fn(),
   studioRevert: vi.fn(),
+  testRuntime: vi.fn(),
   getVoiceStatus: vi.fn(),
   transcribeAudio: vi.fn(),
   synthesizeSpeech: vi.fn(),
@@ -39,6 +40,7 @@ import {
   studioApply,
   studioRevert,
   studioTurn,
+  testRuntime,
 } from '../api/studio'
 import StudioWorkspacePage from './StudioWorkspacePage'
 
@@ -343,6 +345,7 @@ it('a typed request creates the project, shows the answer and its review, applie
       message: 'I want to build a transport management system',
       expected_revision: 1,
       input_mode: 'text',
+      request_id: expect.any(String),
     }),
   )
   expect(
@@ -366,6 +369,25 @@ it('a typed request creates the project, shows the answer and its review, applie
   const undo = await screen.findByRole('button', { name: /Undo/ })
   fireEvent.click(undo)
   await waitFor(() => expect(vi.mocked(studioRevert)).toHaveBeenCalledWith('app_test', 3, 2))
+  vi.mocked(getStudioState).mockResolvedValue(populated(4))
+  vi.mocked(studioTurn).mockResolvedValue({
+    turn: turn({ reply: 'I will run the generated tests.', client_action: 'test', revision: 4 }),
+    state: populated(4),
+  })
+  vi.mocked(testRuntime).mockResolvedValue({
+    passed: true,
+    ran: 7,
+    revision: 4,
+    seconds: 0.2,
+    cases: [],
+    output_tail: '',
+  })
+  fireEvent.change(await screen.findByLabelText('Message to the assistant'), {
+    target: { value: 'run generated tests' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+  await waitFor(() => expect(testRuntime).toHaveBeenCalledWith('app_test'))
+  expect(await screen.findByText(/Passed: 7 generated tests ran/)).toBeTruthy()
 })
 
 it('shows each stage from the saved specification: a process diagram, an entity diagram, roles', async () => {

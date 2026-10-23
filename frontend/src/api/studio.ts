@@ -87,6 +87,22 @@ export type CompileSummary = {
 export type ApprovalState = { state: 'none' | 'valid' | 'stale'; record: ApprovalRecord | null }
 
 export type StudioState = {
+  task?: {
+    history: { role: 'user' | 'assistant'; text: string; request_id: string }[]
+    selected: string | null
+    asked_question_id: string | null
+    original_request: string | null
+    pending_proposal: Proposal | null
+    pending_operation: 'frontend' | 'compile' | 'continue' | 'test' | null
+    last_turn?: Turn | null
+    status:
+      | 'working'
+      | 'awaiting_answer'
+      | 'awaiting_review'
+      | 'awaiting_execution'
+      | 'completed'
+      | 'blocked'
+  } | null
   intake?: IntakeState | null
   definition: StudioDefinition
   revision: number
@@ -197,7 +213,7 @@ export type Generation = {
   state: string
   message: string
   focus?: StageKey
-  client_action?: 'compile' | 'frontend' | 'continue'
+  client_action?: 'compile' | 'frontend' | 'continue' | 'test'
 }
 export type Turn = {
   mode: 'language_model' | 'local_rules' | 'direct'
@@ -213,7 +229,7 @@ export type Turn = {
   focus: StageKey | null
   focus_item: string | null
   generation: Generation | null
-  client_action: 'compile' | 'frontend' | 'continue' | null
+  client_action: 'compile' | 'frontend' | 'continue' | 'test' | null
   input_mode: 'text' | 'voice'
   /** What the saved change means: applied to the specification, not yet generated or tested, recorded but not executable. From the server, never the model. */
   notes?: string[]
@@ -274,6 +290,7 @@ export const studioTurn = (
     asked_question_id: string | null
     selected: string | null
     input_mode: 'text' | 'voice'
+    request_id?: string
   },
   signal?: AbortSignal,
 ) => apiPost<TurnResult>(`${root(id)}/turn`, body, signal)
@@ -301,6 +318,9 @@ export const studioRevert = (id: string, expected_revision: number, to_revision:
     expected_revision,
     to_revision,
   })
+
+export const studioDismiss = (id: string, expected_revision: number, proposal_id: string) =>
+  apiPost<StudioState>(`${root(id)}/dismiss`, { expected_revision, proposal_id })
 
 /** Settle every validation finding whose fix follows from the design itself. No language model; no policy is decided. */
 export const studioResolve = (id: string, expected_revision: number) =>

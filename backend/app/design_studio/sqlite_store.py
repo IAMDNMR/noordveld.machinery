@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
-from app.design_studio.projects import OPERATIONS, preserve_lifecycle
+from app.design_studio.projects import OPERATIONS, preserve_lifecycle, update_context
 from app.design_studio.store import DraftForbidden, DraftMissing, RevisionConflict, StorageCorrupt
 from app.schemas.application_definition import ApplicationDefinition
 from app.schemas.design_studio import DesignDraft, ScreenSpec
@@ -246,6 +246,11 @@ class SqliteStudioStore:
                 ).fetchone()
                 if stored is None:
                     raise StorageCorrupt("Current project revision is missing")
+                if operation == "assistant:context":
+                    updated = update_context(self._definition(stored), definition)
+                    db.execute("UPDATE project_revisions SET definition_json=? WHERE project_id=? AND revision=?", (updated.model_dump_json(), project_id, expected_revision))
+                    db.execute("COMMIT")
+                    return updated
                 definition = preserve_lifecycle(self._definition(stored), definition, operation)
                 updated = ApplicationDefinition.model_validate(
                     {**definition.model_dump(mode="json"), "revision": expected_revision + 1}

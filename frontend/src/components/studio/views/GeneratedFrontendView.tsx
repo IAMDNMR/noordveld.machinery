@@ -12,6 +12,7 @@ import './GeneratedFrontendView.css'
 
 const phaseLabels: Record<string, string> = {
   preparing: 'Preparing your application…',
+  editing: 'Updating the existing application…',
   art_direction: 'Designing the application…',
   planned: 'Planning pages around the process…',
   planning_repair: 'Completing the application plan…',

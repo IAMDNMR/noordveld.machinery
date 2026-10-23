@@ -29,15 +29,13 @@ export const nav: readonly NavItem[] = [
   { label: 'Contact', to: `mailto:${company.email}`, external: true },
 ]
 
-/** The top navigation bar: the site menu without Machines and Contact (both stay in the footer). */
 /** The one Agentic E-Commerce experience, signed in or not: the Agentic Shopping screen (it hands order, shipment and warranty questions to the commerce assistant). */
 export const AGENTIC_SHOPPING_ROUTE = '/agentic-shopping'
 
-export const primaryNav: readonly NavItem[] = nav
-  .filter((item) => item.label !== 'Machines' && item.label !== 'Contact')
-  .map((item) =>
-    item.to === AGENTIC_ROUTE ? { label: item.label, to: AGENTIC_SHOPPING_ROUTE } : item,
-  )
+/** Navbar opens the video introduction; its calls to action lead to Agentic Shopping. */
+export const primaryNav: readonly NavItem[] = nav.filter(
+  (item) => item.label !== 'Machines' && item.label !== 'Contact',
+)
 
 /** What each signed-in role works with. Hiding a link is presentation only: the backend checks every request. */
 export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly NavItem[] =>
@@ -46,8 +44,8 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
         { label: 'Aftersales', to: '/parts-services' },
         { label: 'Parts Portal', to: '/parts-store' },
         { label: 'Parts Intelligence', to: '/parts-intelligence' },
-        // one conversational entry: discovery, recommendation, cart hand-off, orders, shipments and warranty (Agentic Shopping stays reachable from its answers)
-        { label: 'Agentic E-Commerce', to: AGENTIC_SHOPPING_ROUTE },
+        // The introduction includes the films and opens Agentic Shopping from its examples.
+        { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true },
         { label: 'My Orders', to: '/orders' },
       ]
     : role === 'ORDER_PROCESSOR'

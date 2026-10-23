@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from neo4j import READ_ACCESS
-from app.design_studio.projects import OPERATIONS, preserve_lifecycle
+from app.design_studio.projects import OPERATIONS, preserve_lifecycle, update_context
 from app.design_studio.store import DraftForbidden, DraftMissing, RevisionConflict, StorageCorrupt
 from app.schemas.application_definition import ApplicationDefinition
 from app.domain_knowledge.models import DomainPack
@@ -138,6 +138,11 @@ class Neo4jProjectStore:
         result = ApplicationDefinition.model_validate(stored["definition"])
         if result.id != project_id or result.revision != revision:
             raise StorageCorrupt("Revision metadata mismatch")
+        head = self.docs.get(tx, "project", project_id)
+        if head and head["revision"] == revision and head.get("assistant_context"):
+            from app.schemas.studio_task import StudioTask
+
+            result = result.model_copy(update={"assistant_context": StudioTask.model_validate(head["assistant_context"])})
         return result
 
     def list(self, owner):
@@ -180,7 +185,8 @@ class Neo4jProjectStore:
             tx,
             "project",
             definition.id,
-            {"id": definition.id, "owner": owner, "revision": definition.revision},
+            {"id": definition.id, "owner": owner, "revision": definition.revision,
+             "assistant_context": definition.assistant_context.model_dump(mode="json") if definition.assistant_context else None},
         )
         tx.run(
             "MATCH (p:DSDocument {key:$p}),(r:DSDocument {key:$r}) MERGE (p)-[:DS_HAS_REVISION]->(r)",
@@ -203,6 +209,10 @@ class Neo4jProjectStore:
             head = self._head(tx, owner, project_id)
             if head["revision"] != expected_revision or definition.id != project_id:
                 raise RevisionConflict()
+            if operation == "assistant:context":
+                updated = update_context(self._revision(tx, project_id, expected_revision), definition)
+                self.docs.put(tx, "project", project_id, {**head, "assistant_context": updated.assistant_context.model_dump(mode="json")})
+                return updated
             candidate = preserve_lifecycle(
                 self._revision(tx, project_id, expected_revision), definition, operation
             )

@@ -32,6 +32,7 @@ def digest(definition: ApplicationDefinition, scope: str) -> str:
         )
     raw.pop("project_lifecycle", None)
     raw.pop("studio_flow", None)
+    raw.pop("assistant_context", None)
     raw.pop("approvals")
     raw.pop("revision")
     return _digest(raw)

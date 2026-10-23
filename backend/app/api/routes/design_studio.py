@@ -649,6 +649,7 @@ def create_project(
             update={
                 "approvals": [],
                 "studio_flow": None,
+                "assistant_context": None,
                 "project_lifecycle": None,
                 "generated_frontend": None,
                 "frontend_required": True,
@@ -708,6 +709,7 @@ def update_project(
         update={
             "approvals": current.approvals,
             "studio_flow": current.studio_flow,
+            "assistant_context": current.assistant_context,
             "project_lifecycle": current.project_lifecycle,
             "generated_frontend": current.generated_frontend,
             "frontend_required": current.frontend_required,

@@ -2,7 +2,7 @@
 
 import logging
 import time
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from threading import BoundedSemaphore, Lock
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -16,6 +16,7 @@ from app.design_studio.frontend_generation import (
     preview_document,
 )
 from app.llm.base import LLMInvalidResponse, LLMUnavailable
+from app.design_studio.frontend_edit import edit_frontend
 
 log = logging.getLogger(__name__)
 router = APIRouter()
@@ -97,10 +98,11 @@ def generate(
                     str(event)[:300],
                 )
 
-            artifact = generate_frontend(
+            operation = edit_frontend if current.generated_frontend else generate_frontend
+            artifact = operation(
                 current,
                 llm,
-                body.design_brief,
+                body.design_brief or ("Synchronize the existing application with the latest saved business contract. Preserve unrelated layouts, source files and customizations." if current.generated_frontend else ""),
                 progress=update_progress,
             )
         except FrontendGenerationError as exc:
@@ -131,9 +133,29 @@ def generate(
             "generate:frontend",
             actor.id,
         )
+        from app.design_studio.task_context import operation_result
+
+        completed = operation_result(saved, "frontend", "Your interface changes passed the build and browser checks and were saved. The preview now uses this version.")
+        if completed is not None:
+            try:
+                saved = _store_call(projects.update, user.id, project_id, saved.revision, completed, "assistant:context", actor.id)
+            except HTTPException:
+                log.warning("Interface saved for %s, but a concurrent edit prevented updating its task receipt", project_id)
         outcome = {"status": "saved", "revision": saved.revision}
         return {"definition": saved, "checks": artifact.checks}
     finally:
+        if outcome["status"] == "failed" and current.assistant_context:
+            from app.design_studio.task_context import operation_result
+
+            try:
+                latest = _store_call(projects.current, user.id, project_id)
+                # A newer instruction owns its own outcome; never overwrite it.
+                if latest.assistant_context and latest.assistant_context.history == current.assistant_context.history:
+                    blocked = operation_result(latest, "frontend", outcome["message"], failed=True)
+                    if blocked is not None:
+                        _store_call(projects.update, user.id, project_id, latest.revision, blocked, "assistant:context", actor.id)
+            except HTTPException:
+                log.warning("Could not retain the failed interface task outcome for %s", project_id)
         with _progress_lock:
             _progress.pop(project_id, None)
             if len(_outcomes) >= 128:

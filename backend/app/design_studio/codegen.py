@@ -151,7 +151,7 @@ def archive_files(
     """Every file of the export, by path. Paths are fixed or built from validated IDs, so no entry can escape the archive."""
     definition = ApplicationDefinition.model_validate(source.model_dump(mode="json"))
     payload = json.dumps(
-        definition.model_dump(mode="json"),
+        definition.model_dump(mode="json", exclude={"assistant_context"}),
         sort_keys=True,
         ensure_ascii=False,
         separators=(",", ":"),

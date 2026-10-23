@@ -249,14 +249,6 @@ export default function StudioWorkspacePage() {
     async (text: string, via: 'text' | 'voice') => {
       const clean = text.trim()
       if (!clean) return
-      if (
-        studio?.flow &&
-        /^(?:ok(?:ay)?[, ]*)?(?:continue|next|go ahead|proceed)[.! ]*$/i.test(clean)
-      ) {
-        api.echo(clean, via)
-        await advance()
-        return
-      }
       const waiting = api.pending.length
       const intent = localIntent(clean, waiting)
       if (intent === 'stop') {
@@ -294,6 +286,7 @@ export default function StudioWorkspacePage() {
       if (turn.focus) setStage(turn.focus)
       if (turn.focus_item) setSelection(turn.focus_item)
       if (turn.client_action === 'compile') setAutorun((value) => value + 1)
+      if (turn.client_action === 'test') await api.runTests()
       // The assistant understood "go ahead" (in any wording or language) as moving on: press Continue for the person.
       if (turn.client_action === 'continue') await advance()
       if (turn.client_action === 'frontend' && api.getProjectId())
@@ -304,7 +297,7 @@ export default function StudioWorkspacePage() {
         })
       if (via === 'voice' || voice.handsFree) void speak(turn.reply)
     },
-    [api, currentRevision, selection, setStage, speak, voice, studio, advance, stage],
+    [api, currentRevision, selection, setStage, speak, voice, advance, stage],
   )
   submitRef.current = (text, via) => {
     void submit(text, via)

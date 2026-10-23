@@ -32,8 +32,18 @@ function deferred<T>() {
 
 it('keeps the newer project when an earlier open request finishes late', async () => {
   const first = deferred<StudioState>()
+  const recovered = state('second')
+  recovered.task = {
+    history: [{ role: 'user', text: 'Keep the supplier details', request_id: 'saved-request' }],
+    selected: 'supplier',
+    asked_question_id: 'q_approver',
+    original_request: 'Keep the supplier details',
+    pending_proposal: null,
+    pending_operation: null,
+    status: 'awaiting_answer',
+  }
   vi.mocked(getStudioState).mockImplementation((id) =>
-    id === 'first' ? first.promise : Promise.resolve(state(id)),
+    id === 'first' ? first.promise : Promise.resolve(recovered),
   )
   const { result } = renderHook(() => useStudio(false))
   let opening!: Promise<void>
@@ -49,4 +59,6 @@ it('keeps the newer project when an earlier open request finishes late', async (
   })
   expect(result.current.projectId).toBe('second')
   expect(result.current.studio?.definition.id).toBe('second')
+  expect(result.current.messages[0].text).toBe('Keep the supplier details')
+  expect(result.current.studio?.task?.asked_question_id).toBe('q_approver')
 })

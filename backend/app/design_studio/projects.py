@@ -44,6 +44,7 @@ OPERATIONS = frozenset(
         "generate:frontend",
         "select:template",
         "assistant:apply",
+        "assistant:context",
         "assistant:revert",
         "studio:resolve",
     }
@@ -54,9 +55,25 @@ def preserve_lifecycle(
     current: ApplicationDefinition, candidate: ApplicationDefinition, operation: str
 ) -> ApplicationDefinition:
     """Design edits and revision restores cannot implicitly archive or untrash a project."""
-    if operation.startswith("project:"):
-        return candidate
-    return candidate.model_copy(update={"project_lifecycle": current.project_lifecycle})
+    updates = {}
+    if not operation.startswith("project:"):
+        updates["project_lifecycle"] = current.project_lifecycle
+    if operation != "assistant:context":
+        updates["assistant_context"] = current.assistant_context
+    return candidate.model_copy(update=updates)
+
+
+def update_context(current: ApplicationDefinition, candidate: ApplicationDefinition) -> ApplicationDefinition:
+    """Private mutable metadata has its own CAS counter, never a new app revision.
+
+    Only this server operation writes it. Application content and its audit record
+    remain unchanged, so a chat message cannot invalidate a build or test run.
+    """
+    previous = current.assistant_context.version if current.assistant_context else 0
+    context = candidate.assistant_context
+    if context is None or context.version != previous:
+        raise RevisionConflict()
+    return current.model_copy(deep=True, update={"assistant_context": context.model_copy(deep=True, update={"version": previous + 1})})
 
 
 class ProjectStore(Protocol):
@@ -158,6 +175,9 @@ class MemoryProjectStore:
             versions = self._versions(owner, project_id)
             if definition.id != project_id or expected_revision != versions[-1].revision:
                 raise RevisionConflict()
+            if operation == "assistant:context":
+                versions[-1] = update_context(versions[-1], definition)
+                return versions[-1].model_copy(deep=True)
             definition = preserve_lifecycle(versions[-1], definition, operation)
             updated = definition.model_copy(deep=True, update={"revision": expected_revision + 1})
             versions.append(updated)

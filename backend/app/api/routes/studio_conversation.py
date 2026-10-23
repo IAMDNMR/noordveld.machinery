@@ -12,6 +12,7 @@ Included into the Design Studio router (so identity, organization and permission
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 from typing import Annotated, Literal
 
@@ -32,12 +33,13 @@ from app.api.routes.design_studio import (
     _store_call,
 )
 from app.assistant import studio_agent
+from app.assistant import studio_task_planner
 from app.assistant.contracts import ProviderDisabled, SpeechProvider
 from app.assistant.providers import get_speech, get_studio_llm, studio_assistant_status
 from app.assistant.speech_deepgram import MAX_AUDIO_BYTES, SpeechUnavailable
 from app.assistant.studio_actions import (
-    DECISION_ACTIONS,
-    REVIEW_ACTIONS,
+    DECISION_ACTIONS as ACTION_DECISION_ACTIONS,
+    REVIEW_ACTIONS as ACTION_REVIEW_ACTIONS,
     apply_actions,
     parse_actions,
 )
@@ -55,6 +57,11 @@ from app.schemas.application_definition import ApplicationDefinition, StudioFlow
 
 router = APIRouter(route_class=AuditedRoute)
 MAX_PROPOSAL_ACTIONS = 25
+# Deferring changes an approval blocker into a warning, so it needs the same
+# review and decision authority as answering the policy.
+DECISION_ACTIONS = ACTION_DECISION_ACTIONS | {"defer_decision"}
+REVIEW_ACTIONS = ACTION_REVIEW_ACTIONS | {"defer_decision"}
+log = logging.getLogger(__name__)
 
 
 # ── voice ──────────────────────────────────────────────────────────────
@@ -195,6 +202,10 @@ def state_payload(
 
     return {
         "intake": discovery_context(knowledge, definition),
+        "task": {
+            **definition.assistant_context.model_dump(mode="json", exclude={"receipts"}),
+            "last_turn": next((r.turn for r in reversed(definition.assistant_context.receipts) if r.status == "completed"), None),
+        } if definition.assistant_context else None,
         "definition": definition.model_dump(mode="json"),
         "revision": definition.revision,
         "base_sha256": approval.digest(definition, "design"),
@@ -274,6 +285,7 @@ class TurnRequest(BaseModel):
     asked_question_id: str | None = Field(default=None, max_length=80)
     selected: str | None = Field(default=None, max_length=120)
     input_mode: Literal["text", "voice"] = "text"
+    request_id: str | None = Field(default=None, min_length=8, max_length=80, pattern=r"^[a-zA-Z0-9_-]+$")
 
 
 class ApplyRequest(BaseModel):
@@ -282,6 +294,12 @@ class ApplyRequest(BaseModel):
     base_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     candidate_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     actions: list[dict] = Field(min_length=1, max_length=MAX_PROPOSAL_ACTIONS)
+
+
+class DismissRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    expected_revision: int = Field(ge=1)
+    proposal_id: str = Field(min_length=1, max_length=100)
 
 
 class RevertRequest(BaseModel):
@@ -621,7 +639,11 @@ def _execute(
         def words(text):
             return " ".join(re.findall(r"[a-z0-9]+", text.lower()))
 
-        evidence = [words(request_text), words(current.business.brief.goal)]
+        evidence = [
+            words(request_text), words(current.business.brief.goal),
+            *(words(d.answer) for d in current.business.decisions if d.status == "decided"),
+            *(words(r.statement) for r in current.business.requirements if r.status == "agreed"),
+        ]
         retained = []
         for action in plan.actions:
             if action.type == "add_rule":
@@ -656,6 +678,9 @@ def _execute(
                     "Review the relevant stage before making this change.",
                     {"actions": [action.type for action in refused]},
                 )
+        else:
+            for reviewed_stage in guided.reviewed(view):
+                allowed |= guided.ALLOWED[reviewed_stage]
         if key == "knowledge" and plan.knowledge and plan.knowledge.get("generated_blueprint"):
             allowed |= {  # requirements belong to the reviewed brief, not to the foundation
                 "adopt_pack",
@@ -668,15 +693,17 @@ def _execute(
                 "link_requirement",
                 "insert_step",
             }
+        plan.rejected.extend(
+            {"type": a.type, "reason": "Review the relevant stage before making this change."}
+            for a in plan.actions if a.type not in allowed
+        )
         plan.actions = [a for a in plan.actions if a.type in allowed]
-        plan.focus = key
-        plan.focus_item = None
-        plan.questions = []
-        plan.asking = None
+        plan.focus = plan.focus or key
         if key != "export":
             # A guided stage never generates the application or rebuilds the interface from a chat turn; moving on to the next stage
             # is the one thing the person may ask for in words ("go ahead").
-            plan.command = "continue" if plan.command == "continue" else None
+            if plan.command not in ("continue", "design_frontend", "test"):
+                plan.command = None
     validation_repair = is_guided and guided.active(view) == "checks"
     # Validation revisits already reviewed content. Every repair is a proposal;
     # merely asking for fixes must not rewrite the design and invalidate approvals.
@@ -708,6 +735,8 @@ def _execute(
             applied += context_changes
     rejected += more_rejected
     candidate = _with_questions(candidate, plan.questions)
+    if plan.mode == "direct" and plan.command and not plan.actions and not plan.questions and view.studio_flow == current.studio_flow:
+        candidate = current  # running a tool must not save incidental discovery metadata
     if applied or plan.questions:
         candidate = _refresh(candidate, knowledge)
     if (
@@ -757,15 +786,20 @@ def _execute(
 
     generation = None
     focus, client_action = plan.focus, None
+    if plan.command == "test" and not plan.actions and proposal is None:
+        focus, client_action = "export", "test"
+        generation = {"state": "test_requested", "message": plan.reply, "focus": "export", "client_action": "test"}
     if plan.command == "design_frontend" and not plan.actions and proposal is None:
         available = not saved.studio_flow or guided.active(saved) == "screen" or "screen" in guided.reviewed(saved)
         if available:
             focus, client_action = "screen", "frontend"
-            generation = {"state": "design_requested", "message": "I'll rebuild the application's interface from your instruction and check it before saving. The current saved version stays available until the replacement passes.", "focus": "screen", "client_action": "frontend"}
+            generation = {"state": "design_requested", "message": "I'll apply your interface changes and check them before saving. The current saved version stays available until the changes pass.", "focus": "screen", "client_action": "frontend"}
     if plan.command == "continue" and not plan.actions and proposal is None and saved.studio_flow:
         stage_now = guided.active(saved)
         if stage_now != "export" and guided.ready(saved, stage_now):
             client_action = "continue"  # the page presses Continue, so the next stage is drafted with its usual progress display
+        else:
+            plan.reply = "This stage is not ready to continue. Complete its outstanding checks first."
     if plan.command == "generate":
         after, generation = _generation(saved, project_id, user, actor, projects, knowledge, domain)
         if after is not saved:
@@ -836,10 +870,9 @@ def _execute(
         parts.append(questions[0]["text"])
     said = ""
     if is_guided:
-        asking = None
         key = guided.active(saved)
         label = dict(stage_model.STAGES)[key]
-        if key != "export" and guided.ready(saved, key):
+        if key != "export" and guided.ready(saved, key) and not proposal and not generation:
             # A message typed in the chat gets the assistant's own answer. The fixed sentence is for the automatic drafting of a stage,
             # which has no person's question to answer.
             said = plan.reply.strip() if request_text.strip() and not plan.degraded else ""
@@ -887,7 +920,7 @@ def _execute(
             parts = [
                 "No matching reference domain was found, and the language model could not prepare a complete proposed foundation. Try preparing this stage again; you do not need to supply the domain knowledge."
             ]
-        elif key != "export":
+        elif key != "export" and not proposal and not generation:
             parts = [
                 f"The {label.lower()} draft is not complete yet. "
                 + (" ".join(r["reason"] for r in rejected[:2]) if rejected else plan.reply)
@@ -914,6 +947,8 @@ def _execute(
                 f"and it is better to settle {'them' if many else 'it'} now than at the end. First: {open_decisions[0].question} "
                 "Answer here in your own words and I will record it."
             )
+        if key != "export" and open_decisions:
+            asking = open_decisions[0].id
     reply = " ".join(part.strip() for part in parts if part and part.strip()) or "Done."
     return {
         "turn": {
@@ -943,6 +978,87 @@ def _execute(
 def studio_turn(
     project_id: str,
     body: TurnRequest,
+    request: Request,
+    user: ProjectUser,
+    actor: CurrentUser,
+    projects: Projects,
+    knowledge: Knowledge,
+    domain: DomainPacks,
+    directory: Annotated[OrgDirectory, Depends(get_org_directory)],
+):
+    """New clients supply a request id; legacy callers retain their revision contract."""
+    from app.design_studio.task_context import begin, finish, fingerprint
+
+    current = _store_call(projects.current, user.id, project_id)
+    context = current.assistant_context
+    receipt = next((r for r in context.receipts if r.request_id == body.request_id), None) if context and body.request_id else None
+    if receipt:
+        if receipt.fingerprint != fingerprint(body):
+            raise _error(409, "request_id_reused", "This request identifier belongs to a different instruction.")
+        if receipt.status == "completed":
+            turn = {**receipt.turn, "revision": current.revision, "client_action": None}
+            if turn.get("proposal") and turn["proposal"]["base_sha256"] != approval.digest(current, "design"):
+                turn["proposal"] = None
+            return {"turn": turn, "state": state_payload(current, knowledge)}
+        raise _error(409, "request_incomplete", "This request is still running or was interrupted. Refresh the project and inspect its saved changes before retrying with a new request.")
+    _current_at(projects, user.id, project_id, body.expected_revision)
+    original = body
+    if body.request_id:
+        current = _store_call(projects.update, user.id, project_id, current.revision, begin(current, body), "assistant:context", actor.id)
+        history = context.history if context else []
+        body = body.model_copy(update={
+            "expected_revision": current.revision,
+            "history": [Spoken(role=h.role, text=h.text[:1000]) for h in history[-12:]] or body.history,
+            "asked_question_id": body.asked_question_id or (context.asked_question_id if context else None),
+            "selected": body.selected or (context.selected if context else None),
+        })
+    try:
+        text = body.message.lower().strip(" .!?")
+        pending = context.pending_proposal if context else None
+        if pending and pending["base_sha256"] != approval.digest(current, "design"):
+            pending = None
+        if pending and re.fullmatch(r"(?:ok(?:ay)?[, ]*)?(?:apply|apply it|accept|go ahead|proceed|continue|yes)", text):
+            applied = studio_apply(project_id, ApplyRequest(expected_revision=current.revision, base_sha256=pending["base_sha256"], candidate_sha256=pending["candidate_sha256"], actions=pending["actions"]), request, user, actor, projects, knowledge, directory)
+            result = {"state": applied["state"], "turn": {
+                "mode": "direct", "degraded": None, "reply": "Applied the reviewed changes. The updated project is ready to inspect.",
+                "applied": applied["changes"], "previous_revision": current.revision, "revision": applied["state"]["revision"],
+                "approvals_made_stale": applied["approvals_made_stale"], "proposal": None, "rejected": [],
+                "asked_question_id": applied["state"].get("task", {}).get("asked_question_id"), "focus": None, "focus_item": None, "generation": None,
+                "client_action": None, "input_mode": body.input_mode, "notes": applied["notes"], "knowledge": None,
+            }}
+        else:
+            result = _plan_turn(project_id, body, user, actor, projects, knowledge, domain)
+            if body.request_id and result["turn"].get("client_action") == "continue":
+                live = _store_call(projects.current, user.id, project_id)
+                result = continue_stage(project_id, ContinueRequest(expected_revision=live.revision, stage=guided.active(live)), user, actor, projects, knowledge, domain)
+                if result["turn"]["client_action"] == "continue":
+                    result["turn"]["client_action"] = None
+        if body.request_id:
+            latest = _store_call(projects.current, user.id, project_id)
+            # Never attach a successful receipt to someone else's concurrent edit.
+            if latest.revision != result["state"]["revision"]:
+                raise _error(409, "task_changed", "The project changed during this task. Refresh to inspect the saved changes.")
+            saved = _store_call(projects.update, user.id, project_id, latest.revision, finish(latest, original, result["turn"]), "assistant:context", actor.id)
+            result["turn"]["revision"] = saved.revision
+            result["turn"]["previous_revision"] = original.expected_revision
+            result["state"] = state_payload(saved, knowledge)
+        return result
+    except Exception:
+        if body.request_id:
+            try:
+                latest = _store_call(projects.current, user.id, project_id)
+                task = latest.assistant_context.model_copy(deep=True)
+                next(r for r in task.receipts if r.request_id == body.request_id).status = "failed"
+                task.status = "blocked"
+                _store_call(projects.update, user.id, project_id, latest.revision, latest.model_copy(update={"assistant_context": task}), "assistant:context", actor.id)
+            except HTTPException:
+                log.warning("Concurrent change prevented retaining failed task receipt for %s", project_id)
+        raise
+
+
+def _plan_turn(
+    project_id: str,
+    body: TurnRequest,
     user: ProjectUser,
     actor: CurrentUser,
     projects: Projects,
@@ -959,19 +1075,8 @@ def studio_turn(
             raise _error(
                 409, "stage_locked", "Review the current stage before starting the next one."
             )
-        index = view.studio_flow.reviewed.index(body.stage)
-        view = view.model_copy(
-            update={
-                "studio_flow": StudioFlow(
-                    reviewed=view.studio_flow.reviewed[:index],
-                    reviewed_digests={
-                        k: v
-                        for k, v in view.studio_flow.reviewed_digests.items()
-                        if k in view.studio_flow.reviewed[:index]
-                    },
-                )
-            }
-        )
+        # Viewing a reviewed stage does not revoke its review. Content digests reopen
+        # only stages actually changed by the action engine.
     analysis = analyze(view, knowledge, "design")
     stages = stage_model.compute(
         view, analysis, identify_domains(view.business.brief.goal, knowledge)
@@ -997,7 +1102,7 @@ def studio_turn(
             reply="I will continue with the shared process draft. Skipped preferences remain unspecified.",
         )
     else:
-        plan = studio_agent.run(
+        plan = studio_task_planner.run(
             get_studio_llm(),
             body.message,
             [h.model_dump() for h in body.history],
@@ -1008,7 +1113,10 @@ def studio_turn(
             knowledge,
             body.selected,
         )
-    if not view.studio_flow:
+    control = plan.mode == "direct" and not plan.actions and (plan.command or plan.focus)
+    if control:
+        pass  # a preview/test/continuation request is never a new application's goal
+    elif not view.studio_flow:
         plan = studio_agent.ground_first_request(plan, view, body.message)
     elif guided.active(view) == "brief" and not current.business.brief.goal:
         from app.assistant.studio_actions import SetBrief, AddRequirement
@@ -1301,6 +1409,11 @@ def studio_apply(
         "assistant:apply",
         actor.id,
     )
+    from app.design_studio.task_context import resolve_proposal
+
+    resolved = resolve_proposal(saved)
+    if resolved is not None:
+        saved = _store_call(projects.update, user.id, project_id, saved.revision, resolved, "assistant:context", actor.id)
     return {
         "changes": changes,
         "previous_revision": current.revision,
@@ -1308,6 +1421,19 @@ def studio_apply(
         "notes": effect_notes(current, saved),
         "state": state_payload(saved, knowledge),
     }
+
+
+@router.post("/projects/{project_id}/studio/dismiss")
+def studio_dismiss(project_id: str, body: DismissRequest, user: ProjectUser, actor: CurrentUser, projects: Projects, knowledge: Knowledge):
+    from app.design_studio.task_context import resolve_proposal
+
+    current = _current_at(projects, user.id, project_id, body.expected_revision)
+    pending = current.assistant_context.pending_proposal if current.assistant_context else None
+    if pending and pending["id"] != body.proposal_id:
+        raise _error(409, "proposal_changed", "A different proposal is now waiting for review.")
+    resolved = resolve_proposal(current)
+    saved = _store_call(projects.update, user.id, project_id, current.revision, resolved, "assistant:context", actor.id) if resolved else current
+    return state_payload(saved, knowledge)
 
 
 @router.post("/projects/{project_id}/studio/revert")
@@ -1402,6 +1528,18 @@ def runtime_status(project_id: str, user: ProjectUser, projects: Projects):
     return manager.status(project_id, _store_call(projects.current, user.id, project_id).revision)
 
 
+def _test_task_outcome(project_id, user, actor, projects, message, failed=False):
+    from app.design_studio.task_context import operation_result
+
+    try:
+        current = _store_call(projects.current, user.id, project_id)
+        candidate = operation_result(current, "test", message, failed=failed)
+        if candidate is not None:
+            _store_call(projects.update, user.id, project_id, current.revision, candidate, "assistant:context", actor.id)
+    except HTTPException:
+        log.warning("Could not retain generated test task outcome for %s", project_id)
+
+
 @router.post("/projects/{project_id}/runtime/test")
 async def runtime_test(
     project_id: str,
@@ -1415,9 +1553,13 @@ async def runtime_test(
     """Run the generated application's own independent tests (a separate process; nothing of Design Studio is imported)."""
     from app.design_studio.runtime_launcher import LaunchError, manager
 
-    definition, files = await run_in_threadpool(
-        _generated_files, project_id, user, projects, knowledge, domain
-    )
+    try:
+        definition, files = await run_in_threadpool(
+            _generated_files, project_id, user, projects, knowledge, domain
+        )
+    except HTTPException:
+        _test_task_outcome(project_id, user, actor, projects, "Generated tests could not start. Resolve the reported generation prerequisites before retrying.", failed=True)
+        raise
     release = await run_in_threadpool(
         retain_package, releases, user.id, project_id, definition.revision, actor.id, files
     )
@@ -1430,8 +1572,10 @@ async def runtime_test(
             **await run_in_threadpool(manager.test, project_id, definition.revision, files),
         }
         await run_in_threadpool(releases.finish_test, user.id, project_id, run, result)
+        _test_task_outcome(project_id, user, actor, projects, f"Generated tests {'passed' if result['passed'] else 'failed'}: {result['ran']} tests executed.", failed=not result["passed"])
         return result
     except LaunchError as exc:
+        _test_task_outcome(project_id, user, actor, projects, "The generated test worker could not finish. Your application is still saved; inspect the worker error before retrying.", failed=True)
         await run_in_threadpool(
             releases.finish_test,
             user.id,
@@ -1441,6 +1585,7 @@ async def runtime_test(
         )
         raise _error(502, "runtime_test_failed", str(exc)) from None
     except Exception:
+        _test_task_outcome(project_id, user, actor, projects, "The generated test worker failed unexpectedly. No successful test run was recorded.", failed=True)
         await run_in_threadpool(
             releases.finish_test,
             user.id,

@@ -196,6 +196,9 @@ describe('roles', () => {
       ]),
     )
     expect(document.querySelector('.nav__bar .nav__role')?.textContent).toBe('End User')
+    expect(document.querySelector('.nav__links a[href="/agentic-commerce/"]')?.textContent).toBe(
+      'Agentic E-Commerce',
+    )
   })
 
   it('shows the Order Processor navigation', async () => {
@@ -220,6 +223,7 @@ describe('roles', () => {
       '/sign-in?next=%2Forders',
     )
     expect(navLabels()).toContain('Agentic E-Commerce') // the public navigation
+    expect(document.querySelector('.nav__links a[href="/agentic-commerce/"]')).toBeTruthy()
   })
 
   it('lists the End User’s own orders without customer or queue columns', async () => {
