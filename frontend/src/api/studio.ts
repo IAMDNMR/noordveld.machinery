@@ -109,6 +109,7 @@ export type StudioState = {
       id: string
       pack_id: string
       pack_version: string
+      workflow_id: string
       name: string
       family_id?: string | null
       variant?: string

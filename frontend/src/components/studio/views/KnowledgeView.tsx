@@ -168,6 +168,17 @@ export function KnowledgeView({ studio, recent, act, busy }: ViewProps) {
               <li key={item.id}>
                 <div>
                   <strong>{item.name}</strong>
+                  {studio.definition.business.knowledge.some(
+                    (link) => link.pack_id === item.pack_id,
+                  ) &&
+                  !studio.definition.workflow_definitions.some(
+                    (workflow) => workflow.id === item.workflow_id,
+                  ) ? (
+                    <p className="sw-callout-inline">
+                      Not in this project: it applies in {item.region}. Choose that region in
+                      Requirements to add it.
+                    </p>
+                  ) : null}
                   <p className="sw-muted">
                     {item.company ?? 'Shared domain process'} · {item.steps} activities ·{' '}
                     {item.decisions} decisions · {item.exceptions} exception paths
