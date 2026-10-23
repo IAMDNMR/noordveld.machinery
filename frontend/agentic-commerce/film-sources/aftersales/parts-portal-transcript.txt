@@ -1,0 +1,13 @@
+The Parts Portal brings machine parts, product information and ordering into one place. Find what you need, check the details, and order directly through Noordveld.
+
+Choose the manufacturer and machine model, or search by part number, name or description. See the parts with recorded compatibility for that machine.
+
+Browse categories such as attachments, brakes, electrical, filtration and hydraulics. Category and machine filters help you narrow the catalogue to the component you need.
+
+Open the part to see its number, description, category and machine fitment. Check recorded price and availability. Supply and source information provide context; missing information stays clearly marked.
+
+Add the required quantity to your cart. Enter the customer and delivery details, select the dealer or receiver, then review availability, fulfilment, part prices, delivery charges and the complete order total.
+
+Compare the recorded transport options for the delivery location. Check dispatch details, distance and travel time after dispatch. The portal shows the recorded options before you confirm the order.
+
+After placing the order, follow its recorded status in My Orders. From choosing the machine to ordering its parts, the Parts Portal keeps the journey together. Demonstration prices, stock and supply data are labelled.

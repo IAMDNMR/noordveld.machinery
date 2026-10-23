@@ -1,0 +1,304 @@
+{
+  "fps": 24,
+  "frames": 3132,
+  "seconds": 130.5,
+  "scenes": [
+    {
+      "kind": "opening",
+      "eyebrow": "AFTERSALES / THE BUSINESS BEHIND THE MACHINE",
+      "title": "The machine sale\nis the beginning.",
+      "vo": "A machine sale starts a long relationship. Aftersales keeps that machine working through parts availability, maintenance, repair and support across its working life.",
+      "start": 0.0,
+      "frames": 288,
+      "seconds": 12.0,
+      "audio": "aftersales/0.mp3"
+    },
+    {
+      "kind": "ecosystem",
+      "eyebrow": "01 / PEOPLE AND RESPONSIBILITY",
+      "title": "One machine.\nThree connected businesses.",
+      "vo": "The manufacturer supplies product knowledge, parts and warranty support. Independent dealers bring local stock, technicians and customer relationships. The customer depends on both to keep working.",
+      "start": 12.0,
+      "frames": 334,
+      "seconds": 13.916666666666666,
+      "audio": "aftersales/1.mp3"
+    },
+    {
+      "kind": "onboarding",
+      "eyebrow": "02 / DEALER ONBOARDING",
+      "title": "Bring the dealer\ninto the network.",
+      "vo": "Onboarding starts with business checks and agreements. Set up authorised users, product access and training. Then map the dealer data and test the connection before exchanging operational records.",
+      "start": 25.91667,
+      "frames": 341,
+      "seconds": 14.208333333333334,
+      "audio": "aftersales/2.mp3"
+    },
+    {
+      "kind": "systems",
+      "eyebrow": "03 / CONNECTING THE SYSTEMS",
+      "title": "One network.\nDifferent dealer systems.",
+      "vo": "Dealers often run their own systems for sales, inventory, workshop jobs and finance. The manufacturer portal provides a shared entry point for parts, claims and technical information. Interfaces connect the two.",
+      "start": 40.125,
+      "frames": 380,
+      "seconds": 15.833333333333334,
+      "audio": "aftersales/3.mp3"
+    },
+    {
+      "kind": "parts-flow",
+      "eyebrow": "04 / THE PARTS BUSINESS",
+      "title": "The right part.\nWhere it is needed.",
+      "vo": "The parts journey starts with the machine and the correct component. Check stock, place the order, manage back orders, and deliver to the dealer or customer. Returns need a clear path too.",
+      "start": 55.95833,
+      "frames": 317,
+      "seconds": 13.208333333333334,
+      "audio": "aftersales/4.mp3"
+    },
+    {
+      "kind": "service-flow",
+      "eyebrow": "05 / THE SERVICE BUSINESS",
+      "title": "From a reported fault\nto a working machine.",
+      "vo": "The dealer records the issue, diagnoses the fault and plans the repair. Parts and technician availability come together. After the work, record labour, replaced parts and service history against the machine.",
+      "start": 69.16667,
+      "frames": 348,
+      "seconds": 14.5,
+      "audio": "aftersales/5.mp3"
+    },
+    {
+      "kind": "warranty",
+      "eyebrow": "06 / WARRANTY AND CLAIMS",
+      "title": "A repair.\nAn evidence-backed claim.",
+      "vo": "Warranty is a controlled process. The dealer submits the machine details, repair evidence, parts and labour. The manufacturer checks the claim against warranty terms, then reimburses approved claims and records the outcome.",
+      "start": 83.66667,
+      "frames": 389,
+      "seconds": 16.208333333333332,
+      "audio": "aftersales/6.mp3"
+    },
+    {
+      "kind": "business-data",
+      "eyebrow": "07 / THE CONNECTED INSTALLED BASE",
+      "title": "Consistent data.\nA clearer view of the field.",
+      "vo": "The shared foundation is knowing which customer owns each machine and which dealer supports it. Connect parts orders, stock, repair history and claims. Data checks and interfaces reduce repeated entry and incomplete records.",
+      "start": 99.875,
+      "frames": 405,
+      "seconds": 16.875,
+      "audio": "aftersales/7.mp3"
+    },
+    {
+      "kind": "closing",
+      "eyebrow": "AFTERSALES / PARTS, SERVICE AND THE DEALER NETWORK",
+      "title": "Keep the machine working.\nKeep the relationship strong.",
+      "vo": "Effective aftersales connects people, processes and information. The result is a clearer service journey, better parts planning, and a stronger relationship throughout the life of the machine.",
+      "start": 116.75,
+      "frames": 330,
+      "seconds": 13.75,
+      "audio": "aftersales/8.mp3"
+    }
+  ],
+  "captions": [
+    {
+      "text": "A machine sale starts a long relationship.",
+      "start": 0.641,
+      "end": 3.04
+    },
+    {
+      "text": "Aftersales keeps that machine working through parts availability,",
+      "start": 3.349,
+      "end": 6.894
+    },
+    {
+      "text": "maintenance, repair and support across its working life.",
+      "start": 7.086,
+      "end": 10.631
+    },
+    {
+      "text": "The manufacturer supplies product knowledge, parts and warranty",
+      "start": 12.667,
+      "end": 16.072
+    },
+    {
+      "text": "support.",
+      "start": 16.092,
+      "end": 16.759
+    },
+    {
+      "text": "Independent dealers bring local stock, technicians and customer",
+      "start": 17.068,
+      "end": 20.798
+    },
+    {
+      "text": "relationships.",
+      "start": 20.818,
+      "end": 21.824
+    },
+    {
+      "text": "The customer depends on both to keep working.",
+      "start": 22.146,
+      "end": 24.532
+    },
+    {
+      "text": "Onboarding starts with business checks and agreements.",
+      "start": 26.571,
+      "end": 29.516
+    },
+    {
+      "text": "Set up authorised users, product access and training.",
+      "start": 29.826,
+      "end": 33.514
+    },
+    {
+      "text": "Then map the dealer data and test the",
+      "start": 33.823,
+      "end": 35.874
+    },
+    {
+      "text": "connection before exchanging operational records.",
+      "start": 35.894,
+      "end": 38.735
+    },
+    {
+      "text": "Dealers often run their own systems for sales,",
+      "start": 40.792,
+      "end": 43.621
+    },
+    {
+      "text": "inventory, workshop jobs and finance.",
+      "start": 43.722,
+      "end": 46.615
+    },
+    {
+      "text": "The manufacturer portal provides a shared entry point",
+      "start": 46.938,
+      "end": 49.783
+    },
+    {
+      "text": "for parts, claims and technical information.",
+      "start": 49.803,
+      "end": 52.644
+    },
+    {
+      "text": "Interfaces connect the two.",
+      "start": 52.954,
+      "end": 54.558
+    },
+    {
+      "text": "The parts journey starts with the machine and",
+      "start": 56.639,
+      "end": 58.806
+    },
+    {
+      "text": "the correct component.",
+      "start": 58.826,
+      "end": 59.975
+    },
+    {
+      "text": "Check stock, place the order, manage back orders,",
+      "start": 60.284,
+      "end": 63.699
+    },
+    {
+      "text": "and deliver to the dealer or customer.",
+      "start": 63.8,
+      "end": 65.847
+    },
+    {
+      "text": "Returns need a clear path too.",
+      "start": 66.157,
+      "end": 67.774
+    },
+    {
+      "text": "The dealer records the issue, diagnoses the fault",
+      "start": 69.834,
+      "end": 72.897
+    },
+    {
+      "text": "and plans the repair.",
+      "start": 72.998,
+      "end": 74.212
+    },
+    {
+      "text": "Parts and technician availability come together.",
+      "start": 74.534,
+      "end": 77.089
+    },
+    {
+      "text": "After the work, record labour, replaced parts and",
+      "start": 77.399,
+      "end": 80.296
+    },
+    {
+      "text": "service history against the machine.",
+      "start": 80.316,
+      "end": 82.298
+    },
+    {
+      "text": "Warranty is a controlled process.",
+      "start": 84.321,
+      "end": 86.381
+    },
+    {
+      "text": "The dealer submits the machine details, repair evidence,",
+      "start": 86.691,
+      "end": 90.001
+    },
+    {
+      "text": "parts and labour.",
+      "start": 90.115,
+      "end": 91.251
+    },
+    {
+      "text": "The manufacturer checks the claim against warranty terms,",
+      "start": 91.573,
+      "end": 94.74
+    },
+    {
+      "text": "then reimburses approved claims and records the outcome.",
+      "start": 94.907,
+      "end": 98.451
+    },
+    {
+      "text": "The shared foundation is knowing which customer owns",
+      "start": 100.542,
+      "end": 103.592
+    },
+    {
+      "text": "each machine and which dealer supports it.",
+      "start": 103.654,
+      "end": 105.975
+    },
+    {
+      "text": "Connect parts orders, stock, repair history and claims.",
+      "start": 106.284,
+      "end": 110.089
+    },
+    {
+      "text": "Data checks and interfaces reduce repeated entry and",
+      "start": 110.412,
+      "end": 114.038
+    },
+    {
+      "text": "incomplete records.",
+      "start": 114.058,
+      "end": 115.35
+    },
+    {
+      "text": "Effective aftersales connects people, processes and information.",
+      "start": 117.404,
+      "end": 121.795
+    },
+    {
+      "text": "The result is a clearer service journey, better",
+      "start": 122.118,
+      "end": 124.91
+    },
+    {
+      "text": "parts planning, and a stronger relationship throughout the",
+      "start": 124.93,
+      "end": 128.009
+    },
+    {
+      "text": "life of the machine.",
+      "start": 128.029,
+      "end": 129.139
+    }
+  ]
+}

@@ -166,11 +166,15 @@ describe('Parts & Services page', () => {
     )
   })
 
-  it('reserves a video frame without the old component overlays or a fake play button', () => {
+  it('offers an on-demand film with captions without the old component overlays', () => {
     const { container } = mount()
-    expect(
-      screen.getByRole('img', { name: 'Aftersales, explained — video coming soon' }),
-    ).toBeTruthy()
+    const video = screen.getByLabelText('Aftersales, explained') as HTMLVideoElement
+    expect(video.controls).toBe(true)
+    expect(video.autoplay).toBe(false)
+    expect(video.preload).toBe('none')
+    expect(video.querySelector('source')?.getAttribute('src')).toBe('/films/aftersales.mp4')
+    expect(video.querySelector('track')?.getAttribute('src')).toBe('/films/aftersales.vtt')
+    expect(video.querySelector('track')?.hasAttribute('default')).toBe(true)
     expect(container.querySelector('.as-spot')).toBeNull()
     expect(container.querySelector('.as-ident')).toBeNull()
     expect(screen.queryByRole('button', { name: /Replay/ })).toBeNull()

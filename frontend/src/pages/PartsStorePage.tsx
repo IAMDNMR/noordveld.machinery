@@ -104,7 +104,7 @@ export default function PartsStorePage() {
           <p className="store-hero__hint">Search by part number, description or machine model.</p>
         </div>
         <div className="store-hero__media">
-          <OverviewVideoSlot title="Parts Portal, explained" />
+          <OverviewVideoSlot title="Parts Portal, explained" film="parts-portal" />
           <details className="store-hero__help">
             <summary>Help finding a part</summary>
             <aside className="store-assistance" aria-label="Help finding a part">

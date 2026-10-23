@@ -1,0 +1,239 @@
+{
+  "fps": 24,
+  "frames": 2294,
+  "seconds": 95.58333333333331,
+  "scenes": [
+    {
+      "kind": "opening",
+      "eyebrow": "NOORDVELD / PARTS PORTAL",
+      "title": "One place.\nFrom machine to order.",
+      "vo": "The Parts Portal brings machine parts, product information and ordering into one place. Find what you need, check the details, and order directly through Noordveld.",
+      "start": 0.0,
+      "frames": 294,
+      "seconds": 12.25,
+      "audio": "parts-portal/0.mp3"
+    },
+    {
+      "kind": "machine",
+      "eyebrow": "01 / START WITH YOUR MACHINE",
+      "title": "Your machine.\nYour parts.",
+      "vo": "Choose the manufacturer and machine model, or search by part number, name or description. See the parts with recorded compatibility for that machine.",
+      "start": 12.25,
+      "frames": 261,
+      "seconds": 10.875,
+      "audio": "parts-portal/1.mp3"
+    },
+    {
+      "kind": "catalogue",
+      "eyebrow": "02 / BROWSE THE CATALOGUE",
+      "title": "Every system.\nAn easier way to find it.",
+      "vo": "Browse categories such as attachments, brakes, electrical, filtration and hydraulics. Category and machine filters help you narrow the catalogue to the component you need.",
+      "start": 23.125,
+      "frames": 307,
+      "seconds": 12.791666666666666,
+      "audio": "parts-portal/2.mp3"
+    },
+    {
+      "kind": "portal-detail",
+      "eyebrow": "03 / UNDERSTAND THE PART",
+      "title": "Know what\nyou are ordering.",
+      "vo": "Open the part to see its number, description, category and machine fitment. Check recorded price and availability. Supply and source information provide context; missing information stays clearly marked.",
+      "start": 35.91667,
+      "frames": 357,
+      "seconds": 14.875,
+      "audio": "parts-portal/3.mp3"
+    },
+    {
+      "kind": "review",
+      "eyebrow": "04 / ORDER DIRECTLY THROUGH THE PORTAL",
+      "title": "Check the details.\nPlace the order here.",
+      "vo": "Add the required quantity to your cart. Enter the customer and delivery details, select the dealer or receiver, then review availability, fulfilment, part prices, delivery charges and the complete order total.",
+      "start": 50.79167,
+      "frames": 372,
+      "seconds": 15.5,
+      "audio": "parts-portal/4.mp3"
+    },
+    {
+      "kind": "delivery",
+      "eyebrow": "05 / DELIVERY WITH CONTEXT",
+      "title": "See the full\ndelivery picture.",
+      "vo": "Compare the recorded transport options for the delivery location. Check dispatch details, distance and travel time after dispatch. The portal shows the recorded options before you confirm the order.",
+      "start": 66.29167,
+      "frames": 335,
+      "seconds": 13.958333333333334,
+      "audio": "parts-portal/5.mp3"
+    },
+    {
+      "kind": "closing",
+      "eyebrow": "NOORDVELD / PARTS PORTAL",
+      "title": "Find it. Check it. Order it.\nFollow it in one place.",
+      "vo": "After placing the order, follow its recorded status in My Orders. From choosing the machine to ordering its parts, the Parts Portal keeps the journey together. Demonstration prices, stock and supply data are labelled.",
+      "start": 80.25,
+      "frames": 368,
+      "seconds": 15.333333333333334,
+      "audio": "parts-portal/6.mp3"
+    }
+  ],
+  "captions": [
+    {
+      "text": "The Parts Portal brings machine parts, product information",
+      "start": 0.68,
+      "end": 4.16
+    },
+    {
+      "text": "and ordering into one place.",
+      "start": 4.248,
+      "end": 6.243
+    },
+    {
+      "text": "Find what you need, check the details, and",
+      "start": 6.618,
+      "end": 9.085
+    },
+    {
+      "text": "order directly through Noordveld.",
+      "start": 9.105,
+      "end": 10.852
+    },
+    {
+      "text": "Choose the manufacturer and machine model, or search",
+      "start": 12.904,
+      "end": 15.866
+    },
+    {
+      "text": "by part number, name or description.",
+      "start": 15.886,
+      "end": 18.428
+    },
+    {
+      "text": "See the parts with recorded compatibility for that",
+      "start": 18.738,
+      "end": 21.231
+    },
+    {
+      "text": "machine.",
+      "start": 21.251,
+      "end": 21.761
+    },
+    {
+      "text": "Browse categories such as attachments, brakes, electrical, filtration",
+      "start": 23.792,
+      "end": 28.538
+    },
+    {
+      "text": "and hydraulics.",
+      "start": 28.558,
+      "end": 29.576
+    },
+    {
+      "text": "Category and machine filters help you narrow the",
+      "start": 29.886,
+      "end": 32.522
+    },
+    {
+      "text": "catalogue to the component you need.",
+      "start": 32.542,
+      "end": 34.55
+    },
+    {
+      "text": "Open the part to see its number, description,",
+      "start": 36.558,
+      "end": 39.022
+    },
+    {
+      "text": "category and machine fitment.",
+      "start": 39.162,
+      "end": 41.001
+    },
+    {
+      "text": "Check recorded price and availability.",
+      "start": 41.31,
+      "end": 43.605
+    },
+    {
+      "text": "Supply and source information provide context; missing information",
+      "start": 43.915,
+      "end": 47.957
+    },
+    {
+      "text": "stays clearly marked.",
+      "start": 47.977,
+      "end": 49.399
+    },
+    {
+      "text": "Add the required quantity to your cart.",
+      "start": 51.446,
+      "end": 53.493
+    },
+    {
+      "text": "Enter the customer and delivery details, select the",
+      "start": 53.803,
+      "end": 56.829
+    },
+    {
+      "text": "dealer or receiver, then review availability, fulfilment, part",
+      "start": 56.849,
+      "end": 61.231
+    },
+    {
+      "text": "prices, delivery charges and the complete order total.",
+      "start": 61.251,
+      "end": 64.912
+    },
+    {
+      "text": "Compare the recorded transport options for the delivery",
+      "start": 66.946,
+      "end": 69.738
+    },
+    {
+      "text": "location.",
+      "start": 69.758,
+      "end": 70.503
+    },
+    {
+      "text": "Check dispatch details, distance and travel time after",
+      "start": 70.813,
+      "end": 74.244
+    },
+    {
+      "text": "dispatch.",
+      "start": 74.264,
+      "end": 75.035
+    },
+    {
+      "text": "The portal shows the recorded options before you",
+      "start": 75.357,
+      "end": 77.824
+    },
+    {
+      "text": "confirm the order.",
+      "start": 77.844,
+      "end": 78.863
+    },
+    {
+      "text": "After placing the order, follow its recorded status",
+      "start": 80.904,
+      "end": 83.84
+    },
+    {
+      "text": "in My Orders.",
+      "start": 83.86,
+      "end": 84.865
+    },
+    {
+      "text": "From choosing the machine to ordering its parts,",
+      "start": 85.201,
+      "end": 87.86
+    },
+    {
+      "text": "the Parts Portal keeps the journey together.",
+      "start": 88.014,
+      "end": 90.295
+    },
+    {
+      "text": "Demonstration prices, stock and supply data are labelled.",
+      "start": 90.605,
+      "end": 94.175
+    }
+  ]
+}

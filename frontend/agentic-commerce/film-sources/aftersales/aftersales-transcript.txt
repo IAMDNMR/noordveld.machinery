@@ -1,0 +1,17 @@
+A machine sale starts a long relationship. Aftersales keeps that machine working through parts availability, maintenance, repair and support across its working life.
+
+The manufacturer supplies product knowledge, parts and warranty support. Independent dealers bring local stock, technicians and customer relationships. The customer depends on both to keep working.
+
+Onboarding starts with business checks and agreements. Set up authorised users, product access and training. Then map the dealer data and test the connection before exchanging operational records.
+
+Dealers often run their own systems for sales, inventory, workshop jobs and finance. The manufacturer portal provides a shared entry point for parts, claims and technical information. Interfaces connect the two.
+
+The parts journey starts with the machine and the correct component. Check stock, place the order, manage back orders, and deliver to the dealer or customer. Returns need a clear path too.
+
+The dealer records the issue, diagnoses the fault and plans the repair. Parts and technician availability come together. After the work, record labour, replaced parts and service history against the machine.
+
+Warranty is a controlled process. The dealer submits the machine details, repair evidence, parts and labour. The manufacturer checks the claim against warranty terms, then reimburses approved claims and records the outcome.
+
+The shared foundation is knowing which customer owns each machine and which dealer supports it. Connect parts orders, stock, repair history and claims. Data checks and interfaces reduce repeated entry and incomplete records.
+
+Effective aftersales connects people, processes and information. The result is a clearer service journey, better parts planning, and a stronger relationship throughout the life of the machine.

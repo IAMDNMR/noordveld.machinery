@@ -1,0 +1,127 @@
+{
+  "voice": "en-US-AndrewNeural",
+  "rate": "-4%",
+  "fps": 24,
+  "films": {
+    "aftersales": [
+      {
+        "kind": "opening",
+        "eyebrow": "AFTERSALES / THE BUSINESS BEHIND THE MACHINE",
+        "title": "The machine sale\nis the beginning.",
+        "vo": "A machine sale starts a long relationship. Aftersales keeps that machine working through parts availability, maintenance, repair and support across its working life."
+      },
+      {
+        "kind": "ecosystem",
+        "eyebrow": "01 / PEOPLE AND RESPONSIBILITY",
+        "title": "One machine.\nThree connected businesses.",
+        "vo": "The manufacturer supplies product knowledge, parts and warranty support. Independent dealers bring local stock, technicians and customer relationships. The customer depends on both to keep working."
+      },
+      {
+        "kind": "onboarding",
+        "eyebrow": "02 / DEALER ONBOARDING",
+        "title": "Bring the dealer\ninto the network.",
+        "vo": "Onboarding starts with business checks and agreements. Set up authorised users, product access and training. Then map the dealer data and test the connection before exchanging operational records."
+      },
+      {
+        "kind": "systems",
+        "eyebrow": "03 / CONNECTING THE SYSTEMS",
+        "title": "One network.\nDifferent dealer systems.",
+        "vo": "Dealers often run their own systems for sales, inventory, workshop jobs and finance. The manufacturer portal provides a shared entry point for parts, claims and technical information. Interfaces connect the two."
+      },
+      {
+        "kind": "parts-flow",
+        "eyebrow": "04 / THE PARTS BUSINESS",
+        "title": "The right part.\nWhere it is needed.",
+        "vo": "The parts journey starts with the machine and the correct component. Check stock, place the order, manage back orders, and deliver to the dealer or customer. Returns need a clear path too."
+      },
+      {
+        "kind": "service-flow",
+        "eyebrow": "05 / THE SERVICE BUSINESS",
+        "title": "From a reported fault\nto a working machine.",
+        "vo": "The dealer records the issue, diagnoses the fault and plans the repair. Parts and technician availability come together. After the work, record labour, replaced parts and service history against the machine."
+      },
+      {
+        "kind": "warranty",
+        "eyebrow": "06 / WARRANTY AND CLAIMS",
+        "title": "A repair.\nAn evidence-backed claim.",
+        "vo": "Warranty is a controlled process. The dealer submits the machine details, repair evidence, parts and labour. The manufacturer checks the claim against warranty terms, then reimburses approved claims and records the outcome."
+      },
+      {
+        "kind": "business-data",
+        "eyebrow": "07 / THE CONNECTED INSTALLED BASE",
+        "title": "Consistent data.\nA clearer view of the field.",
+        "vo": "The shared foundation is knowing which customer owns each machine and which dealer supports it. Connect parts orders, stock, repair history and claims. Data checks and interfaces reduce repeated entry and incomplete records."
+      },
+      {
+        "kind": "closing",
+        "eyebrow": "AFTERSALES / PARTS, SERVICE AND THE DEALER NETWORK",
+        "title": "Keep the machine working.\nKeep the relationship strong.",
+        "vo": "Effective aftersales connects people, processes and information. The result is a clearer service journey, better parts planning, and a stronger relationship throughout the life of the machine."
+      }
+    ],
+    "parts-portal": [
+      {
+        "kind": "opening",
+        "eyebrow": "NOORDVELD / PARTS PORTAL",
+        "title": "One place.\nFrom machine to order.",
+        "vo": "The Parts Portal brings machine parts, product information and ordering into one place. Find what you need, check the details, and order directly through Noordveld."
+      },
+      {
+        "kind": "machine",
+        "eyebrow": "01 / START WITH YOUR MACHINE",
+        "title": "Your machine.\nYour parts.",
+        "vo": "Choose the manufacturer and machine model, or search by part number, name or description. See the parts with recorded compatibility for that machine."
+      },
+      {
+        "kind": "catalogue",
+        "eyebrow": "02 / BROWSE THE CATALOGUE",
+        "title": "Every system.\nAn easier way to find it.",
+        "vo": "Browse categories such as attachments, brakes, electrical, filtration and hydraulics. Category and machine filters help you narrow the catalogue to the component you need."
+      },
+      {
+        "kind": "portal-detail",
+        "eyebrow": "03 / UNDERSTAND THE PART",
+        "title": "Know what\nyou are ordering.",
+        "vo": "Open the part to see its number, description, category and machine fitment. Check recorded price and availability. Supply and source information provide context; missing information stays clearly marked."
+      },
+      {
+        "kind": "review",
+        "eyebrow": "04 / ORDER DIRECTLY THROUGH THE PORTAL",
+        "title": "Check the details.\nPlace the order here.",
+        "vo": "Add the required quantity to your cart. Enter the customer and delivery details, select the dealer or receiver, then review availability, fulfilment, part prices, delivery charges and the complete order total."
+      },
+      {
+        "kind": "delivery",
+        "eyebrow": "05 / DELIVERY WITH CONTEXT",
+        "title": "See the full\ndelivery picture.",
+        "vo": "Compare the recorded transport options for the delivery location. Check dispatch details, distance and travel time after dispatch. The portal shows the recorded options before you confirm the order."
+      },
+      {
+        "kind": "closing",
+        "eyebrow": "NOORDVELD / PARTS PORTAL",
+        "title": "Find it. Check it. Order it.\nFollow it in one place.",
+        "vo": "After placing the order, follow its recorded status in My Orders. From choosing the machine to ordering its parts, the Parts Portal keeps the journey together. Demonstration prices, stock and supply data are labelled."
+      }
+    ]
+  },
+  "examples": {
+    "source": "Supplied Noordveld catalogue and current catalogue filters; illustrative film snapshot, not live operational data.",
+    "part": {
+      "number": "NVM-1010-AT",
+      "label": "General-purpose\nbucket",
+      "category": "Attachments · Bucket"
+    },
+    "categories": [
+      "Attachments",
+      "Brakes",
+      "Cab & Controls",
+      "Cooling",
+      "Drivetrain",
+      "Electrical",
+      "Filtration",
+      "Hydraulics",
+      "Lubrication",
+      "Structural"
+    ]
+  }
+}

@@ -22,7 +22,7 @@ export function AftersalesHero() {
             </ButtonLink>
           </div>
         </div>
-        <OverviewVideoSlot title="Aftersales, explained" />
+        <OverviewVideoSlot title="Aftersales, explained" film="aftersales" />
       </div>
     </section>
   )
