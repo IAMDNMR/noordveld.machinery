@@ -294,6 +294,8 @@ export default function StudioWorkspacePage() {
       if (turn.focus) setStage(turn.focus)
       if (turn.focus_item) setSelection(turn.focus_item)
       if (turn.client_action === 'compile') setAutorun((value) => value + 1)
+      // The assistant understood "go ahead" (in any wording or language) as moving on: press Continue for the person.
+      if (turn.client_action === 'continue') await advance()
       if (turn.client_action === 'frontend' && api.getProjectId())
         setDesignRequest({
           id: ++designRequestCounter.current,

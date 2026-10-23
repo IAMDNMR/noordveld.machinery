@@ -61,7 +61,7 @@ class Plan:
     asking: str | None = None  # id of an existing open question the reply asks
     focus: str | None = None  # a stage key
     focus_item: str | None = None
-    command: str | None = None  # "generate" or "design_frontend"
+    command: str | None = None  # "generate", "design_frontend" or "continue" (move on to the next stage)
     mode: str = "local_rules"
     degraded: str | None = None  # why the language model was not used, when it was expected
     knowledge: dict | None = (
@@ -292,7 +292,9 @@ def plan_with_model(
             "2) If it is ambiguous or missing something you need (which colour, which screen or role, which section, how many), make NO change yet and ask ONE specific question in the reply, with two to four concrete choices they can answer in a few words. Never ask more than one question at a time, and never ask what you can decide sensibly yourself. "
             "3) If they answer, or say \"go ahead\", use the earlier messages in the conversation to carry out what was agreed; do not ask again. "
             "4) If you cannot do it, say so plainly and in the same message offer the closest thing you can do, naming it. Never claim a change that was not made. "
-            "5) If it is a question or a remark, answer it directly and specifically, without redrafting the stage and without repeating that the draft is ready. If they ask what you need from them, tell them what is open for them (the unanswered business decisions or findings in the context), or that nothing is needed except to review and press Continue. "
+            "5) Moving on: when the person tells you to go ahead, continue, or move to the next stage (any wording, any language, typos included) AND nothing of yours is waiting on their answer, set command=continue and actions=[]; say in one short sentence that you are moving on. If your previous message proposed a change or asked a question, \"go ahead\" or \"yes\" means do that, not move on. "
+            "6) OPEN BUSINESS QUESTIONS: context.open_decisions lists questions of company policy, each as id then a colon then the question, that only the person can answer; never decide them yourself. When it is not empty, finish every reply by asking the FIRST one as one plain question with two or three sensible choices, for example: How should a vehicle be chosen when several fit: the nearest, the largest, or the driver's preference? When the person answers (briefly, in any language), record it with answer_decision{decision_id: its id from open_decisions, answer: their answer in one sentence}, say it is recorded, and ask the next one. If they do not know yet, leave it open and move on. If they ask something else first, answer that first. "
+            "7) If it is a question or a remark, answer it directly and specifically, without redrafting the stage and without repeating that the draft is ready. If they ask what you need from them, tell them what is open for them (the unanswered business decisions or findings in the context), or that nothing is needed except to review and press Continue. "
             "Reply in the language the person wrote in, in short plain sentences, without technical terms."
         )
     if context.get("guided_stage") == "Screens & UI":
@@ -322,7 +324,7 @@ def plan_with_model(
         if isinstance(data.get("focus_item"), str) and len(data["focus_item"]) <= 120
         else None
     )
-    command = data.get("command") if data.get("command") in ("generate", "design_frontend") else None
+    command = data.get("command") if data.get("command") in ("generate", "design_frontend", "continue") else None
     reply = _clean_reply(data.get("reply"))
     if not reply and not actions:
         raise LLMInvalidResponse("empty plan")

@@ -197,7 +197,7 @@ export type Generation = {
   state: string
   message: string
   focus?: StageKey
-  client_action?: 'compile' | 'frontend'
+  client_action?: 'compile' | 'frontend' | 'continue'
 }
 export type Turn = {
   mode: 'language_model' | 'local_rules' | 'direct'
@@ -213,7 +213,7 @@ export type Turn = {
   focus: StageKey | null
   focus_item: string | null
   generation: Generation | null
-  client_action: 'compile' | 'frontend' | null
+  client_action: 'compile' | 'frontend' | 'continue' | null
   input_mode: 'text' | 'voice'
   /** What the saved change means: applied to the specification, not yet generated or tested, recorded but not executable. From the server, never the model. */
   notes?: string[]

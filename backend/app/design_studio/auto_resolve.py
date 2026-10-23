@@ -54,6 +54,22 @@ def assign_owners(raw: dict, definition: ApplicationDefinition) -> list[str]:
     return changes
 
 
+def merge_duplicate_decisions(raw: dict) -> list[str]:
+    """Keep one of two open business questions that ask the same thing in different words (their examples in brackets differ)."""
+    from app.assistant.studio_actions import same_decision
+
+    decisions, changes, kept = raw["business"]["decisions"], [], []
+    for decision in decisions:
+        twin = next((k for k in kept if decision["status"] == "open" and k["status"] == "open" and same_decision(k["question"], decision["question"])), None)
+        if twin is None:
+            kept.append(decision)
+            continue
+        twin["affects"] = list(dict.fromkeys([*twin.get("affects", []), *decision.get("affects", [])]))
+        changes.append(f"Merged a business question that was asked twice: {decision['question'][:80]}")
+    raw["business"]["decisions"] = kept
+    return changes
+
+
 def _words(name: str) -> frozenset[str]:
     return frozenset(re.findall(r"[a-z0-9]+", name.lower()))
 
@@ -116,6 +132,7 @@ def resolve(definition: ApplicationDefinition) -> tuple[ApplicationDefinition, l
             question["status"], question["answer"] = "not_applicable", NOT_SPECIFIED
             changes.append(f"Recorded as not specified for this version: {question['text']}")
     changes.extend(merge_duplicate_roles(raw))
+    changes.extend(merge_duplicate_decisions(raw))
     changes.extend(assign_owners(raw, definition))
     for workflow in raw["workflow_definitions"]:
         changes.extend(f"Merged a repeated step: {workflow['name']} · {label}" for label in _fold_repeats(workflow))

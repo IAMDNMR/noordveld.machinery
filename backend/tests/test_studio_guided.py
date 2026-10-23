@@ -56,6 +56,19 @@ def test_serial_review_reload_and_conflicts(journey):
     assert c.post(url + '/continue', json={'expected_revision': original, 'stage': 'brief'}).status_code == 409
 
 
+def test_telling_the_assistant_to_go_ahead_in_any_wording_moves_the_page_on_only_when_the_stage_is_ready(journey, monkeypatch):
+    c, url, state = journey
+
+    class MovingOn(FoundationModel):
+        def studio_json(self, system, prompt):
+            return {'reply': 'Moving on to the next stage.', 'command': 'continue', 'actions': [], 'questions': [], 'ask': None}
+
+    monkeypatch.setattr('app.api.routes.studio_conversation.get_studio_llm', MovingOn)
+    ready = c.post(url + '/turn', json={'guided': True, 'expected_revision': state['revision'], 'message': 'go ahesd'})
+    assert ready.status_code == 200, ready.text
+    assert ready.json()['turn']['client_action'] == 'continue' and 'Moving on' in ready.json()['turn']['reply']
+
+
 def test_a_typed_question_gets_the_assistants_own_answer_not_the_fixed_ready_sentence(journey, monkeypatch):
     c, url, state = journey
 

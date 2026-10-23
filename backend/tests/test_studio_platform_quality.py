@@ -120,6 +120,41 @@ def test_a_change_asked_in_chat_for_the_screens_is_applied_to_the_application_th
     assert restored.theme.hidden_sections == ["finished"]
 
 
+def test_business_questions_are_asked_once_answered_in_any_stage_and_never_left_as_twins():
+    from app.assistant.studio_actions import apply_actions, parse_actions
+    from app.design_studio import guided
+    from app.design_studio.auto_resolve import resolve
+    from app.design_studio.knowledge.provider import LocalKnowledgeProvider
+
+    # Only the person can decide company policy, so answering is allowed in every stage, not just in Rules or Validation.
+    assert all("answer_decision" in guided.ALLOWED[stage] for stage in guided.ALLOWED)
+
+    definition = build(SCENARIOS["after-sales"])
+    first = "What is the policy for vehicle assignment when multiple vehicles match a transport request (e.g., nearest, largest capacity)?"
+    twin = "What is the policy for vehicle assignment when multiple vehicles match a transport request (capacity, type, location)?"
+    actions, _ = parse_actions([{"type": "add_decision", "question": first}])
+    asked, _, _ = apply_actions(definition, actions, LocalKnowledgeProvider())
+    # The same question in other words is already open; the model asking it again is not an error to report.
+    again, rejected = apply_actions(asked, parse_actions([{"type": "add_decision", "question": twin}])[0], LocalKnowledgeProvider())[::2]
+    assert [r["reason"] for r in rejected] == ["That decision is already open."]
+    assert len([d for d in again.business.decisions if d.status == "open"]) == 1
+
+    # A project that already holds both wordings gets them folded into one, and answering records the person's decision.
+    raw = asked.model_dump(mode="json")
+    raw["business"]["decisions"].append({**raw["business"]["decisions"][0], "id": "dec_twin", "question": twin})
+    from app.schemas.application_definition import ApplicationDefinition
+
+    merged, changes = resolve(ApplicationDefinition.model_validate(raw))
+    open_now = [d for d in merged.business.decisions if d.status == "open"]
+    assert len(open_now) == 1 and any("asked twice" in line for line in changes)
+    answered, _, _ = apply_actions(
+        merged,
+        parse_actions([{"type": "answer_decision", "decision_id": open_now[0].id, "answer": "The nearest vehicle that has capacity."}])[0],
+        LocalKnowledgeProvider(),
+    )
+    assert [d.status for d in answered.business.decisions if d.id == open_now[0].id] == ["decided"]
+
+
 def test_a_workflow_of_only_look_up_and_check_steps_is_a_dashboard_not_a_process_to_start():
     from types import SimpleNamespace as Step
 

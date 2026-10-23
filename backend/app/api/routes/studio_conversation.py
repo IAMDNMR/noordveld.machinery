@@ -652,7 +652,9 @@ def _execute(
         plan.questions = []
         plan.asking = None
         if key != "export":
-            plan.command = None
+            # A guided stage never generates the application or rebuilds the interface from a chat turn; moving on to the next stage
+            # is the one thing the person may ask for in words ("go ahead").
+            plan.command = "continue" if plan.command == "continue" else None
     validation_repair = is_guided and guided.active(view) == "checks"
     # Validation revisits already reviewed content. Every repair is a proposal;
     # merely asking for fixes must not rewrite the design and invalidate approvals.
@@ -738,6 +740,10 @@ def _execute(
         if available:
             focus, client_action = "screen", "frontend"
             generation = {"state": "design_requested", "message": "I'll rebuild the application's interface from your instruction and check it before saving. The current saved version stays available until the replacement passes.", "focus": "screen", "client_action": "frontend"}
+    if plan.command == "continue" and not plan.actions and proposal is None and saved.studio_flow:
+        stage_now = guided.active(saved)
+        if stage_now != "export" and guided.ready(saved, stage_now):
+            client_action = "continue"  # the page presses Continue, so the next stage is drafted with its usual progress display
     if plan.command == "generate":
         after, generation = _generation(saved, project_id, user, actor, projects, knowledge, domain)
         if after is not saved:
@@ -826,12 +832,14 @@ def _execute(
                 else []
             )
             open_decisions = [d for d in saved.business.decisions if d.status == "open"]
-            if request_text.strip() and open_decisions:
-                # Stated from the saved design, never by the model: what is still waiting for the person.
+            if open_decisions and not (request_text.strip() and "?" in said):
+                # Business questions are asked while the application is being built, not left for Validation. Stated from the saved
+                # design, never by the model, when the assistant's own reply did not already ask: what is waiting for the person.
+                many = len(open_decisions) != 1
                 parts.append(
-                    f"Still waiting for you: {len(open_decisions)} business decision{'s' if len(open_decisions) != 1 else ''}, "
-                    f"for example “{open_decisions[0].question}”. They are answered in Domain Knowledge; company policy is yours to decide. "
-                    "They do not stop you from continuing this stage, but approval in Validation needs them answered."
+                    f"I have {len(open_decisions)} business question{'s' if many else ''} that only you can decide, "
+                    f"and it is better to settle {'them' if many else 'it'} now than at the end. First: {open_decisions[0].question} "
+                    "Answer here in your own words and I will record it."
                 )
         elif key == "checks":
             if proposal:
