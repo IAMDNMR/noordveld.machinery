@@ -350,6 +350,8 @@ export type ApplicationDefinition = {
     text: string
     font: 'inter' | 'system' | 'serif'
     logo: null | { asset_id: string }
+    /** Parts of the generated screens that were hidden on request; absent or empty means everything is shown. */
+    hidden_sections?: ('stats' | 'pipelines' | 'steps' | 'exceptions' | 'records' | 'finished')[]
   }
   fixtures: {
     id: string

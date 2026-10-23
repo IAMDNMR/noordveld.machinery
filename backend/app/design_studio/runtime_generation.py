@@ -105,6 +105,7 @@ def presentation(definition, provider=None) -> dict:
         "description": (definition.metadata.description or brief.goal)[:400],
         "domain": brief.domain_id,
         "areas": work_areas(definition, provider),
+        "hidden_sections": list(definition.theme.hidden_sections),
     }
     chosen = automatic(definition)
     if chosen:

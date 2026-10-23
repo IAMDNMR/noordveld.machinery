@@ -23,7 +23,7 @@ ALLOWED = {
         "merge_process",
     },
     "data": {"add_entity", "add_attribute", "set_attribute_required", "set_step_data"},
-    "screen": {"set_theme"},
+    "screen": {"set_theme", "set_screen_sections"},
     "rules": {"reconcile_duplicate", "bind_rule", "confirm_rule", "add_rule", "add_decision", "add_exception", "update_exception", "answer_decision"},
     "roles": {"add_role", "assign_step_role"},
     "checks": {

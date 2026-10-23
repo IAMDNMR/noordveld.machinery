@@ -217,6 +217,10 @@ class Asset(Strict):
     asset_id: str = Field(pattern=ID_PATTERN)
 
 
+# Parts of the generated screens a person may hide ("remove the steps from the screen"). Everything is shown unless listed here.
+ScreenSection = Literal["stats", "pipelines", "steps", "exceptions", "records", "finished"]
+
+
 class Theme(Strict):
     primary: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
     background: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
@@ -224,6 +228,7 @@ class Theme(Strict):
     text: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
     font: Literal["inter", "system", "serif"]
     logo: Asset | None = None
+    hidden_sections: list[ScreenSection] = Field(default_factory=list, max_length=6)
 
 
 class FixtureField(Strict):
