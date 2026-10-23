@@ -21,7 +21,7 @@ import {
 import {
   launchRuntime,
   stopRuntime,
-  studioDemoLink,
+  liveDemoUrl,
   testRuntime,
   retainRelease,
   type RuntimeTest,
@@ -187,22 +187,6 @@ export function GenerateView({ studio, access, busy, refresh, say, autorun = 0 }
       setWorking(null)
     }
   }
-  const openLiveDemo = () => {
-    // Open the tab now, while the click still counts for the browser, then point it at the signed link.
-    const tab = window.open('', '_blank')
-    setError(null)
-    studioDemoLink(projectId).then(
-      (link) => {
-        const url = new URL(link.path, window.location.origin).href
-        if (tab) tab.location.href = url
-        else window.open(url, '_blank')
-      },
-      (cause) => {
-        tab?.close()
-        setError(message(cause, 'The live demo could not be opened.'))
-      },
-    )
-  }
   const stop = async () => {
     setWorking('stop')
     try {
@@ -281,9 +265,14 @@ export function GenerateView({ studio, access, busy, refresh, say, autorun = 0 }
             </button>
           ) : null}
           {generated ? (
-            <button type="button" className="sw-button" onClick={openLiveDemo}>
+            <a
+              className="sw-button"
+              href={liveDemoUrl(projectId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <ExternalLink size={14} /> Open live demo
-            </button>
+            </a>
           ) : null}
           {runtime.running && runtime.url ? (
             <a className="sw-button" href={runtime.url} target="_blank" rel="noreferrer">

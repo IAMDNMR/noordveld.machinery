@@ -91,6 +91,10 @@ def test_a_signed_link_opens_the_live_demo_for_anyone_until_it_expires_and_only_
         link = owner.post(f"/api/v1/design-studio/projects/{project}/demo-link")
         assert link.status_code == 200 and link.json()["path"].startswith("/api/v1/demo/") and link.json()["expires_in_days"] == 7
         assert other.post(f"/api/v1/design-studio/projects/{project}/demo-link").status_code in (403, 404), "not someone else's project"
+        # The "Open live demo" link: a plain GET that signs the link and redirects to it, so it opens in a new tab on any browser.
+        hop = owner.get(f"/api/v1/design-studio/projects/{project}/live-demo", follow_redirects=False)
+        assert hop.status_code == 303 and hop.headers["location"].startswith("/api/v1/demo/")
+        assert other.get(f"/api/v1/design-studio/projects/{project}/live-demo", follow_redirects=False).status_code in (403, 404)
 
         page = stranger.get(link.json()["path"])  # no cookie, no sign-in
         assert page.status_code == 200 and "text/html" in page.headers["content-type"] and "live demo" in page.text

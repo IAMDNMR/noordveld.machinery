@@ -169,6 +169,17 @@ def demo_link(project_id: str, user: ProjectUser, projects: Projects):
     return {"path": f"/api/v1/demo/{token}", "expires_in_days": TTL_SECONDS // 86400}
 
 
+@router.get("/projects/{project_id}/live-demo")
+def live_demo_redirect(project_id: str, user: ProjectUser, projects: Projects):
+    """What the "Open live demo" link points at: mints the signed link and sends the browser on to it. Being a plain link, it opens in
+    a new tab on every browser (a script that opens a window after a request is often blocked and leaves the page as it was)."""
+    from fastapi.responses import RedirectResponse
+
+    return RedirectResponse(
+        demo_link(project_id, user, projects)["path"], status_code=303, headers={"Cache-Control": "no-store"}
+    )
+
+
 @router.get("/projects/{project_id}/frontend/preview")
 def preview(project_id: str, user: ProjectUser, projects: Projects, knowledge: Knowledge):
     current = _store_call(projects.current, user.id, project_id)

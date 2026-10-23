@@ -2,7 +2,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { StudioState, StudioAccess } from '../../../api/studio'
-import { getRuntime, launchRuntime, retainRelease, studioDemoLink } from '../../../api/studio'
+import { getRuntime, launchRuntime, retainRelease } from '../../../api/studio'
 import { compileProject, compiledArchiveUrl, type Compilation } from '../../../api/domainKnowledge'
 import { emptyDefinition } from '../model/applicationDefinition'
 import { GenerateView } from './GenerateView'
@@ -15,7 +15,7 @@ vi.mock('../../../api/studio', () => ({
   testRuntime: vi.fn(),
   getReleases: vi.fn(async () => []),
   retainRelease: vi.fn(),
-  studioDemoLink: vi.fn(),
+  liveDemoUrl: (id: string) => `/api/v1/design-studio/projects/${id}/live-demo`,
   releaseArchiveUrl: vi.fn(() => '/saved-release.zip'),
 }))
 vi.mock('../../../api/studioFrontend', () => ({
@@ -130,13 +130,10 @@ it('opens a browsable demo without a running server or worker service', async ()
   expect(decodeURIComponent(app.getAttribute('src') ?? '')).toContain('Generated bundle')
   expect(launchRuntime).not.toHaveBeenCalled()
 
-  // The live demo opens its own tab, pointed at a signed link for this project.
-  const tab = { location: { href: '' }, close: vi.fn() }
-  const open = vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window)
-  vi.mocked(studioDemoLink).mockResolvedValue({ path: '/api/v1/demo/abc.def', expires_in_days: 7 })
-  fireEvent.click(screen.getByRole('button', { name: 'Open live demo' }))
-  await waitFor(() => expect(tab.location.href).toContain('/api/v1/demo/abc.def'))
-  expect(studioDemoLink).toHaveBeenCalledWith(props.studio.definition.id)
-  expect(open).toHaveBeenCalledWith('', '_blank')
-  open.mockRestore()
+  // The live demo is a plain link that opens its own tab and never replaces this page.
+  const live = screen.getByRole('link', { name: /Open live demo/ })
+  expect(live.getAttribute('target')).toBe('_blank')
+  expect(live.getAttribute('href')).toContain(
+    `/design-studio/projects/${props.studio.definition.id}/live-demo`,
+  )
 })

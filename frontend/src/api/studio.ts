@@ -307,12 +307,9 @@ export const studioResolve = (id: string, expected_revision: number) =>
     expected_revision,
   })
 
-/** A signed link (valid for a week) to this project's live demo: the application with sample data, in its own tab. */
-export const studioDemoLink = (id: string) =>
-  apiPost<{ path: string; expires_in_days: number }>(
-    `/design-studio/projects/${encodeURIComponent(id)}/demo-link`,
-    {},
-  )
+/** Where the "Open live demo" link points: it signs a link (valid for a week) to this project's live demo and redirects to it. */
+export const liveDemoUrl = (id: string) =>
+  `${base()}/design-studio/projects/${encodeURIComponent(id)}/live-demo`
 
 // ── voice ──
 export type VoiceStatus = { assistant: ProviderState; speech: ProviderState }
