@@ -579,6 +579,28 @@ def _generation(
     }
 
 
+CHANGE_VERBS = {"set", "changed", "removed", "added", "updated", "applied", "made", "done", "hidden", "replaced", "renamed", "deleted", "saved", "recorded"}
+
+
+def _claims_a_change(sentence: str) -> bool:
+    """Does the sentence say "I (have / 've) (just) <changed something>"?"""
+    words = re.findall(r"[a-z]+", sentence.lower())[:5]
+    if not words or words[0] != "i":
+        return False
+    rest = words[1:]
+    if rest[:1] in (["ve"], ["have"]):
+        rest = rest[1:]
+    if rest[:1] in (["just"], ["now"], ["also"]):
+        rest = rest[1:]
+    return bool(rest) and rest[0] in CHANGE_VERBS
+
+
+def _without_claimed_changes(text: str) -> str:
+    """The model's words with any sentence that says it already changed something taken out. Used when this turn changed nothing: the
+    model sometimes repeats an earlier turn's work as if it were new, and a change that was not made must never be reported as made."""
+    return " ".join(s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s and not _claims_a_change(s))
+
+
 def _execute(
     plan: studio_agent.Plan,
     view: ApplicationDefinition,
@@ -812,6 +834,7 @@ def _execute(
     ):
         asking = questions[0]["id"]
         parts.append(questions[0]["text"])
+    said = ""
     if is_guided:
         asking = None
         key = guided.active(saved)
@@ -820,6 +843,8 @@ def _execute(
             # A message typed in the chat gets the assistant's own answer. The fixed sentence is for the automatic drafting of a stage,
             # which has no person's question to answer.
             said = plan.reply.strip() if request_text.strip() and not plan.degraded else ""
+            if said and not applied and proposal is None:
+                said = _without_claimed_changes(said)
             parts = [
                 said
                 or f"Your {label.lower()} draft is ready to review. Ask for any changes, or select Continue when you are happy with it."
@@ -831,16 +856,6 @@ def _execute(
                 if rejected
                 else []
             )
-            open_decisions = [d for d in saved.business.decisions if d.status == "open"]
-            if open_decisions and not (request_text.strip() and "?" in said):
-                # Business questions are asked while the application is being built, not left for Validation. Stated from the saved
-                # design, never by the model, when the assistant's own reply did not already ask: what is waiting for the person.
-                many = len(open_decisions) != 1
-                parts.append(
-                    f"I have {len(open_decisions)} business question{'s' if many else ''} that only you can decide, "
-                    f"and it is better to settle {'them' if many else 'it'} now than at the end. First: {open_decisions[0].question} "
-                    "Answer here in your own words and I will record it."
-                )
         elif key == "checks":
             if proposal:
                 parts = [
@@ -852,8 +867,10 @@ def _execute(
                     + " ".join(r["reason"] for r in rejected[:3])
                 ]
             elif not applied and not plan.actions:
+                said = _without_claimed_changes(plan.reply) if request_text.strip() and not plan.degraded else ""
                 parts = [
-                    "No design changes were saved. "
+                    said
+                    or "No design changes were saved. "
                     + (plan.degraded or plan.reply)
                     + " The validation findings remain open."
                 ]
@@ -879,6 +896,16 @@ def _execute(
             parts.insert(
                 0,
                 f"Saved {len(applied)} design repair changes. The {label.lower()} content changed after review, so review it again before continuing.",
+            )
+        open_decisions = [d for d in saved.business.decisions if d.status == "open"]
+        if key != "export" and open_decisions and not (request_text.strip() and "?" in said):
+            # Business questions are asked while the application is being built, not left for Validation. Stated from the saved
+            # design, never by the model, when the assistant's own reply did not already ask: what is waiting for the person.
+            many = len(open_decisions) != 1
+            parts.append(
+                f"I have {len(open_decisions)} business question{'s' if many else ''} that only you can decide, "
+                f"and it is better to settle {'them' if many else 'it'} now than at the end. First: {open_decisions[0].question} "
+                "Answer here in your own words and I will record it."
             )
     reply = " ".join(part.strip() for part in parts if part and part.strip()) or "Done."
     return {

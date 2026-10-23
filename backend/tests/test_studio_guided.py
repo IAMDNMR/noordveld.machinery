@@ -69,6 +69,14 @@ def test_telling_the_assistant_to_go_ahead_in_any_wording_moves_the_page_on_only
     assert ready.json()['turn']['client_action'] == 'continue' and 'Moving on' in ready.json()['turn']['reply']
 
 
+def test_a_reply_never_reports_a_change_that_this_turn_did_not_make():
+    import app.main  # noqa: F401  (loads the routes in their usual order)
+    from app.api.routes.studio_conversation import _without_claimed_changes
+
+    said = "I've set the theme to blue and removed the steps. I have 3 questions for you? Which vehicle first. I set it up."
+    assert _without_claimed_changes(said) == "I have 3 questions for you? Which vehicle first."
+
+
 def test_a_typed_question_gets_the_assistants_own_answer_not_the_fixed_ready_sentence(journey, monkeypatch):
     c, url, state = journey
 
