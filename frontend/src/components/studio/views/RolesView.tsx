@@ -10,18 +10,24 @@ export function RolesView({ studio, recent, ask }: ViewProps) {
     workflow.states.map((state) => ({ workflow, state })),
   )
   const owned = (roleId: string) => steps.filter(({ state }) => state.role_id === roleId)
-  const access = (roleId: string, entityId: string) => {
+  // What a role may do with a record, by the same rules the generated application applies on its server: the owner of a record, and
+  // a role with a permitted step that changes it, may change it; a step that only reads it (or any change) lets a role read it; only
+  // the owner creates an owned record. Nothing in the generated application deletes a record, so nobody may.
+  const rights = (roleId: string, entityId: string) => {
     const role = business.roles.find((item) => item.id === roleId)
-    if (business.entities.find((item) => item.id === entityId)?.owner_role_id === roleId) return 'W'
+    const entity = business.entities.find((item) => item.id === entityId)
+    const owner = entity?.owner_role_id === roleId
     const mine = owned(roleId).filter(
       ({ state }) => state.permission && role?.permissions.includes(state.permission),
     )
-    const writes = mine.some(({ state }) => (state.writes_entity_ids ?? []).includes(entityId))
-    const reads = mine.some(({ state }) => (state.reads_entity_ids ?? []).includes(entityId))
-    return writes ? 'W' : reads ? 'R' : ''
+    const update =
+      owner || mine.some(({ state }) => (state.writes_entity_ids ?? []).includes(entityId))
+    const read =
+      update || mine.some(({ state }) => (state.reads_entity_ids ?? []).includes(entityId))
+    return { create: update && (!entity?.owner_role_id || owner), read, update, delete: false }
   }
   const entities = business.entities.filter((entity) =>
-    business.roles.some((role) => access(role.id, entity.id)),
+    business.roles.some((role) => rights(role.id, entity.id).read),
   )
 
   if (!business.roles.length)
@@ -87,9 +93,12 @@ export function RolesView({ studio, recent, ask }: ViewProps) {
       <section className="sw-card" aria-label="Data access">
         <h3>Access boundaries</h3>
         <p className="sw-muted">
-          Read (R) and update (W) access includes entity ownership and permitted process steps. Only
-          the owner role can create an owned record. Fields maintained by another role remain
-          read-only. The generated application checks access on its server.
+          Each mark is a separate right: <strong>C</strong> create, <strong>R</strong> read,{' '}
+          <strong>U</strong> update, <strong>D</strong> delete. A role gets them from owning a
+          record or from the process steps it may perform. Only the owner of a record creates it,
+          and fields kept by another role stay read-only. No role can delete: the generated
+          application keeps every record and its history. The generated application checks all of
+          this on its server.
         </p>
         {entities.length === 0 ? (
           <p className="sw-muted">No role touches any data yet.</p>
@@ -109,16 +118,38 @@ export function RolesView({ studio, recent, ask }: ViewProps) {
                   <tr key={entity.id}>
                     <th scope="row">{entity.name}</th>
                     {business.roles.map((role) => {
-                      const value = access(role.id, entity.id)
+                      const right = rights(role.id, entity.id)
+                      const granted = (
+                        [
+                          ['create', 'C', 'Create'],
+                          ['read', 'R', 'Read'],
+                          ['update', 'U', 'Update'],
+                          ['delete', 'D', 'Delete'],
+                        ] as const
+                      ).filter(([key]) => right[key])
                       return (
-                        <td key={role.id} data-access={value || undefined}>
-                          {value || '·'}
+                        <td
+                          key={role.id}
+                          data-access={right.update ? 'W' : right.read ? 'R' : undefined}
+                        >
+                          <span className="sw-crud" aria-hidden="true">
+                            {(
+                              [
+                                ['create', 'C', 'Create'],
+                                ['read', 'R', 'Read'],
+                                ['update', 'U', 'Update'],
+                                ['delete', 'D', 'Delete'],
+                              ] as const
+                            ).map(([key, letter, name]) => (
+                              <abbr key={key} data-on={right[key] || undefined} title={name}>
+                                {letter}
+                              </abbr>
+                            ))}
+                          </span>
                           <span className="sw-sr">
-                            {value === 'W'
-                              ? 'can change'
-                              : value === 'R'
-                                ? 'can read'
-                                : 'no access'}
+                            {granted.length
+                              ? `can ${granted.map(([, , name]) => name.toLowerCase()).join(', ')}`
+                              : 'no access'}
                           </span>
                         </td>
                       )

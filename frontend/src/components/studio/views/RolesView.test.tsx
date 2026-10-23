@@ -31,6 +31,9 @@ it('includes owner access and denies step access when its permission is absent',
   }
   render(<RolesView {...({ studio, recent: new Set(), ask: vi.fn() } as unknown as ViewProps)} />)
   const row = screen.getByRole('row', { name: /Customer/ })
-  expect(within(row).getByText('can change')).toBeTruthy()
+  // The owner creates, reads and updates its record; nobody deletes (the generated application keeps every record); a worker whose
+  // step permission is missing has no access at all.
+  expect(within(row).getByText('can create, read, update')).toBeTruthy()
   expect(within(row).getByText('no access')).toBeTruthy()
+  expect(within(row).queryByText(/delete/i)).toBeNull()
 })
