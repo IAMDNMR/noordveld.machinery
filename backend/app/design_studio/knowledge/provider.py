@@ -320,6 +320,58 @@ def _data_model_only(
     return {group: [item for item in content[group] if item["id"] in wanted] for group in GROUPS}
 
 
+# Regions that name a legal regime ("remedies under Directive (EU) 2019/771"). A process written for one applies only when the project
+# chose that region; "Global", "Europe" (a geographic variant of a standard flow) and "Unspecified" are never held back.
+LEGAL_REGIONS = {"European Union": "eu", "India": "india"}
+
+
+def _applies_in(context_region: str, selected: str | None) -> bool:
+    code = LEGAL_REGIONS.get(context_region)
+    return code is None or selected == code
+
+
+def _leave_out_other_regions(raw: dict, pack, selected: str | None) -> list[str]:
+    """Remove the pack's processes written for a legal region the project did not choose, and what only they use.
+
+    A small workshop that never chose the European Union should not get an EU consumer-law remedy process, its record, rules and
+    requirements. Anything also used by a process that stays, and anything not copied from this pack, is kept. A pack is never emptied.
+    Returns the names of the processes left out."""
+    held_back = {c.workflow_id for c in pack.process_contexts if not _applies_in(c.region, selected)}
+    own = {w.id for w in pack.workflows}
+    present = [w for w in raw["workflow_definitions"] if w["id"] in held_back]
+    if not present or len(present) == len([w for w in raw["workflow_definitions"] if w["id"] in own]):
+        return []
+    kept = [w for w in raw["workflow_definitions"] if w not in present]
+
+    def used(workflows) -> dict[str, set]:
+        found = {key: set() for key in ("entities", "rules", "exceptions", "requirements")}
+        for workflow in workflows:
+            for state in workflow["states"]:
+                found["entities"] |= set(state.get("reads_entity_ids", [])) | set(state.get("writes_entity_ids", []))
+                found["rules"] |= set(state.get("rule_ids", []))
+                found["exceptions"] |= set(state.get("exception_ids", []))
+                found["requirements"] |= set(state.get("requirement_ids", []))
+        return found
+
+    gone, still = used(present), used(kept)
+    business = raw["business"]
+    for group in ("entities", "rules", "exceptions", "requirements"):
+        only_there = gone[group] - still[group]
+        business[group] = [
+            item
+            for item in business[group]
+            if not (item["id"] in only_there and (item.get("origin") or {}).get("pack_id") == pack.id)
+        ]
+    removed_entities = gone["entities"] - still["entities"]
+    for entity in business["entities"]:
+        entity["relationships"] = [r for r in entity.get("relationships", []) if r["target"] not in removed_entities]
+    names = [w["name"] for w in present]
+    ids = {w["id"] for w in present}
+    raw["workflow_definitions"] = [w for w in raw["workflow_definitions"] if w["id"] not in ids]
+    raw["workflows"] = [i for i in raw["workflows"] if i not in ids]
+    return names
+
+
 def apply_pack(
     definition: ApplicationDefinition, pack_id: str, provider: KnowledgeProvider
 ) -> tuple[ApplicationDefinition, dict]:
@@ -394,6 +446,15 @@ def apply_pack(
             brief["capability"] = pack.capability.name
     if conflicts:
         raise PackConflict(sorted(set(conflicts)))
+    intake = definition.business.brief.intake
+    left_out = [
+        name
+        for pack in ordered
+        if pack.id in full
+        for name in _leave_out_other_regions(raw, pack, intake.region if intake else None)
+    ]
+    if left_out:
+        added["left_out_for_region"] = len(left_out)
     # A draft may already express exactly the same requirement in user wording.
     # Keep the sourced canonical ID (used by the imported process) and preserve
     # the user's acceptance criteria instead of leaving an uncovered duplicate.

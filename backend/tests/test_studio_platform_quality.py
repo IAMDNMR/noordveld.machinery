@@ -61,6 +61,36 @@ def test_a_drafted_role_that_is_a_shorter_name_for_a_verified_one_is_merged_but_
     assert any("Merged the role Technician into Service technician" in line for line in changes)
 
 
+def test_a_process_written_for_one_legal_region_joins_only_when_that_region_was_chosen():
+    from app.design_studio.discovery import blank_definition
+    from app.design_studio.knowledge.provider import LocalKnowledgeProvider, apply_pack
+    from app.schemas.application_definition import IntakeContext
+
+    provider = LocalKnowledgeProvider()
+
+    def adopt(region):
+        start = blank_definition()
+        if region:
+            brief = start.business.brief.model_copy(update={"intake": IntakeContext(region=region, catalog_version="1")})
+            start = start.model_copy(update={"business": start.business.model_copy(update={"brief": brief})})
+        return apply_pack(start, "cat_aftersales_warranty", provider)
+
+    for region in (None, "global", "india"):
+        definition, added = adopt(region)
+        names = {w.name for w in definition.workflow_definitions}
+        assert "Warranty claim" in names and "Consumer remedy for non-conforming goods" not in names, region
+        # What only the EU process used goes with it; what the other processes use stays.
+        assert "Consumer remedy" not in {e.name for e in definition.business.entities}
+        assert "Machine" in {e.name for e in definition.business.entities}
+        assert not any("remedy" in rule.id for rule in definition.business.rules)
+        assert added["left_out_for_region"] == 1
+
+    definition, added = adopt("eu")
+    assert "Consumer remedy for non-conforming goods" in {w.name for w in definition.workflow_definitions}
+    assert "Consumer remedy" in {e.name for e in definition.business.entities}
+    assert "left_out_for_region" not in added
+
+
 def test_a_workflow_of_only_look_up_and_check_steps_is_a_dashboard_not_a_process_to_start():
     from types import SimpleNamespace as Step
 
