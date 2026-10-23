@@ -728,6 +728,8 @@ def _execute(
 
     proposal, more_rejected = _proposal(saved, review, knowledge) if review else (None, [])
     rejected += more_rejected
+    # Asking for a decision that is already open changes nothing and is no problem to report.
+    rejected = [r for r in rejected if r.get("reason") != "That decision is already open."]
 
     generation = None
     focus, client_action = plan.focus, None
@@ -809,8 +811,12 @@ def _execute(
         key = guided.active(saved)
         label = dict(stage_model.STAGES)[key]
         if key != "export" and guided.ready(saved, key):
+            # A message typed in the chat gets the assistant's own answer. The fixed sentence is for the automatic drafting of a stage,
+            # which has no person's question to answer.
+            said = plan.reply.strip() if request_text.strip() and not plan.degraded else ""
             parts = [
-                f"Your {label.lower()} draft is ready to review. Ask for any changes, or select Continue when you are happy with it."
+                said
+                or f"Your {label.lower()} draft is ready to review. Ask for any changes, or select Continue when you are happy with it."
             ] + (
                 [
                     "Some requested changes could not be applied: "
@@ -819,6 +825,14 @@ def _execute(
                 if rejected
                 else []
             )
+            open_decisions = [d for d in saved.business.decisions if d.status == "open"]
+            if request_text.strip() and open_decisions:
+                # Stated from the saved design, never by the model: what is still waiting for the person.
+                parts.append(
+                    f"Still waiting for you: {len(open_decisions)} business decision{'s' if len(open_decisions) != 1 else ''}, "
+                    f"for example “{open_decisions[0].question}”. They are answered in Domain Knowledge; company policy is yours to decide. "
+                    "They do not stop you from continuing this stage, but approval in Validation needs them answered."
+                )
         elif key == "checks":
             if proposal:
                 parts = [
