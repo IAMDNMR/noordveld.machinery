@@ -19,6 +19,11 @@ def test_diagnostics_keep_later_files_after_large_first_file_report():
     report += "\nsrc/pages/Request.tsx(8,2): error TS2322: wrong props"
     assert "src/pages/Request.tsx" in build_errors(report)
     assert "wrong props" in errors_for(report, "src/pages/Request.tsx")
+    # The same report as the Linux builder prints it (only the climb out of the working directory is left in front of src/),
+    # and as Windows prints it (the temporary folder's name is still there): both give the file and its line.
+    for path in ("../../../../../../src/App.tsx", "../../Temp/studio-source-check-ab12/src/App.tsx"):
+        found = build_errors(f"{path}(1,42): error TS2304: Cannot find name 'missingName'.")
+        assert found["src/App.tsx"][0]["line"] == 1, path
 
 
 def test_valid_patch_preserves_other_source():

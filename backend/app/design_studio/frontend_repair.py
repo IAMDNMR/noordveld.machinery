@@ -98,6 +98,9 @@ def build_errors(report: str) -> dict[str, list[dict]]:
     for text in report.splitlines():
         # tsc reports files under the temporary check folder (../../Temp/studio-source-check-x/src/a.tsx): keep the src/ path.
         text = re.sub(r"^\S*?studio-source-check-[^/\\]+[/\\]", "", text.strip())
+        # On Linux the builder has already removed the temp folder's own name, leaving only the climb out of the working
+        # directory ("../../../src/App.tsx"): drop that too, so the file is recognised as "src/App.tsx" on every platform.
+        text = re.sub(r"^(?:\.{1,2}[/\\])+/*", "", text)
         for pattern in PATTERNS:
             match = pattern.match(text.strip())
             if match:
