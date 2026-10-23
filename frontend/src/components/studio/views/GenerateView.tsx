@@ -274,6 +274,26 @@ export function GenerateView({ studio, access, busy, refresh, say, autorun = 0 }
               <ExternalLink size={14} /> Open live demo
             </a>
           ) : null}
+          {generated ? (
+            current?.status === 'generated' && generateAllowed ? (
+              <a className="sw-button" href={compiledArchiveUrl(projectId)}>
+                <Download size={14} /> Download code (ZIP)
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="sw-button"
+                disabled
+                title={
+                  approved
+                    ? 'The application package is being prepared and checked.'
+                    : 'Approve the process and the design in Validation, then generate the application, to unlock the download.'
+                }
+              >
+                <Download size={14} /> Download code (ZIP)
+              </button>
+            )
+          ) : null}
           {runtime.running && runtime.url ? (
             <a className="sw-button" href={runtime.url} target="_blank" rel="noreferrer">
               <ExternalLink size={14} /> Open application
