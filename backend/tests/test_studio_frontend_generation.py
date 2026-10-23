@@ -265,9 +265,10 @@ def test_generation_repairs_the_failed_file_instead_of_returning_a_template():
             return super().studio_frontend_file(system, prompt)
 
     model = RepairingModel(definition)
-    artifact = generate_frontend(definition, model, brief=f"test-{uuid4()}")
+    events = []
+    artifact = generate_frontend(definition, model, brief=f"test-{uuid4()}", progress=events.append)
     assert model.repairs == 1
-    assert "<p>{'Ready'}</p>" in artifact.files["src/App.tsx"]
+    assert "<p>{'Ready'}</p>" in artifact.files["src/App.tsx"], "DEBUGEVENTS " + repr(events)[:3500]
     assert "TypeScript strict check passes" in artifact.checks
 
 
