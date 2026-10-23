@@ -439,6 +439,10 @@ class Runtime:
         if len(edges) != 1 or edges[0]["condition"]["kind"] != "always":
             raise Fault(409, "This start gateway is unsupported")
         first = next(s for s in workflow["states"] if s["id"] == edges[0]["target"])
+        if first["kind"] == "branch":
+            # An automatic decision has no role and no permission, and which way it goes depends on records that do not exist yet:
+            # nobody could ever act on an instance parked there, so say plainly that this start is not supported.
+            raise Fault(409, "This start gateway is unsupported")
         if not self.permits(user, first):
             raise Fault(403, "Only the responsible role may start this process")
         if not isinstance(links, dict) or any(
