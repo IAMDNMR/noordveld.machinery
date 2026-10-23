@@ -56,6 +56,24 @@ def test_serial_review_reload_and_conflicts(journey):
     assert c.post(url + '/continue', json={'expected_revision': original, 'stage': 'brief'}).status_code == 409
 
 
+def test_a_typed_question_gets_the_assistants_own_answer_not_the_fixed_ready_sentence(journey, monkeypatch):
+    c, url, state = journey
+
+    class Answering(FoundationModel):
+        def studio_json(self, system, prompt):
+            assert 'HOW TO TALK WITH THE PERSON' in system  # the guided assistant is told to answer, ask one clear question, or say what it cannot do
+            return {'reply': 'Nothing is needed from you except to review the requirements.', 'actions': [], 'questions': [], 'ask': None}
+
+    monkeypatch.setattr('app.api.routes.studio_conversation.get_studio_llm', Answering)
+    asked = c.post(url + '/turn', json={'guided': True, 'expected_revision': state['revision'], 'message': 'what do you want from me?'})
+    assert asked.status_code == 200, asked.text
+    reply = asked.json()['turn']['reply']
+    assert 'Nothing is needed from you' in reply and 'draft is ready to review' not in reply
+    # The automatic drafting of a stage (no typed message) still ends with the fixed invitation to review.
+    drafted = c.post(url + '/continue', json={'expected_revision': asked.json()['state']['revision'], 'stage': 'brief'})
+    assert drafted.status_code == 200, drafted.text
+
+
 
 
 
