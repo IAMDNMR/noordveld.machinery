@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.design_studio.discovery import blank_definition
 from app.design_studio.releases import ReleaseStore, get_release_store
 from app.design_studio.sqlite_store import SqliteProjectStore, SqliteStudioStore
-from app.design_studio.visitors import INSTANCE_PER_HOUR, MAX_PROJECTS, VISITOR_PER_HOUR, check_rate, new_visitor_id
+from app.design_studio.visitors import INSTANCE_PER_HOUR, VISITOR_PER_HOUR, check_rate, new_visitor_id
 from app.main import create_app
 
 SITE = "https://noordveldmachinery.vercel.app"
@@ -48,33 +48,40 @@ def test_the_switch_is_off_by_default_so_a_deployed_studio_stays_closed(monkeypa
         assert client.get("/api/v1/design-studio/projects").status_code == 503
 
 
-def test_each_visitor_gets_a_private_workspace_with_no_sign_in_and_cannot_reach_anything_else(monkeypatch, tmp_path):
+def test_everyone_who_opens_the_demo_works_in_one_shared_workspace_with_no_sign_in(monkeypatch, tmp_path):
+    from app.design_studio import visitors
+
     app = deployed_app(monkeypatch, tmp_path, public=True)
+    cap = 3
+    monkeypatch.setattr(visitors, "MAX_PROJECTS", cap)  # the real cap is larger; three is enough to prove it is shared
     with TestClient(app, base_url=SITE) as first, TestClient(app, base_url=SITE) as second:
         me = first.post("/api/v1/studio-session/demo")
         assert me.status_code == 200 and me.json()["id"].startswith("visitor-") and me.json()["role"] == "END_USER"
-        assert first.post("/api/v1/studio-session/demo").json()["id"] == me.json()["id"], "the same browser keeps its workspace"
-        # The workspace is the only way back to a visitor's projects, so it lasts a year and is renewed at every visit (not 12 hours).
+        assert first.post("/api/v1/studio-session/demo").json()["id"] == me.json()["id"], "the same browser keeps its identity"
+        # The identity tells browsers apart for the hourly limits; it lasts a year and is renewed at every visit (not 12 hours).
         assert "Max-Age=31536000" in me.headers["set-cookie"]
         assert "Max-Age=31536000" in first.get("/api/v1/studio-session/me").headers["set-cookie"]
         assert second.post("/api/v1/studio-session/demo").json()["id"] != me.json()["id"]
 
+        # What one visitor generates is saved once and listed, opened and continued by the other: one shared workspace.
         body = blank_definition().model_dump(mode="json")
-        for _ in range(MAX_PROJECTS):
+        for _ in range(cap):
             created = first.post("/api/v1/design-studio/projects", json={**body, "id": f"app_{new_visitor_id()[-12:]}"})
             assert created.status_code == 200, created.text
-        over = first.post("/api/v1/design-studio/projects", json={**body, "id": "app_overlimit0001"})
-        assert over.status_code == 409 and over.json()["error"]["code"] == "demo_project_limit"
+        assert len(first.get("/api/v1/design-studio/projects").json()) == cap
+        listed = second.get("/api/v1/design-studio/projects").json()
+        assert [item["id"] for item in listed] == [item["id"] for item in first.get("/api/v1/design-studio/projects").json()]
+        shared = listed[0]["id"]
+        assert second.get(f"/api/v1/design-studio/projects/{shared}").status_code == 200
 
-        assert len(first.get("/api/v1/design-studio/projects").json()) == MAX_PROJECTS
-        assert second.get("/api/v1/design-studio/projects").json() == [], "another visitor sees none of it"
-        first_project = first.get("/api/v1/design-studio/projects").json()[0]["id"]
-        assert second.get(f"/api/v1/design-studio/projects/{first_project}").status_code in (403, 404)
+        # The cap is on the whole workspace, whoever asks: the open demo cannot grow without limit.
+        over = second.post("/api/v1/design-studio/projects", json={**body, "id": "app_overlimit0001"})
+        assert over.status_code == 409 and over.json()["error"]["code"] == "demo_project_limit"
 
         # Shared knowledge cannot be changed, the commerce sign-in stays closed, and running an app needs a local Studio.
         assert second.post("/api/v1/domain-knowledge/versions/x/1/transition", json={"to": "approved", "reason": "x"}).status_code in (403, 404, 405, 422)
         assert second.post("/api/v1/auth/login", json={"user_id": "USR-EU-001"}).status_code == 404
-        launch = first.post(f"/api/v1/design-studio/projects/{first_project}/runtime/launch", json={})
+        launch = first.post(f"/api/v1/design-studio/projects/{shared}/runtime/launch", json={})
         assert launch.status_code == 409 and launch.json()["error"]["code"] == "runtime_local_only"
 
 
@@ -90,11 +97,11 @@ def test_a_signed_link_opens_the_live_demo_for_anyone_until_it_expires_and_only_
 
         link = owner.post(f"/api/v1/design-studio/projects/{project}/demo-link")
         assert link.status_code == 200 and link.json()["path"].startswith("/api/v1/demo/") and link.json()["expires_in_days"] == 7
-        assert other.post(f"/api/v1/design-studio/projects/{project}/demo-link").status_code in (403, 404), "not someone else's project"
+        assert other.post(f"/api/v1/design-studio/projects/{project}/demo-link").status_code == 200, "the demo workspace is shared"
         # The "Open live demo" link: a plain GET that signs the link and redirects to it, so it opens in a new tab on any browser.
         hop = owner.get(f"/api/v1/design-studio/projects/{project}/live-demo", follow_redirects=False)
         assert hop.status_code == 303 and hop.headers["location"].startswith("/api/v1/demo/")
-        assert other.get(f"/api/v1/design-studio/projects/{project}/live-demo", follow_redirects=False).status_code in (403, 404)
+        assert other.get(f"/api/v1/design-studio/projects/{project}/live-demo", follow_redirects=False).status_code == 303
 
         page = stranger.get(link.json()["path"])  # no cookie, no sign-in
         assert page.status_code == 200 and "text/html" in page.headers["content-type"] and "live demo" in page.text

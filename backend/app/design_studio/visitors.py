@@ -1,7 +1,8 @@
-"""Anonymous visitors of the public Design Studio demo: one private workspace per browser, no sign-in.
+"""Anonymous visitors of the public Design Studio demo: no sign-in, one shared workspace.
 
 The identity is a random id inside the signed Studio session cookie (the same signature as every Studio session). It is not an
-account: it holds the END_USER role, owns only the projects it creates, and is meaningful only while the public demo switch is on.
+account: it holds the END_USER role and is meaningful only while the public demo switch is on. It tells browsers apart for the
+hourly limits; the projects themselves belong to one shared workspace, so everyone who opens the demo sees the same projects.
 """
 
 from __future__ import annotations
@@ -17,7 +18,8 @@ from app.core.demo_access import VISITOR_PREFIX
 from app.core.roles import Role
 from app.services.orders import User
 
-MAX_PROJECTS = 3  # live projects per visitor; Trash does not count so a visitor can start over
+SHARED_OWNER = VISITOR_PREFIX + "shared-demo"  # who owns every project made in the public demo (not a visitor id itself)
+MAX_PROJECTS = 30  # live projects in the shared demo workspace; Trash does not count, so people can start over
 # Requests that call the language model, speech or code-generation providers cost money: bounded per visitor (best effort per server
 # instance, since instances do not share memory) and for the whole instance.
 EXPENSIVE_SUFFIXES = (
@@ -87,20 +89,37 @@ def check_rate(user_id: str, now: float | None = None) -> None:
                 _visitor_hits.pop(key, None)
 
 
-class LimitedProjects:
-    """A project store that stops a visitor from creating more than MAX_PROJECTS live projects; everything else is the real store."""
+class SharedWorkspace:
+    """Makes every anonymous visitor work in the one shared demo workspace.
+
+    Any call whose first argument is a visitor's id (every store method takes its owner first) is made as SHARED_OWNER instead, so a
+    project anyone generates is saved once, in the database, and listed, opened and continued by everyone who opens the demo. Calls
+    made for a real account, and calls whose first argument is not an owner, pass through unchanged."""
 
     def __init__(self, inner):
         self._inner = inner
 
     def __getattr__(self, name):
-        return getattr(self._inner, name)
+        attribute = getattr(self._inner, name)
+        if not callable(attribute):
+            return attribute
+
+        def call(*args, **kwargs):
+            if args and is_visitor(args[0]):
+                args = (SHARED_OWNER, *args[1:])
+            return attribute(*args, **kwargs)
+
+        return call
+
+
+class LimitedProjects(SharedWorkspace):
+    """The shared workspace for projects, bounded: at most MAX_PROJECTS live projects in total, so an open demo cannot grow without limit."""
 
     def create(self, owner, definition):
         if is_visitor(owner):
             live = [
                 p
-                for p in self._inner.list(owner)
+                for p in self._inner.list(SHARED_OWNER)
                 if not (
                     p.project_lifecycle and p.project_lifecycle.status in ("trashed", "archived")
                 )
@@ -109,6 +128,7 @@ class LimitedProjects:
                 raise _refuse(
                     409,
                     "demo_project_limit",
-                    f"The demo keeps up to {MAX_PROJECTS} projects per visitor. Move one to Trash to start another.",
+                    f"The shared demo keeps up to {MAX_PROJECTS} projects. Move one to Trash to start another.",
                 )
+            owner = SHARED_OWNER
         return self._inner.create(owner, definition)

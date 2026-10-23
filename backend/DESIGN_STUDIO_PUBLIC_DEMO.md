@@ -1,15 +1,17 @@
 # Design Studio on Vercel: public demo (no sign-in)
 
-Anyone who opens `/design-studio` gets their own anonymous workspace. There is no account: a random visitor id lives in a signed
-cookie, owns only the projects that browser creates, and nobody can read another visitor's projects or any real account's.
-Shared domain knowledge stays read-only (nobody holds domain permissions on a deployed backend). The commerce demo sign-in stays closed.
+Anyone who opens `/design-studio` works in ONE shared workspace. There is no account and no sign-in: every project anyone generates is
+saved in CockroachDB under a single shared owner and is listed, opened, continued and trashed by everyone who opens the demo. A random
+visitor id in a signed cookie (kept a year, renewed at each visit) only tells browsers apart for the hourly limits. Nobody can reach a
+real account's projects. Shared domain knowledge stays read-only (nobody holds domain permissions on a deployed backend). The commerce
+demo sign-in stays closed. Because the workspace is open, do not put anything confidential in it.
 
 ## Limits (code: `app/design_studio/visitors.py`)
-- 3 live projects per visitor (Trash does not count).
+- 30 live projects in the whole shared workspace (Trash does not count).
 - 40 assistant/voice/generation requests per visitor per hour, and 600 per server instance per hour. Best effort: serverless
   instances do not share memory, so the true ceiling scales with the number of instances.
 - Launching or testing a generated application needs a local process, so on Vercel it answers "available when running locally".
-- Visitor projects are never expired automatically. Plan a clean-up (for example, delete visitor projects older than 30 days).
+- Demo projects are never expired automatically. Plan a clean-up (for example, trash demo projects older than 30 days).
 
 ## Settings to add in Vercel (Project, Settings, Environment Variables)
 | Variable | Value |

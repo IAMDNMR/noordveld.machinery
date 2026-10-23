@@ -270,6 +270,12 @@ def get_release_store() -> ReleaseStore:
 
     store = configured_release_store()
     if store is not None:
+        from app.core.demo_access import public_studio_enabled
+
+        if public_studio_enabled():
+            from app.design_studio.visitors import SharedWorkspace
+
+            return SharedWorkspace(store)  # saved versions belong to the shared demo workspace, like its projects
         return store
     raise HTTPException(
         503,
