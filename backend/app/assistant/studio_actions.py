@@ -1034,9 +1034,20 @@ def _add_exception(raw, action: AddException, changes, provider):
         )
 
 
+def decision_words(question: str) -> frozenset[str]:
+    """The words of a business question without its examples in brackets ("(e.g., nearest, largest capacity)"), so two ways of asking
+    the same thing compare equal."""
+    return frozenset(re.findall(r"[a-z0-9]+", re.sub(r"\([^)]*\)", " ", question.lower())))
+
+
+def same_decision(first: str, second: str) -> bool:
+    a, b = decision_words(first), decision_words(second)
+    return bool(a and b) and len(a & b) / min(len(a), len(b)) >= 0.85
+
+
 def _add_decision(raw, action: AddDecision, changes, provider):
     business = raw["business"]
-    if any(_norm(d["question"]) == _norm(action.question) for d in business["decisions"]):
+    if any(_norm(d["question"]) == _norm(action.question) or same_decision(d["question"], action.question) for d in business["decisions"]):
         raise ActionError("That decision is already open.")
     ident = _unique_id("dec", action.question[:40], _business_ids(raw))
     business["decisions"].append(
