@@ -154,6 +154,18 @@ def test_business_questions_are_asked_once_answered_in_any_stage_and_never_left_
     )
     assert [d.status for d in answered.business.decisions if d.id == open_now[0].id] == ["decided"]
 
+    # "I will decide later" stops the question blocking approval; it becomes a warning with the person's reason.
+    from app.design_studio.completeness import analyze
+
+    deferred, _, _ = apply_actions(
+        merged,
+        parse_actions([{"type": "defer_decision", "decision_id": open_now[0].id, "reason": "To be settled with operations next month."}])[0],
+        LocalKnowledgeProvider(),
+    )
+    mine = {item["code"]: item["severity"] for item in analyze(deferred, LocalKnowledgeProvider(), "design")["findings"] if open_now[0].id in item["artefacts"]}
+    assert mine == {"DECISION_DEFERRED": "warning"}, mine  # no longer an error that blocks approval
+    assert all("defer_decision" in guided.ALLOWED[stage] for stage in guided.ALLOWED)
+
 
 def test_a_workflow_of_only_look_up_and_check_steps_is_a_dashboard_not_a_process_to_start():
     from types import SimpleNamespace as Step

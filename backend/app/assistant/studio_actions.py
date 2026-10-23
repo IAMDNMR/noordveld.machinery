@@ -240,6 +240,14 @@ class AnswerDecision(Strict):
     answer: Annotated[str, Field(min_length=1, max_length=1000)]
 
 
+class DeferDecision(Strict):
+    """The person will decide later. It stops blocking approval and becomes a warning they acknowledge; the reason is theirs."""
+
+    type: Literal["defer_decision"]
+    decision_id: Annotated[str, Field(max_length=80)]
+    reason: Annotated[str, Field(min_length=1, max_length=1000)]
+
+
 STEP_KINDS = ("form", "search", "review", "approval", "action", "exception", "branch")
 # What a model calls a step that is not one of ours. The process always gets its own Start and Completed, so those are dropped.
 KIND_ALIASES = {"decision": "branch", "gateway": "branch", "check": "review", "handler": "exception", "exception_handler": "exception", "manual": "form"}
@@ -353,6 +361,7 @@ Action = Annotated[
     | UpdateException
     | AddDecision
     | AnswerDecision
+    | DeferDecision
     | CreateWorkflow
     | InsertStep
     | AddApproval
@@ -1084,6 +1093,19 @@ def _answer_decision(raw, action: AnswerDecision, changes, provider):
     )
 
 
+def _defer_decision(raw, action: DeferDecision, changes, provider):
+    decision = _find(raw["business"]["decisions"], action.decision_id, ("question",), "decision")
+    decision["status"], decision["deferral_reason"] = "deferred", action.reason.strip()
+    changes.append(
+        {
+            "area": "decisions",
+            "kind": "changed",
+            "item_id": decision["id"],
+            "summary": f"Deferred: {decision['question'][:80]}",
+        }
+    )
+
+
 HUMAN = ("form", "search", "review", "approval", "action", "exception")
 
 
@@ -1476,6 +1498,7 @@ def _set_screen_sections(raw, action: SetScreenSections, changes, provider):
 
 HANDLERS: dict[str, Callable] = {
     "set_screen_sections": _set_screen_sections,
+    "defer_decision": _defer_decision,
     "set_theme": _set_theme,
     "set_intake_context": _set_intake_context,
     "set_brief": _set_brief,

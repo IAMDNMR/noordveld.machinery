@@ -85,7 +85,7 @@ def stage_digest(definition: ApplicationDefinition, stage: str) -> str:
 # A business decision is answered the moment the person decides it, in whatever stage they are in (it is stored with the rules; answering
 # before that stage is reviewed changes nothing already reviewed). Asking is the assistant's job, deciding is never its.
 for _stage in ALLOWED:
-    ALLOWED[_stage] = ALLOWED[_stage] | {"answer_decision"}
+    ALLOWED[_stage] = ALLOWED[_stage] | {"answer_decision", "defer_decision"}
 
 
 def reviewed(definition: ApplicationDefinition) -> list[str]:
