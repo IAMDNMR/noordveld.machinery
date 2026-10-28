@@ -109,9 +109,7 @@ function NodeDetail({ nodeId }: { nodeId: string }) {
                       key={l.label}
                       type="button"
                       className="rcard__action"
-                      onClick={() =>
-                        navigate(`/parts-intelligence?q=${encodeURIComponent(l.question!)}`)
-                      }
+                      onClick={() => navigate(`/spark/chat?q=${encodeURIComponent(l.question!)}`)}
                     >
                       {l.label}
                     </button>

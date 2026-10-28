@@ -13,6 +13,8 @@ import {
   ShieldCheck,
   Truck,
   Warehouse,
+  Expand,
+  X,
 } from 'lucide-react'
 import type { GraphNode, GraphView } from '../../api/intelligenceTypes'
 import { humanize } from '../../lib/format'
@@ -39,13 +41,16 @@ export function GraphExplorer({
   onOpen,
   renderDetail,
   label = 'Relationships',
+  allowExpand = true,
 }: {
   view: GraphView
   onOpen?: (part: string) => void
   renderDetail?: (node: GraphNode) => ReactNode
   label?: string
+  allowExpand?: boolean
 }) {
   const svg = useRef<SVGSVGElement>(null)
+  const expanded = useRef<HTMLDialogElement>(null)
   const marker = useId().replaceAll(':', '')
   const base = useMemo(() => graphPositions(view), [view])
   const [moves, setMoves] = useState<Record<string, Point>>({})
@@ -83,7 +88,7 @@ export function GraphExplorer({
       displayedIds.has(node.id) ||
       (search && matches.has(node.id)),
   )
-  const connected = view.edges.filter(
+  const connected = displayedEdges.filter(
     (edge) => edge.source === selectedId || edge.target === selectedId,
   )
   const neighbourIds = new Set(connected.flatMap((edge) => [edge.source, edge.target]))
@@ -174,6 +179,15 @@ export function GraphExplorer({
           {displayedEdges.length === 1 ? 'connection' : 'connections'}
         </span>
         <div className="gx-zoom">
+          {allowExpand ? (
+            <button
+              type="button"
+              aria-label="Open full screen graph"
+              onClick={() => expanded.current?.showModal()}
+            >
+              <Expand size={17} />
+            </button>
+          ) : null}
           <button type="button" aria-label="Zoom out graph" onClick={() => zoom(1 / 1.2)}>
             <Minus size={16} />
           </button>
@@ -261,7 +275,7 @@ export function GraphExplorer({
                       textAnchor="middle"
                       transform={`rotate(${angle} ${cx} ${cy - 7})`}
                     >
-                      {edge.type}
+                      {humanize(edge.type)}
                     </text>
                   </g>
                 )
@@ -371,7 +385,7 @@ export function GraphExplorer({
         </aside>
       </div>
       <div className="gx-legend">
-        {[...new Set(view.nodes.map((node) => node.kind))].map((kind) => (
+        {[...new Set(nodes.map((node) => node.kind))].map((kind) => (
           <span key={kind}>
             <i
               style={{
@@ -390,6 +404,28 @@ export function GraphExplorer({
         <p className="gx-limit">
           The service returned a limited neighbourhood. Use the related sections for full counts.
         </p>
+      ) : null}
+      {allowExpand ? (
+        <dialog ref={expanded} className="gx-fullscreen" aria-label="Full screen relationships">
+          <div className="gx-fullscreen__header">
+            <strong>{label}</strong>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => expanded.current?.close()}
+              aria-label="Close full screen graph"
+            >
+              <X size={18} /> Close
+            </button>
+          </div>
+          <GraphExplorer
+            view={view}
+            onOpen={onOpen}
+            renderDetail={renderDetail}
+            label={label}
+            allowExpand={false}
+          />
+        </dialog>
       ) : null}
     </section>
   )

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { CHECKOUT_ROUTE, STORE_ROUTE } from '../../lib/storeQuery'
 import { useCart } from '../../store/CartContext'
 import { CartContents } from './CartContents'
+import './cart-redesign.css'
 
 export function CartDrawer() {
   const { lines, count, open, setOpen, clear } = useCart()

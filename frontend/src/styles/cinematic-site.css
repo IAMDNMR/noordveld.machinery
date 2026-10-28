@@ -1,0 +1,272 @@
+/*
+  Site-wide cinematic finish, loaded last by SiteLayout. It adds motion and depth to the openings and surfaces of every page without
+  changing their structure: a reading-progress line, scroll-driven parallax where the browser supports it, rising titles, an animated
+  brand gradient behind dark openings, and consistent card lift. All of it stops under prefers-reduced-motion.
+*/
+
+/* ── reading progress ────────────────────────────────────────────────────── */
+.read-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--teal-ink), var(--teal));
+  transform-origin: left;
+  transform: scaleX(0);
+}
+@supports (animation-timeline: scroll()) {
+  .read-progress {
+    animation: read-grow linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes read-grow {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ── openings: rising titles and a living gradient ──────────────────────── */
+#main .as-hero__title > span,
+#main .store-hero h1,
+#main .page-head .hero-title,
+#main .mhero h1,
+#main .pf h1 {
+  animation: site-rise 1000ms var(--cine-ease, cubic-bezier(0.22, 0.8, 0.2, 1)) both;
+}
+#main .as-hero__title > span + span {
+  animation-delay: 140ms;
+}
+#main .as-hero__lead,
+#main .store-hero .lede,
+#main .page-head .lead {
+  animation: site-rise 1000ms var(--cine-ease, ease-out) 260ms both;
+}
+#main .as-hero__actions,
+#main .store-hero__search {
+  animation: site-rise 1000ms var(--cine-ease, ease-out) 380ms both;
+}
+@keyframes site-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#main .as-hero::after,
+#main .page-head--dark::before,
+#main .mhero::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(35% 40% at 15% 25%, rgb(0 191 165 / 0.22), transparent 70%),
+    radial-gradient(30% 35% at 85% 70%, rgb(0 117 106 / 0.3), transparent 70%);
+  mix-blend-mode: screen;
+  animation: site-drift 24s ease-in-out infinite alternate;
+}
+#main .page-head--dark,
+#main .mhero {
+  overflow: hidden;
+  isolation: isolate;
+}
+#main .page-head--dark > *,
+#main .mhero > * {
+  position: relative;
+  z-index: 1;
+}
+@keyframes site-drift {
+  from {
+    transform: translate3d(-3%, -2%, 0);
+  }
+  to {
+    transform: translate3d(3%, 3%, 0) rotate(6deg);
+  }
+}
+
+/* scroll-driven parallax for opening pictures (progressive enhancement) */
+@supports (animation-timeline: view()) {
+  #main .as-hero__scene img,
+  #main .range-opening__feature .mimg img {
+    animation: site-parallax linear both;
+    animation-timeline: view();
+    animation-range: cover;
+  }
+  #main .family,
+  #main .insights__card,
+  #main .store-flow,
+  #main .as-page > section:not(.as-hero),
+  #main .orders-page section,
+  #main .pf-form fieldset {
+    animation: site-enter linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+@keyframes site-parallax {
+  from {
+    transform: translate3d(0, -4%, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(0, 4%, 0) scale(1.08);
+  }
+}
+@keyframes site-enter {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Parts Portal: a lit opening band and the order flow ────────────────── */
+#main .store-hero {
+  position: relative;
+  isolation: isolate;
+  margin-top: 12px;
+  padding: clamp(28px, 4vw, 56px);
+  border: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 80% at 100% 0%, rgb(0 191 165 / 0.16), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, rgb(0 117 106 / 0.1), transparent 70%), #fff;
+  box-shadow:
+    0 1px 0 rgb(20 24 26 / 0.06),
+    0 40px 80px -60px rgb(20 24 26 / 0.5);
+}
+#main .store-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(to right, rgb(20 24 26 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(20 24 26 / 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(60% 80% at 70% 30%, black, transparent);
+}
+#main .store-hero h1 {
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.store-flow {
+  margin: 36px 0 24px;
+  padding: clamp(24px, 3vw, 40px);
+  border-radius: 20px;
+  background: var(--paper, #f7f5f0);
+}
+.store-flow h2 {
+  margin: 0 0 28px;
+  font-size: clamp(20px, 1.6vw, 26px);
+  letter-spacing: -0.02em;
+}
+
+/* ── surfaces: one lift for every card that links somewhere ─────────────── */
+@media (hover: hover) {
+  #main :is(.mcard, .part-card, .as-quick a, .insights__card) {
+    transition:
+      transform 380ms var(--cine-ease, ease-out),
+      box-shadow 380ms var(--cine-ease, ease-out);
+  }
+  #main :is(.mcard, .part-card, .as-quick a):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 60px -36px rgb(20 24 26 / 0.45);
+  }
+}
+
+/* ── typography: balanced headings everywhere ───────────────────────────── */
+#main :is(h1, h2, h3) {
+  text-wrap: balance;
+}
+#main p {
+  text-wrap: pretty;
+}
+
+/* ── profile ─────────────────────────────────────────────────────────────── */
+#main .pf h1 {
+  font-size: var(--text-h2);
+  letter-spacing: var(--tracking-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .read-progress,
+  #main .as-hero__title > span,
+  #main .store-hero h1,
+  #main .page-head .hero-title,
+  #main .mhero h1,
+  #main .pf h1,
+  #main .as-hero__lead,
+  #main .store-hero .lede,
+  #main .page-head .lead,
+  #main .as-hero__actions,
+  #main .store-hero__search,
+  #main .as-hero::after,
+  #main .page-head--dark::before,
+  #main .mhero::before,
+  #main .as-hero__scene img,
+  #main .range-opening__feature .mimg img,
+  #main .family,
+  #main .insights__card,
+  #main .store-flow,
+  #main .as-page > section:not(.as-hero),
+  #main .orders-page section,
+  #main .pf-form fieldset {
+    animation: none;
+  }
+}
+
+/* Aftersales: the network, counted live from the graph, under the opening */
+#main .as-hero__live {
+  position: relative;
+  z-index: 2;
+}
+#main .as-hero__live .cine-stats {
+  margin-top: 1.5rem;
+}
+
+/* ── typography: a serif italic carries the emphasis in every heading ───── */
+#main :is(h1, h2) em,
+#main .cine-title__line:last-child > span {
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+#main .cine-title__line:last-child > span {
+  font-size: 1.08em;
+  padding-right: 0.06em;
+}
+
+/* machine cards lean towards the pointer; the lift is the tilt's job now */
+#main .mcard-tilt {
+  height: 100%;
+  border-radius: 14px;
+}
+#main .mcard-tilt .mcard {
+  height: 100%;
+}
+@media (hover: hover) {
+  #main .mcard-tilt .mcard:hover {
+    transform: none;
+  }
+}
+
+/* Sign-in: its text and cards are drawn for a dark page; the light order-page background must not win here. */
+#main.site-premium.site-brand .ord-page--signin {
+  background:
+    radial-gradient(60% 70% at 85% 0%, rgb(0 191 165 / 0.22), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, rgb(0 117 106 / 0.25), transparent 70%),
+    var(--cine-deep, #071b19);
+  color: var(--on-dark);
+}

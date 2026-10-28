@@ -1,5 +1,5 @@
-import logoDark from '../assets/brand/logo.png'
-import logoLight from '../assets/brand/logo-reversed.png'
+import logoDark from '../assets/brand/logo.webp'
+import logoLight from '../assets/brand/logo-reversed.webp'
 
 interface LogoProps {
   /** 'light' is the reversed logo for dark backgrounds */

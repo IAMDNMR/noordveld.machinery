@@ -1,0 +1,82 @@
+/* Spark introduction: a deep forest opening and film band; the agreed layout, now with depth and motion. */
+#main.site-premium .sp-hero {
+  position: relative;
+  border-bottom: 0;
+  padding-bottom: 80px;
+  background:
+    radial-gradient(60% 80% at 85% 0%, rgb(42 157 143 / 0.34), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+  color: var(--on-dark);
+  overflow: hidden;
+}
+#main.site-premium .sp-hero .sp-product-name {
+  color: #8fe0d3;
+}
+#main.site-premium .sp-hero .sp-display {
+  color: #fff;
+  font-size: clamp(2.5rem, 1.6rem + 3.4vw, 4.5rem);
+}
+#main.site-premium .sp-hero .sp-display span {
+  color: #8fe0d3;
+}
+#main.site-premium .sp-hero .sp-statement {
+  color: var(--on-dark-2);
+  font-size: 16px;
+}
+#main.site-premium .sp-hero .sp-text-link,
+#main.site-premium .sp-hero .sp-showcase-next,
+#main.site-premium .sp-hero .sp-ask__plain {
+  color: #8fe0d3;
+}
+#main.site-premium .sp-hero .sp-showcase-heading {
+  color: var(--on-dark-2);
+  border-top-color: var(--line-dark);
+}
+#main.site-premium .sp-hero .sp-ask__form {
+  background: #fff;
+  border-color: transparent;
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.55);
+}
+#main.site-premium .sp-hero .sp-film video {
+  border-color: var(--line-dark);
+  box-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.65);
+}
+
+#main.site-premium .sp-button {
+  background: var(--grad-forest);
+  transition:
+    transform var(--motion-quick) var(--ease-weight),
+    box-shadow var(--motion-quick);
+}
+#main.site-premium .sp-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -10px rgb(13 59 54 / 0.6);
+}
+
+/* films on a dark band, so the video is the light source */
+#main.site-premium .sp-reels {
+  background: var(--charcoal);
+  color: var(--on-dark);
+}
+#main.site-premium .sp-reels .sp-h2 {
+  color: #fff;
+}
+#main.site-premium .sp-reels .sp-body {
+  color: var(--on-dark-2);
+}
+#main.site-premium .sp-reels .sp-film video {
+  border-color: var(--line-dark);
+}
+
+#main.site-premium .sp-close {
+  background: linear-gradient(180deg, var(--paper), var(--mist));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main.site-premium .sp-button {
+    transition: none;
+  }
+  #main.site-premium .sp-button:hover {
+    transform: none;
+  }
+}

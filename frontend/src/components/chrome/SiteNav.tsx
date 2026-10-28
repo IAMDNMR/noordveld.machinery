@@ -1,5 +1,5 @@
 import { Menu, X } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { primaryNav, type NavItem } from '../../data/content'
 import { Logo } from '../Logo'
 import './chrome-tokens.css'
@@ -18,42 +18,27 @@ interface SiteNavProps {
   account?: ReactNode
 }
 
-/** Agentic Shopping is the hands-on step of Agentic E-Commerce, so it lights up that item. */
+/** Spark covers its introduction and the conversation. */
 const isCurrent = (item: NavItem, pathname: string): boolean => {
   const [path] = pathname.split('?')
-  if (item.to === '/agentic-commerce/')
-    return path.startsWith('/agentic-commerce') || path.startsWith('/agentic-shopping')
-  // Agentic E-Commerce: the Agentic Shopping screen, the commerce assistant it hands over to, and the introduction page
-  if (item.to === '/agentic-shopping')
-    return (
-      path.startsWith('/agentic-shopping') ||
-      path.startsWith('/commerce') ||
-      path.startsWith('/agentic-commerce')
-    )
+  if (item.to === '/spark') return path === '/spark' || path.startsWith('/spark/')
   if (item.to.includes('?')) return pathname === item.to // a queue of the order list
   if (item.to === '/orders') return path.startsWith('/orders') && !pathname.includes('queue=')
-  if (item.to === '/studio') return path === '/studio'
   if (item.to === '/workspace') return path === '/workspace'
   return (
-    [
-      '/aftersales',
-      '/parts-services',
-      '/parts-store',
-      '/parts-intelligence',
-      '/machines',
-      '/agentic-shopping',
-    ].includes(item.to) && path.startsWith(item.to)
+    ['/aftersales', '/parts-services', '/parts-store', '/machines'].includes(item.to) &&
+    path.startsWith(item.to)
   )
 }
 
 export function SiteNav({ pathname, heroTone, Link, items = primaryNav, account }: SiteNavProps) {
-  const navigation = items.filter(
-    (item) => item.to !== '/machines' && !item.to.startsWith('mailto:'),
-  )
+  const navigation = items.filter((item) => !item.to.startsWith('mailto:'))
   const [openPath, setOpenPath] = useState<string | null>(null)
   const open = openPath === pathname
   const [scrolled, setScrolled] = useState(false)
   const overHero = heroTone && !scrolled && !open
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -64,7 +49,23 @@ export function SiteNav({ pathname, heroTone, Link, items = primaryNav, account 
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpenPath(null)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpenPath(null)
+        toggleRef.current?.focus()
+      }
+      if (e.key === 'Tab') {
+        const links = sheetRef.current?.querySelectorAll<HTMLElement>('a, button')
+        const last = links?.[links.length - 1]
+        if (e.shiftKey && document.activeElement === toggleRef.current) {
+          e.preventDefault()
+          last?.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          toggleRef.current?.focus()
+        }
+      }
+    }
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
     return () => {
@@ -107,6 +108,7 @@ export function SiteNav({ pathname, heroTone, Link, items = primaryNav, account 
         </nav>
         {account ? <div className="nav__account">{account}</div> : null}
         <button
+          ref={toggleRef}
           className="nav__toggle"
           type="button"
           aria-expanded={open}
@@ -117,7 +119,7 @@ export function SiteNav({ pathname, heroTone, Link, items = primaryNav, account 
           {open ? <X size={26} aria-hidden="true" /> : <Menu size={26} aria-hidden="true" />}
         </button>
       </div>
-      <div id="mobile-menu" className="nav__sheet" hidden={!open}>
+      <div ref={sheetRef} id="mobile-menu" className="nav__sheet" hidden={!open}>
         <span className="nav__sheet-label">EXPLORE NOORDVELD</span>
         <nav aria-label="Mobile">
           {navigation.map((item) => (

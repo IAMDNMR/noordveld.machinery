@@ -1,0 +1,59 @@
+/* Sign-in, not-found and legal: the same deep forest opening as the rest of the site. */
+#main.site-premium .page-head--dark {
+  position: relative;
+  border-bottom: 0;
+  background:
+    radial-gradient(70% 90% at 85% 0%, rgb(42 157 143 / 0.32), transparent 65%), var(--grad-forest);
+  background-color: var(--charcoal);
+  overflow: hidden;
+}
+#main.site-premium .page-head--dark.page-head--centered {
+  min-height: 78svh;
+}
+#main.site-premium .page-head--dark .note {
+  color: var(--on-dark-2);
+}
+
+#main.site-premium .ord-page--signin {
+  min-height: calc(100svh - var(--nav-height));
+  padding-top: var(--nav-height);
+  background:
+    radial-gradient(60% 70% at 85% 0%, rgb(42 157 143 / 0.3), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+  color: var(--on-dark);
+}
+#main.site-premium .ord-page--signin :is(h1, h2) {
+  color: #fff;
+}
+#main.site-premium .ord-page--signin .eyebrow {
+  color: #8fe0d3;
+}
+#main.site-premium .ord-page--signin :is(.lede, .muted, .small, .ord-signin__note) {
+  color: var(--on-dark-2);
+}
+#main.site-premium .ord-page--signin .ord-account {
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid var(--line-dark);
+  box-shadow: none;
+  backdrop-filter: blur(6px);
+  transition:
+    transform var(--dur-base) var(--ease-weight),
+    background-color var(--motion-quick),
+    border-color var(--motion-quick);
+}
+#main.site-premium .ord-page--signin .ord-account:hover {
+  transform: translateY(-3px);
+  background: rgb(255 255 255 / 0.11);
+  border-color: rgb(255 255 255 / 0.32);
+}
+#main.site-premium .ord-page--signin .ord-account .small:not(.muted) {
+  color: var(--on-dark);
+}
+@media (prefers-reduced-motion: reduce) {
+  #main.site-premium .ord-page--signin .ord-account {
+    transition: none;
+  }
+  #main.site-premium .ord-page--signin .ord-account:hover {
+    transform: none;
+  }
+}

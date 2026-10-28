@@ -167,10 +167,12 @@ def test_the_full_lifecycle_without_dealer_service(repo):
     sh = d["shipments"][0]
     assert d["status"] == "READY_TO_SHIP" and sh["status"] == "CREATED" and sh["dispatched_from"] == "Depot B (demo)" and sh["tracking_basis"] == "SYNTHETIC_DEMO"  # origin depot, synthetic tracking
     assert sh["tracking_ref"].startswith("DEMO-") and sh["events"][0]["data_status"] == "SYNTHETIC_DEMO"
+    assert d["fulfilment"]["allocation_status"] == "RESERVED"
     d = drive(jane, oid, "dispatch")
     assert d["status"] == "SHIPPED" and d["shipments"][0]["status"] == "DISPATCHED"
     row = repo.stock[("P-AB-1", "WH-B")]
     assert (row["on_hand"], row["reserved"], row["available"]) == (18, 0, 18)  # the units have left the depot
+    assert d["fulfilment"]["allocation_status"] == "CONSUMED" and d["fulfilment"]["lines"][0]["allocation_status"] == "SHIPPED"  # order and line agree: nothing is held any more
     d = drive(jane, oid, "in_transit")
     assert d["status"] == "SHIPPED" and d["shipments"][0]["status"] == "IN_TRANSIT"
     d = drive(jane, oid, "deliver")
@@ -179,6 +181,7 @@ def test_the_full_lifecycle_without_dealer_service(repo):
     assert all(e["data_status"] == "SYNTHETIC_DEMO" for e in d["shipments"][0]["events"])
     d = drive(jane, oid, "complete_order")
     assert d["status"] == "COMPLETED" and d["actions"] == [] and [s["state"] for s in d["stages"]] == ["done", "done", "done", "done", "done", "skipped", "done"]
+    assert d["fulfilment"]["allocation_status"] == "CONSUMED"
     assert [h["status"] for h in d["history"]] == ["NEW", "ALLOCATED", "FULFILMENT_PENDING", "FULFILLING", "READY_TO_SHIP", "READY_TO_SHIP", "SHIPPED", "SHIPPED", "DELIVERED", "COMPLETED"]
     assert all(h["by"] for h in d["history"])  # every step is attributed
 

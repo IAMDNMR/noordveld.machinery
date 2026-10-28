@@ -7,6 +7,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { roleLabel, useSession } from '../store/session'
 import '../styles/wf.css'
 import '../components/orders/orders.css'
+import './pages-dark.css'
 
 const PURPOSE: Record<DemoUser['role'], string> = {
   END_USER: 'Find the right part, compare recommendations and track your order through delivery.',
@@ -49,7 +50,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="wf ord-page">
+    <div className="wf ord-page ord-page--signin">
       <div className="wf-container ord-signin">
         <p className="eyebrow">Noordveld demo</p>
         <h1>Choose your demo experience.</h1>

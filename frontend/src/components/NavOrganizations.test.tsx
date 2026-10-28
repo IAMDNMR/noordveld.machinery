@@ -25,17 +25,14 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 const labels = () => [...document.querySelectorAll('.nav__links a')].map((a) => a.textContent)
-const workspace = (studio: boolean, configured = true): Workspace => ({
+const workspace = (_available: boolean, configured = true): Workspace => ({
   user: { id: 'u1', name: 'U', email: 'u@example.invalid' },
   directory_configured: configured,
   platform_roles: [],
   organizations: [{ id: 'org_a', name: 'A', roles: [] }],
   active_organization: 'org_a',
   permissions: [],
-  studio: { visible: studio, can_create: false },
   applications: [],
-  projects: [],
-  tasks: [],
   activity: [],
   onboarding: [],
 })

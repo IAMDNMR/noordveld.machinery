@@ -115,6 +115,8 @@ class GraphFulfilmentRepository:
                         raise Stale(order_id)
                     if p["status"] == "DISPATCHED":
                         tx.run(q.CONSUME, order_id=order_id, at=at, today=today)
+                        # the reserved units have left the depot: the order no longer holds a reservation, so it can never be released again
+                        tx.run(q.MARK_ALLOCATION, order_id=order_id, status="CONSUMED", at=at)
                 elif name == "cancel_open_shipment":
                     tx.run(q.CANCEL_OPEN_SHIPMENT, order_id=order_id, today=today)
                 elif name == "create_service":

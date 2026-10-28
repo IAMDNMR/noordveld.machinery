@@ -9,8 +9,9 @@ import {
   type WorkspaceApp,
 } from '../api/workspace'
 import { useSession } from '../store/session'
-import { InvitePanel, ProjectAccessPanel } from '../components/workspace/AccessAdmin'
+import { InvitePanel } from '../components/workspace/AccessAdmin'
 import './WorkspacePage.css'
+import '../components/orders/orders-redesign.css'
 
 type Filter = 'all' | 'operational' | 'in_design' | 'planned'
 const FILTERS: [Filter, string][] = [
@@ -54,7 +55,6 @@ export default function WorkspacePage() {
   const [error, setError] = useState<string | null>(null)
   const [search] = useSearchParams()
   const [org, setOrg] = useState<string | null>(search.get('org'))
-  const [managing, setManaging] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [attempt, setAttempt] = useState(0)
@@ -89,13 +89,6 @@ export default function WorkspacePage() {
       ),
     [data, filter, query],
   )
-  const projects = useMemo(
-    () =>
-      (data?.projects ?? []).filter((item) =>
-        item.name.toLowerCase().includes(query.trim().toLowerCase()),
-      ),
-    [data, query],
-  )
 
   if (!ready)
     return (
@@ -107,7 +100,7 @@ export default function WorkspacePage() {
     return (
       <section className="ws-page">
         <h1>Workspace</h1>
-        <p>Sign in to see your systems and projects.</p>
+        <p>Sign in to see your applications.</p>
         <Link to="/sign-in?next=/workspace">Sign in</Link>
       </section>
     )
@@ -136,7 +129,6 @@ export default function WorkspacePage() {
       </p>
     )
 
-  const showStudio = false // Studio is entered separately from the public product page.
   const active = data.organizations.find((item) => item.id === data.active_organization)
   return (
     <div className="ws-page">
@@ -198,29 +190,9 @@ export default function WorkspacePage() {
 
       {data.onboarding.length > 0 && (
         <section className="ws-onboarding" aria-label="Getting started">
-          {data.onboarding
-            .filter((text) => !/design studio/i.test(text))
-            .map((text) => (
-              <p key={text}>{text}</p>
-            ))}
-        </section>
-      )}
-
-      {showStudio && data.studio?.visible && (
-        <section className="ws-studio" aria-label="Design Studio">
-          <div>
-            <h2>Design Studio</h2>
-            <p>
-              Describe what the business needs, review the process and the data behind it, then
-              generate and check the application.
-            </p>
-          </div>
-          <div className="ws-actions">
-            <Link className="ws-primary" to="/design-studio">
-              Open Design Studio
-            </Link>
-            <Link to="/design-studio/domains">Domain knowledge</Link>
-          </div>
+          {data.onboarding.map((text) => (
+            <p key={text}>{text}</p>
+          ))}
         </section>
       )}
 
@@ -232,7 +204,7 @@ export default function WorkspacePage() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Systems and projects"
+              placeholder="Search applications"
             />
           </label>
           <div role="group" aria-label="Filter systems">
@@ -250,24 +222,9 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {showStudio && data.tasks.length > 0 && (
-        <section aria-label="Needs your attention">
-          <h2>Needs your attention</h2>
-          <ul className="ws-tasks">
-            {data.tasks.map((task) => (
-              <li key={`${task.kind}${task.project_id}`}>
-                <strong>{task.title}</strong>
-                <span>{task.detail}</span>
-                <Link to={`/design-studio/${task.project_id}?stage=checks`}>Review</Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {data.active_organization && (
         <section aria-label="Systems">
-          <h2>{data.journeys?.creator ? 'Systems' : 'Your applications'}</h2>
+          <h2>Your applications</h2>
           {apps.length === 0 ? (
             <p className="ws-muted" role="status">
               {data.applications.length
@@ -280,49 +237,6 @@ export default function WorkspacePage() {
                 <AppCard key={app.id} app={app} />
               ))}
             </div>
-          )}
-        </section>
-      )}
-
-      {showStudio && data.studio?.visible && (
-        <section aria-label="Projects">
-          <h2>Projects</h2>
-          {projects.length === 0 ? (
-            <p className="ws-muted" role="status">
-              {data.projects.length
-                ? 'No project matches your search.'
-                : data.studio?.can_create
-                  ? 'You have no assigned projects yet. Create one in Design Studio, or ask a project owner to assign you to theirs.'
-                  : 'You have no assigned projects. Design Studio only opens the projects a project owner or your organization administrator assigns to you.'}
-            </p>
-          ) : (
-            <ul className="ws-projects">
-              {projects.map((item) => (
-                <li key={item.id}>
-                  <div>
-                    <strong>{item.name}</strong>
-                    <span className="ws-muted"> · revision {item.revision}</span>
-                  </div>
-                  <span className={`ws-status ws-status--${item.status}`}>
-                    {item.status === 'approved_design' ? 'Design approved' : 'In design'}
-                  </span>
-                  <small>Being designed. Not an operational application.</small>
-                  <Link to={`/design-studio/${item.id}`}>Open project</Link>
-                  {item.access?.includes('manage') || data.can_administer ? (
-                    <button
-                      type="button"
-                      aria-expanded={managing === item.id}
-                      onClick={() => setManaging(managing === item.id ? null : item.id)}
-                    >
-                      Access
-                    </button>
-                  ) : null}
-                  {managing === item.id && data.active_organization ? (
-                    <ProjectAccessPanel org={data.active_organization} project={item.id} />
-                  ) : null}
-                </li>
-              ))}
-            </ul>
           )}
         </section>
       )}

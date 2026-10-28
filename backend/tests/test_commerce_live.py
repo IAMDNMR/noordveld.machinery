@@ -52,9 +52,9 @@ def test_the_difference_report_names_the_path_of_every_difference():
 
 
 # ── live ─────────────────────────────────────────────────────────────────────────────────────────
-def test_live_every_context_equals_the_file_context(files, graph):
+def test_live_every_context_equals_the_file_context(graph):
     live = CommerceContextEngine.from_graph(graph, as_of=v.AS_OF)
-    report = v.compare_engines(files, live)
+    report = v.compare_engines(v.expected_files_engine(graph), live)  # the files, moved only by the stock the app's own orders reserved
     assert report["different"] == {}, report["different"]
 
 

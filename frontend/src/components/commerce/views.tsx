@@ -410,7 +410,10 @@ export function LogisticsView({
   const s = ctx.shipment
   const total = ctx.route_legs.length
   const done = ctx.completed_legs.length
-  const alternatives = (ctx.transport_comparison?.options ?? []).filter((o) => !o.is_current)
+  // once delivered, faster lanes are no longer an option for this shipment
+  const alternatives = ctx.planned_eta?.delivered
+    ? []
+    : (ctx.transport_comparison?.options ?? []).filter((o) => !o.is_current)
   return (
     <section className="cw-view" aria-label="Shipment result">
       {!bare && <Banner ctx={ctx} />}

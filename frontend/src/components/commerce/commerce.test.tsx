@@ -576,7 +576,7 @@ describe('Commerce Assistant: one input, one answer', () => {
     )
     expect(
       a.getByRole('link', { name: 'Compare delivery and fulfilment options' }).getAttribute('href'),
-    ).toContain('/agentic-shopping?q=')
+    ).toContain('/spark/chat?q=')
   })
 
   it('offers no cart hand-off when nothing is recommended', async () => {
@@ -726,6 +726,26 @@ describe('Commerce Assistant: one input, one answer', () => {
       message: 'Can I get it faster?',
       state: { shipment_id: 'SHP-1' },
     })
+    cleanup() // a delivered shipment cannot be sped up: no speed follow-ups and no faster lanes
+    replies = [
+      {
+        body: logistics({
+          planned_eta: { planned_eta: null, actual_eta: null, days_to_eta: null, delivered: true },
+          transport_comparison: {
+            options: [{ route_id: 'RTE-FAST', transport_mode: 'ROAD', is_current: false }],
+          },
+        }),
+      },
+    ]
+    mount()
+    await ask('Where is SHP-1?')
+    await screen.findByRole('table', { name: 'Order lines in this shipment' })
+    expect(
+      within(screen.getByLabelText('What next'))
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['What parts are in this shipment?'])
+    expect(screen.queryByText('RTE-FAST')).toBeNull()
   })
 
   it('declines an out-of-scope request politely and shows what can be asked, with no empty panels', async () => {

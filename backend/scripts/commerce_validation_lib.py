@@ -33,6 +33,7 @@ from app.canonical.io import CANON_DIR, load_rows
 from app.canonical.registry import BY_NAME, KINDS, SPECS, DatasetSpec
 
 APP = "APP-SESSION"
+OTHER_APP_PREFIX = "DK"  # the Design Studio knowledge store (DKProposedKnowledge, DKPackVersion, DK_DERIVED_FROM ...): another application's records
 SRC_CANON = "SRC-CANON"
 BOOKKEEPING = ("ingestion_timestamp", "last_updated", "canonical_dataset", "canonical_schema_version", "source_file", "source_name", "enrichment_batch")
 PROTECTED_STATUSES = ("SOURCE_DERIVED", "DERIVED", "REAL")
@@ -152,6 +153,7 @@ class GraphSource(Protocol):
     def resolve(self, kind: str, ids: list[str]) -> dict[str, tuple[str, str]]: ...
     def node_ids(self, label: str, key: str, dataset: str | None = None, exclude_app: bool = False, require_property: str | None = None) -> set[str]: ...
     def app_written(self, label: str) -> int: ...
+    def app_stock(self) -> dict[tuple[str, str], dict[str, int]]: ...
     def rel_ids(self, type_: str, dataset: str | None = None) -> set[str]: ...
     def rel_endpoints(self, type_: str, fl: tuple[str, str], tl: tuple[str, str]) -> set[tuple[str, str]]: ...
     def part_aliases(self) -> dict[str, list[str]]: ...
@@ -216,6 +218,9 @@ class CypherSource:
         _safe(label)
         return self.g.read(f"MATCH (n:`{label}`) WHERE n.source_id = $app RETURN count(n) AS n", app=APP)[0]["n"]
 
+    def app_stock(self):
+        return app_stock_effects(self.g.read(APP_STOCK_QUERY, app=APP))
+
     def rel_endpoints(self, type_, fl, tl):
         """(from id, to id) of every non-app relationship of a type between two labels: a relationship is identified by its ends, not by the id a loader gave it."""
         _safe(type_, *fl, *tl)
@@ -252,11 +257,16 @@ class CypherSource:
         rels = self.g.read(REL_QUERY, app=APP)
         canon_nodes = self.g.read("MATCH (n) WHERE n.source_id = $s RETURN labels(n)[0] AS l, properties(n) AS p ORDER BY l, coalesce(n.source_record_id, ''), elementId(n)", s=SRC_CANON)
         canon_rels = self.g.read("MATCH ()-[x]->() WHERE x.source_id = $s RETURN type(x) AS t, properties(x) AS p ORDER BY t, coalesce(x.rel_id, '')", s=SRC_CANON)
-        return {"source": "NEO4J", "node_count": one("MATCH (n) RETURN count(n) AS n"), "relationship_count": one("MATCH ()-[r]->() RETURN count(r) AS n"),
+        # The Design Studio shares this AuraDB and writes its own knowledge store under the DK label / DK_ relationship namespace at any time. Those records belong to
+        # another application, so "unchanged" is judged on the Noordveld graph only; every non-DK node, relationship, label and type is still counted.
+        other = f"l STARTS WITH '{OTHER_APP_PREFIX}'"
+        return {"source": "NEO4J", "node_count": one(f"MATCH (n) WHERE NONE(l IN labels(n) WHERE {other}) RETURN count(n) AS n"),
+                "relationship_count": one(f"MATCH (a)-[r]->(b) WHERE NOT type(r) STARTS WITH '{OTHER_APP_PREFIX}_' AND NONE(l IN labels(a) + labels(b) WHERE {other}) RETURN count(r) AS n"),
                 "protected_node_count": len(nodes), "protected_relationship_count": len(rels), "integrity_checksum": fingerprint(nodes, rels),
                 "src_canon_graph_fingerprint": canon_fingerprint(canon_nodes, canon_rels),
-                "label_counts": {r["l"]: r["n"] for r in self.g.read("MATCH (n) UNWIND labels(n) AS l RETURN l, count(*) AS n ORDER BY l")},
-                "relationship_type_counts": {r["t"]: r["n"] for r in self.g.read("MATCH ()-[r]->() RETURN type(r) AS t, count(*) AS n ORDER BY t")}}
+                "label_counts": {r["l"]: r["n"] for r in self.g.read("MATCH (n) UNWIND labels(n) AS l RETURN l, count(*) AS n ORDER BY l") if not r["l"].startswith(OTHER_APP_PREFIX)},
+                "relationship_type_counts": {r["t"]: r["n"] for r in self.g.read("MATCH ()-[r]->() RETURN type(r) AS t, count(*) AS n ORDER BY t")
+                                             if not r["t"].startswith(OTHER_APP_PREFIX + "_")}}
 
 
 VOLATILE = ("ingestion_timestamp", "last_updated")
@@ -387,6 +397,9 @@ class MemorySource:
 
     def app_written(self, label):
         return self.app_nodes[label]
+
+    def app_stock(self):
+        return {}
 
     def rel_endpoints(self, type_, fl, tl):
         return set(self.r.get((type_, fl[0], tl[0]), {}))
@@ -571,6 +584,46 @@ def _show(v: Any) -> Any:
 
 
 # ═══ dataset comparison (driven by the registry) ═══════════════════════════════════════════════════
+# ═══ stock moved by the running app ═════════════════════════════════════════════════════════════════
+# Orders placed in the app (source_id APP-SESSION) reserve stock on the canonical AVAILABLE_AT rows, and shipping them takes it off hand. Those changes are operational,
+# not catalogue drift: the live value must equal the canonical value moved by exactly the quantities the app's own order lines record. Anything else still fails.
+APP_STOCK_RULE = "APP_ORDER_STOCK"
+APP_STOCK_QUERY = """
+MATCH (o:Order)-[:CONTAINS_LINE]->(l:OrderLine)-[a:ALLOCATED_FROM]->(w:Warehouse)
+WHERE o.source_id = $app AND l.allocation_status IN ['RESERVED', 'SHIPPED'] AND a.released_at IS NULL
+MATCH (l)-[:REFERENCES_PART]->(p:Part)
+RETURN p.part_id AS part_id, w.warehouse_id AS location_id, l.allocation_status AS status, coalesce(l.reserved_quantity, l.quantity) AS qty
+"""
+LOW_STOCK_AT = 5  # the threshold the app's RESERVE statement uses
+
+
+def app_stock_effects(rows: list[dict[str, Any]]) -> dict[tuple[str, str], dict[str, int]]:
+    """(part_id, location_id) -> units the app still holds reserved, and units it has shipped (consumed from on hand)."""
+    out: dict[tuple[str, str], dict[str, int]] = {}
+    for r in rows:
+        e = out.setdefault((r["part_id"], r["location_id"]), {"reserved": 0, "shipped": 0})
+        e["reserved" if r["status"] == "RESERVED" else "shipped"] += int(r["qty"] or 0)
+    return out
+
+
+def with_app_stock(row: dict[str, Any], moved: dict[str, int] | None) -> dict[str, Any]:
+    """A canonical inventory row as the app's own reservations and shipments leave it (the same arithmetic as RESERVE and CONSUME in app/graph/queries/checkout.py)."""
+    if not moved:
+        return row
+    r, s = moved["reserved"], moved["shipped"]
+    out = dict(row)
+    if row.get("available_quantity") is not None:
+        out["available_quantity"] = row["available_quantity"] - r - s
+    if row.get("reserved_quantity") is not None:
+        out["reserved_quantity"] = row["reserved_quantity"] + r
+    if row.get("quantity") is not None:
+        out["quantity"] = max(0, row["quantity"] - s)
+    if row.get("status") in ("IN_STOCK", "LOW_STOCK") and out.get("available_quantity") is not None:
+        a = out["available_quantity"]
+        out["status"] = "OUT_OF_STOCK" if a <= 0 else "LOW_STOCK" if a <= LOW_STOCK_AT else "IN_STOCK"
+    return out
+
+
 def compare_datasets(src: GraphSource, root: Path = CANON_DIR, names: list[str] | None = None, keep_detail: bool = False) -> list[DatasetResult]:
     results = []
     for spec in SPECS:
@@ -700,6 +753,7 @@ def _rel_dataset(src: GraphSource, spec: DatasetSpec, recs: list[Any], res: Data
             res.add(rec.id, f"{rt.type}.endpoints", f"{getattr(rec, rt.from_field)}->{getattr(rec, rt.to_field)}", None, MISSING_IN_GRAPH, None, keep)
             continue
         groups[(fl, tl)].append(rec)
+    stock = defaultdict(lambda: None, src.app_stock()) if rt.type == "AVAILABLE_AT" else None
     for (fl, tl), rows in groups.items():
         have = src.rels(rt.type, fl, tl, [(getattr(r, rt.from_field), getattr(r, rt.to_field)) for r in rows])
         for rec in rows:
@@ -708,8 +762,12 @@ def _rel_dataset(src: GraphSource, spec: DatasetSpec, recs: list[Any], res: Data
                 res.add(rec.id, f"{rt.type}", f"{getattr(rec, rt.from_field)}->{getattr(rec, rt.to_field)}", None, MISSING_IN_GRAPH, None, keep)
                 continue
             res.bookkeeping(sum(1 for b in BOOKKEEPING if b in rel))
+            moved = stock[(getattr(rec, rt.from_field), getattr(rec, rt.to_field))] if rt.type == "AVAILABLE_AT" and stock else None
+            expected = with_app_stock({cf: getattr(rec, cf, None) for cf in rt.fields}, moved) if moved else None
             for cf, gp in rt.fields.items():
                 d, r = classify(getattr(rec, cf, None), rel.get(gp), cf, protected=res.protected and rt.mode == "verify")
+                if d in FAILING and expected is not None and classify(expected[cf], rel.get(gp), cf)[0] == MATCH:
+                    d, r = NORMALIZATION_ONLY, APP_STOCK_RULE  # explained exactly by stock the running app reserved or shipped
                 res.add(rec.id, f"{rt.type}.{gp}", getattr(rec, cf, None), rel.get(gp), d, r, keep)
             d, r = classify(rec.data_status, rel.get("data_status"), "data_status", protected=res.protected and rt.mode == "verify")
             res.add(rec.id, f"{rt.type}.data_status", rec.data_status, rel.get("data_status"), d, r, keep)

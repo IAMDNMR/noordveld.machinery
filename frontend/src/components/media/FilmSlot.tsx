@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Pause, Play } from 'lucide-react'
 import type { Film } from '../../data/content'
 import { useInView } from '../../hooks/useInView'
 import { queries } from '../../lib/breakpoints'
@@ -70,6 +71,8 @@ function FilmFrame({ film, src, poster, ratio, hero, staticOnly }: FilmFrameProp
   const frameRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [failed, setFailed] = useState(false)
+  const [manuallyPaused, setManuallyPaused] = useState(false)
+  const [playing, setPlaying] = useState(false)
   // Below-the-fold films only start downloading when they are about to scroll into view
   const near = useInView(frameRef, { once: true, rootMargin: '500px 0px' })
   const visible = useInView(videoRef, { threshold: 0.25 })
@@ -78,13 +81,19 @@ function FilmFrame({ film, src, poster, ratio, hero, staticOnly }: FilmFrameProp
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    if (visible) void video.play().catch(() => undefined)
-    else video.pause()
-  }, [visible])
+    const sync = () => {
+      if ((hero || near) && visible && !manuallyPaused && !document.hidden)
+        void video.play().catch(() => undefined)
+      else video.pause()
+    }
+    sync()
+    document.addEventListener('visibilitychange', sync)
+    return () => document.removeEventListener('visibilitychange', sync)
+  }, [visible, manuallyPaused, near, hero])
 
   const content =
     staticOnly || failed ? (
-      <div ref={frameRef} className="film" style={style}>
+      <div ref={frameRef} className={`film film--${film.id}`} style={style}>
         {poster ? (
           <img
             className="film__video"
@@ -96,7 +105,7 @@ function FilmFrame({ film, src, poster, ratio, hero, staticOnly }: FilmFrameProp
         ) : null}
       </div>
     ) : (
-      <div ref={frameRef} className="film" style={style}>
+      <div ref={frameRef} className={`film film--${film.id}`} style={style}>
         <video
           ref={videoRef}
           className="film__video"
@@ -105,10 +114,36 @@ function FilmFrame({ film, src, poster, ratio, hero, staticOnly }: FilmFrameProp
           muted
           loop
           playsInline
-          preload={hero ? 'auto' : 'metadata'}
+          preload={hero ? 'metadata' : 'none'}
           aria-label={film.title}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onCanPlay={(event) => {
+            if (visible && !manuallyPaused && !document.hidden) {
+              void event.currentTarget.play().catch(() => undefined)
+            }
+          }}
           onError={() => setFailed(true)}
         />
+        <button
+          className="film__control"
+          type="button"
+          aria-label={`${playing ? 'Pause' : 'Play'} ${film.title}`}
+          onClick={() => {
+            const video = videoRef.current
+            if (!video) return
+            if (playing) {
+              setManuallyPaused(true)
+              video.pause()
+            } else {
+              setManuallyPaused(false)
+              void video.play().catch(() => undefined)
+            }
+          }}
+        >
+          {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+          <span>{playing ? 'Pause film' : 'Play film'}</span>
+        </button>
       </div>
     )
 

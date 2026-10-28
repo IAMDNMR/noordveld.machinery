@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { apiGet, apiPost } from '../api/client'
 import { getMe, signIn as apiSignIn, signOut as apiSignOut, type Me } from '../api/orders'
 
 interface SessionValue {
@@ -20,22 +19,22 @@ interface SessionValue {
 
 const Session = createContext<SessionValue | null>(null)
 
-export function SessionProvider({
-  children,
-  scope = 'commerce',
-}: {
-  children: ReactNode
-  scope?: 'commerce' | 'studio'
-}) {
+/** The user's cart stays on the server; this browser keeps no copy once they leave. */
+const forgetCart = () => {
+  try {
+    localStorage.removeItem('noordveld-parts-cart-v2')
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Me | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     const ctrl = new AbortController()
-    ;(scope === 'studio'
-      ? apiGet<Me>('/studio-session/me', {}, ctrl.signal)
-      : getMe(ctrl.signal)
-    ).then(
+    getMe(ctrl.signal).then(
       (me) => {
         setUser(me)
         setReady(true)
@@ -45,32 +44,22 @@ export function SessionProvider({
       },
     )
     return () => ctrl.abort()
-  }, [scope])
+  }, [])
 
   const signIn = useCallback(
     async (userId: string) => {
-      const me = await (scope === 'studio'
-        ? apiPost<Me>('/studio-session/demo', {})
-        : apiSignIn(userId))
+      const me = await apiSignIn(userId)
+      if (user && user.id !== me.id) forgetCart() // switching accounts: the previous person's cart must not carry over
       setUser(me)
       return me
     },
-    [scope],
+    [user],
   )
   const signOut = useCallback(async () => {
-    if (scope === 'studio') {
-      await apiPost('/studio-session/logout', {}).catch(() => undefined)
-      setUser(null)
-      return
-    }
     await apiSignOut().catch(() => undefined)
-    try {
-      localStorage.removeItem('noordveld-parts-cart-v2') // the user's cart stays on the server; this browser keeps no copy
-    } catch {
-      /* storage unavailable */
-    }
+    forgetCart()
     setUser(null)
-  }, [scope])
+  }, [])
 
   const value = useMemo(() => ({ user, ready, signIn, signOut }), [user, ready, signIn, signOut])
   return <Session.Provider value={value}>{children}</Session.Provider>

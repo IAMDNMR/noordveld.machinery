@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost, apiPut } from './client'
+import { apiDelete, apiGet, apiPost } from './client'
 
 /** The signed-in user's workspace, computed by the server from the organization directory. The browser only displays it. */
 export type AppStatus = 'operational' | 'in_design' | 'planned'
@@ -14,18 +14,6 @@ export type WorkspaceApp = {
   reason: string | null
   can_manage_users?: boolean
 }
-export type WorkspaceProject = {
-  id: string
-  name: string
-  revision: number
-  created_by: string
-  approvals: { process: string; design: string }
-  status: 'in_design' | 'approved_design'
-  operational: false
-  domain: string | null
-  access?: string[]
-}
-export type WorkspaceTask = { kind: 'approval'; project_id: string; title: string; detail: string }
 export type Organization = { id: string; name: string; roles: string[] }
 export type Workspace = {
   user: { id: string; name: string; email: string }
@@ -34,27 +22,22 @@ export type Workspace = {
   organizations: Organization[]
   active_organization: string | null
   permissions: string[]
-  studio?: { visible: boolean; can_create: boolean }
   applications: WorkspaceApp[]
-  projects: WorkspaceProject[]
-  tasks: WorkspaceTask[]
   activity: { at: string; actor: string; action: string; detail: string }[]
   onboarding: string[]
-  /** The two journeys, never one switch: creating applications (Design Studio) and using them. A person can have either or both. */
-  journeys?: { creator: boolean; business_user: boolean }
+  journeys?: { business_user: boolean }
   /** Combinable profiles shown to the person; display only: the server enforces access independently. */
   profiles?: string[]
   can_administer?: boolean
 }
 
-export const getWorkspace = (org?: string | null, signal?: AbortSignal, studio = false) =>
-  apiGet<Workspace>('/workspace', { org, ...(studio ? { studio: '1' } : {}) }, signal)
+export const getWorkspace = (org?: string | null, signal?: AbortSignal) =>
+  apiGet<Workspace>('/workspace', { org }, signal)
 export type AppGrant = { app_id: string; app_role: string }
 export type InviteRequest = {
   email: string
   role?: string | null
   app_grants?: AppGrant[]
-  project_access?: { project_id: string; level: string }[]
   team_id?: string | null
 }
 export type InvitationPreview = {
@@ -62,7 +45,6 @@ export type InvitationPreview = {
   email_hint: string
   role: string | null
   app_grants: AppGrant[]
-  project_access: { project_id: string; level: string }[]
   team: string | null
   expires_at: string
 }
@@ -79,7 +61,6 @@ export type Accepted = {
   org_id: string
   role: string | null
   app_grants: AppGrant[]
-  project_access: { project_id: string; level: string }[]
 }
 
 const organizationPath = (org: string) => `/workspace/organizations/${encodeURIComponent(org)}`
@@ -96,33 +77,6 @@ export const listInvitations = (org: string, signal?: AbortSignal) =>
   apiGet<InvitationRow[]>(`${organizationPath(org)}/invitations`, {}, signal)
 export const revokeInvitation = (org: string, id: string) =>
   apiDelete<{ revoked: true }>(`${organizationPath(org)}/invitations/${encodeURIComponent(id)}`)
-export type ProjectAccess = {
-  project_id: string
-  levels: string[]
-  access: { subject: 'user' | 'team'; id: string; level: string }[]
-  policy: 'assigned' | 'org'
-}
-export const getProjectAccess = (org: string, project: string, signal?: AbortSignal) =>
-  apiGet<ProjectAccess>(
-    `${organizationPath(org)}/projects/${encodeURIComponent(project)}/access`,
-    {},
-    signal,
-  )
-export const assignProjectAccess = (
-  org: string,
-  project: string,
-  subject: 'user' | 'team',
-  id: string,
-  level: string,
-) =>
-  apiPut<{ assigned: true }>(
-    `${organizationPath(org)}/projects/${encodeURIComponent(project)}/access`,
-    { subject, id, level },
-  )
-export const removeProjectAccess = (org: string, project: string, subject: string, id: string) =>
-  apiDelete<{ unassigned: true }>(
-    `${organizationPath(org)}/projects/${encodeURIComponent(project)}/access/${subject}/${encodeURIComponent(id)}`,
-  )
 export type AuditRow = { at: string; actor: string; action: string; detail: string }
 export const getAudit = (org: string, signal?: AbortSignal) =>
   apiGet<AuditRow[]>(`${organizationPath(org)}/audit`, { limit: 25 }, signal)

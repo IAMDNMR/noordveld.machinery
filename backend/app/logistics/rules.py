@@ -4,7 +4,8 @@ how long it takes (that is route data).
 Tracking is a list of DISCRETE events. There is no live position: an event at sea or in the air has no location_id, only a status.
 
 Route progress
-  A leg is COMPLETED when the shipment has an arrival event (ARRIVED_PORT, ARRIVED_DC or DELIVERED) at the leg's destination location.
+  A leg is COMPLETED when the shipment has an arrival event (ARRIVED_PORT, ARRIVED_DC or DELIVERED) at the leg's destination location. A DELIVERED event
+  completes every leg: delivery ends the route.
   Position: all legs completed -> delivered. Otherwise the first incomplete leg is the CURRENT leg; the shipment is `on_leg` while the last event is a
   departure, transit or out-for-delivery event, and `at_location` while the last event is an arrival or customs event.
 """
@@ -108,6 +109,9 @@ def route_progress(legs: list[dict[str, Any]], events: list[dict[str, Any]]) -> 
     arrived = {
         e["location_id"] for e in evs if e["event_type"] in ARRIVAL_TYPES and e.get("location_id")
     }
+    if any(e["event_type"] == "DELIVERED" for e in evs):
+        # delivery ends the route; app tracking records its place as text only, so a delivered shipment would otherwise show no leg completed
+        arrived |= {leg["destination_location_id"] for leg in legs}
     completed: list[dict[str, Any]] = []
     for leg in legs:
         if leg["destination_location_id"] in arrived:

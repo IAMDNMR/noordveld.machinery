@@ -1,12 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/inter'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App'
-import './styles/tokens.css'
-import './styles/base.css'
+import '../../src/styles/tokens.css'
+import '../../src/styles/base.css'
 
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>,
 )

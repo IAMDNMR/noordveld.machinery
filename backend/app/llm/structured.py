@@ -32,19 +32,15 @@ log = logging.getLogger("app.llm")
 # Token budget: replies are short structures or two sentences, and only the evidence the wording needs is sent.
 # "question_retry" is the single second attempt after an unusable reply: temperature is 0, so the same cap would truncate the same way
 MAX_OUTPUT_TOKENS = {
+    "spark": 650,
     "commerce": 120,
     "question": 320,
     "question_retry": 480,
     "shopping": 150,
     "grounded_answer": 120,
-    "studio_turn": 10000,
-    "studio_blueprint": 16000,
-    "studio_frontend": 8000,
-    "studio_frontend_file": 6000,
+    "order_message": 260,  # about 11 short fields; a cap stops a model that stalls from padding to the default
 }
-JSON_KINDS = frozenset(
-    {"studio_turn", "studio_blueprint", "studio_frontend"}
-)  # free-form JSON objects (no schema); the caller validates every field
+JSON_KINDS = frozenset()
 MAX_EVIDENCE_ITEMS = (
     12  # records sent to the wording step: the summary record plus up to 11 results
 )
@@ -316,13 +312,6 @@ class StructuredLLM:
         raise NotImplementedError
 
     def _guarded(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
-        if kind.startswith(
-            "studio_frontend"
-        ):  # one generation makes many calls: wait for room instead of failing it
-            for _ in range(60):
-                if self._limit.allow():
-                    return self._complete(kind, system, prompt, schema)
-                time.sleep(2)
         if not self._limit.allow():
             log.warning("llm call provider=%s kind=%s outcome=local_rate_limit", self.name, kind)
             raise LLMUnavailable("rate limit reached")
@@ -379,29 +368,41 @@ class StructuredLLM:
             ),
         )
 
-    def studio_blueprint(self, system: str, prompt: str) -> dict[str, Any]:
-        """A complete proposed domain needs more output than a conversation turn."""
-        return _load(self._guarded("studio_blueprint", system, prompt, None))
+    def parse_spark_request(self, system: str, prompt: str):
+        """Validate routing and contextual rewrites before any existing tool runs."""
+        from pydantic import ValidationError
+        from app.schemas.spark import SparkPlan
 
-    def studio_json(self, system: str, prompt: str) -> dict[str, Any]:
-        """One Design Studio conversation turn: a JSON object whose every field the caller validates. Never cached (it depends on the project)."""
-        return _load(self._guarded("studio_turn", system, prompt, None))
+        schema = _obj({**{key: _STR for key in ("intelligence", "shopping", "account", "clarification")},
+                       "view": {"type": "string", "enum": ["answer", "compare", "chart", "graph"]},
+                       "reuse_previous": {"type": "boolean"}, "order": _STR})
+        try:
+            return SparkPlan.model_validate(_load(self._guarded("spark", system, prompt, schema)))
+        except ValidationError as exc:
+            raise LLMInvalidResponse("Spark returned an invalid tool plan") from exc
 
-    def studio_frontend(self, system: str, prompt: str) -> dict[str, Any]:
-        """Fresh application source, validated and built by the caller before storage."""
-        return _load(self._guarded("studio_frontend", system, prompt, None))
 
-    def studio_frontend_suffix(self, system: str, prompt: str) -> str:
-        """The missing end of a cut-off file. Leading spaces are kept: the cut can fall between two words."""
-        value = self._guarded("studio_frontend_file", system, prompt, None)
-        value = re.sub(r"<think>.*?</think>", "", value, flags=re.S)
-        return re.sub(r"^```[^\n]*\n|\n```\s*$", "", value).rstrip()
 
-    def studio_frontend_file(self, system: str, prompt: str) -> str:
-        """One source file per request avoids truncating a whole application in JSON."""
-        value = self._guarded("studio_frontend_file", system, prompt, None)
-        value = re.sub(r"<think>.*?</think>", "", value, flags=re.S).strip()
-        return re.sub(r"^```[^\n]*\n|\n```$", "", value).strip()
+
+
+
+    def parse_order_message(self, system: str, prompt: str):
+        """Read one free-text reply in the order journey into strict slots; the journey validates every value against the graph."""
+        from pydantic import ValidationError
+        from app.schemas.spark_order import OrderMessage
+
+        text, num = _STR, {"type": ["number", "null"]}
+        schema = _obj({"relevant": {"type": "boolean"}, "part": text, "compare_options": {"type": ["boolean", "null"]},
+                       "quantity": {"type": ["integer", "null"]}, "machine": text, "skip_machine": {"type": ["boolean", "null"]},
+                       "destination": text, "needed_by": text, "budget_eur": num, "install": {"type": ["boolean", "null"]},
+                       "preference": {"type": ["string", "null"], "enum": ["fastest", "cheapest", None]},
+                       "proceed": {"type": ["boolean", "null"]},
+                       **{key: text for key in ("name", "company", "email", "phone", "receiver_name", "receiver_phone")}})
+        # contact details typed in chat fill the details form; the journey validates each one like a form entry
+        try:
+            return OrderMessage.model_validate(_load(self._guarded("order_message", system, prompt, schema)))
+        except ValidationError as exc:
+            raise LLMInvalidResponse("Spark returned an invalid order reading") from exc
 
     def generate_grounded_response(
         self, question: str, intent: str, evidence: list[dict[str, Any]], draft: str

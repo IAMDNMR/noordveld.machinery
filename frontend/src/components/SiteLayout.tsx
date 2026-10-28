@@ -1,8 +1,14 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Footer } from './Footer'
 import { Nav } from './Nav'
 import '../styles/site-premium.css'
+import '../styles/experience.css'
+import '../styles/brand-refresh.css'
+import '../styles/motion.css'
+import '../styles/editorial-system.css'
+import './cine/cine.css'
+import '../styles/cinematic-site.css'
 
 /** Scrolls to the hash target when there is one, otherwise to the top of the new page. */
 function ScrollManager() {
@@ -12,7 +18,12 @@ function ScrollManager() {
       const id = decodeURIComponent(location.hash.slice(1))
       // The target may not be mounted yet on a cross-page navigation
       const frame = requestAnimationFrame(() =>
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        document.getElementById(id)?.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'instant'
+            : 'smooth',
+          block: 'start',
+        }),
       )
       return () => cancelAnimationFrame(frame)
     }
@@ -26,20 +37,29 @@ function ScrollManager() {
 
 export function SiteLayout() {
   const { pathname } = useLocation()
-  const studio = pathname.startsWith('/design-studio')
-  // Design Studio has its own full-height navigation.
-  const ownShell = studio && !/^\/design-studio\/domains(\/|$)/.test(pathname)
+  const spark = pathname === '/spark/chat'
   return (
     <>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
       <ScrollManager />
-      {!ownShell && <Nav />}
-      <main id="main" className={studio ? undefined : 'site-premium'}>
-        <Outlet />
+      {!spark && <div className="read-progress" aria-hidden="true" />}
+      <Nav />
+      <main key={pathname} id="main" className="site-premium site-brand">
+        {/* a page that is still loading keeps the navigation and footer on screen */}
+        <Suspense
+          fallback={
+            <div className="page-loading" role="status">
+              <span aria-hidden="true" />
+              Loading…
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
-      {!studio && <Footer />}
+      {!spark && <Footer />}
     </>
   )
 }

@@ -21,7 +21,7 @@ from app.canonical.store import MemoryStore
 from app.core.config import get_settings
 from app.logistics.context import ShipmentContextBuilder
 from app.logistics.readers import FileReader
-from app.logistics.rules import TRANSITIONS, sequence_errors
+from app.logistics.rules import TRANSITIONS, route_progress, sequence_errors
 
 live = pytest.mark.skipif(not get_settings().graph_configured, reason="Neo4j is not configured")
 APP = Path(__file__).resolve().parents[1] / "app"
@@ -304,6 +304,15 @@ LEGS = [
     {"sequence": i, "origin_location_id": o, "destination_location_id": d}
     for i, (o, d) in enumerate([("S", "P1"), ("P1", "P2"), ("P2", "DC"), ("DC", "D")], 1)
 ]
+
+
+def test_a_delivered_shipment_has_completed_every_leg():
+    moving = [ev("DEPARTED_ORIGIN", "2026-01-01", "S", 1), ev("ARRIVED_PORT", "2026-01-02", "P1", 2)]
+    p = route_progress(LEGS, moving)
+    assert p["completed_legs"] == [1] and p["current_leg"] == 2 and p["position"] == "at_location"
+    # app tracking records the place as text only: the DELIVERED event has no location_id
+    p = route_progress(LEGS, moving + [ev("DELIVERED", "2026-01-05", None, 3, "Customer site")])
+    assert p["completed_legs"] == [1, 2, 3, 4] and p["remaining_legs"] == [] and p["position"] == "delivered"
 
 
 def builder() -> ShipmentContextBuilder:

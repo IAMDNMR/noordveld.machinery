@@ -1,6 +1,8 @@
 import { ShoppingBag } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { getProfile } from '../api/profile'
 import { Link, useNavigate } from 'react-router-dom'
+import '../components/store/cart-redesign.css'
 import { ApiError, isAbort, lineKey, quoteCart } from '../api/index'
 import {
   getCountries,
@@ -166,6 +168,29 @@ function Flow() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<{ message: string; reasons: string[] } | null>(null)
   const idem = useRef(checkoutKey())
+  // saved profile (stored only with the user's consent): fills what is still empty, never overwrites what was typed
+  useEffect(() => {
+    let live = true
+    getProfile()
+      .then(({ profile: p }) => {
+        if (!live || !p) return
+        setDetails((d) => ({
+          name: d.name || p.name || '',
+          email: d.email || p.email || '',
+          phone: d.phone || p.phone || '',
+          company: d.company || p.company || '',
+        }))
+        setReceiverName((v) => v || p.receiver_name || '')
+        setReceiverPhone((v) => v || p.receiver_phone || '')
+        setCountry((v) => v || p.country || '')
+        setShipToId((v) => v || p.ship_to_id || '')
+        setDealerId((v) => v || p.dealer_id || '')
+      })
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [])
 
   const items = useMemo(
     () => lines.map((l) => ({ part_id: l.partId, quantity: l.qty, machine: l.machine ?? null })),

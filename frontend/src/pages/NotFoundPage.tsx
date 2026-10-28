@@ -1,11 +1,15 @@
 import { ButtonLink } from '../components/ButtonLink'
 import { usePageMeta } from '../hooks/usePageMeta'
 import './pages.css'
+import './pages-dark.css'
 
 export default function NotFoundPage() {
   usePageMeta({ title: 'Page not found', description: 'This page does not exist.', path: '/404' })
   return (
-    <section className="page-head page-head--centered" aria-labelledby="nf-title">
+    <section
+      className="page-head page-head--centered page-head--dark on-dark"
+      aria-labelledby="nf-title"
+    >
       <div className="container simple">
         <h1 id="nf-title" className="hero-title">
           Not found.

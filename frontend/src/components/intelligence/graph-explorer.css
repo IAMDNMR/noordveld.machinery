@@ -5,6 +5,29 @@
   background: #fff;
   color: #243c32;
 }
+.gx-fullscreen {
+  width: calc(100vw - 32px);
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 16px;
+  border: 1px solid #dbe2dc;
+  border-radius: 16px;
+  color: #243c32;
+  background: #fff;
+}
+.gx-fullscreen::backdrop {
+  background: rgb(8 30 26 / 65%);
+}
+.gx-fullscreen__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.gx-fullscreen .gx-canvas svg {
+  height: max(340px, calc(100dvh - 230px));
+}
 .gx-toolbar {
   display: flex;
   flex-wrap: wrap;

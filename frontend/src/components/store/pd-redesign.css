@@ -1,0 +1,130 @@
+/* Part detail: a dark product stage with the buying decision beside the part, then unboxed information sections. */
+#main.site-premium .pd-page {
+  overflow-x: clip;
+  padding-top: 0;
+}
+#main.site-premium .pd-page > .breadcrumbs,
+#main.site-premium .pd-page > .pd-head {
+  position: relative;
+  color: var(--on-dark);
+}
+#main.site-premium .pd-page > .breadcrumbs {
+  padding-top: 24px;
+  margin-bottom: 0;
+  padding-bottom: 12px;
+  isolation: isolate;
+}
+#main.site-premium .pd-page > .breadcrumbs::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw) 0;
+  z-index: -1;
+  background:
+    radial-gradient(55% 90% at 85% 0%, rgb(42 157 143 / 0.34), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+}
+#main.site-premium .pd-page > .pd-head {
+  isolation: isolate;
+  padding: 16px 0 48px;
+  margin-bottom: 40px;
+}
+#main.site-premium .pd-page > .pd-head::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background:
+    radial-gradient(55% 90% at 85% 0%, rgb(42 157 143 / 0.34), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+}
+#main.site-premium .pd-page .breadcrumbs :is(a, .crumb-sep, .crumb-current) {
+  color: var(--on-dark-2);
+}
+#main.site-premium .pd-page .breadcrumbs a:hover {
+  color: #fff;
+}
+#main.site-premium .pd-head .pd-visual :is(.pvis, .pimg) {
+  height: clamp(280px, 38vw, 440px);
+  border-radius: var(--radius-m);
+  background: linear-gradient(180deg, #f3f2ed, #e2e1d9);
+  box-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.6);
+}
+#main.site-premium .pd-head .pd-info .part-number {
+  color: #8fe0d3;
+  font-size: 13px;
+}
+#main.site-premium .pd-head h1 {
+  color: #fff;
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+#main.site-premium .pd-head :is(.muted, .small) {
+  color: var(--on-dark-2);
+}
+#main.site-premium .pd-head .pd-price {
+  color: #fff;
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+  letter-spacing: -0.03em;
+}
+#main.site-premium .pd-head .link-more {
+  color: #8fe0d3;
+}
+
+/* the four facts become a divided strip, not four boxes */
+#main.site-premium .pd-head .pd-stat-row {
+  gap: 0;
+  border-block: 1px solid var(--line-dark);
+}
+#main.site-premium .pd-head .pd-stat {
+  padding: 14px 16px 14px 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+#main.site-premium .pd-head .pd-stat + .pd-stat {
+  padding-left: 16px;
+  border-left: 1px solid var(--line-dark);
+}
+#main.site-premium .pd-head .pd-stat .label {
+  color: var(--on-dark-2);
+}
+#main.site-premium .pd-head .pd-stat .value {
+  color: #fff;
+}
+#main.site-premium .pd-head .pd-machine {
+  color: var(--on-dark);
+}
+#main.site-premium .pd-head .btn-secondary {
+  background: transparent;
+  color: #fff;
+  border-color: rgb(255 255 255 / 0.4);
+}
+#main.site-premium .pd-head .btn-secondary:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+/* information sections: typographic, divided, no card chrome */
+#main.site-premium .pd-sections .pd-section.card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding-inline: 0;
+}
+#main.site-premium .pd-sections .pd-section h3 {
+  font-size: 1.25rem;
+  border-bottom-color: var(--line-strong);
+}
+#main.site-premium .pd-sections .kv-row:hover {
+  background: var(--teal-soft);
+}
+
+@media (max-width: 760px) {
+  #main.site-premium .pd-head .pd-stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #main.site-premium .pd-head .pd-stat:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}

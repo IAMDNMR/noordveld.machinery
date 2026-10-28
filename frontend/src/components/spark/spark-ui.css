@@ -1,0 +1,1050 @@
+/*
+ * Spark design system: tokens and primitives for the conversation workspace.
+ * Loaded after spark.css; every rule here is scoped to .spark-workspace so nothing leaks into the site.
+ * Palette: deep teal, restrained turquoise, warm off-white, white, charcoal, muted grey.
+ */
+.wf.spark-workspace {
+  /* colour */
+  --sp-teal-900: #0d3b36;
+  --sp-teal-700: #00665d;
+  --sp-teal-600: #00756a;
+  --sp-turquoise: #2a9d8f;
+  --sp-teal-100: #dcebe8;
+  --sp-teal-50: #eef6f4;
+  --sp-paper: #faf9f6;
+  --sp-surface: #ffffff;
+  --sp-sand: #f1efe9;
+  --sp-ink: #1f2a28;
+  --sp-ink-2: #3d4a47;
+  --sp-muted: #5d6967;
+  --sp-line: #e5e2db;
+  --sp-line-strong: #cfcac0;
+  --sp-warn-bg: #fbf6e9;
+  --sp-warn-line: #b8975a;
+  --sp-warn-ink: #6b5428;
+  --sp-danger: #9a3b34;
+  /* shape, depth, rhythm */
+  --sp-r-sm: 8px;
+  --sp-r-md: 12px;
+  --sp-r-lg: 18px;
+  --sp-shadow-1: 0 1px 2px rgb(20 40 36 / 6%);
+  --sp-shadow-2: 0 8px 28px rgb(20 40 36 / 10%);
+  --sp-side: 272px;
+  --sp-measure: 780px;
+  --sp-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sp-fast: 140ms;
+  --sp-base: 220ms;
+  --spark-teal: var(--sp-teal-600);
+  --spark-ink: var(--sp-ink);
+  --spark-muted: var(--sp-muted);
+  --spark-line: var(--sp-line);
+  --spark-paper: var(--sp-paper);
+
+  grid-template-columns: var(--sp-side) minmax(0, 1fr);
+  grid-template-rows: 48px minmax(0, 1fr) auto;
+  background: var(--sp-paper);
+  color: var(--sp-ink);
+  transition: grid-template-columns var(--sp-base) var(--sp-ease);
+}
+.wf.spark-workspace:not(.has-sidebar) {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+.wf.spark-workspace > :is(.spark-toolbar, .spark-thread, .spark-compose-wrap),
+.wf.spark-workspace:not(.has-sidebar) > :is(.spark-toolbar, .spark-thread, .spark-compose-wrap) {
+  grid-column: 2;
+}
+
+/* ---- primitives ---- */
+.spark-workspace :is(button, a, textarea, input, summary):focus-visible {
+  outline: 2px solid var(--sp-teal-600);
+  outline-offset: 2px;
+  border-radius: var(--sp-r-sm);
+}
+.spark-workspace button:disabled {
+  opacity: 0.5;
+}
+.spark-workspace .sp-btn,
+.spark-response-actions button,
+.spark-text-button {
+  transition:
+    background-color var(--sp-fast),
+    color var(--sp-fast),
+    border-color var(--sp-fast);
+}
+
+/* ---- sidebar ---- */
+.wf.spark-workspace > .spark-sidebar,
+.wf.spark-workspace:not(.has-sidebar) > .spark-sidebar {
+  display: flex;
+  grid-column: 1;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--sp-sand);
+  border-right: 1px solid var(--sp-line);
+  padding: 16px 12px 12px;
+}
+.wf.spark-workspace:not(.has-sidebar) > .spark-sidebar {
+  visibility: hidden;
+  border-right-color: transparent;
+  transition: visibility 0s linear var(--sp-base);
+}
+.spark-sidebar > * {
+  min-width: calc(var(--sp-side) - 26px);
+}
+.spark-sidebar__brand {
+  padding: 0 6px 6px;
+}
+.spark-sidebar__brand a {
+  font-size: 20px;
+  letter-spacing: -0.04em;
+  color: var(--sp-teal-900);
+}
+.spark-sidebar__brand a span {
+  display: inline;
+  margin-left: 6px;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--sp-muted);
+}
+.spark-sidebar__brand button {
+  border-radius: var(--sp-r-sm);
+}
+.spark-sidebar__brand button:hover {
+  background: var(--sp-teal-100);
+}
+.spark-sidebar__description {
+  margin: 0 6px 14px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--sp-muted);
+}
+.spark-new-chat {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--sp-r-md);
+  background: var(--sp-teal-600);
+  color: #fff;
+  font-weight: 550;
+  font-size: 13px !important;
+  box-shadow: var(--sp-shadow-1);
+}
+.spark-new-chat:hover:not(:disabled) {
+  background: var(--sp-teal-700);
+}
+.spark-history-search {
+  margin: 12px 0 6px;
+  padding: 0 10px;
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: var(--sp-r-md);
+  background: rgb(255 255 255 / 60%);
+}
+.spark-history-search:focus-within {
+  background: #fff;
+  border-color: var(--sp-line-strong);
+}
+.spark-history-search input {
+  font-size: 13px;
+}
+.spark-history-search input:focus-visible {
+  outline: none;
+}
+.spark-sidebar__eyebrow {
+  display: none;
+}
+.spark-history-list {
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.spark-history-date,
+#main.site-premium .spark-history-date {
+  margin: 16px 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--sp-muted);
+}
+.spark-history-item {
+  margin: 1px 0;
+  border-radius: var(--sp-r-sm);
+  transition: background-color var(--sp-fast);
+}
+.spark-history-item > button {
+  padding: 0 10px;
+  min-height: 38px;
+  font-size: 13px;
+  color: var(--sp-ink-2);
+}
+.spark-history-item > button > svg {
+  color: var(--sp-muted);
+}
+.spark-history-item:hover,
+.spark-history-item:focus-within {
+  background: rgb(255 255 255 / 70%);
+}
+.spark-history-item.is-active {
+  background: #fff;
+  box-shadow:
+    inset 3px 0 0 var(--sp-turquoise),
+    var(--sp-shadow-1);
+}
+.spark-history-item.is-active > button {
+  color: var(--sp-teal-900);
+  font-weight: 600;
+}
+.spark-history-item__actions {
+  top: 4px;
+  background: transparent;
+}
+.spark-history-item__actions button {
+  border-radius: var(--sp-r-sm);
+  color: var(--sp-ink-2);
+}
+.spark-history-item__actions button:hover {
+  background: var(--sp-teal-100);
+}
+.spark-sidebar__footer {
+  border-top: 1px solid var(--sp-line);
+  padding: 12px 6px 0;
+}
+.spark-sidebar__footer a {
+  color: var(--sp-teal-700);
+  font-weight: 550;
+}
+.spark-sidebar__footer a:hover {
+  text-decoration: underline;
+}
+.spark-sidebar__footer p {
+  font-size: 11px;
+}
+
+/* ---- compact header ---- */
+.spark-toolbar {
+  padding: 0 20px;
+  gap: 12px;
+  border-bottom: 1px solid var(--sp-line);
+  background: var(--sp-paper);
+}
+.spark-brand {
+  gap: 8px;
+}
+.spark-brand > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.spark-brand > svg {
+  color: var(--sp-teal-600);
+}
+.spark-brand h1 {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.spark-brand p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--sp-muted);
+}
+.spark-toolbar button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-sm);
+  background: var(--sp-surface);
+  color: var(--sp-ink-2);
+}
+.spark-toolbar button:hover {
+  border-color: var(--sp-line-strong);
+}
+.spark-toolbar .spark-history-toggle {
+  min-height: 36px;
+  min-width: 36px;
+  margin: 0 0 0 -8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.spark-toolbar .spark-history-toggle:hover {
+  background: var(--sp-teal-100);
+}
+.spark-toolbar__actions > a {
+  font-size: 13px;
+  color: var(--sp-ink-2);
+}
+.spark-toolbar__actions > a:hover {
+  color: var(--sp-teal-700);
+  text-decoration: underline;
+}
+
+/* ---- thread ---- */
+.spark-thread {
+  scroll-behavior: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sp-line-strong) transparent;
+}
+.spark-turns {
+  width: min(100% - 40px, var(--sp-measure));
+  padding-bottom: 28px;
+}
+.spark-turn {
+  padding: 22px 0 8px;
+  animation: sp-arrive var(--sp-base) var(--sp-ease);
+}
+.spark-workspace .spark-question,
+#main.site-premium .spark-workspace .spark-question {
+  max-width: 82%;
+  margin: 0 0 20px auto;
+  padding: 10px 16px;
+  font-size: 15px;
+  line-height: 1.55;
+  border-radius: var(--sp-r-lg) var(--sp-r-lg) 4px var(--sp-r-lg);
+  background: var(--sp-teal-50);
+  border: 1px solid var(--sp-teal-100);
+  color: var(--sp-ink);
+}
+.spark-answer__by {
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--sp-teal-700);
+  font-size: 13px;
+}
+.spark-answer__by strong {
+  font-weight: 650;
+}
+.spark-answer__by time {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--sp-muted);
+}
+.spark-answer-text {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.spark-answer-text p {
+  margin: 0 0 12px;
+}
+.spark-answer .pr__summary {
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0 0 12px;
+}
+.spark-answer .pr__subject {
+  margin-bottom: 10px;
+}
+.spark-answer .pr__count {
+  margin: 14px 0 8px;
+}
+.spark-answer .pr__count h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sp-ink-2);
+}
+
+/* part, machine and supplier results: compact data cards in a responsive grid */
+.spark-answer .pr__results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.spark-answer .rcard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-1);
+  transition:
+    border-color var(--sp-fast),
+    box-shadow var(--sp-fast);
+}
+.spark-answer .rcard:hover {
+  border-color: var(--sp-line-strong);
+  box-shadow: var(--sp-shadow-2);
+}
+.spark-answer .rcard__key {
+  font-size: 15px;
+  font-weight: 650;
+}
+.spark-answer .rcard__open {
+  color: var(--sp-teal-700);
+}
+.spark-answer .rcard__name {
+  font-size: 13px;
+  color: var(--sp-ink-2);
+}
+.spark-answer .rcard__rel {
+  background: var(--sp-teal-50);
+  color: var(--sp-teal-700);
+}
+.spark-answer .rcard__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 12.5px;
+}
+.spark-answer .rcard__facts > div {
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.spark-answer .rcard__facts dt {
+  font-size: 11px;
+  color: var(--sp-muted);
+}
+.spark-answer .rcard__facts dt::after {
+  content: none;
+}
+.spark-answer .rcard__facts dd {
+  overflow-wrap: anywhere;
+  color: var(--sp-ink);
+}
+.spark-answer .rcard__foot {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--sp-line);
+  text-align: left;
+}
+.spark-answer .rcard__action {
+  color: var(--sp-teal-700);
+  min-height: 32px;
+}
+
+/* dealer, supplier and warehouse availability: one scannable table */
+.spark-availability {
+  margin: 8px 0 14px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+}
+.spark-availability table {
+  font-size: 13px;
+}
+.spark-availability :is(th, td) {
+  padding: 10px 14px;
+}
+.spark-availability thead th {
+  position: sticky;
+  top: 0;
+  background: var(--sp-sand);
+  font-weight: 600;
+  color: var(--sp-ink-2);
+}
+.spark-availability caption {
+  caption-side: bottom;
+  padding: 8px 14px;
+  border-top: 1px solid var(--sp-line);
+}
+.spark-availability tbody tr:hover {
+  background: var(--sp-teal-50);
+}
+.spark-answer-table {
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+}
+.spark-answer-table th {
+  background: var(--sp-sand);
+}
+
+/* demo-data and caution notices */
+.spark-answer .pr__demo,
+.spark-notice {
+  margin: 10px 0;
+  padding: 9px 12px;
+  border: 0;
+  border-left: 3px solid var(--sp-warn-line);
+  border-radius: 0 var(--sp-r-sm) var(--sp-r-sm) 0;
+  background: var(--sp-warn-bg);
+  color: var(--sp-warn-ink);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.spark-error {
+  border-left-color: var(--sp-danger);
+  background: #fbefee;
+  color: #6e2823;
+}
+
+/* evidence and graph disclosures share one quiet pattern with the sources panel */
+.spark-answer :is(.evid, .gx-answer) {
+  margin-top: 0;
+  border-top: 1px solid var(--sp-line);
+  font-size: 12.5px;
+}
+.spark-answer :is(.evid, .gx-answer) > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0;
+  list-style: none;
+  cursor: pointer;
+  font-weight: 550;
+  color: var(--sp-muted);
+}
+.spark-answer :is(.evid, .gx-answer) > summary::-webkit-details-marker {
+  display: none;
+}
+.spark-answer :is(.evid, .gx-answer) > summary::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border: solid currentcolor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+  transition: transform var(--sp-fast) var(--sp-ease);
+}
+.spark-answer :is(.evid, .gx-answer)[open] > summary::after {
+  transform: rotate(-135deg);
+}
+.spark-answer :is(.evid, .gx-answer) > summary:hover {
+  color: var(--sp-teal-700);
+}
+.spark-answer .evid__title {
+  font-size: 12.5px;
+  font-weight: 550;
+  color: inherit;
+}
+.spark-answer .evid__sub {
+  display: none;
+}
+.spark-sources > summary svg {
+  margin-left: auto;
+}
+
+/* ---- sources and steps (expandable) ---- */
+.spark-sources {
+  margin-top: 14px;
+  border-top: 1px solid var(--sp-line);
+  font-size: 12.5px;
+}
+.spark-sources > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--sp-muted);
+  font-weight: 550;
+}
+.spark-sources > summary::-webkit-details-marker {
+  display: none;
+}
+.spark-sources > summary:hover {
+  color: var(--sp-teal-700);
+}
+.spark-sources > summary svg {
+  transition: transform var(--sp-fast) var(--sp-ease);
+}
+.spark-sources[open] > summary svg {
+  transform: rotate(180deg);
+}
+.spark-sources__body {
+  display: grid;
+  gap: 12px;
+  padding: 4px 0 8px;
+  animation: sp-arrive var(--sp-base) var(--sp-ease);
+}
+.spark-sources__body h3 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sp-muted);
+}
+.spark-sources__body ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.spark-sources__body li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.5;
+  color: var(--sp-ink-2);
+}
+.spark-sources__body li svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--sp-teal-600);
+}
+.spark-sources__meta {
+  margin: 0;
+  color: var(--sp-muted);
+}
+
+/* ---- response actions ---- */
+.spark-response-actions {
+  gap: 4px;
+  padding: 4px 0 0;
+  margin-left: -8px;
+}
+.spark-response-actions button {
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: var(--sp-r-sm);
+  font-size: 12px;
+  color: var(--sp-muted);
+}
+.spark-response-actions button:hover:not(:disabled) {
+  background: var(--sp-sand);
+  color: var(--sp-teal-700);
+}
+
+/* ---- pending: reserves the space the answer will take, so nothing jumps ---- */
+.spark-pending {
+  display: block;
+  padding: 0 0 10px;
+  font-size: 13px;
+}
+.spark-skeleton {
+  display: grid;
+  gap: 9px;
+  min-height: 92px;
+}
+.spark-skeleton i {
+  display: block;
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--sp-sand), #e8e5dd, var(--sp-sand));
+  background-size: 200% 100%;
+  animation: sp-shimmer 1.6s linear infinite;
+}
+.spark-skeleton i:nth-child(1) {
+  width: 92%;
+}
+.spark-skeleton i:nth-child(2) {
+  width: 78%;
+}
+.spark-skeleton i:nth-child(3) {
+  width: 55%;
+}
+
+.spark-pending > p {
+  margin: 0 0 10px;
+  color: var(--sp-muted);
+}
+
+/* ---- empty state ---- */
+.spark-welcome {
+  width: min(100% - 40px, 720px);
+  margin: clamp(24px, 9vh, 88px) auto 24px;
+}
+.spark-kicker {
+  color: var(--sp-teal-600);
+  margin-bottom: 10px;
+}
+.spark-welcome h2 {
+  max-width: none;
+  margin-bottom: 10px;
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 560;
+  letter-spacing: -0.03em;
+}
+.spark-welcome > p:not(.spark-kicker) {
+  max-width: 52ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--sp-muted);
+}
+.spark-starters {
+  margin-top: 24px;
+  gap: 10px;
+}
+.spark-starters li {
+  border: 0;
+}
+.spark-starters button {
+  min-height: 0;
+  height: 100%;
+  padding: 14px 40px 14px 16px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: var(--sp-shadow-1);
+  transition:
+    border-color var(--sp-fast),
+    box-shadow var(--sp-fast);
+}
+.spark-starters button:hover {
+  border-color: var(--sp-turquoise);
+  box-shadow: var(--sp-shadow-2);
+}
+.spark-starters button span {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--sp-teal-600);
+}
+.spark-starters button svg {
+  right: 14px;
+  top: 16px;
+}
+
+/* ---- composer ---- */
+.spark-compose-wrap {
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, transparent, var(--sp-paper) 18%);
+}
+.spark-compose-wrap > * {
+  width: min(100% - 40px, var(--sp-measure));
+  margin-inline: auto;
+}
+.spark-compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 2px 8px;
+  padding: 10px 10px 8px 16px;
+  border: 1px solid var(--sp-line-strong);
+  border-radius: var(--sp-r-lg);
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-2);
+  transition:
+    border-color var(--sp-fast),
+    box-shadow var(--sp-fast);
+}
+.spark-compose:focus-within {
+  outline: 0;
+  border-color: var(--sp-teal-600);
+  box-shadow:
+    0 0 0 3px rgb(0 117 106 / 16%),
+    var(--sp-shadow-2);
+}
+.spark-compose textarea,
+#main.site-premium.site-brand .spark-compose textarea:focus-visible {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  min-height: 24px;
+  max-height: 176px;
+  padding: 6px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  outline: 0;
+  box-shadow: none;
+  scrollbar-width: thin;
+}
+.spark-compose__tools {
+  display: contents;
+}
+.spark-compose__tools > div {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  gap: 2px;
+}
+.spark-compose__tools > span {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  font-size: 11.5px;
+  color: var(--sp-muted);
+}
+.spark-compose__tools button {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--sp-r-md);
+  transition:
+    background-color var(--sp-fast),
+    color var(--sp-fast);
+}
+.spark-compose__tools button:hover:not(:disabled) {
+  background: var(--sp-sand);
+  color: var(--sp-teal-700);
+}
+.spark-compose__tools button[aria-pressed='true'] {
+  background: var(--sp-teal-100);
+  color: var(--sp-teal-700);
+}
+.spark-compose__tools button.spark-send {
+  background: var(--sp-teal-600);
+  color: #fff;
+  border-radius: 50%;
+}
+.spark-compose__tools button.spark-send:hover:not(:disabled) {
+  background: var(--sp-teal-700);
+  color: #fff;
+}
+.spark-compose__tools button.spark-send:disabled {
+  background: var(--sp-line-strong);
+}
+.spark-compose-note {
+  margin-top: 6px;
+  font-size: 11.5px;
+}
+.spark-jump {
+  top: -40px;
+  min-height: 34px;
+  border-radius: 999px;
+  box-shadow: var(--sp-shadow-2);
+  color: var(--sp-teal-700);
+}
+
+/* ---- dialogs ---- */
+.spark-part-dialog,
+.spark-manage-dialog {
+  border-radius: var(--sp-r-lg);
+  box-shadow: var(--sp-shadow-2);
+}
+.spark-manage-dialog input {
+  border-radius: var(--sp-r-sm);
+}
+.spark-manage-dialog button {
+  min-height: 40px;
+  border-radius: var(--sp-r-sm);
+}
+.spark-manage-dialog button[type='submit'] {
+  background: var(--sp-teal-600);
+  border-color: var(--sp-teal-600);
+}
+.spark-manage-dialog button.is-destructive {
+  background: var(--sp-danger);
+  border-color: var(--sp-danger);
+}
+
+@keyframes sp-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sp-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---- tablet and mobile: sidebar becomes an overlay drawer ---- */
+@media (max-width: 1000px) {
+  .wf.spark-workspace,
+  .wf.spark-workspace:not(.has-sidebar) {
+    grid-template-columns: minmax(0, 1fr);
+    transition: none;
+  }
+  .wf.spark-workspace > :is(.spark-toolbar, .spark-thread, .spark-compose-wrap),
+  .wf.spark-workspace:not(.has-sidebar) > :is(.spark-toolbar, .spark-thread, .spark-compose-wrap) {
+    grid-column: 1;
+  }
+  .wf.spark-workspace > .spark-sidebar,
+  .wf.spark-workspace:not(.has-sidebar) > .spark-sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw);
+    z-index: 31;
+    visibility: visible;
+    transform: translateX(0);
+    border-right-color: var(--sp-line);
+    box-shadow: var(--sp-shadow-2);
+    transition: transform var(--sp-base) var(--sp-ease);
+  }
+  .wf.spark-workspace:not(.has-sidebar) > .spark-sidebar {
+    visibility: hidden;
+    transform: translateX(-104%);
+    transition:
+      transform var(--sp-base) var(--sp-ease),
+      visibility 0s linear var(--sp-base);
+  }
+  .spark-sidebar > * {
+    min-width: 0;
+  }
+  .has-sidebar .spark-sidebar-backdrop {
+    background: rgb(13 59 54 / 40%);
+    animation: sp-fade var(--sp-base) ease-out;
+  }
+  .spark-history-item > button {
+    min-height: 46px;
+  }
+  .spark-history-item__actions button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .spark-compose__tools button {
+    width: 42px;
+    height: 42px;
+  }
+  .spark-brand p {
+    display: none;
+  }
+}
+@keyframes sp-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (max-width: 640px) {
+  .wf.spark-workspace {
+    grid-template-rows: 52px minmax(0, 1fr) auto;
+  }
+  .spark-toolbar {
+    padding: 0 12px;
+  }
+  .spark-turns,
+  .spark-compose-wrap > *,
+  .spark-welcome {
+    width: calc(100% - 24px);
+  }
+  .spark-workspace .spark-question {
+    max-width: 92%;
+  }
+  .spark-starters {
+    grid-template-columns: 1fr;
+  }
+  .spark-answer .rcard__facts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .spark-compose textarea {
+    font-size: 16px;
+  }
+  .spark-compose__tools > span {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf.spark-workspace,
+  .wf.spark-workspace *,
+  .wf.spark-workspace *::before,
+  .wf.spark-workspace *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* ---- decluttered answers: prose first, data second, everything else on demand ---- */
+.spark-answer .rcard {
+  box-shadow: none;
+  border-color: var(--sp-line);
+  background: transparent;
+  padding: 12px 14px;
+  gap: 6px;
+}
+.spark-answer .rcard:hover {
+  box-shadow: none;
+  background: var(--sp-surface);
+}
+.spark-answer .rcard .prov,
+.spark-answer .pr__actions + .evid {
+  display: none;
+}
+.spark-answer .rcard__foot:not(:has(button)) {
+  display: none;
+}
+.spark-answer .rcard__foot {
+  border-top: 0;
+  padding-top: 0;
+}
+.spark-answer .pr__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.spark-answer .pr__actions .btn,
+.spark-answer .pr__actions button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--sp-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sp-ink-2);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.spark-answer .pr__actions button:hover {
+  background: var(--sp-surface);
+  border-color: var(--sp-line-strong);
+}
+.spark-response-actions button {
+  opacity: 0.7;
+}
+.spark-response-actions button:hover:not(:disabled),
+.spark-response-actions button:focus-visible {
+  opacity: 1;
+}
+.spark-sources,
+.spark-answer :is(.evid, .gx-answer) {
+  border-top: 0;
+}
+.spark-sources {
+  margin-top: 8px;
+}
+.spark-sources > summary,
+.spark-answer :is(.evid, .gx-answer) > summary {
+  display: inline-flex;
+  width: auto;
+  gap: 6px;
+  font-weight: 500;
+}
+.spark-answer :is(.evid, .gx-answer) > summary::after,
+.spark-sources > summary svg {
+  margin-left: 2px;
+}
+
+/* ---- composer in the manner of a modern chat input ---- */
+.spark-compose {
+  border-radius: 26px;
+  border-color: var(--sp-line);
+  padding: 8px 8px 8px 20px;
+  box-shadow: 0 2px 14px rgb(20 40 36 / 8%);
+}
+.spark-compose:focus-within {
+  border-color: var(--sp-line-strong);
+  box-shadow:
+    0 0 0 1px var(--sp-line-strong),
+    0 4px 20px rgb(20 40 36 / 10%);
+}
+.spark-compose textarea {
+  padding: 9px 0;
+}
+.spark-compose__tools > div {
+  align-self: center;
+  gap: 0;
+}
+.spark-compose__tools button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.spark-compose__tools button.spark-send {
+  background: var(--sp-teal-900);
+  margin-left: 4px;
+}
+.spark-compose__tools button.spark-send:hover:not(:disabled) {
+  background: var(--sp-teal-700);
+}
+.spark-compose__tools > span:empty,
+.spark-compose__tools > span:not(:has(*)):empty {
+  display: none;
+}
+.spark-compose-note {
+  margin-top: 8px;
+  font-size: 11px;
+  opacity: 0.8;
+}

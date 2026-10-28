@@ -388,43 +388,26 @@ def test_a_qualifier_the_user_wrote_is_kept_when_the_model_drops_it():
     assert nothing.calls == ["air filter", "filter"]
 
 
-def test_relationship_types_are_counted_not_rows():
-    """One relationship type that reaches two kinds of entity is one type: 3 rows, 2 types, 6 relationships."""
+def test_part_graph_draws_named_business_records_instead_of_aggregate_or_internal_nodes():
     from app.intelligence.handlers import Context, part_graph
     from app.intelligence.models import Kind, Resolved
 
     class Repo:
-        def relationships(self, part_id):
-            return [
-                {
-                    "relationship": "FITS",
-                    "other_label": "Machine",
-                    "data_status": "SOURCE_DERIVED",
-                    "n": 2,
-                },
-                {
-                    "relationship": "HAS_SPECIFICATION",
-                    "other_label": "PartSpecification",
-                    "data_status": "SOURCE_DERIVED",
-                    "n": 3,
-                },
-                {
-                    "relationship": "HAS_SPECIFICATION",
-                    "other_label": "Evidence",
-                    "data_status": "SOURCE_DERIVED",
-                    "n": 1,
-                },
-            ]
+        def graph_view(self, part_id):
+            assert part_id == "PRT-1"
+            return {
+                "machines": [{"label": "Machine A", "type": "FITS", "ds": "SOURCE_DERIVED"}],
+                "suppliers": [{"label": "Supplier A", "type": "SUPPLIED_BY", "ds": "SYNTHETIC_DEMO"}],
+                "compliance": [{"label": "Technical evidence", "type": "HAS_COMPLIANCE", "ds": "SYNTHETIC_DEMO"}],
+                "category": None,
+            }
 
-    c = Context(
-        "Show the relationships for AB-1000-XY.",
-        "",
-        12,
-        Repo(),
-        None,
-        {Kind.PART: Resolved(Kind.PART, "PRT-1", "AB-1000-XY", None, "SOURCE_DERIVED", 2)},
-    )  # type: ignore[arg-type]
-    assert (
-        part_graph(c).summary
-        == "AB-1000-XY has 6 direct relationships across 2 relationship types."
-    )
+    c = Context("Show connections", "", 1, Repo(), None,
+        {Kind.PART: Resolved(Kind.PART, "PRT-1", "AB-1000-XY", None, "SOURCE_DERIVED", 2)})
+    result = part_graph(c)
+    assert result.summary == "Showing 2 recorded business connections for AB-1000-XY."
+    assert len(result.results) == 1 and result.total == 2
+    assert [e.target for e in result.evidence] == ["Machine A", "Supplier A"]
+    assert result.evidence[0].data_class == "SOURCE_DERIVED"
+    assert result.evidence[1].data_class == "SYNTHETIC_DEMO"
+    assert result.warnings and "bounded" in result.warnings[0]

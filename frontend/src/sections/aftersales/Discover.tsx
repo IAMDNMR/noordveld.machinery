@@ -31,9 +31,9 @@ export function QuickAccess({
       kind: 'part',
     },
     {
-      title: 'Parts Intelligence',
+      title: 'Ask Spark',
       text: 'Investigate relationships, machine fitment and the supply evidence that is recorded.',
-      to: '/parts-intelligence',
+      to: '/spark/chat',
       img: editorialImageUrl('engineering'),
       kind: 'photo',
     },
@@ -155,7 +155,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
     if (!v) return
     navigate(
       QUESTION.test(v)
-        ? `/parts-intelligence?${new URLSearchParams({ q: v })}`
+        ? `/spark/chat?${new URLSearchParams({ q: v })}`
         : `${STORE_ROUTE}?${new URLSearchParams({ q: v })}`,
     )
   }
@@ -196,7 +196,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
               <button
                 type="button"
                 className="as-inline"
-                onClick={() => navigate(`/parts-intelligence?${new URLSearchParams({ q })}`)}
+                onClick={() => navigate(`/spark/chat?${new URLSearchParams({ q })}`)}
               >
                 ask Parts Intelligence
               </button>
@@ -225,7 +225,7 @@ export function PartSearch({ filters }: { filters: CatalogueFilters | null }) {
           {!isQuestion && q.length >= 2 && !live.loading && live.data && results.length === 0 ? (
             <p className="as-note">
               No catalogue part matches “{q}”. Check the spelling or the part number, or{' '}
-              <Link to={`/agentic-shopping?${new URLSearchParams({ q })}`}>
+              <Link to={`/spark/chat?${new URLSearchParams({ q })}`}>
                 describe the problem in Agentic E-Commerce
               </Link>
               . Nothing is suggested without a match.

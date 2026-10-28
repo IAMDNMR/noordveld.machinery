@@ -26,7 +26,7 @@ __all__ = [
     "LLMUnavailable",
     "ShoppingParse",
     "create_llm",
-    "create_studio_llm",
+    "create_reasoning_llm",
     "PROVIDERS",
 ]
 
@@ -50,9 +50,9 @@ def create_llm(settings: Settings) -> LLMClient | None:
 
 
 @lru_cache(maxsize=4)
-def create_studio_llm(settings: Settings) -> LLMClient | None:
-    """The Design Studio conversation model: `AI_PROVIDER` (nvidia, groq or gemini) when set, otherwise the project's `LLM_PROVIDER`.
-    One provider, chosen by configuration; there is no silent failover between providers (the Studio falls back to its labelled local rules)."""
+def create_reasoning_llm(settings: Settings) -> LLMClient | None:
+    """The Spark reasoning model: `AI_PROVIDER` (nvidia, groq or gemini) when set, otherwise the project's `LLM_PROVIDER`.
+    One provider, chosen by configuration; there is no silent failover between providers."""
     provider = settings.ai_provider or settings.llm_provider
     if provider == "nvidia":
         if not (
@@ -62,10 +62,10 @@ def create_studio_llm(settings: Settings) -> LLMClient | None:
             return None
         from app.llm.nvidia import NvidiaClient
 
-        # The planner model is the default: the smaller one is 2-4x faster but proposed duplicates and malformed steps in testing. STUDIO_MODEL=fast opts in.
+        # The planner model is the default: the smaller one is 2-4x faster but proposed duplicates and malformed steps in testing. SPARK_MODEL=fast opts in.
         import os
 
-        fast = os.environ.get("STUDIO_MODEL", "").strip().lower() == "fast"
+        fast = os.environ.get("SPARK_MODEL", "").strip().lower() == "fast"
         return NvidiaClient(
             settings,
             model=(settings.nvidia_fast_model or settings.nvidia_planner_model)

@@ -185,9 +185,17 @@ export function PartActions({
   return (
     <div className="pw__actions">
       {action.kind === 'parts_store' && action.href ? (
-        <Link className="btn btn-primary" to={action.href}>
-          {action.label}
-        </Link>
+        <>
+          <Link className="btn btn-primary" to={action.href}>
+            {action.label}
+          </Link>
+          <Link
+            className="btn btn-secondary"
+            to={`/spark/chat?${new URLSearchParams({ q: `Find buying options for ${overview.part_number}` })}`}
+          >
+            Compare buying options
+          </Link>
+        </>
       ) : action.kind === 'identify' ? (
         <button type="button" className="btn btn-primary" onClick={onIdentify}>
           {action.label}

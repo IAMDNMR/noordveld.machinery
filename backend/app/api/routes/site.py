@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from app.api.dependencies import Sites
 
@@ -12,8 +12,10 @@ router = APIRouter(tags=["site"])
 
 
 @router.get("/site/overview")
-def overview(service: Sites) -> dict[str, Any]:
+def overview(service: Sites, response: Response) -> dict[str, Any]:
     """Machines, plants, brands and catalogue size for the company website."""
+    # The same for every visitor and slow to read (about 1.7 s): let browsers and the CDN reuse it for a few minutes.
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=600"
     return service.overview()
 
 

@@ -4,13 +4,7 @@ import './chrome-tokens.css'
 import './chrome.css'
 import type { ChromeLink } from './links'
 
-export function SiteFooter({
-  Link,
-  showStudio = true,
-}: {
-  Link: ChromeLink
-  showStudio?: boolean
-}) {
+export function SiteFooter({ Link }: { Link: ChromeLink }) {
   return (
     <footer className="footer nvx-chrome">
       <div className="nvx-container footer__grid">
@@ -22,7 +16,7 @@ export function SiteFooter({
           <h2 className="footer__heading">Explore</h2>
           <ul>
             {nav
-              .filter((item) => showStudio || item.to !== '/studio')
+              .filter((item) => item.label !== 'Company' && item.label !== 'Contact')
               .map((item) => (
                 <li key={item.label}>
                   <Link to={item.to} external={item.external}>
@@ -33,8 +27,14 @@ export function SiteFooter({
           </ul>
         </nav>
         <div className="footer__col">
-          <h2 className="footer__heading">Contact</h2>
+          <h2 className="footer__heading">Company</h2>
           <ul>
+            <li>
+              <Link to="/#company">About Noordveld</Link>
+            </li>
+            <li>
+              <Link to="/#plants">Manufacturing</Link>
+            </li>
             <li>
               <a href={`mailto:${company.email}`}>{company.email}</a>
             </li>

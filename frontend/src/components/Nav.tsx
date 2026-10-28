@@ -52,14 +52,9 @@ export function Nav() {
     [user],
   )
   const items = useMemo(() => {
-    const base = navFor(user?.role ?? null).filter(
-      (item) => !user || (item.to !== '/studio' && item.to !== '/design-studio'),
-    )
+    const base = navFor(user?.role ?? null)
     if (!user || !workspace?.directory_configured) return base
-    const visible = workspace.studio?.visible
-      ? base
-      : base.filter((item) => item.to !== '/design-studio')
-    return [{ label: 'Workspace', to: '/workspace' }, ...visible]
+    return [{ label: 'Workspace', to: '/workspace' }, ...base]
   }, [user, workspace])
   const account = user ? (
     <>

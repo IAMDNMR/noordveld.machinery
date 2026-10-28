@@ -19,14 +19,15 @@ import { Reveal } from '../../components/Reveal'
 import { company } from '../../data/content'
 import { useApi } from '../../hooks/useApi'
 import { useInView } from '../../hooks/useInView'
-import { editorialImageUrl } from '../../lib/assets'
+import { editorialImageUrl, partImageUrl } from '../../lib/assets'
 import { STORE_ROUTE } from '../../lib/storeQuery'
 import { useSession } from '../../store/session'
 import { label, withImage } from './data'
+import './connection-story.css'
 
-const PI = (q: string) => `/parts-intelligence?${new URLSearchParams({ q })}`
+const PI = (q: string) => `/spark/chat?${new URLSearchParams({ q })}`
 /** A question for the one Agentic E-Commerce screen (parts, delivery, orders, shipments and warranty). */
-const ASK = (q: string) => `/agentic-shopping?${new URLSearchParams({ q })}`
+const ASK = (q: string) => `/spark/chat?${new URLSearchParams({ q })}`
 const signInTo = (hash: string) =>
   `/sign-in?${new URLSearchParams({ next: `/parts-services${hash}` })}`
 
@@ -61,7 +62,7 @@ export function IntelligenceMap({ parts }: { parts: PartSummary[] | null }) {
         name: 'Part',
         rel: '',
         icon: Cog,
-        to: no ? `/parts-intelligence?${new URLSearchParams({ q: no })}` : null,
+        to: no ? `/spark/chat?${new URLSearchParams({ q: no })}` : null,
         note: 'catalogue record',
       },
       {
@@ -123,92 +124,141 @@ export function IntelligenceMap({ parts }: { parts: PartSummary[] | null }) {
         },
       ]
     : []
-  const ref = useRef<HTMLOListElement>(null)
-  const inView = useInView(ref, { once: true, threshold: 0.3 })
+  const [chapter, setChapter] = useState(0)
+  const chapters = [
+    {
+      title: 'Start with the machine.',
+      label: 'Find the fit',
+      text: 'A part is only useful when it fits the equipment. Start with the machine and follow its recorded compatibility.',
+      indices: [0, 1],
+    },
+    {
+      title: 'Find the people behind the part.',
+      label: 'Find the supply',
+      text: 'Explore who supplies the part, which dealers stock it and what the depot records show. Ask Spark to check the evidence.',
+      indices: [2, 3, 4],
+    },
+    {
+      title: 'Keep the next step connected.',
+      label: 'Follow through',
+      text: 'Continue into your order and shipment. Service and warranty answers depend on the records available; they are not a confirmed booking or claim.',
+      indices: [5, 6, 7],
+    },
+  ]
+  const current = chapters[chapter]
   const k = kpis.data
   return (
-    <section className="section on-dark as-intel" aria-labelledby="as-intel-title">
-      <div className="as-intel__grid" aria-hidden="true" />
+    <section className="connection-story" aria-labelledby="as-intel-title">
       <div className="container">
-        <Reveal>
-          <p className="label">Parts Intelligence</p>
-          <h2 id="as-intel-title" className="h1">
-            Make the connections visible.
+        <header className="connection-story__heading">
+          <p className="label">ONE PART. A CONNECTED STORY.</p>
+          <h2 id="as-intel-title">
+            From the machine.
+            <br />
+            <span>To the next working day.</span>
           </h2>
-          <p className="lead">
-            Every part sits in a graph of recorded relationships. Select a node to inspect it with
-            Parts Intelligence
-            {example ? (
-              <>
-                , starting from <span className="as-mono">{no}</span> ({example.name})
-              </>
-            ) : null}
-            .
-          </p>
-        </Reveal>
-        <ol
-          ref={ref}
-          className={`as-graph ${inView ? 'is-in' : ''}`}
-          aria-label="Relationships recorded in the graph"
+          <p>Follow the connections with Spark. Choose a chapter to see what you can explore.</p>
+        </header>
+        <div
+          className="connection-story__chapters"
+          role="group"
+          aria-label="Explore the part journey"
         >
-          {nodes.map((n, i) => (
-            <li key={n.name} style={{ transitionDelay: `${i * 110}ms` }}>
-              {n.rel ? <span className="as-graph__rel">{n.rel}</span> : null}
-              {n.to ? (
-                <Link to={n.to} className="as-graph__node">
-                  <n.icon size={22} strokeWidth={1.6} aria-hidden="true" />
-                  <strong>{n.name}</strong>
-                  <small>{n.note}</small>
-                </Link>
-              ) : (
-                <span className="as-graph__node">
-                  <n.icon size={22} strokeWidth={1.6} aria-hidden="true" />
-                  <strong>{n.name}</strong>
-                  <small>{n.note}</small>
-                </span>
-              )}
-            </li>
+          {chapters.map((item, index) => (
+            <button
+              key={item.label}
+              type="button"
+              aria-pressed={chapter === index}
+              aria-controls="connection-chapter"
+              onClick={() => setChapter(index)}
+            >
+              <span>0{index + 1}</span>
+              {item.label}
+            </button>
           ))}
-        </ol>
-        {k ? (
-          <p className="as-intel__kpis">
-            {k.parts} parts · {k.machines} machines · {k.fitments} fitment records · {k.suppliers}{' '}
-            suppliers · {k.dealers} dealers · {k.relationships.toLocaleString('en-US')}{' '}
-            relationships, of which {Math.round((k.synthetic_nodes / k.nodes) * 100)}% of the
-            records are synthetic demonstration data.
+        </div>
+        <div className="connection-story__stage">
+          <figure className="connection-story__part">
+            {no && partImageUrl(no) ? (
+              <img src={partImageUrl(no)} alt={example.name} loading="lazy" />
+            ) : (
+              <Cog size={64} aria-hidden="true" />
+            )}
+            <figcaption>
+              <span>EXAMPLE FROM THE CATALOGUE</span>
+              <strong>{example?.name ?? 'Choose a part to explore'}</strong>
+              {no ? <small>{no}</small> : null}
+            </figcaption>
+          </figure>
+          <div id="connection-chapter" className="connection-story__chapter" aria-live="polite">
+            <p className="connection-story__number">0{chapter + 1} / 03</p>
+            <h3>{current.title}</h3>
+            <p>{current.text}</p>
+            <ul aria-label={current.label}>
+              {current.indices.map((index) => {
+                const node = nodes[index]
+                const Icon = node.icon
+                return (
+                  <li key={node.name}>
+                    {node.to ? (
+                      <Link to={node.to}>
+                        <Icon size={21} aria-hidden="true" />
+                        <span>
+                          <strong>{node.name}</strong>
+                          <small>{node.note}</small>
+                        </span>
+                        <span aria-hidden="true">↗</span>
+                      </Link>
+                    ) : (
+                      <span className="connection-story__unavailable">
+                        <Icon size={21} aria-hidden="true" />
+                        <span>{node.name} — waiting for catalogue data</span>
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+            <div className="connection-story__navigation">
+              <button
+                type="button"
+                disabled={chapter === 0}
+                onClick={() => setChapter(chapter - 1)}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={chapter === 2}
+                onClick={() => setChapter(chapter + 1)}
+              >
+                Next chapter →
+              </button>
+            </div>
+          </div>
+        </div>
+        <details className="connection-story__evidence">
+          <summary>About these connections and example questions</summary>
+          <p>
+            This illustrates how the records connect. It does not confirm stock or a completed
+            service. Spark distinguishes catalogue evidence, derived answers, demonstration data and
+            unknown information.
           </p>
-        ) : null}
-        <div className="as-intel__bottom">
-          <ul className="as-questions" aria-label="Example questions">
-            {questions.map((x) => (
-              <li key={x.q}>
-                <Link to={x.to}>{x.q}</Link>
+          {k ? (
+            <p>
+              {k.parts} parts · {k.machines} machines · {k.fitments} fitment records.{' '}
+              {k.nodes > 0 ? Math.round((k.synthetic_nodes / k.nodes) * 100) : 0}% of records are
+              synthetic demonstration data.
+            </p>
+          ) : null}
+          <ul>
+            {questions.map((item) => (
+              <li key={item.q}>
+                <Link to={item.to}>{item.q}</Link>
               </li>
             ))}
           </ul>
-          <div className="as-legend">
-            <p>Answers depend on the records that exist. Every answer is labelled:</p>
-            <dl>
-              <div>
-                <dt className="is-source">Source records</dt>
-                <dd>from the supplied catalogue (source-derived)</dd>
-              </div>
-              <div>
-                <dt className="is-derived">Derived</dt>
-                <dd>computed from those records</dd>
-              </div>
-              <div>
-                <dt className="is-demo">Synthetic demo</dt>
-                <dd>demonstration data, never real operations</dd>
-              </div>
-              <div>
-                <dt className="is-unknown">Unknown</dt>
-                <dd>not recorded: shown as unknown, never as zero or “no”</dd>
-              </div>
-            </dl>
-            <ButtonLink to="/parts-intelligence">Explore Parts Intelligence</ButtonLink>
-          </div>
-        </div>
+        </details>
       </div>
     </section>
   )
@@ -264,12 +314,14 @@ export function OrderJourney() {
 export function DealerLocator() {
   const { user, ready } = useSession()
   const [country, setCountry] = useState('')
+  // the dealer records are checkout reference data: only a role that can place orders may read them
+  const buyer = user?.permissions.includes('orders.place') ?? false
   const countries = useApi(
-    (s) => (user ? getCountries(s) : Promise.resolve([])),
+    (s) => (buyer ? getCountries(s) : Promise.resolve([])),
     `as-countries:${user?.id ?? '-'}`,
   )
   const dealers = useApi(
-    (s) => (user && country ? getDealers(country, s) : Promise.resolve(null)),
+    (s) => (buyer && country ? getDealers(country, s) : Promise.resolve(null)),
     `as-dealers:${user?.id ?? '-'}:${country}`,
   )
   return (
@@ -287,7 +339,12 @@ export function DealerLocator() {
               delivery.
             </p>
           </Reveal>
-          {!ready ? null : user ? (
+          {!ready ? null : user && !buyer ? (
+            <p className="as-note">
+              Dealer search is part of ordering. Each order shows its dealer.{' '}
+              <Link to="/orders">Open orders →</Link>
+            </p>
+          ) : user ? (
             <label className="as-select">
               <span>Country</span>
               <select value={country} onChange={(e) => setCountry(e.target.value)}>
@@ -373,8 +430,8 @@ export function ServiceJourney() {
       name: 'Identify issue',
       state: 'available',
       text: 'Describe the problem in plain words; the agent identifies the machine and the part.',
-      to: '/agentic-shopping',
-      cta: 'Agentic E-Commerce',
+      to: '/spark/chat',
+      cta: 'Ask Spark',
     },
     {
       name: 'Find part',
@@ -402,7 +459,7 @@ export function ServiceJourney() {
       state: 'partial',
       text: 'Installation records exist for demonstration machines and are shown with warranty answers; booking an installation is not available.',
       to: ASK('Is this failed part covered by warranty?'),
-      cta: 'Agentic E-Commerce',
+      cta: 'Ask Spark',
     },
     {
       name: 'Service completion',
@@ -564,7 +621,7 @@ export function Trust() {
             <Link to={STORE_ROUTE}>Product information</Link>
           </li>
           <li>
-            <Link to="/parts-intelligence">How answers are built</Link>
+            <Link to="/spark/chat">How answers are built</Link>
           </li>
           <li>
             <Link to="/privacy">Privacy</Link>

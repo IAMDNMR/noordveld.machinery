@@ -31,6 +31,7 @@ export function PartImage({ partNumber, category, name, variant = 'card' }: Part
           src={url}
           alt={variant === 'mini' ? '' : name}
           loading={variant === 'large' ? 'eager' : 'lazy'}
+          fetchPriority={variant === 'large' ? 'high' : 'auto'}
           decoding="async"
         />
       </div>

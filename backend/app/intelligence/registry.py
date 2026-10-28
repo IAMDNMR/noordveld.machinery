@@ -208,10 +208,10 @@ _SPECS = (
     IntentSpec(
         Intent.PART_GRAPH,
         "Part relationships",
-        "Counts of everything directly connected to a part.",
+        "Named machines, suppliers, dealers, warehouses, assemblies, related parts and category directly connected to a part (bounded business view).",
         Kind.PART,
         (),
-        ("PART_RELATIONSHIPS",),
+        ("PART_GRAPH_VIEW",),
         "path",
         "(Part)-[*1]-(any)",
         _PROV_EDGE,

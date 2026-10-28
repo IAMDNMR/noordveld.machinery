@@ -1,0 +1,43 @@
+/* Orders and workspace: the dark forest opening, then calm working surfaces. */
+#main.site-premium :is(.ord-hero, .ord-head, .ws-head) {
+  position: relative;
+  isolation: isolate;
+  padding: 36px 0 32px;
+  margin-bottom: 28px;
+  color: var(--on-dark);
+}
+#main.site-premium :is(.ord-hero, .ord-head, .ws-head)::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background:
+    radial-gradient(55% 90% at 85% 0%, rgb(42 157 143 / 0.34), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+}
+#main.site-premium :is(.ord-hero, .ord-head, .ws-head) :is(.eyebrow, .ws-eyebrow) {
+  color: #8fe0d3;
+}
+#main.site-premium :is(.ord-hero, .ord-head, .ws-head) h1 {
+  color: #fff;
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+  letter-spacing: -0.035em;
+}
+#main.site-premium
+  :is(.ord-hero, .ord-head, .ws-head)
+  :is(.lede, .muted, .ws-muted, p:not(.eyebrow)) {
+  color: var(--on-dark-2);
+}
+#main.site-premium .ws-head label,
+#main.site-premium .ws-head .ws-org {
+  color: var(--on-dark);
+}
+#main.site-premium :is(.ord-page, .ws-page) {
+  overflow-x: clip;
+}
+#main.site-premium .ord-page .data-table tbody tr {
+  transition: background-color var(--motion-quick);
+}
+#main.site-premium .ord-page .data-table tbody tr:hover {
+  background: var(--teal-soft);
+}

@@ -10,9 +10,7 @@ from app.main import create_app
 @pytest.mark.parametrize(
     "path, expected",
     [
-        ("/api/v1/studio-session/error-probe", "account service"),
-        ("/api/v1/design-studio/error-probe", "Design Studio"),
-        ("/api/v1/domain-knowledge/error-probe", "knowledge service"),
+        ("/api/v1/auth/error-probe", "account service"),
         ("/api/v1/checkout/error-probe", "Refresh the order status"),
         ("/api/v1/parts/error-probe/dependency", "parts catalogue"),
         ("/api/v1/site/error-probe", "Required data"),

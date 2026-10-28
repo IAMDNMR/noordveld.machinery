@@ -1,0 +1,141 @@
+/* Aftersales: section indicator, a support action that is always in reach, and image-led quick access. */
+.as-section-nav > div {
+  scrollbar-width: none;
+}
+.as-section-nav > div::-webkit-scrollbar {
+  display: none;
+}
+.as-section-nav a:not(.as-section-nav__cta) {
+  position: relative;
+}
+.as-section-nav a:not(.as-section-nav__cta)::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  background: var(--teal-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-weight);
+}
+.as-section-nav a[aria-current='true'] {
+  color: var(--teal-ink);
+  font-weight: 600;
+}
+.as-section-nav a[aria-current='true']::after,
+.as-section-nav a:not(.as-section-nav__cta):hover::after {
+  transform: scaleX(1);
+}
+.as-section-nav .as-section-nav__cta {
+  margin-left: auto;
+  padding: 0 var(--space-4);
+  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--grad-forest);
+  color: #fff;
+  font-weight: 600;
+  transition:
+    transform var(--motion-quick) var(--ease-weight),
+    box-shadow var(--motion-quick);
+}
+.as-section-nav .as-section-nav__cta:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -10px rgb(13 59 54 / 0.6);
+}
+.as-section-nav span {
+  margin-right: 0;
+}
+
+/* quick access: a dark band of image-led tiles for rhythm against the light sections around it */
+#main.site-premium .as-quick {
+  background:
+    radial-gradient(60% 80% at 90% 0%, rgb(42 157 143 / 0.28), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+  color: var(--on-dark);
+}
+#main.site-premium .as-quick .label {
+  color: #8fe0d3;
+}
+#main.site-premium .as-quick__grid {
+  gap: 28px;
+  background: transparent;
+  border: 0;
+}
+#main.site-premium .as-quick .as-tile {
+  border: 0;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background: rgb(255 255 255 / 0.06);
+  transition:
+    transform var(--dur-base) var(--ease-weight),
+    background-color var(--motion-quick);
+}
+#main.site-premium .as-quick .as-tile:hover {
+  transform: translateY(-4px);
+  background: rgb(255 255 255 / 0.1);
+}
+#main.site-premium .as-quick .as-tile__link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 190px auto;
+  gap: 0;
+  padding: 0;
+}
+#main.site-premium .as-quick .as-tile__media {
+  width: 100%;
+  height: 100%;
+  flex-basis: auto;
+  border-radius: 0;
+}
+#main.site-premium .as-quick .as-tile__text {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px 22px;
+  color: var(--on-dark);
+}
+#main.site-premium .as-quick .as-tile__text span {
+  color: var(--on-dark-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+#main.site-premium .as-quick .as-tile__text em {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-style: normal;
+  font-weight: 600;
+  color: #8fe0d3;
+}
+#main.site-premium .as-quick .as-tile__text em svg {
+  transition: transform var(--motion-quick) var(--ease-weight);
+}
+#main.site-premium .as-quick .as-tile:hover em svg {
+  transform: translateX(4px);
+}
+@media (max-width: 1100px) {
+  #main.site-premium .as-quick__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  #main.site-premium .as-quick__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  #main.site-premium .as-quick .as-tile__link {
+    grid-template-rows: 160px auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #main.site-premium .as-quick .as-tile,
+  .as-section-nav a::after,
+  .as-section-nav .as-section-nav__cta {
+    transition: none;
+  }
+  #main.site-premium .as-quick .as-tile:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,62 @@
+/*
+  Site-wide motion and gradient tokens. One easing, three durations; opacity and transform only.
+  Everything is switched off under prefers-reduced-motion.
+*/
+:root {
+  --grad-forest: linear-gradient(135deg, #0d3b36 0%, #00665d 55%, #2a9d8f 100%);
+  --grad-glow: radial-gradient(60% 60% at 50% 0%, rgb(42 157 143 / 0.28), transparent 70%);
+  --grad-paper: linear-gradient(180deg, var(--paper), var(--mist));
+  --motion-ease: var(--ease-weight);
+  --motion-quick: 160ms;
+  --motion-page: 320ms;
+}
+
+/* Page transition: the new route fades and settles in. Opacity plus a tiny lift, so fixed and sticky children are unaffected. */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+#main.site-premium {
+  animation: page-enter var(--motion-page) var(--motion-ease) both;
+}
+
+/* Button feedback */
+#main.site-premium :is(.button, .btn),
+.nav :is(.button, .btn) {
+  transition:
+    transform var(--motion-quick) var(--motion-ease),
+    background-color var(--motion-quick),
+    box-shadow var(--motion-quick),
+    border-color var(--motion-quick),
+    color var(--motion-quick);
+}
+@media (hover: hover) {
+  #main.site-premium :is(.button, .btn):hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -10px rgb(13 59 54 / 0.45);
+  }
+}
+#main.site-premium :is(.button, .btn):active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main.site-premium {
+    animation: none;
+  }
+  #main.site-premium :is(.button, .btn),
+  .nav :is(.button, .btn) {
+    transition: none;
+  }
+  #main.site-premium :is(.button, .btn):hover,
+  #main.site-premium :is(.button, .btn):active {
+    transform: none;
+  }
+}

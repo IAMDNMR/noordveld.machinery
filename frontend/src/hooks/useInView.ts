@@ -11,9 +11,11 @@ export function useInView<T extends Element>(
   { once = false, threshold = 0.15, rootMargin = '0px' }: Options = {},
 ): boolean {
   const [inView, setInView] = useState(false)
+  // Without IntersectionObserver (old browsers, test DOMs) everything counts as visible, so content is never hidden.
+  const supported = typeof IntersectionObserver !== 'undefined'
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el || !supported) return
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -25,6 +27,6 @@ export function useInView<T extends Element>(
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [ref, once, threshold, rootMargin])
-  return inView
+  }, [ref, once, threshold, rootMargin, supported])
+  return inView || !supported
 }

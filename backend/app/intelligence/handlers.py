@@ -897,41 +897,33 @@ def part_provenance(c: Context) -> Outcome:
 
 
 def part_graph(c: Context) -> Outcome:
+    """Draw named business records, never aggregate counts or internal application nodes."""
     part = c.need(Kind.PART)
-    rels = c.repo.relationships(part.id)
+    view = c.repo.graph_view(part.id)
+    evidence = []
+    for group, kind in (
+        ("machines", "MACHINE"), ("assemblies", "ASSEMBLY"),
+        ("suppliers", "SUPPLIER"), ("dealers", "DEALER"),
+        ("warehouses", "WAREHOUSE"), ("related", "PART"),
+        ("category", "CATEGORY"),
+    ):
+        items = ([view[group]] if view.get(group) else []) if group == "category" else view.get(group, [])
+        for item in items:
+            if not item.get("label"):
+                continue
+            evidence.append(ev(part.label, "PART", item["type"], item["label"], kind, item.get("ds")))
     results = [
         ResultItem(
-            kind="path",
-            key=f"{r['relationship']}-{r['other_label']}-{r['data_status']}",
-            title=r["relationship"],
-            subtitle=r["other_label"],
-            relationship=r["relationship"],
-            data_class=data_class(r["data_status"]),
-            facts=[
-                Fact(label="Connected entities", value=str(r["n"])),
-                Fact(label="Data class", value=LABELS[data_class(r["data_status"])]),
-            ],
-        )
-        for r in rels
+            kind="path", key=f"{row.relationship}:{row.target_kind}:{row.target}",
+            title=row.target, subtitle=humanize(row.target_kind),
+            relationship=row.relationship, data_class=row.data_class,
+            facts=[Fact(label="Connection", value=humanize(row.relationship))],
+        ) for row in evidence
     ]
-    evidence = [
-        ev(
-            part.label,
-            "PART",
-            r["relationship"],
-            f"{r['n']} × {r['other_label']}",
-            r["other_label"].upper(),
-            r["data_status"],
-        )
-        for r in rels
-    ]
-    # a row is one relationship type to one kind of entity (HAS_SPECIFICATION can reach two), so the types are counted, not the rows
     return Outcome(
-        f"{part.label} has {sum(r['n'] for r in rels)} direct relationships across {_count(len({r['relationship'] for r in rels}), 'relationship type')}.",
-        results,
-        evidence,
-        ["Part", "any relationship", "any"],
-        len(results),
+        f"Showing {_count(len(evidence), 'recorded business connection')} for {part.label}.",
+        results[:c.limit], evidence, ["Part", "business relationships"], len(results),
+        warnings=["This is a bounded business view. Ask about suppliers, dealers, stock or fitment to explore a specific relationship in more detail."],
         actions=[investigate_action(part.label)],
     )
 

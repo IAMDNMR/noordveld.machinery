@@ -1,0 +1,30 @@
+{
+  "id": "COR-2026-10-28-01",
+  "status": "PROPOSED_NOT_APPLIED",
+  "summary": "Two synthetic search aliases point 'hydraulic pump' at parts that are not hydraulic pumps. Spark's shopping recommender then offered a water pump for a failed hydraulic pump.",
+  "source": {
+    "file": "backend/data/processed/noordveld-complete-dataset-synthetic-demo.xlsx",
+    "sheet": "SYN_search_aliases",
+    "generator": "gen_synthetic.py (seed 42)",
+    "flows_into": [
+      "graph: (:Part)-[:HAS_ALIAS]->(:SearchAlias {alias_type: 'SYNONYM_DEMO'})",
+      "backend/graph/cypher/03_parts.cypher",
+      "backend/data/canonical/master/parts.json (aliases, common_names; exported from the graph)"
+    ]
+  },
+  "remove": [
+    {"alias_id": "ALI-0353", "alias": "hydraulic pump", "part_id": "PRT-078", "part_number": "NVM-1050-CL", "part_name": "Water pump", "part_class": "Cooling / Water pump"},
+    {"alias_id": "ALI-0433", "alias": "hydraulic pump", "part_id": "PRT-097", "part_number": "NVM-1020-LU", "part_name": "Central lubrication pump", "part_class": "Lubrication"}
+  ],
+  "keep": [
+    {"alias_id": "ALI-0030", "part_id": "PRT-006", "part_number": "NVM-1050-HY", "part_name": "Gear pump, 28cc/rev", "reason": "a hydraulic pump (Hydraulics)"},
+    {"alias_id": "ALI-0035", "part_id": "PRT-007", "part_number": "NVM-1060-HY", "part_name": "Piston pump, variable displacement", "reason": "a hydraulic pump (Hydraulics)"}
+  ],
+  "validated": "Applied to a copy of backend/data/canonical and checked with the canonical engine's offline validation: see the report printed by the correction check.",
+  "to_apply_with_authorization": [
+    "1. Graph (shared production AuraDB): MATCH (:Part {part_id: 'PRT-078'})-[r:HAS_ALIAS]->(:SearchAlias {alias_id: 'ALI-0353'}) DELETE r; the same for PRT-097 / ALI-0433. The two SearchAlias nodes can then be deleted or left unlinked. The canonical ingest never deletes, so this step is manual.",
+    "2. Re-export the parts dataset (python backend/scripts/canonical.py export --dataset parts) so parts.json matches the graph.",
+    "3. Remove ALI-0353 and ALI-0433 from the SYN_search_aliases sheet and from backend/graph/cypher/03_parts.cypher, so a rebuild cannot bring them back."
+  ],
+  "already_mitigated_in_code": "app/agent/service.py _same_class: a part whose own name, category and subcategory lack the product-class words asked for is never offered, so the wrong aliases no longer produce a wrong recommendation."
+}

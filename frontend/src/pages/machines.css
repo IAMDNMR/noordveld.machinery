@@ -1,0 +1,241 @@
+/* Machines: an image-led range and product pages that open on the machine itself. */
+#main.site-premium .page-head--dark {
+  border-bottom: 0;
+  padding-block: calc(var(--nav-height) + 56px) 56px;
+  position: relative;
+  background:
+    radial-gradient(70% 90% at 85% 0%, rgb(42 157 143 / 0.32), transparent 65%), var(--grad-forest);
+  background-color: var(--charcoal);
+  overflow: hidden;
+}
+.page-head--dark::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.25), transparent);
+}
+.page-head--dark .page-head__title {
+  max-width: 12ch;
+}
+
+/* family filter: pills with a sliding feel, not anchor links */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.filters button {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line-dark);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-quick),
+    color var(--motion-quick),
+    border-color var(--motion-quick);
+}
+.filters button span {
+  color: var(--on-dark-2);
+  font-weight: 500;
+}
+.filters button:hover {
+  border-color: rgb(255 255 255 / 0.5);
+}
+.filters button[aria-pressed='true'] {
+  background: var(--on-dark);
+  border-color: var(--on-dark);
+  color: var(--charcoal);
+}
+.filters button[aria-pressed='true'] span {
+  color: var(--graphite-3);
+}
+
+/* the range: one lead machine per family, then the rest */
+.family.is-filtered {
+  border-top: 0;
+  animation: page-enter var(--motion-page) var(--motion-ease) both;
+}
+.family__grid > .is-feature {
+  grid-column: span 2;
+}
+.family__grid > .is-feature .mcard__name {
+  font-size: 1.75rem;
+}
+
+/* machine page: dark, cinematic opening with the facts as a strip */
+#main.site-premium .mhero {
+  position: relative;
+  background:
+    radial-gradient(60% 70% at 80% 20%, rgb(42 157 143 / 0.3), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+  padding-bottom: var(--space-7);
+}
+.mhero .crumbs,
+.mhero .crumbs a {
+  color: var(--on-dark-2);
+}
+.mhero .crumbs a:hover {
+  color: var(--on-dark);
+}
+.mhero__model {
+  color: #8fe0d3;
+}
+.mhero .mimg {
+  box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.6);
+}
+.mhero__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line-dark);
+}
+.mhero__facts dt {
+  font-size: var(--text-small);
+  color: var(--on-dark-2);
+}
+.mhero__facts dd {
+  margin: 2px 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* specifications read as large typography, not rows in a box */
+.specs dd {
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  letter-spacing: -0.015em;
+}
+.partlist .part {
+  transition: background-color var(--motion-quick);
+}
+.partlist .part:hover {
+  background: var(--teal-soft);
+}
+
+@media (max-width: 760px) {
+  .family__grid > .is-feature {
+    grid-column: auto;
+  }
+  .mhero__facts {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+@media (max-width: 1100px) and (min-width: 761px) {
+  .family__grid > .is-feature {
+    grid-column: 1 / -1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .family.is-filtered {
+    animation: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .mhero__copy {
+    order: -1;
+  }
+}
+
+/* machine page: parts coverage chart and the ownership flow */
+.mparts__coverage {
+  max-width: 44rem;
+  margin: 0 0 var(--space-7);
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow:
+    0 1px 0 var(--line),
+    0 30px 60px -45px rgb(20 24 26 / 0.4);
+}
+.mparts__coverage h3 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.mparts__hint {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--graphite-3);
+}
+.partlist .part__no {
+  color: var(--teal-ink);
+  text-decoration: none;
+}
+.partlist .part__no:hover {
+  text-decoration: underline;
+}
+.mown {
+  background: var(--paper);
+}
+.mown h2 {
+  margin: 0 0 var(--space-7);
+}
+
+/* machines: the range at a glance, on dark glass */
+.range-glance {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-9) 0;
+  background: radial-gradient(45% 60% at 10% 20%, rgb(0 191 165 / 0.18), transparent 70%), #071b19;
+  color: #f2f1ec;
+}
+.range-glance__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+  align-items: start;
+}
+.range-glance h2 {
+  margin: 0;
+  font-size: var(--text-h2);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: var(--tracking-display);
+}
+.range-glance h2 em {
+  color: #00bfa5;
+}
+.range-glance header > p:not(.cine-eyebrow) {
+  margin: 1.25rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #aeb4b3;
+}
+.range-glance__card {
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.045);
+  border: 1px solid rgb(255 255 255 / 0.1);
+}
+.range-glance__card h3 {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.range-glance .cine-donut {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+.range-glance .cine-donut figcaption {
+  width: 100%;
+}
+.range-glance .cine-donut__base {
+  stroke: rgb(255 255 255 / 0.08);
+}
+@media (max-width: 1000px) {
+  .range-glance__layout {
+    grid-template-columns: 1fr;
+  }
+}

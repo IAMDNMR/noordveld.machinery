@@ -1,66 +1,65 @@
-import { Cog, LifeBuoy, Timer, Wrench, type LucideIcon } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowUpRight } from 'lucide-react'
 import { ButtonLink } from '../components/ButtonLink'
 import { FilmSlot } from '../components/media/FilmSlot'
 import { EditorialImage } from '../components/media/MachineImage'
-import { Reveal } from '../components/Reveal'
-import { company, films } from '../data/content'
+import { films } from '../data/content'
 import { useSite } from '../data/site'
 
-const concepts: readonly { name: string; text: string; icon: LucideIcon }[] = [
-  { name: 'Service', text: 'People who know the machine.', icon: Wrench },
-  { name: 'Maintenance', text: 'Keeping the machine in shape for the next job.', icon: Cog },
-  { name: 'Support', text: 'Someone to ask when something is not right.', icon: LifeBuoy },
-  { name: 'Uptime', text: 'The point of all of it: a machine that is working.', icon: Timer },
+const topics = [
+  { name: 'Service', text: 'People who know the machine, and the work it needs to do.' },
+  { name: 'Maintenance', text: 'Keeping the machine in shape for the next job.' },
+  { name: 'Technical support', text: 'Someone to ask when something is not right.' },
+  {
+    name: 'Uptime',
+    text: 'Parts, maintenance and support working towards one goal: a machine that is working.',
+  },
 ]
 
 export function Service() {
   return (
     <section id="service" className="section service" aria-labelledby="service-title">
-      <div className="container service__layout">
-        <div className="service__copy">
-          <Reveal>
-            <p className="label">Service &amp; support</p>
+      <div className="container">
+        <header className="service__heading">
+          <div>
+            <p className="label">06 / AFTERSALES</p>
             <h2 id="service-title" className="h1">
-              Support that stays with the machine.
+              Support that stays
+              <br />
+              with the machine.
             </h2>
-          </Reveal>
-          <Reveal delay={120}>
-            <p className="lead">
-              A machine is only as good as the support behind it. Service, maintenance, parts and
-              support work together to keep Noordveld machinery running.
-            </p>
-          </Reveal>
-          <ul className="concepts">
-            {concepts.map((c, i) => (
-              <Reveal as="li" key={c.name} className="concept" delay={i * 80}>
-                <c.icon size={26} strokeWidth={1.5} aria-hidden="true" />
-                <div>
-                  <h3 className="concept__name">{c.name}</h3>
-                  <p>{c.text}</p>
-                </div>
-              </Reveal>
-            ))}
-          </ul>
-          <Reveal>
-            <ButtonLink to={`mailto:${company.serviceEmail}?subject=Service%20enquiry`} external>
-              Explore Service
-            </ButtonLink>
-          </Reveal>
-        </div>
-        <Reveal className="service__media" delay={160}>
+          </div>
           <EditorialImage
             name="service"
             subject="Service"
-            ratio="4 / 5"
+            ratio="16 / 9"
             alt="A Noordveld service engineer at work"
             position="74% 50%"
           />
-        </Reveal>
+        </header>
       </div>
-      <div className="container service__film">
-        <Reveal>
-          <FilmSlot film={films.service} />
-        </Reveal>
+      <div className="service__cinema">
+        <FilmSlot film={films.service} />
+      </div>
+      <div className="container service__narrative">
+        <p className="media-caption">HUMAN EXPERTISE. MACHINE UPTIME.</p>
+        <ol className="service-topics">
+          {topics.map((topic, i) => (
+            <li key={topic.name}>
+              <span>0{i + 1}</span>
+              <h3>{topic.name}</h3>
+              <p>{topic.text}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="service__closing">
+          <p>
+            For the next job.
+            <br />
+            And the one after that.
+          </p>
+          <ButtonLink to="/parts-services">Explore Aftersales</ButtonLink>
+        </div>
       </div>
     </section>
   )
@@ -73,23 +72,23 @@ export function PartsSection() {
     <section id="parts" className="section on-mist parts" aria-labelledby="parts-title">
       <div className="container parts__layout">
         <div className="parts__copy">
-          <Reveal>
-            <p className="label">Parts &amp; commerce</p>
+          <div>
+            <p className="label">07 / PARTS &amp; COMMERCE</p>
             <h2 id="parts-title" className="h1">
-              The right part matters.
+              Every component matters.
             </h2>
-          </Reveal>
-          <Reveal delay={120}>
+          </div>
+          <div>
             <p className="lead">
               Every machine depends on the parts behind it. Noordveld brings machine and parts
               information together to make finding the right component easier.
             </p>
-          </Reveal>
-          <Reveal>
-            <ButtonLink to="/parts-store">Shop Parts</ButtonLink>
-          </Reveal>
+          </div>
+          <div>
+            <ButtonLink to="/parts-store">Open Parts Portal</ButtonLink>
+          </div>
         </div>
-        <Reveal className="parts__catalogue" delay={160}>
+        <div className="parts__catalogue">
           <p className="parts__count">
             {data ? (
               <>
@@ -101,14 +100,18 @@ export function PartsSection() {
             )}
           </p>
           <ul className="parts__list">
-            {partCategories.map((c) => (
+            {partCategories.map((c, index) => (
               <li key={c.name}>
-                <span>{c.name}</span>
-                <span className="parts__n">{c.count}</span>
+                <Link to={`/parts-store?category=${encodeURIComponent(c.name)}`}>
+                  <span className="parts__ordinal">{String(index + 1).padStart(2, '0')}</span>
+                  <span>{c.name}</span>
+                  <span className="parts__n">{c.count}</span>
+                  <ArrowUpRight size={18} aria-hidden="true" />
+                </Link>
               </li>
             ))}
           </ul>
-        </Reveal>
+        </div>
       </div>
     </section>
   )
