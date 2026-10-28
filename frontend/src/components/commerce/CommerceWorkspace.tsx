@@ -306,7 +306,7 @@ export function CommerceWorkspace() {
             </div>
           )}
           {latest && (
-            <Answer
+            <CommerceAnswer
               key={latest.id}
               turn={latest}
               dim={busy}
@@ -457,7 +457,7 @@ export function CommerceAnswerPanel({
         </div>
       ) : null}
       {turn ? (
-        <Answer
+        <CommerceAnswer
           turn={turn}
           dim={chosen.busy}
           onChoose={(o) => void choose(o)}
@@ -469,18 +469,21 @@ export function CommerceAnswerPanel({
   )
 }
 
-function Answer({
+export function CommerceAnswer({
   turn,
   dim,
   onChoose,
   onAsk,
   typeHint = 'Type your answer in the box above and I will carry on with your question.',
+  format,
 }: {
   turn: Turn
   dim: boolean
   onChoose: (o: Record<string, unknown>) => void
   onAsk: (q: string) => void
   typeHint?: string
+  /** Spark's presentation: 'text' keeps the record details one click away; the chat already shows the question */
+  format?: 'text' | 'detail'
 }) {
   const r = turn.response
   const answeredSections = r.answer.sections.filter((s) => s.status !== 'REQUIRES_CLARIFICATION')
@@ -512,15 +515,27 @@ function Answer({
         r.contexts.LOGISTICS.shipment
       ))
       ? []
-      : FOLLOW_UPS[primary]
+      : primary === 'LOGISTICS' &&
+          r.contexts.LOGISTICS &&
+          'planned_eta' in r.contexts.LOGISTICS &&
+          r.contexts.LOGISTICS.planned_eta?.delivered
+        ? FOLLOW_UPS.LOGISTICS.slice(0, 1) // a delivered shipment cannot be sped up
+        : FOLLOW_UPS[primary]
   return (
     <article className={`cw-answer${dim ? ' is-dim' : ''}`} aria-label="Answer">
-      <p className="cw-question">{turn.question}</p>
+      {format ? null : <p className="cw-question">{turn.question}</p>}
       {lead && <p className="cw-lead">{lead}</p>}
 
-      {r.answer.sections.map((s) => (
-        <Detail key={s.domain} section={s} response={r} />
-      ))}
+      {format === 'text' && answeredSections.length ? (
+        <details className="cw-more">
+          <summary>Show the details</summary>
+          {r.answer.sections.map((s) => (
+            <Detail key={s.domain} section={s} response={r} />
+          ))}
+        </details>
+      ) : (
+        r.answer.sections.map((s) => <Detail key={s.domain} section={s} response={r} />)
+      )}
 
       {r.clarification && (
         <div className="cw-clarify" role="group" aria-label="Clarification">
@@ -564,7 +579,7 @@ function Answer({
           )}
           {recommended && (
             <Link
-              to={`/agentic-shopping?${new URLSearchParams({ q: turn.question })}`}
+              to={`/spark/chat?${new URLSearchParams({ q: turn.question })}`}
               className="cw-link"
             >
               Compare delivery and fulfilment options

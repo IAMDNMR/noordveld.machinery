@@ -1,0 +1,345 @@
+/* The public Spark experience uses the same calm surfaces and proportions as its workspace. */
+.sp {
+  --sp-ground: #fbfcfa;
+  --sp-ink: #1c302d;
+  --sp-muted: #60706b;
+  --sp-accent: #00756a;
+  background: var(--sp-ground);
+  color: var(--sp-ink);
+  font-family: var(--font-sans, 'Inter Variable', sans-serif);
+}
+.sp *,
+.sp *::before,
+.sp *::after {
+  box-sizing: border-box;
+}
+.sp :is(h1, h2, h3, p, figure) {
+  margin: 0;
+}
+.sp :is(a, button, input, video):focus-visible {
+  outline: 2px solid #00756a;
+  outline-offset: 4px;
+}
+.sp-frame {
+  width: min(calc(100% - 80px), 1240px);
+  margin-inline: auto;
+}
+.sp-product-name {
+  color: #00756a;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.sp-hero {
+  padding: calc(var(--nav-height, 72px) + 64px) 0 64px;
+  border-bottom: 1px solid #e0e7e1;
+}
+.sp-hero__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.sp-hero__copy {
+  display: grid;
+  gap: 23px;
+  justify-items: start;
+}
+.sp-display {
+  font-size: clamp(42px, 4.5vw, 64px);
+  line-height: 1.06;
+  letter-spacing: -0.06em;
+  font-weight: 480;
+}
+.sp-display span {
+  color: #00756a;
+}
+.sp-statement {
+  color: var(--sp-muted);
+  font-size: 15px;
+  line-height: 1.85;
+  max-width: 43ch;
+}
+.sp-small {
+  font-size: 11px;
+  color: var(--sp-muted);
+  line-height: 1.7;
+}
+.sp-body {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--sp-muted);
+}
+.sp-h2 {
+  font-size: clamp(30px, 3vw, 42px);
+  font-weight: 480;
+  line-height: 1.17;
+  letter-spacing: -0.045em;
+}
+.sp-text-link {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  text-decoration: none;
+  font-size: 12px;
+  color: #00756a;
+}
+.sp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 12px 17px;
+  border: 0;
+  border-radius: 8px;
+  background: #00756a;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 160ms;
+}
+.sp-button:hover {
+  background: #005f56;
+}
+.sp-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.sp-showcase-heading {
+  display: flex;
+  justify-content: space-between;
+  color: #60706b;
+  font-size: 10px;
+  padding: 13px 0;
+  border-top: 1px solid #d5ded7;
+}
+.sp-showcase-next {
+  display: flex;
+  justify-content: space-between;
+  color: #00756a;
+  text-decoration: none;
+  font-size: 11px;
+  margin-top: 16px;
+}
+.sp-film {
+  min-width: 0;
+}
+.sp-film video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #102c28;
+  border: 1px solid #dae2dc;
+}
+.sp-film figcaption {
+  display: grid;
+  gap: 6px;
+  padding-top: 15px;
+}
+.sp-film figcaption > span {
+  font-size: 10px;
+  color: #60706b;
+}
+.sp-film figcaption > strong {
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+.sp-film figcaption > p {
+  font-size: 12px;
+  color: #60706b;
+  line-height: 1.7;
+  max-width: 52ch;
+}
+.sp-reels {
+  padding: 56px 0;
+  background: #fff;
+}
+.sp-reels__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  align-items: end;
+  margin-bottom: 32px;
+}
+.sp-reels__heading .sp-body {
+  max-width: 40ch;
+  font-size: 13px;
+}
+.sp-reels__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.sp-close {
+  background: #f1f5f0;
+  padding: 56px 0;
+  border-top: 1px solid #e0e7e1;
+}
+.sp-close__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+.sp-close .sp-body {
+  margin: 20px 0 16px;
+  max-width: 42ch;
+}
+.sp-close .sp-small {
+  max-width: 45ch;
+}
+.sp-ask {
+  width: 100%;
+}
+.sp-ask__form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid #c9d8ce;
+  background: #fff;
+  border-radius: 12px;
+}
+.sp-ask__form:focus-within {
+  border-color: #619986;
+}
+.sp-ask__form input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: #1c302d;
+  padding: 10px;
+  outline: none;
+}
+.sp-ask__plain {
+  display: inline-block;
+  color: #60706b;
+  font-size: 11px;
+  text-decoration: none;
+  margin-top: 12px;
+}
+.sp-ask__plain:hover {
+  color: #00756a;
+  text-decoration: underline;
+}
+.sp-ask__examples {
+  margin-top: 28px;
+}
+.sp-ask__examples ul {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.sp-ask__examples li {
+  border-top: 1px solid #d9e3da;
+}
+.sp-ask__examples button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: none;
+  border: 0;
+  width: 100%;
+  color: #26483b;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: left;
+  padding: 14px 0;
+  cursor: pointer;
+}
+.sp-enter {
+  animation: sp-appear 240ms ease-out both;
+}
+@keyframes sp-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 1000px) {
+  .sp-hero__grid {
+    gap: 32px;
+  }
+  .sp-frame {
+    width: calc(100% - 48px);
+  }
+  .sp-display {
+    font-size: 44px;
+  }
+  .sp-ask__form {
+    flex-wrap: wrap;
+  }
+  .sp-ask__form .sp-button {
+    flex: 1;
+  }
+}
+@media (max-width: 760px) {
+  .sp-frame {
+    width: calc(100% - 40px);
+  }
+  .sp-hero {
+    padding-top: calc(var(--nav-height, 72px) + 32px);
+    padding-bottom: 32px;
+  }
+  .sp-hero__grid,
+  .sp-close__grid,
+  .sp-reels__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .sp-hero__copy {
+    gap: 20px;
+  }
+  .sp-display {
+    font-size: clamp(37px, 9.5vw, 50px);
+  }
+  .sp-ask__form input {
+    flex: 1 0 180px;
+    font-size: 16px;
+  }
+  .sp-ask__form .sp-button {
+    flex: initial;
+  }
+  .sp-reels,
+  .sp-close {
+    padding: 34px 0;
+  }
+  .sp-reels__heading {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+}
+@media (max-width: 400px) {
+  .sp-ask__form input {
+    flex-basis: 100%;
+  }
+  .sp-ask__form .sp-button {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-enter {
+    animation: none;
+  }
+  .sp-button {
+    transition: none;
+  }
+}

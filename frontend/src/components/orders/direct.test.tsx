@@ -255,6 +255,10 @@ describe('direct order lifecycle screen', () => {
     expect(cost.getAllByText('Not available').length).toBe(3)
     expect(screen.getAllByText('Synthetic demo data').length).toBeGreaterThan(0)
     expect(document.body.textContent).not.toMatch(/purchase request|quote request/i)
+    cleanup() // once the line has shipped, its stock is no longer described as reserved
+    mount(jane, direct({ lines: [{ ...direct().lines[0], allocation_status: 'SHIPPED' }] }))
+    expect(await screen.findByRole('heading', { name: 'HCME-ORD-000007' })).toBeTruthy()
+    expect(screen.queryByText('2 reserved')).toBeNull()
   })
 
   it('offers only the actions the server says are valid, and sends the action with the status the user saw', async () => {

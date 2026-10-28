@@ -373,7 +373,7 @@ describe('agentic shopping', () => {
     await screen.findAllByText('AB-3')
     expect(screen.queryByRole('button', { name: /add to cart/i })).toBeNull()
     expect(screen.getByRole('link', { name: 'Identification required' }).getAttribute('href')).toBe(
-      '/parts-intelligence?part=AB-3&tab=store',
+      '/spark/chat?part=AB-3&tab=store',
     )
   })
 
@@ -474,7 +474,7 @@ describe('agentic shopping', () => {
       'tell me a joke',
     )
     await screen.findByText('I find and help order Noordveld machine parts.')
-    expect(document.querySelector('.ag-note a')?.getAttribute('href')).toBe('/parts-intelligence')
+    expect(document.querySelector('.ag-note a')?.getAttribute('href')).toBe('/spark/chat')
     expect(document.querySelectorAll('.reco-card')).toHaveLength(0)
   })
 

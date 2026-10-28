@@ -1,0 +1,759 @@
+/* Spark guided order: one configuration card, one step body, consistent controls. Tokens come from spark-ui.css. */
+.so {
+  display: grid;
+  gap: 14px;
+}
+.so-h {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: var(--sp-ink);
+}
+.so-sub {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--sp-muted);
+}
+.so-note,
+.so-prefilled,
+.so-foot {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--sp-muted);
+}
+
+/* ---- progress ---- */
+.so-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  counter-reset: step;
+}
+.so-progress li {
+  display: flex;
+  align-items: center;
+  color: var(--sp-muted);
+}
+.so-progress li + li::before {
+  content: '';
+  width: 10px;
+  height: 1px;
+  margin-right: 2px;
+  background: var(--sp-line-strong);
+}
+.so-progress :is(span, button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+.so-progress i {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--sp-line-strong);
+  font-size: 10px;
+  font-style: normal;
+}
+.so-progress li[data-state='done'] {
+  color: var(--sp-teal-700);
+}
+.so-progress button {
+  cursor: pointer;
+}
+.so-progress button:hover:not(:disabled) {
+  border-color: var(--sp-teal-100);
+  background: var(--sp-teal-50);
+}
+.so-progress li[data-state='current'] span {
+  background: var(--sp-teal-600);
+  color: #fff;
+  font-weight: 600;
+}
+.so-progress li[data-state='current'] i {
+  border-color: rgb(255 255 255 / 60%);
+}
+
+/* ---- notes ---- */
+.so-warnings {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.so-warnings li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px 12px;
+  border: 1px solid var(--sp-warn-line);
+  border-radius: var(--sp-r-sm);
+  background: var(--sp-warn-bg);
+  color: var(--sp-warn-ink);
+  font-size: 13px;
+}
+.so-warnings svg {
+  flex: none;
+  margin-top: 2px;
+}
+.so-reasons {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--sp-muted);
+}
+
+/* ---- buttons ---- */
+.so-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--sp-line-strong);
+  border-radius: var(--sp-r-sm);
+  background: var(--sp-surface);
+  color: var(--sp-ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--sp-fast) var(--sp-ease),
+    border-color var(--sp-fast) var(--sp-ease);
+}
+.so-btn:hover:not(:disabled) {
+  border-color: var(--sp-teal-600);
+}
+.so-btn--primary {
+  border-color: var(--sp-teal-600);
+  background: var(--sp-teal-600);
+  color: #fff;
+}
+.so-btn--primary:hover:not(:disabled) {
+  background: var(--sp-teal-700);
+}
+.so-btn--ghost {
+  border-color: var(--sp-line);
+  background: transparent;
+  font-weight: 500;
+}
+.so-btn--lg {
+  min-height: 44px;
+  padding: 0 22px;
+  font-size: 14.5px;
+}
+.so-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.so-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- configuration card ---- */
+.so-config {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(200px, 240px);
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-1);
+}
+.so-config__no {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--sp-teal-700);
+}
+.so-config__name {
+  margin: 2px 0 8px;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.so-config__meta {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--sp-muted);
+}
+.so-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.so-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border: 1px solid var(--sp-line);
+  border-radius: 999px;
+  background: var(--sp-paper);
+  font-size: 12px;
+  color: var(--sp-ink-2);
+}
+.so-chips .is-good {
+  border-color: var(--sp-teal-100);
+  background: var(--sp-teal-50);
+  color: var(--sp-teal-700);
+}
+.so-chips .is-warn {
+  border-color: var(--sp-warn-line);
+  background: var(--sp-warn-bg);
+  color: var(--sp-warn-ink);
+}
+.so-config__buy {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--sp-line);
+}
+.so-price {
+  display: grid;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.so-price small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--sp-muted);
+}
+.so-stepper {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  height: 38px;
+  border: 1px solid var(--sp-line-strong);
+  border-radius: var(--sp-r-sm);
+  overflow: hidden;
+}
+.so-stepper button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: var(--sp-paper);
+  color: var(--sp-ink);
+  cursor: pointer;
+}
+.so-stepper input {
+  width: 100%;
+  border: 0;
+  border-inline: 1px solid var(--sp-line);
+  text-align: center;
+  font: inherit;
+  font-weight: 600;
+  color: var(--sp-ink);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.so-stepper input::-webkit-inner-spin-button,
+.so-stepper input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.so-subtotal {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 13px;
+  color: var(--sp-muted);
+}
+.so-subtotal strong {
+  color: var(--sp-ink);
+}
+.so-error {
+  color: var(--sp-danger);
+  font-size: 12px;
+}
+
+/* ---- panels: delivery, review, questions ---- */
+.so-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+}
+.so-verdict {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: var(--sp-r-sm);
+  background: var(--sp-teal-50);
+  color: var(--sp-teal-900);
+  font-size: 14px;
+  font-weight: 550;
+}
+.so-verdict p {
+  margin: 0;
+}
+.so-verdict svg {
+  flex: none;
+  margin-top: 1px;
+}
+.so-verdict--none {
+  background: var(--sp-warn-bg);
+  color: var(--sp-warn-ink);
+}
+.so-tradeoffs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.so-tradeoff {
+  display: grid;
+  gap: 3px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-sm);
+}
+.so-tradeoff p {
+  margin: 0;
+  font-size: 13px;
+}
+.so-tradeoff__what {
+  font-weight: 600;
+}
+.so-tradeoff__facts {
+  color: var(--sp-ink-2);
+}
+.so-tradeoff__gap {
+  color: var(--sp-warn-ink);
+}
+.so-tradeoff .so-btn {
+  margin-top: 6px;
+  justify-self: start;
+}
+.so-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.so-table th {
+  padding: 0 8px 6px;
+  border-bottom: 1px solid var(--sp-line);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--sp-muted);
+}
+.so-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--sp-line);
+  vertical-align: top;
+}
+.so-table td:last-child {
+  text-align: right;
+  vertical-align: middle;
+}
+.so-table tr.is-best td {
+  background: var(--sp-teal-50);
+}
+.so-best,
+.so-hit,
+.so-miss {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.so-best {
+  background: var(--sp-teal-600);
+  color: #fff;
+}
+.so-hit {
+  background: var(--sp-teal-100);
+  color: var(--sp-teal-700);
+}
+.so-miss {
+  background: var(--sp-warn-bg);
+  color: var(--sp-warn-ink);
+}
+.so-rows,
+.so-breakdown {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+.so-rows div,
+.so-breakdown div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--sp-line);
+  font-size: 13.5px;
+}
+.so-rows dt,
+.so-breakdown dt {
+  color: var(--sp-muted);
+}
+.so-rows dd,
+.so-breakdown dd {
+  margin: 0;
+}
+.so-breakdown {
+  margin-left: auto;
+  width: min(100%, 340px);
+}
+.so-breakdown div {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 6px 0;
+}
+.so-breakdown dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.so-breakdown__total {
+  border-bottom: 0 !important;
+  font-size: 16px !important;
+  font-weight: 700;
+}
+.so-breakdown__total dt {
+  color: var(--sp-ink);
+}
+.so-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+.so-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+.so-form .so-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.so-ask label {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--sp-muted);
+}
+.so-ask :is(input, select) {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--sp-line-strong);
+  border-radius: var(--sp-r-sm);
+  background: var(--sp-surface);
+  font: inherit;
+  font-size: 14px;
+  color: var(--sp-ink);
+}
+.so-ask select {
+  min-width: min(100%, 320px);
+}
+.so-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+.so-choices button {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--sp-line-strong);
+  border-radius: var(--sp-r-sm);
+  background: var(--sp-surface);
+  color: var(--sp-ink);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.so-choices button:hover:not(:disabled),
+.so-choices .is-recommended {
+  border-color: var(--sp-teal-600);
+}
+.so-choices button:disabled {
+  opacity: 0.55;
+}
+.so-choices small {
+  color: var(--sp-muted);
+}
+.so-choices em {
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--sp-teal-700);
+}
+.so-related {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+}
+.so-related small {
+  display: block;
+  color: var(--sp-muted);
+}
+
+/* ---- earlier steps, placed order, saved profile ---- */
+.so-record {
+  display: grid;
+  gap: 4px;
+}
+.so-record__step {
+  justify-self: start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--sp-sand);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sp-muted);
+}
+.so-placed {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--sp-teal-100);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-teal-50);
+  color: var(--sp-teal-900);
+}
+.so-placed > svg {
+  color: var(--sp-teal-600);
+}
+.so-placed h3 {
+  margin: 2px 0 4px;
+  font-size: 17px;
+}
+.so-placed p {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: var(--sp-ink-2);
+}
+.so-save {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--sp-teal-100);
+  font-size: 13px;
+}
+.so-save p {
+  margin: 0;
+}
+.so-save .so-btn {
+  justify-self: start;
+}
+
+/* ---- the open order above the message box ---- */
+.so-draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-bottom: 6px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-1);
+  font-size: 13px;
+}
+.so-draft__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sp-teal-700);
+}
+.so-draft__what {
+  font-weight: 600;
+}
+.so-draft__step {
+  color: var(--sp-muted);
+}
+.so-draft button {
+  margin-left: auto;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--sp-line-strong);
+  border-radius: var(--sp-r-sm);
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--sp-teal-700);
+  cursor: pointer;
+}
+
+.spark-welcome__logo {
+  display: block;
+  margin: 0 auto 14px;
+}
+
+@media (max-width: 720px) {
+  .so-config {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .so-config__buy {
+    grid-column: 1 / -1;
+    padding: 12px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--sp-line);
+  }
+  .so-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* the comparison table becomes stacked rows */
+  .so-table thead {
+    display: none;
+  }
+  .so-table,
+  .so-table tbody,
+  .so-table tr,
+  .so-table td {
+    display: block;
+  }
+  .so-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px 12px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--sp-line);
+  }
+  .so-table td {
+    padding: 0;
+    border: 0;
+  }
+  .so-table td:first-child,
+  .so-table td:last-child {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+  .so-table td:last-child .so-btn {
+    width: 100%;
+  }
+  .so-rows div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .so-draft__step {
+    display: none;
+  }
+  /* one line on phones: the draft stays visible without crowding the message box */
+  .so-draft {
+    flex-wrap: nowrap;
+  }
+  .so-draft__what {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .so-draft__label {
+    display: none;
+  }
+  .so-table td:last-child .so-btn {
+    min-height: 34px;
+  }
+}
+
+/* recommendations inside the conversation: a compact product card, not a full product page */
+.spark-answer .ag-recommended {
+  padding: 16px;
+}
+.spark-answer .ag-recommended__grid {
+  grid-template-columns: 96px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+.spark-answer .ag-recommended__img :is(.pvis, .pimg) {
+  height: 96px;
+}
+.spark-answer .ag-recommended__main {
+  gap: 6px;
+}
+.spark-answer .ag-recommended__main .reco-price {
+  font-size: 20px;
+}
+.spark-answer .ag-recommended__facts .kv-row {
+  padding: 4px 0;
+  font-size: 12.5px;
+}
+.spark-answer .ag-stock {
+  display: none; /* per-depot stock appears in the order's delivery comparison, where it matters */
+}
+@media (max-width: 560px) {
+  .spark-answer .ag-recommended__grid {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .spark-answer .ag-recommended__img :is(.pvis, .pimg) {
+    height: 72px;
+  }
+  .spark-answer .ag-recommended__facts {
+    grid-column: 1 / -1;
+  }
+}
+
+/* voice: spoken questions carry a microphone mark; the live voice state is shown beside the message box */
+.spark-question__mic {
+  margin-right: 6px;
+  vertical-align: -2px;
+  color: var(--sp-teal-600);
+}
+.spark-voice-state--listening,
+.spark-voice-state--speaking {
+  color: var(--sp-teal-700);
+  font-weight: 600;
+}
+
+/* reasons behind an order message, one click away */
+.so-why > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--spark-teal, #00756a);
+}
+.so-why > summary:focus-visible {
+  outline: 2px solid var(--spark-teal, #00756a);
+  outline-offset: 2px;
+}
+.so-why[open] > .so-reasons {
+  margin-top: 8px;
+}

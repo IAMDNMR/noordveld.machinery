@@ -275,6 +275,7 @@ class FakeRepo:
                         row = self.stock[(l["part_id"], depot)]
                         row.update(on_hand=max(row["on_hand"] - l["reserved_quantity"], 0), reserved=max(row.get("reserved", 0) - l["reserved_quantity"], 0))
                         l["allocation_status"] = "SHIPPED"
+                props["allocation_status"] = "CONSUMED"
         elif name == "cancel_open_shipment":
             for s in o["shipments"]:
                 if s["status"] == "CREATED":

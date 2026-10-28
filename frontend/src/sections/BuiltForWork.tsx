@@ -1,99 +1,110 @@
-import { useRef } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowUpRight } from 'lucide-react'
 import { FilmSlot } from '../components/media/FilmSlot'
-import { EditorialImage } from '../components/media/MachineImage'
-import { Reveal } from '../components/Reveal'
+import { EditorialImage, MachineImage } from '../components/media/MachineImage'
 import { films, industries } from '../data/content'
-import { useParallax } from '../hooks/useParallax'
-
-/** Editorial slots for brand photography. Each states what the final image shows. */
-const mosaic = [
-  {
-    name: 'machinery-at-work',
-    subject: 'Machinery at work',
-    ratio: '4 / 5',
-    className: 'mosaic__a',
-    position: '70% 50%',
-    alt: 'Noordveld machinery at work',
-  },
-  {
-    name: 'mechanical-detail',
-    subject: 'Mechanical detail',
-    ratio: '1 / 1',
-    className: 'mosaic__b',
-    position: '40% 50%',
-    alt: 'Close-up of a mechanical detail',
-  },
-  {
-    name: 'engineering',
-    subject: 'Engineering',
-    ratio: '4 / 3',
-    className: 'mosaic__c',
-    position: '12% 50%',
-    alt: 'Engineering at a Noordveld plant',
-  },
-  {
-    name: 'work-environment',
-    subject: 'Work environment',
-    ratio: '16 / 9',
-    className: 'mosaic__d',
-    position: '62% 50%',
-    alt: 'A working environment for Noordveld machines',
-  },
-] as const
+import { useSite } from '../data/site'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 export function BuiltForWork() {
-  const mosaicRef = useRef<HTMLDivElement>(null)
-  useParallax(mosaicRef, 90)
+  const [active, setActive] = useState(0)
+  const { data } = useSite()
+  const compact = useMediaQuery('(max-width: 759px)')
+  const types = [
+    'Electric Forklift',
+    'Belt Conveyor Module',
+    'Reach Truck',
+    'Wheel Loader',
+    'Telehandler',
+  ]
+  const selectedMachine = data?.machines.find((machine) => machine.name === types[active])
+  const visual = selectedMachine ? (
+    <MachineImage machine={selectedMachine} ratio="4 / 5" />
+  ) : (
+    <EditorialImage
+      name="work-environment"
+      subject="Work environment"
+      ratio="4 / 5"
+      alt="Noordveld machinery in a working environment"
+    />
+  )
   return (
-    <section id="industries" className="section on-dark built" aria-labelledby="built-title">
-      <div className="container">
-        <div className="built__head">
-          <Reveal>
+    <>
+      <section id="at-work" className="built on-dark" aria-labelledby="built-title">
+        <div className="built__stage">
+          <div className="built__intro container">
+            <p className="label">02 / AT WORK</p>
             <h2 id="built-title" className="h1">
-              Built for the work that doesn’t stop.
+              Built for the work
+              <br />
+              that doesn’t stop.
             </h2>
-          </Reveal>
-          <Reveal delay={120}>
-            <p className="lead">
-              Machines are judged where the work happens: on the site, in the yard, on the line.
-              Everything Noordveld builds starts from that.
-            </p>
-          </Reveal>
+            <p>On the site. In the yard. On the line.</p>
+          </div>
+          <div className="built__window">
+            <FilmSlot film={films.machinery} />
+          </div>
+          <p className="built__caption container">
+            <span>NOORDVELD IN MOTION</span>
+            <span>Performance where it matters.</span>
+          </p>
         </div>
-
-        <div className="mosaic" ref={mosaicRef}>
-          {mosaic.map((m, i) => (
-            <Reveal key={m.subject} className={`mosaic__item ${m.className}`} delay={i * 110}>
-              <EditorialImage
-                name={m.name}
-                subject={m.subject}
-                ratio={m.ratio}
-                alt={m.alt}
-                position={'position' in m ? m.position : undefined}
-              />
-            </Reveal>
-          ))}
+      </section>
+      <section
+        id="industries"
+        className="section applications"
+        aria-labelledby="applications-title"
+      >
+        <div className="container applications__layout">
+          <div className="applications__index">
+            <p className="label">03 / APPLICATIONS</p>
+            <h2 id="applications-title" className="h1">
+              Where Noordveld works.
+            </h2>
+            <ol className="industry-index">
+              {industries.map((industry, i) => (
+                <li key={industry.name} className={active === i ? 'is-current' : ''}>
+                  <button
+                    type="button"
+                    aria-expanded={compact ? active === i : undefined}
+                    aria-pressed={compact ? undefined : active === i}
+                    aria-controls={compact ? `industry-panel-${i}` : 'industry-visual'}
+                    onClick={() => setActive(i)}
+                    onFocus={() => {
+                      if (!compact) setActive(i)
+                    }}
+                    onPointerEnter={(event) => {
+                      if (event.pointerType === 'mouse' && !compact) setActive(i)
+                    }}
+                  >
+                    <span>0{i + 1}</span>
+                    <strong>{industry.name}</strong>
+                    <ArrowUpRight size={20} aria-hidden="true" />
+                  </button>
+                  <div id={`industry-panel-${i}`} hidden={active !== i}>
+                    <p>{industry.text}</p>
+                    <div className="industry-index__image">{active === i ? visual : null}</div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <Link className="text-link" to="/machines">
+              Explore the machinery range <ArrowUpRight size={18} aria-hidden="true" />
+            </Link>
+          </div>
+          <figure id="industry-visual" className="applications__visual" key={active}>
+            {visual}
+            <figcaption>
+              <span>
+                0{active + 1} / {industries[active].name}
+              </span>
+              <span>NOORDVELD</span>
+            </figcaption>
+            <p className="applications__description">{industries[active].text}</p>
+          </figure>
         </div>
-
-        <Reveal className="built__film">
-          <FilmSlot film={films.machinery} />
-        </Reveal>
-
-        <div className="industries">
-          <Reveal>
-            <h3 className="h3 industries__title">Where Noordveld machinery works</h3>
-          </Reveal>
-          <ul className="industries__list">
-            {industries.map((industry, i) => (
-              <Reveal as="li" key={industry.name} className="industry" delay={i * 80}>
-                <industry.icon size={30} strokeWidth={1.4} aria-hidden="true" />
-                <h4 className="industry__name">{industry.name}</h4>
-                <p>{industry.text}</p>
-              </Reveal>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }

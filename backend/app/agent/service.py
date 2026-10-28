@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from collections import Counter
 
 from app.agent.ranking import (
@@ -70,7 +71,7 @@ LABELS = {
 ORDER = list(LABELS)
 OUT_OF_SCOPE = (
     "I find and help order Noordveld machine parts. Describe the part you need and the machine it is for, for example "
-    '"I need a hydraulic hose for my wheel loader". To investigate data instead, use Parts Intelligence.'
+    '"I need a hydraulic hose for my wheel loader". You can also ask Spark about recorded parts and their connections.'
 )
 
 
@@ -98,6 +99,7 @@ class AgentService:
         self._parts = PartRepository(graph)
         self._resolver = EntityResolver(self._intel)
         self._llm = llm
+        self._classes: set[str] | None = None  # product-class vocabulary, read once per service
 
     # ── starter requests, built from the graph ───────────────────────────────────────────────────
     def suggestions(self) -> list[AgentSuggestion]:
@@ -644,7 +646,9 @@ class AgentService:
         step("compare", "blocked", "No verified option")
         return {
             "state": "no_match",
-            "question": f"No verified {need} is recorded for the {machine}, so I will not recommend one.",
+            "question": f"The {need} recorded for the {machine} has not been cleared for ordering. "
+                        "Recorded fitment and permission to order are separate checks. "
+                        "The catalogue status must be verified before I can recommend a purchase.",
         }
 
     @staticmethod
@@ -1045,8 +1049,23 @@ class AgentService:
                 limit=60,
             )
             if ids:
-                return [to_summary(r) for r in self._parts.summaries(ids)]
+                return self._same_class(t, [to_summary(r) for r in self._parts.summaries(ids)])
         return []
+
+    def _same_class(self, request: str, parts: list[PartSummary]) -> list[PartSummary]:
+        """Keep only parts whose OWN class agrees with the product-class words asked for. The text search also matches search aliases, and an alias may point a
+        class word at another kind of part (a water pump aliased 'hydraulic pump'); such a part is never offered for that request. The same rule as the commerce
+        engine's CANONICAL_TYPE_MISMATCH (app/commerce/discovery.py)."""
+        stem = lambda w: w[:-1] if w.endswith("s") and len(w) > 4 else w  # noqa: E731
+        words = lambda text: {stem(w) for w in re.findall(r"[a-z]{4,}", (text or "").lower())}  # noqa: E731
+        classes = getattr(self, "_classes", None)
+        if classes is None:
+            rows = self._g.read(q.PRODUCT_CLASSES) if hasattr(self._g, "read") else []
+            classes = self._classes = set().union(*(words(n) for n in (rows[0]["names"] if rows and rows[0].get("names") else [])))
+        wanted = words(request) & classes
+        if not wanted:
+            return parts
+        return [p for p in parts if wanted <= words(" ".join([p.name, p.category or "", p.subcategory or ""]))]
 
     def _machine_options(self, part_type: str | None) -> list[Option]:
         if part_type:

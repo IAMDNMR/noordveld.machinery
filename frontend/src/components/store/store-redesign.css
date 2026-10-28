@@ -1,0 +1,212 @@
+/* Parts Portal: a dark opening, pill category navigation and quieter, image-first part cards. */
+/* Keep content inside the hero surface and align catalogue controls at narrow widths. */
+#main.site-premium.site-brand .store-page.wf-container .store-hero {
+  padding: clamp(24px, 3vw, 40px);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+#main.site-premium.site-brand .store-page .store-hero__main,
+#main.site-premium.site-brand .store-page .store-main,
+#main.site-premium.site-brand .store-page .store-cell {
+  min-width: 0;
+}
+#main.site-premium.site-brand .store-page .store-hero__search {
+  width: 100%;
+  max-width: 100%;
+}
+#main.site-premium.site-brand .store-page .store-toolbar {
+  align-items: center;
+  flex-wrap: wrap;
+}
+#main.site-premium.site-brand .store-page .store-toolbar > .row {
+  margin-left: auto;
+  min-width: 0;
+}
+#main.site-premium.site-brand .store-page .part-name {
+  min-height: 2.7em;
+  overflow-wrap: anywhere;
+}
+#main.site-premium.site-brand .store-page .part-foot {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+#main.site-premium.site-brand .store-page .part-actions {
+  align-items: stretch;
+  min-height: 40px;
+}
+#main.site-premium.site-brand .store-page .part-actions .btn {
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  #main.site-premium.site-brand .store-page.wf-container .store-hero {
+    padding: 24px 18px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #main.site-premium.site-brand .store-page .store-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  #main.site-premium.site-brand .store-page .store-toolbar > .row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    width: 100%;
+    margin-left: 0;
+    gap: 10px;
+  }
+  #main.site-premium.site-brand .store-page .store-sort,
+  #main.site-premium.site-brand .store-page .store-sort select {
+    width: 100%;
+    min-width: 0;
+  }
+  #main.site-premium.site-brand .store-page .store-filter-btn {
+    min-height: 44px;
+  }
+}
+#main.site-premium .store-page .store-hero {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 0;
+  padding: 56px 0 44px;
+  border-bottom: 0;
+  color: var(--on-dark);
+}
+/* full-bleed band behind the contained hero */
+#main.site-premium .store-page .store-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background:
+    radial-gradient(55% 90% at 85% 0%, rgb(42 157 143 / 0.34), transparent 70%), var(--grad-forest);
+  background-color: var(--charcoal);
+}
+#main.site-premium .store-page .store-hero .eyebrow {
+  color: #8fe0d3;
+}
+#main.site-premium .store-page .store-hero h1 {
+  color: #fff;
+  font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem);
+  letter-spacing: -0.04em;
+}
+#main.site-premium .store-page .store-hero :is(.lede, .store-hero__hint) {
+  color: var(--on-dark-2);
+}
+#main.site-premium .store-page .store-hero__search .search-box {
+  border-color: transparent;
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.55);
+}
+#main.site-premium .store-page .store-hero__help > summary {
+  color: #8fe0d3;
+}
+#main.site-premium .store-page .store-hero .store-assistance {
+  color: var(--ink-900, var(--graphite));
+}
+
+/* category navigation: pills */
+#main.site-premium .store-page {
+  overflow-x: clip;
+}
+#main.site-premium .store-page .store-category-rail {
+  padding: 18px 0;
+}
+#main.site-premium .store-page .store-category-rail button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border-color: var(--line-strong);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    background-color var(--motion-quick),
+    color var(--motion-quick),
+    border-color var(--motion-quick);
+}
+#main.site-premium .store-page .store-category-rail button:hover {
+  border-color: var(--teal-ink);
+}
+#main.site-premium .store-page .store-category-rail button[aria-pressed='true'] {
+  background: var(--grad-forest);
+  border-color: transparent;
+}
+
+/* part cards: image-led, no heavy outline, gentle lift */
+#main.site-premium .store-page .part-card {
+  padding: 0 0 16px;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgb(20 24 26 / 0.06);
+  transition:
+    transform var(--dur-base) var(--ease-weight),
+    box-shadow var(--dur-base) var(--ease-weight),
+    border-color var(--motion-quick);
+}
+#main.site-premium .store-page .part-card:hover,
+#main.site-premium .store-page .part-card:focus-within {
+  transform: translateY(-3px);
+  border-color: var(--teal-soft);
+  box-shadow: var(--shadow-soft);
+}
+#main.site-premium .store-page .part-card > :not(.part-thumb) {
+  margin-inline: 18px;
+}
+#main.site-premium .store-page .part-thumb {
+  overflow: hidden;
+  margin-bottom: 4px;
+  background: linear-gradient(180deg, #f3f2ed, #e9e8e1);
+}
+#main.site-premium .store-page .part-thumb .pimg,
+#main.site-premium .store-page .part-thumb .pvis {
+  height: 170px;
+  transition: transform 0.7s var(--ease-weight);
+}
+#main.site-premium .store-page .part-card:hover .part-thumb :is(.pimg, .pvis) {
+  transform: scale(1.05);
+}
+
+/* results arrive in a short stagger */
+@keyframes store-cell-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+#main.site-premium .store-page .store-cell {
+  animation: store-cell-in var(--dur-base) var(--ease-weight) both;
+}
+#main.site-premium .store-page .store-cell:nth-child(2) {
+  animation-delay: 40ms;
+}
+#main.site-premium .store-page .store-cell:nth-child(3) {
+  animation-delay: 80ms;
+}
+#main.site-premium .store-page .store-cell:nth-child(4) {
+  animation-delay: 120ms;
+}
+#main.site-premium .store-page .store-cell:nth-child(n + 5) {
+  animation-delay: 160ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main.site-premium .store-page .store-cell {
+    animation: none;
+  }
+  #main.site-premium .store-page .part-card,
+  #main.site-premium .store-page .part-thumb :is(.pimg, .pvis) {
+    transition: none;
+  }
+  #main.site-premium .store-page .part-card:hover,
+  #main.site-premium .store-page .part-card:hover .part-thumb :is(.pimg, .pvis) {
+    transform: none;
+  }
+}

@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError } from '../../api/client'
 import {
-  assignProjectAccess,
-  getProjectAccess,
   inviteMember,
   listInvitations,
-  removeProjectAccess,
   revokeInvitation,
   ROLE_LABEL,
   type InvitationRow,
-  type ProjectAccess,
   type Workspace,
 } from '../../api/workspace'
 
@@ -25,7 +21,6 @@ const ORG_ROLES = [
   'developer',
   'reviewer',
 ]
-const LEVELS = ['viewer', 'reviewer', 'editor', 'owner']
 
 /** Invitations, for administrators. The link is shown once: only its hash is stored, and delivering it is outside this service. */
 export function InvitePanel({
@@ -88,7 +83,7 @@ export function InvitePanel({
           They will
           <select value={kind} onChange={(event) => setKind(event.target.value as 'role' | 'app')}>
             <option value="app">Use an application</option>
-            <option value="role">Work in Design Studio</option>
+            <option value="role">Organization role</option>
           </select>
         </label>
         {kind === 'role' ? (
@@ -175,100 +170,3 @@ export function InvitePanel({
 }
 
 /** Who may do what inside one project. Owners and organization administrators assign access; it is separate from editing the project. */
-export function ProjectAccessPanel({ org, project }: { org: string; project: string }) {
-  const [access, setAccess] = useState<ProjectAccess | null>(null)
-  const [person, setPerson] = useState('')
-  const [level, setLevel] = useState('viewer')
-  const [error, setError] = useState<string | null>(null)
-  const reload = useCallback(() => {
-    void getProjectAccess(org, project).then(setAccess, (cause) =>
-      setError(message(cause, 'Access could not be loaded.')),
-    )
-  }, [org, project])
-  useEffect(reload, [reload])
-  const change = async (action: () => Promise<unknown>) => {
-    setError(null)
-    try {
-      await action()
-      reload()
-    } catch (cause) {
-      setError(message(cause, 'Access was not changed.'))
-    }
-  }
-  if (!access)
-    return error ? (
-      <div className="pixels-error" role="alert">
-        {error}
-      </div>
-    ) : (
-      <p className="ws-muted" role="status">
-        Loading access…
-      </p>
-    )
-  return (
-    <div className="ws-project-access" aria-label={`Access to ${project}`}>
-      <p className="ws-muted">
-        {access.policy === 'assigned'
-          ? 'Only the people and teams below can open this project.'
-          : 'Everyone in the organization with a Design Studio role can open this project; the levels below still apply to what they can change.'}
-      </p>
-      <ul>
-        {access.access.map((item) => (
-          <li key={`${item.subject}:${item.id}`}>
-            <span>
-              {item.subject === 'team' ? 'Team ' : ''}
-              {item.id}
-            </span>{' '}
-            <strong>{item.level}</strong>
-            <button
-              type="button"
-              onClick={() =>
-                void change(() => removeProjectAccess(org, project, item.subject, item.id))
-              }
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="ws-form">
-        <label>
-          Person
-          <input
-            value={person}
-            onChange={(event) => setPerson(event.target.value)}
-            placeholder="user id"
-          />
-        </label>
-        <label>
-          Level
-          <select value={level} onChange={(event) => setLevel(event.target.value)}>
-            {LEVELS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="button"
-          disabled={!person.trim()}
-          onClick={() =>
-            void change(() =>
-              assignProjectAccess(org, project, 'user', person.trim(), level).then(() =>
-                setPerson(''),
-              ),
-            )
-          }
-        >
-          Give access
-        </button>
-      </div>
-      {error ? (
-        <div className="pixels-error" role="alert">
-          {error}
-        </div>
-      ) : null}
-    </div>
-  )
-}

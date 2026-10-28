@@ -120,6 +120,25 @@ def run(engine: CommerceContextEngine, kind: str, kw: dict[str, Any], principal:
     return fn(*args, principal=principal, **{k: v for k, v in kw.items() if k != "request"})
 
 
+def expected_files_engine(graph: Any) -> CommerceContextEngine:
+    """The engine over the canonical files, with the stock the running app has reserved or shipped applied (read from the graph's own APP-SESSION order lines).
+    Comparing the live engine with this keeps every other difference visible while not reporting real orders as drift."""
+    from app.commerce.discovery_reader import FileDiscoveryReader
+    from app.lifecycle.readers import FileReader as FileLifecycleReader
+    from app.logistics.readers import FileReader as FileLogisticsReader
+
+    moved = L.app_stock_effects(L.ReadOnlyGraph(graph).read(L.APP_STOCK_QUERY, app=L.APP))
+
+    class Reader(FileDiscoveryReader):
+        def _rows(self, name):
+            rows = super()._rows(name)
+            if name != "inventory" or not moved:
+                return rows
+            return [L.with_app_stock(r, moved.get((r["part_id"], r["location_id"]))) for r in rows]
+
+    return CommerceContextEngine(Reader(CANON_DIR), FileLogisticsReader(CANON_DIR), FileLifecycleReader(CANON_DIR), as_of=AS_OF)
+
+
 def compare_engines(files: CommerceContextEngine, live: CommerceContextEngine) -> dict[str, Any]:
     report: dict[str, Any] = {"scenarios": 0, "identical": 0, "different": {}}
     for name, kind, kw in scenarios(files):

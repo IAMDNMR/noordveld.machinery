@@ -62,6 +62,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const owner = user?.role === 'END_USER' ? user.id : null
   const synced = useRef<string | null>(null)
 
+  // Signing out or switching accounts drops the previous person's lines; signing in from a guest cart keeps them.
+  const [person, setPerson] = useState(user?.id ?? null)
+  if (person !== (user?.id ?? null)) {
+    if (person !== null) setLines([])
+    setPerson(user?.id ?? null)
+  }
+
   useEffect(() => {
     if (!owner) {
       synced.current = null

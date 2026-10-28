@@ -1,3 +1,4 @@
+import { partHref } from '../components/spark/AnswerText'
 import {
   ArrowLeft,
   ArrowRight,
@@ -34,8 +35,8 @@ import '../styles/wf.css'
 import '../components/store/store.css'
 import '../components/agent/agent.css'
 
-export const AGENT_ROUTE = '/agentic-shopping'
-const PI = '/parts-intelligence'
+export const AGENT_ROUTE = '/spark/chat'
+const PI = '/spark/chat'
 const STEP_MS = 320 // the API answers at once; the steps it reports are revealed one after another so the work can be followed
 
 /**
@@ -93,11 +94,11 @@ function Compose({ onRun }: { onRun: (q: string) => void }) {
   return (
     <section className="ag-compose" aria-labelledby="ag-title">
       <div className="wf-container">
-        <a className="back-link" href="/agentic-commerce/">
-          <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" /> Agentic E-Commerce
+        <a className="back-link" href="/spark">
+          <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" /> Ask Spark
         </a>
         <div className="ag-compose__inner">
-          <p className="eyebrow">Agentic Shopping</p>
+          <p className="eyebrow">Spark · Buying options</p>
           <h1 id="ag-title" className="ag-compose__title">
             Your next part. <br />A smarter way to find it.
           </h1>
@@ -220,7 +221,10 @@ function Run({ request, onRun }: { request: string; onRun: (q: string) => void }
 
         <div ref={results} className="ag-results">
           {r && done && (open || direct) ? (
-            <Result r={r} onRefine={(extra) => onRun(extra ? `${r.request} ${extra}` : '')} />
+            <ShoppingResult
+              r={r}
+              onRefine={(extra) => onRun(extra ? `${r.request} ${extra}` : '')}
+            />
           ) : null}
         </div>
       </div>
@@ -390,7 +394,18 @@ function CommerceSection({ r }: { r: AgentResponse }) {
 }
 
 // ── results ─────────────────────────────────────────────────────────────────────────────────────
-function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) => void }) {
+export function ShoppingResult({
+  r,
+  onRefine,
+  conversational = false,
+  format,
+}: {
+  r: AgentResponse
+  onRefine: (extra: string) => void
+  conversational?: boolean
+  /** Spark's presentation: a question as plain text, one product card, or the options side by side */
+  format?: 'text' | 'product' | 'compare'
+}) {
   const i = r.interpretation
   const best = r.candidates.find((c) => c.recommended)
 
@@ -416,10 +431,12 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
       </h2>
 
       {r.state !== 'recommendation' ? (
-        <div className="ag-need card card-pad">
-          <p className="eyebrow">
-            {r.state === 'no_match' ? 'No verified option meets your request' : 'One more detail'}
-          </p>
+        <div className={format ? 'ag-need ag-need--text' : 'ag-need card card-pad'}>
+          {format ? null : (
+            <p className="eyebrow">
+              {r.state === 'no_match' ? 'No verified option meets your request' : 'One more detail'}
+            </p>
+          )}
           <p className="ag-need__q">{r.question}</p>
           {r.options.length ? (
             <div className="chip-row ag-need__opts">
@@ -452,15 +469,36 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
         </div>
       ) : null}
 
-      {best && r.state === 'recommendation' ? (
+      {best && r.state === 'recommendation' && format === 'product' ? (
+        <ProductText r={r} best={best} onRefine={onRefine} />
+      ) : null}
+      {best && r.state === 'recommendation' && format !== 'product' ? (
         <>
-          {r.decision ? <DecisionPanel d={r.decision} /> : null}
-          <Recommended c={best} machine={i.machine} qty={i.quantity} />
-          <div className="grid grid-2 ag-explain">
-            <Why r={r} best={best} />
-            <HowWeKnow r={r} best={best} />
-          </div>
-          <Alternatives r={r} />
+          {format && r.reason ? <p className="ag-res__lead">{r.reason}</p> : null}
+          {!conversational && r.decision ? <DecisionPanel d={r.decision} /> : null}
+          {format === 'compare' ? (
+            <OptionList r={r} all />
+          ) : (
+            <Recommended c={best} machine={i.machine} qty={i.quantity} compact={!!format} />
+          )}
+          {conversational ? (
+            <details className="spark-recommendation-details">
+              <summary>Why this option and the evidence behind it</summary>
+              {/* in Spark the lead sentence already gives the decision; the reasons and sources follow */}
+              {r.decision && !format ? <DecisionPanel d={r.decision} /> : null}
+              <div className="grid grid-2 ag-explain">
+                <Why r={r} best={best} />
+                <HowWeKnow r={r} best={best} />
+              </div>
+            </details>
+          ) : (
+            <div className="grid grid-2 ag-explain">
+              <Why r={r} best={best} />
+              <HowWeKnow r={r} best={best} />
+            </div>
+          )}
+          {/* in the chat: a compact list (a comparison already shows every option); elsewhere the full table */}
+          {format === 'compare' ? null : format ? <OptionList r={r} /> : <Alternatives r={r} />}
           {r.notes.length || r.excluded.length ? (
             <div className="ag-res__notes">
               {r.notes.map((n) => (
@@ -474,7 +512,71 @@ function Result({ r, onRefine }: { r: AgentResponse; onRefine: (extra: string) =
         </>
       ) : null}
       {r.commerce_domains.length ? <CommerceSection r={r} /> : null}
-      <p className="disclaimer">{r.disclaimer}</p>
+      {/* in the chat the demo notice is a footnote, not a box repeated under every reply */}
+      <p className={format ? 'ag-res__fine' : 'disclaimer'}>{r.disclaimer}</p>
+    </div>
+  )
+}
+
+/**
+ * A recommendation as Spark says it in the chat: the part (a link that opens it), its price and the ranking's own reason,
+ * then the other valid options in a sentence. Every value is a field of the verified response; ordering is one reply away.
+ */
+function ProductText({
+  r,
+  best,
+  onRefine,
+}: {
+  r: AgentResponse
+  best: AgentCandidate
+  onRefine: (extra: string) => void
+}) {
+  const others = r.candidates.filter((c) => !c.recommended)
+  const part = (c: AgentCandidate) => (
+    <a href={partHref(c.part.part_number)}>{c.part.part_number}</a>
+  )
+  return (
+    <div className="spark-answer-text ag-text">
+      <p>
+        I&rsquo;d go with {part(best)}, {best.part.name.toLowerCase()}, at {priceText(best)}.{' '}
+        {r.reason ?? ''}
+      </p>
+      {others.length ? (
+        <p>
+          {others.length === 1 ? 'Also fits: ' : 'Other options: '}
+          {others.map((c, n) => (
+            <span key={c.part.part_id}>
+              {n ? '; ' : ''}
+              {part(c)} at {priceText(c)}
+              {c.tradeoffs.length ? ` (${c.tradeoffs.join(', ').toLowerCase()})` : ''}
+            </span>
+          ))}
+          .
+        </p>
+      ) : null}
+      <p>
+        {best.order_action === 'add_to_cart' ? (
+          <>
+            Say &ldquo;order it&rdquo; and I&rsquo;ll fill in the order for you, or{' '}
+            <button
+              type="button"
+              className="spark-inline-link"
+              onClick={() => onRefine('Order it')}
+            >
+              order it now
+            </button>
+            .
+          </>
+        ) : (
+          (best.order_note ?? 'This part cannot be ordered online yet.')
+        )}
+      </p>
+      {r.notes.map((n) => (
+        <p key={n} className="small muted">
+          {n}
+        </p>
+      ))}
+      <Excluded r={r} />
     </div>
   )
 }
@@ -547,18 +649,29 @@ function OrderAction({
       </Link>
     )
   return (
-    <button
-      type="button"
-      className={`btn ${compact ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-      onClick={() => {
-        add(c.part.part_id, qty ?? 1, machine) // the machine the agent resolved goes with the part into the existing cart
-        setAdded(true)
-      }}
-      aria-label={c.recommended ? undefined : `Add ${c.part.part_number} to cart`}
-    >
-      <ShoppingCart size={15} strokeWidth={1.8} aria-hidden="true" />
-      {c.availability_label === 'On order' ? 'Add to cart · on order' : 'Add to cart'}
-    </button>
+    <>
+      <button
+        type="button"
+        className={`btn ${compact ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+        onClick={() => {
+          add(c.part.part_id, qty ?? 1, machine) // the machine the agent resolved goes with the part into the existing cart
+          setAdded(true)
+        }}
+        aria-label={c.recommended ? undefined : `Add ${c.part.part_number} to cart`}
+      >
+        <ShoppingCart size={15} strokeWidth={1.8} aria-hidden="true" />
+        {c.availability_label === 'On order' ? 'Add to cart · on order' : 'Add to cart'}
+      </button>
+      {compact ? null : (
+        // the guided order in Spark: it carries the part, quantity and machine, and asks only for what is still missing
+        <Link
+          className="btn btn-secondary btn-sm"
+          to={`/spark/chat?order=${encodeURIComponent(c.part.part_id)}${qty ? `&qty=${qty}` : ''}${machine ? `&machine=${encodeURIComponent(machine)}` : ''}`}
+        >
+          Order this part with Spark
+        </Link>
+      )}
+    </>
   )
 }
 
@@ -601,10 +714,13 @@ function Recommended({
   c,
   machine,
   qty,
+  compact = false,
 }: {
   c: AgentCandidate
   machine: string | null
   qty: number | null
+  /** in the chat the evidence sits in the "Why this option" disclosure, so the card keeps only its buying actions */
+  compact?: boolean
 }) {
   const p = c.part
   const rows: [string, React.ReactNode][] = [
@@ -652,12 +768,14 @@ function Recommended({
             <Link className="btn btn-secondary btn-sm" to={partPath(p.part_number)}>
               View part
             </Link>
-            <Link
-              className="btn btn-secondary btn-sm"
-              to={`${PI}?part=${encodeURIComponent(p.part_number)}`}
-            >
-              View evidence
-            </Link>
+            {compact ? null : (
+              <Link
+                className="btn btn-secondary btn-sm"
+                to={`${PI}?part=${encodeURIComponent(p.part_number)}`}
+              >
+                View evidence
+              </Link>
+            )}
           </div>
           {c.order_note ? <p className="small muted">{c.order_note}</p> : null}
         </div>
@@ -742,6 +860,53 @@ function HowWeKnow({ r, best }: { r: AgentResponse; best: AgentCandidate }) {
 }
 
 /** The valid alternatives to the recommendation; the recommendation itself is never repeated here. */
+/**
+ * Options for the chat column: one row each, the part and price on the first line, the deciding facts on the second,
+ * and its real cart action. No horizontal scrolling at any width. With `all` the recommended option comes first.
+ */
+function OptionList({ r, all = false }: { r: AgentResponse; all?: boolean }) {
+  const options = all
+    ? [...r.candidates].sort((a, b) => Number(b.recommended) - Number(a.recommended))
+    : r.candidates.filter((c) => !c.recommended)
+  if (!options.length) return null
+  const title = all ? 'Options side by side' : options.length === 1 ? 'Also fits' : 'Other options'
+  return (
+    <section className="ag-optlist" aria-label={title}>
+      <h3>{title}</h3>
+      <ul>
+        {options.map((c) => (
+          <li key={c.part.part_id}>
+            <div className="ag-optlist__head">
+              <Link to={partPath(c.part.part_number)} className="ag-optlist__part">
+                {c.part.part_number}
+              </Link>
+              <span className="ag-optlist__name">{c.part.name}</span>
+              {c.recommended ? <span className="tag tag-good">Recommended</span> : null}
+              <strong className="ag-optlist__price">{priceText(c)}</strong>
+            </div>
+            <p className="ag-optlist__facts">
+              {[
+                c.fitment_label,
+                c.availability_label,
+                c.delivery !== 'Estimate not recorded' ? c.delivery : c.fulfilment,
+                ...(c.recommended ? [] : c.tradeoffs),
+              ].join(' · ')}
+            </p>
+            <div className="ag-optlist__act">
+              <OrderAction
+                c={c}
+                machine={r.interpretation.machine}
+                qty={r.interpretation.quantity}
+                compact
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 function Alternatives({ r }: { r: AgentResponse }) {
   const alts = r.candidates.filter((c) => !c.recommended)
   return (

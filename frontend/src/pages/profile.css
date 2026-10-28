@@ -1,0 +1,171 @@
+.pf {
+  padding-block: var(--space-7) var(--space-8);
+}
+.pf-layout {
+  display: grid;
+  grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+  gap: clamp(1.5rem, 1rem + 3vw, 4rem);
+  align-items: start;
+}
+.pf-side {
+  position: sticky;
+  top: calc(var(--nav-height) + 1.5rem);
+  padding: 1.75rem;
+  border-radius: 20px;
+  background: var(--cine-deep, #071b19);
+  color: var(--on-dark);
+  box-shadow: 0 40px 80px -50px rgb(7 27 25 / 0.8);
+}
+.pf-ring {
+  position: relative;
+  width: 9rem;
+  margin: 0 auto 1.25rem;
+}
+.pf-ring svg {
+  display: block;
+  width: 100%;
+  transform: rotate(-90deg);
+}
+.pf-ring circle {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.1);
+  stroke-width: 10;
+}
+.pf-ring .pf-ring__fill {
+  stroke: var(--teal);
+  stroke-linecap: round;
+  stroke-dasharray: var(--share) 1;
+  transition: stroke-dasharray 900ms var(--cine-ease);
+}
+.pf-ring > div {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+.pf-ring strong {
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.pf-ring span {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+.pf-side__lead {
+  margin: 0 0 1.25rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--on-dark-2);
+  text-align: center;
+}
+.pf-known {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+.pf-known li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.pf-known i {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  border: 1.5px solid rgb(255 255 255 / 0.35);
+  transition:
+    background 300ms,
+    border-color 300ms;
+}
+.pf-known li[data-set='true'] i {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+.pf-known span {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--on-dark-2);
+}
+.pf-form {
+  display: grid;
+  gap: 20px;
+}
+.pf-form fieldset {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
+}
+.pf-form legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+.pf-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+.pf-form input:not([type='checkbox']),
+.pf-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--white);
+  font: inherit;
+  transition:
+    border-color 200ms,
+    box-shadow 200ms;
+}
+.pf-form input:not([type='checkbox']):focus,
+.pf-form select:focus {
+  outline: none;
+  border-color: var(--teal-ink);
+  box-shadow: 0 0 0 3px rgb(0 191 165 / 0.18);
+}
+.pf-form small {
+  color: var(--graphite-3);
+}
+.pf-consent {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgb(0 191 165 / 0.08);
+}
+.pf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@media (min-width: 720px) {
+  .pf-form fieldset {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pf-form legend,
+  .pf-form small {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 900px) {
+  .pf-layout {
+    grid-template-columns: 1fr;
+  }
+  .pf-side {
+    position: static;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pf-ring .pf-ring__fill,
+  .pf-known i {
+    transition: none;
+  }
+}

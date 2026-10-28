@@ -457,3 +457,14 @@ def test_the_live_tests_do_not_count_as_passes_when_skipped():
     """The live module skips (with a reason) when Neo4j is unreachable; the dry-run tests it contains are the only ones that can pass without the graph."""
     text = (Path(__file__).parent / "test_commerce_live.py").read_text(encoding="utf-8")
     assert "pytest.skip(" in text and "a skip is not a pass" in text
+
+
+def test_stock_the_app_reserved_or_shipped_is_explained_exactly_and_nothing_else_is():
+    """Live orders move canonical AVAILABLE_AT rows; the comparison expects exactly the quantities the app's own order lines record."""
+    moved = L.app_stock_effects([{"part_id": "P", "location_id": "W", "status": "RESERVED", "qty": 2},
+                                 {"part_id": "P", "location_id": "W", "status": "SHIPPED", "qty": 1}])
+    assert moved == {("P", "W"): {"reserved": 2, "shipped": 1}}
+    row = {"quantity": 8, "available_quantity": 8, "reserved_quantity": 0, "status": "IN_STOCK"}
+    assert L.with_app_stock(row, moved[("P", "W")]) == {"quantity": 7, "available_quantity": 5, "reserved_quantity": 2, "status": "LOW_STOCK"}
+    assert L.with_app_stock(row, None) is row  # no app order there: the canonical value must match as it is
+    assert L.with_app_stock({**row, "status": "ON_ORDER"}, moved[("P", "W")])["status"] == "ON_ORDER"  # reserving never changes a non-stock status

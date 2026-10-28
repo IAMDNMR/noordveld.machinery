@@ -43,9 +43,8 @@ export const setActiveOrganization = (id: string | null): void => {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event('active-organization'))
 }
 export const getActiveOrganization = (): string | null => activeOrganization
-// Design Studio, the workspace and the business applications are organization-scoped: the server checks the person's access in THIS organization.
-const ORG_SCOPED =
-  /^\/(design-studio|domain-knowledge|workspace|agent|intelligence|orders|cart|checkout)(\/|\?|$)/
+// The workspace and business applications are organization-scoped: the server checks the person's access in THIS organization.
+const ORG_SCOPED = /^\/(workspace|agent|intelligence|spark|orders|cart|checkout)(\/|\?|$)/
 
 async function request<T>(path: string, init: RequestInit): Promise<T> {
   let response: Response

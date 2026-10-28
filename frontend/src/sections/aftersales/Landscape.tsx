@@ -28,14 +28,14 @@ const offerings = [
     name: 'Spark · Parts Intelligence',
     icon: ScanLine,
     detail: 'Ask a question and follow the relationships behind the answer.',
-    to: '/parts-intelligence',
+    to: '/spark/chat',
     action: 'Ask Spark',
   },
   {
     name: 'Agentic Shopping',
     icon: Route,
     detail: 'Describe a need. Compare suitable parts, availability and delivery options.',
-    to: '/agentic-shopping',
+    to: '/spark/chat',
     action: 'Describe your need',
   },
 ]

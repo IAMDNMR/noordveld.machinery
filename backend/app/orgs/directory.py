@@ -1,7 +1,7 @@
 """Organization directory: organizations, teams, memberships, platform staff, application grants, invitations, project registry and access.
 
 `SqliteOrgDirectory` is the isolated local implementation (a temporary file, never a production database). There is no
-production directory yet: the trusted identity provider must supply memberships (see DESIGN_STUDIO_ACTIVATION.md), so
+production directory yet: the trusted identity provider must supply memberships through the organization directory, so
 the default directory is `NoDirectory`, which holds nobody and answers every question with "no access".
 
 Invitations are the only way into an organization. A token is shown once and only its hash is stored; accepting needs a

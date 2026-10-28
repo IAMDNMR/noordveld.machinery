@@ -1,4 +1,5 @@
 import { CircleAlert } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { IntelligenceAction, QueryResponse, Suggestion } from '../../api/index'
 import type { Subject } from '../../api/intelligenceTypes'
@@ -7,6 +8,10 @@ import { evidenceGraph } from './graphModel'
 import { EvidencePanel } from './EvidencePanel'
 import { ProvenanceBadge, ProvenanceLine } from './provenance'
 import { ResultCard } from './ResultCard'
+import { AvailabilityTable } from './AvailabilityTable'
+import type { SparkChart, SparkPresentation, SparkTable } from '../../api/spark'
+import { RecordChart, RecordTable } from '../spark/AnswerBlocks'
+import { AnswerText } from '../spark/AnswerText'
 
 interface ResultViewProps {
   response: QueryResponse
@@ -19,6 +24,12 @@ interface ResultViewProps {
   onMore: () => void
   /** starts over: clears the question */
   onClear?: () => void
+  showGraph?: boolean
+  conversational?: boolean
+  /** Spark's checked presentation; without it the classic card layout is used */
+  format?: NonNullable<SparkPresentation['intelligence']>
+  table?: SparkTable | null
+  chart?: SparkChart | null
 }
 
 function ActionButton({
@@ -111,44 +122,71 @@ export function ResultView({
   onSelect,
   onMore,
   onClear,
+  showGraph = false,
+  conversational = false,
+  format,
+  table = null,
+  chart = null,
 }: ResultViewProps) {
   const { clarification } = response
   const canShowMore = response.results.length < response.total && limit < maxLimit
   const unsupported = response.intent === 'UNSUPPORTED'
+  const [showRecords, setShowRecords] = useState(!showGraph)
 
   return (
     <section className="pr" aria-label={`Answer to: ${response.question}`} aria-live="polite">
-      <div className="pr__understood">
-        <span className="pr__understood-k">Understood as</span>
-        <span className="pr__chip">{response.intent_label}</span>
-        {response.entities.map((e) => (
-          <span key={`${e.kind}-${e.key}`} className="pr__chip">
-            <span>{e.kind.charAt(0) + e.kind.slice(1).toLowerCase()}</span>{' '}
-            <strong>{e.label}</strong>
-          </span>
-        ))}
-        {onClear ? (
-          <button type="button" className="pr__clear" onClick={onClear}>
-            Clear
-          </button>
-        ) : null}
-      </div>
+      {!conversational ? (
+        <div className="pr__understood">
+          <span className="pr__understood-k">Understood as</span>
+          <span className="pr__chip">{response.intent_label}</span>
+          {response.entities.map((e) => (
+            <span key={`${e.kind}-${e.key}`} className="pr__chip">
+              <span>{e.kind.charAt(0) + e.kind.slice(1).toLowerCase()}</span>{' '}
+              <strong>{e.label}</strong>
+            </span>
+          ))}
+          {onClear ? (
+            <button type="button" className="pr__clear" onClick={onClear}>
+              Clear
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="pr__answer">
-        <h2 className="pr__title">
-          {unsupported ? 'Outside Parts Intelligence' : response.intent_label}
-        </h2>
-        {response.subject && !clarification ? (
+        {!conversational ? (
+          <h2 className="pr__title">
+            {unsupported ? 'Outside Parts Intelligence' : response.intent_label}
+          </h2>
+        ) : null}
+        {response.subject &&
+        !clarification &&
+        // a text answer that already names its subject needs no identity block above it
+        !(format === 'text' && response.answer.summary.includes(response.subject.label)) ? (
           <SubjectLine subject={response.subject} onInvestigate={onInvestigate} />
         ) : null}
-        <p className="pr__summary">{response.answer.summary}</p>
+        {conversational ? (
+          // in the chat a part named in the answer is a link that opens it
+          <div className="pr__summary">
+            <AnswerText
+              text={response.answer.summary}
+              parts={[
+                ...response.results.flatMap((item) => (item.part_number ? [item.part_number] : [])),
+                ...response.entities.filter((e) => e.kind === 'PART').map((e) => e.label),
+                ...(response.subject?.kind === 'PART' ? [response.subject.label] : []),
+              ]}
+            />
+          </div>
+        ) : (
+          <p className="pr__summary">{response.answer.summary}</p>
+        )}
         {response.answer.demo ? (
           <p className="pr__demo" role="note">
             <strong>Demo data.</strong> This answer includes synthetic demonstration data, not live
             enterprise data.
           </p>
         ) : null}
-        {response.answer.source === 'llm' ? (
+        {!conversational && response.answer.source === 'llm' ? (
           <p className="pr__source">Worded by the language model from the evidence below.</p>
         ) : null}
       </div>
@@ -188,24 +226,82 @@ export function ResultView({
         </div>
       ) : null}
 
-      {response.results.length > 0 ? (
+      {showGraph && response.results.length > 0 ? (
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          aria-expanded={showRecords}
+          onClick={() => setShowRecords((value) => !value)}
+        >
+          {showRecords ? 'Hide answer records' : 'Show answer records'}
+        </button>
+      ) : null}
+      {response.results.length > 0 && showRecords && (format === 'text' || format === 'chart') ? (
+        // the sentence (or the chart) carries the answer; the records stay one click away
         <>
-          <div className="pr__count">
-            <h3>
-              {response.total} {response.total === 1 ? 'result' : 'results'}
-              {response.results.length < response.total ? (
-                <span> · showing {response.results.length}</span>
-              ) : null}
-            </h3>
-            <ProvenanceLine items={response.provenance} />
-          </div>
-          <ul className="pr__results">
-            {response.results.map((item, i) => (
-              <li key={`${i}-${item.kind}-${item.key}`}>
-                <ResultCard item={item} onInvestigate={onInvestigate} />
-              </li>
-            ))}
-          </ul>
+          {format === 'chart' && chart ? <RecordChart chart={chart} /> : null}
+          <details className="spark-records">
+            <summary>
+              Show{' '}
+              {response.results.length === 1
+                ? 'the record'
+                : `the ${response.results.length} records`}
+            </summary>
+            {table ? (
+              <RecordTable table={table} onOpenPart={onInvestigate} label="Answer records" />
+            ) : (
+              <ul className="pr__results">
+                {response.results.map((item, i) => (
+                  <li key={`${i}-${item.kind}-${item.key}`}>
+                    <ResultCard item={item} onInvestigate={onInvestigate} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </details>
+        </>
+      ) : null}
+      {response.results.length > 0 && showRecords && format === 'table' && table ? (
+        <>
+          <RecordTable table={table} onOpenPart={onInvestigate} label="Answer records" />
+          {canShowMore ? (
+            <button type="button" className="btn btn-secondary pr__more" onClick={onMore}>
+              Show more
+            </button>
+          ) : null}
+        </>
+      ) : null}
+      {response.results.length > 0 &&
+      showRecords &&
+      format !== 'text' &&
+      format !== 'chart' &&
+      !(format === 'table' && table) ? (
+        <>
+          {!conversational ? (
+            <div className="pr__count">
+              <h3>
+                {response.total} {response.total === 1 ? 'result' : 'results'}
+                {response.results.length < response.total ? (
+                  <span> · showing {response.results.length}</span>
+                ) : null}
+              </h3>
+              <ProvenanceLine items={response.provenance} />
+            </div>
+          ) : null}
+          {conversational &&
+          response.results.every((item) =>
+            ['dealer', 'supplier', 'warehouse'].includes(item.kind),
+          ) ? (
+            <AvailabilityTable items={response.results} />
+          ) : (
+            <ul className="pr__results">
+              {response.results.map((item, i) => (
+                <li key={`${i}-${item.kind}-${item.key}`}>
+                  <ResultCard item={item} onInvestigate={onInvestigate} />
+                </li>
+              ))}
+            </ul>
+          )}
           {canShowMore ? (
             <button type="button" className="btn btn-secondary pr__more" onClick={onMore}>
               Show more
@@ -227,10 +323,10 @@ export function ResultView({
         </div>
       ) : null}
 
-      {!clarification && response.evidence.length > 0 ? (
-        <details className="gx-answer">
+      {!clarification && response.evidence.length > (format === 'text' ? 1 : 0) ? (
+        <details className="gx-answer" open={showGraph || undefined}>
           <summary>
-            Explore answer relationships · {response.evidence.length}{' '}
+            View graph · {response.evidence.length}{' '}
             {response.evidence.length === 1 ? 'connection' : 'connections'}
           </summary>
           <GraphExplorer
@@ -241,7 +337,7 @@ export function ResultView({
           />
         </details>
       ) : null}
-      {!clarification ? <EvidencePanel response={response} /> : null}
+      {!clarification && !conversational ? <EvidencePanel response={response} /> : null}
     </section>
   )
 }

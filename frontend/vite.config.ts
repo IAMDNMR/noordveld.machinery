@@ -27,11 +27,9 @@ export default defineConfig({
   // The Parts Store reads the catalogue from the FastAPI backend (backend/, port 8000)
   server: {
     proxy: { '/api': 'http://localhost:8000' },
-    watch: { ignored: ['**/.export-check-*/**'] },
   },
-  // Export verification has its own root and runner. Never discover its
-  // temporary files as part of the Studio's component suite.
-  test: { exclude: ['**/node_modules/**', '**/.export-check-*/**'] },
+  // Long conversation tests wait on several async steps; a fully loaded parallel run needs more than the defaults.
+  test: { testTimeout: 20000, setupFiles: ['./src/test-setup.ts'] },
   preview: { proxy: { '/api': 'http://localhost:8000' } },
   build: {
     target: 'es2022',

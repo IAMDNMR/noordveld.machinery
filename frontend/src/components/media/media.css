@@ -286,6 +286,29 @@
   transform: scale(var(--crop));
   transform-origin: 0 0;
 }
+.film__control {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  border-radius: 4px;
+  background: rgb(9 33 30 / 0.8);
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+.film__control:hover {
+  background: #09211e;
+}
+.film__control:focus-visible {
+  outline: 2px solid #00b7a4;
+  outline-offset: 4px;
+}
 
 /*
   Stage: the same teal treatment as the hero. A full-width teal band (wash, glow, fine grid) dissolves into the page at

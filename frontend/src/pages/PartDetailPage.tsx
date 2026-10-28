@@ -1,6 +1,8 @@
 import { Check, ShoppingCart } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
+import '../components/store/pd-redesign.css'
 import { Link, useParams } from 'react-router-dom'
+import { getProfile } from '../api/profile'
 import { getPart, type PartDetail, type RelationKind } from '../api/index'
 import { AvailabilityBadge, canOrder, DemoTag, StatusFlag } from '../components/store/Badges'
 import { PartImage } from '../components/store/PartImage'
@@ -103,9 +105,15 @@ function PartView({ d }: { d: PartDetail }) {
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
   // the machine this part is bought for: it travels with the cart line and the order. Chosen by the user; preselected only when the catalogue records a single fit.
-  const [machine, setMachine] = useState<string>(() =>
-    d.fitment.length === 1 ? d.fitment[0].model_code : '',
+  const [picked, setPicked] = useState<string | null>(null)
+  // the saved profile only fills this in when the catalogue records that the part fits that machine
+  const saved = useApi((signal) => getProfile(signal), 'part-profile').data?.profile
+  const fits = new Set(d.fitment.map((f) => f.model_code))
+  const preferred = [saved?.preferred_machine, ...(saved?.machines ?? [])].find(
+    (m) => m && fits.has(m),
   )
+  const machine = picked ?? (d.fitment.length === 1 ? d.fitment[0].model_code : (preferred ?? ''))
+  const setMachine = setPicked
   const inCart = lines.filter((l) => l.partId === part.part_id).reduce((n, l) => n + l.qty, 0)
   const orderable = canOrder(profile?.part_status, profile?.orderable)
     ? true
@@ -274,11 +282,19 @@ function PartView({ d }: { d: PartDetail }) {
                   : 'Online ordering is not configured for this part.'}
               </p>
             )}
+            {orderable === true ? (
+              <Link
+                className="btn btn-secondary"
+                to={`/spark/chat?order=${encodeURIComponent(part.part_id)}&qty=${qty}${machine ? `&machine=${encodeURIComponent(machine)}` : ''}`}
+              >
+                Order this part with Spark
+              </Link>
+            ) : null}
             <Link
               className="btn btn-secondary"
-              to={`/parts-intelligence?part=${encodeURIComponent(part.part_number)}`}
+              to={`/spark/chat?part=${encodeURIComponent(part.part_number)}`}
             >
-              Investigate in Parts Intelligence
+              Ask Spark about this part
             </Link>
           </div>
           {inCart > 0 ? (

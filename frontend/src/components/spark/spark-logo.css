@@ -1,0 +1,90 @@
+/* Spark's palette from the films: teal #14958C, soft teal #7FC9C2, ink #161616. */
+.spark-logo {
+  flex: none;
+  display: inline-block;
+  overflow: visible;
+  vertical-align: middle;
+}
+.spark-logo__ink {
+  fill: #161616;
+}
+.spark-logo__outline {
+  stroke: #161616;
+}
+.spark-logo__teal-stroke {
+  stroke: #14958c;
+}
+.spark-logo__bead {
+  fill: #14958c;
+  stroke: #161616;
+}
+.spark-logo__orbit {
+  stroke: #14958c;
+  opacity: 0.9;
+  animation: spark-orbit 3.2s linear infinite;
+}
+.spark-logo__arc--1 {
+  stroke: #14958c;
+  animation: spark-signal 1.6s ease-in-out infinite;
+}
+.spark-logo__arc--2 {
+  stroke: #7fc9c2;
+  animation: spark-signal 1.6s ease-in-out 0.2s infinite;
+}
+.spark-logo__eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spark-blink 3.2s ease-in-out infinite;
+}
+.spark-logo__body {
+  animation: spark-bob 3.6s ease-in-out infinite;
+}
+@keyframes spark-orbit {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes spark-signal {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes spark-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes spark-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.spark-logo.is-still *,
+.spark-logo.is-still {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spark-logo,
+  .spark-logo * {
+    animation: none !important;
+  }
+}
+
+.sp-product-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}

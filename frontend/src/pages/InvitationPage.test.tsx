@@ -31,7 +31,6 @@ const offer: InvitationPreview = {
   email_hint: 'f•••••@example.invalid',
   role: null,
   app_grants: [{ app_id: 'agentic_shopping', app_role: 'customer' }],
-  project_access: [],
   team: null,
   expires_at: '2026-12-01T00:00:00+00:00',
 }
@@ -55,13 +54,12 @@ const open = (token = TOKEN) =>
   )
 
 it('accepting applies it on the server and lands on the workspace welcome', async () => {
-  session.user = { id: 'studio-frank', name: 'Frank' }
+  session.user = { id: 'frank', name: 'Frank' }
   vi.mocked(previewInvitation).mockResolvedValue(offer)
   vi.mocked(acceptInvitation).mockResolvedValue({
     org_id: 'org_a',
     role: null,
     app_grants: offer.app_grants,
-    project_access: [],
   })
   open()
   fireEvent.click(await screen.findByRole('button', { name: 'Accept invitation' }))

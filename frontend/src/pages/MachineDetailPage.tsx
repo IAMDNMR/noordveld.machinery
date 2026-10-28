@@ -5,6 +5,8 @@ import { ButtonLink } from '../components/ButtonLink'
 import { FilmSlot } from '../components/media/FilmSlot'
 import { MachineImage } from '../components/media/MachineImage'
 import { Reveal } from '../components/Reveal'
+import { BarChart, ProcessFlow } from '../components/cine/Cine'
+import { partPath } from '../lib/storeQuery'
 import { company, films } from '../data/content'
 import { useSite } from '../data/site'
 import { useParallax } from '../hooks/useParallax'
@@ -12,6 +14,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import type { Machine } from '../types/catalog'
 import NotFoundPage from './NotFoundPage'
 import './pages.css'
+import './machines.css'
 
 const PREVIEW = 8
 
@@ -54,12 +57,16 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
     for (const p of machine.relatedParts) map.set(p.category, [...(map.get(p.category) ?? []), p])
     return Array.from(map, ([category, items]) => ({ category, items }))
   }, [machine])
-  const visible = showAll ? machine.relatedParts : machine.relatedParts.slice(0, PREVIEW)
+  const [category, setCategory] = useState<string | null>(null)
+  const filtered = category
+    ? machine.relatedParts.filter((p) => p.category === category)
+    : machine.relatedParts
+  const visible = showAll || category ? filtered : filtered.slice(0, PREVIEW)
   const film = { ...films.machine, title: `${machine.model} at work` }
 
   return (
     <>
-      <section className="mhero" aria-labelledby="machine-title">
+      <section className="mhero on-dark" aria-labelledby="machine-title">
         <div className="container mhero__inner">
           <div className="mhero__copy">
             <nav aria-label="Breadcrumb" className="crumbs">
@@ -88,38 +95,23 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
             <MachineImage machine={machine} ratio="4 / 3" eager imageType="studio" />
           </div>
         </div>
-      </section>
-
-      <section className="section detail" aria-labelledby="overview-title">
-        <div className="container detail__grid">
-          <Reveal>
-            <h2 id="overview-title" className="h2">
-              Overview
-            </h2>
-          </Reveal>
-          <Reveal delay={100} className="detail__body">
-            <p className="lead">
-              {machine.model} is part of the{' '}
-              {machine.brand === 'Noordveld' ? 'Noordveld' : `${machine.brand} (a Noordveld brand)`}{' '}
-              range, in the {machine.family}, built at the {machine.plant} plant.
-            </p>
-            <ul className="facts-inline">
-              <li>
-                <span>Family</span>
-                {machine.family}
-              </li>
-              <li>
-                <span>Built at</span>
-                {machine.plant}
-              </li>
-              <li>
-                <span>Brand</span>
-                {machine.brand}
-                {machine.acquired ? `, acquired ${machine.acquired}` : ''}
-              </li>
-            </ul>
-          </Reveal>
-        </div>
+        <dl className="container mhero__facts">
+          <div>
+            <dt>Family</dt>
+            <dd>{machine.family}</dd>
+          </div>
+          <div>
+            <dt>Built at</dt>
+            <dd>{machine.plant}</dd>
+          </div>
+          <div>
+            <dt>Brand</dt>
+            <dd>
+              {machine.brand}
+              {machine.acquired ? `, acquired ${machine.acquired}` : ''}
+            </dd>
+          </div>
+        </dl>
       </section>
 
       <section className="section on-mist detail" aria-labelledby="specs-title">
@@ -200,11 +192,31 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
                 : `${machine.relatedParts.length} ${machine.relatedParts.length === 1 ? 'part is' : 'parts are'} catalogued for ${machine.model}${groups.length > 1 ? `, across ${groups.length} categories` : ''}.`}
             </p>
           </Reveal>
+          {groups.length > 1 ? (
+            <div className="mparts__coverage">
+              <h3>Coverage by system</h3>
+              <BarChart
+                label={`Parts for ${machine.model} by category. Choose a category to filter the list.`}
+                rows={[...groups]
+                  .sort((a, b) => b.items.length - a.items.length)
+                  .map((g) => ({ name: g.category, value: g.items.length }))}
+                selected={category}
+                onSelect={setCategory}
+              />
+              <p className="mparts__hint" role="status">
+                {category
+                  ? `Showing ${filtered.length} ${category.toLowerCase()} parts.`
+                  : 'Choose a system to filter the parts below.'}
+              </p>
+            </div>
+          ) : null}
           {visible.length > 0 ? (
             <ul className="partlist">
               {visible.map((p) => (
                 <li key={p.partNo} className="part">
-                  <span className="part__no">{p.partNo}</span>
+                  <Link className="part__no" to={partPath(p.partNo)}>
+                    {p.partNo}
+                  </Link>
                   <span className="part__name">{p.name}</span>
                   <span className="part__cat">{p.category}</span>
                   <span className="part__spec">{p.specNote}</span>
@@ -212,7 +224,7 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
               ))}
             </ul>
           ) : null}
-          {machine.relatedParts.length > PREVIEW ? (
+          {!category && machine.relatedParts.length > PREVIEW ? (
             <button
               type="button"
               className="text-link partlist__more"
@@ -222,6 +234,40 @@ function MachineDetail({ machine, machines }: { machine: Machine; machines: read
               {showAll ? 'Show fewer parts' : `Show all ${machine.relatedParts.length} parts`}
             </button>
           ) : null}
+        </div>
+      </section>
+
+      <section className="section mown" aria-labelledby="mown-title">
+        <div className="container">
+          <h2 id="mown-title" className="h2">
+            Owning {machine.model}
+          </h2>
+          <ProcessFlow
+            label={`The ownership steps for ${machine.model}`}
+            steps={[
+              {
+                title: 'Specify',
+                text: 'Family, plant and recorded attachments.',
+                to: '#specs-title',
+              },
+              {
+                title: 'Find the part',
+                text: 'Parts recorded as fitting this model.',
+                to: '#related-parts',
+              },
+              {
+                title: 'Order',
+                text: 'Open a part, then order it with Spark or at checkout.',
+                to: '/parts-store',
+              },
+              {
+                title: 'Service',
+                text: 'Dealers, service steps and warranty.',
+                to: '/parts-services',
+              },
+              { title: 'Track', text: 'Every order, from allocation to delivery.', to: '/orders' },
+            ]}
+          />
         </div>
       </section>
 

@@ -46,8 +46,10 @@ const FILTERS = {
 }
 
 let signedIn = false
+let processor = false
 beforeEach(() => {
   signedIn = false
+  processor = false
   vi.stubGlobal(
     'IntersectionObserver',
     class {
@@ -75,9 +77,9 @@ beforeEach(() => {
               id: 'U1',
               name: 'U',
               email: 'u@x',
-              role: 'END_USER',
+              role: processor ? 'ORDER_PROCESSOR' : 'END_USER',
               customer: 'C',
-              permissions: [],
+              permissions: processor ? ['orders.read'] : [],
             })
           : json({ error: { code: 'not_signed_in', message: 'x' } }, 401)
       if (path === '/parts')
@@ -155,9 +157,7 @@ const mount = () =>
 describe('Parts & Services page', () => {
   it('shows the headline and both actions at once, pointing at the Parts Store and the machine finder', async () => {
     mount()
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(
-      'Every Machine Has a Story.',
-    )
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('Beyond the machine.')
     expect(screen.getByRole('link', { name: 'Explore Parts' }).getAttribute('href')).toBe(
       '/parts-store',
     )
@@ -180,6 +180,17 @@ describe('Parts & Services page', () => {
     expect(screen.queryByRole('button', { name: /Replay/ })).toBeNull()
   })
 
+  it('shows who owns a process step and returns keyboard focus when its details close', () => {
+    mount()
+    const trigger = screen.getByRole('button', { name: /Establish the relationship/ })
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.click(screen.getByText('Before moving on', { exact: true }))
+    expect(screen.getByText(/Dealer onboarding/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Close process step' }))
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(document.activeElement).toBe(trigger)
+  })
+
   it('every quick-access destination is a real route or a section on the page', async () => {
     mount()
     const quick = within(
@@ -190,7 +201,7 @@ describe('Parts & Services page', () => {
     const hrefs = quick.getAllByRole('link').map((a) => a.getAttribute('href'))
     expect(hrefs).toEqual([
       '/parts-store',
-      '/parts-intelligence',
+      '/spark/chat',
       '/parts-store?sort=name',
       '#find-parts',
       '#dealers',
@@ -236,6 +247,14 @@ describe('Parts & Services page', () => {
     mount()
     expect(await screen.findByText('Allocated')).toBeTruthy()
     expect(screen.getByText(/demo record/)).toBeTruthy()
+    cleanup()
+    vi.mocked(fetch).mockClear()
+    processor = true // an Order Processor cannot read checkout data: no failing request and no error
+    mount()
+    expect(await screen.findByText(/Dealer search is part of ordering/)).toBeTruthy()
+    const urls = vi.mocked(fetch).mock.calls.map(([u]) => String(u))
+    expect(urls.some((u) => u.includes('/checkout/'))).toBe(false)
+    expect(screen.queryByText('Countries could not be loaded.')).toBeNull()
   })
 
   it('labels the service steps that are not available', async () => {

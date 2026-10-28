@@ -16,25 +16,22 @@ export interface NavItem {
   tag?: string
 }
 
-/** The Agentic E-Commerce introduction page, built into this project and served from the same site. */
-export const AGENTIC_ROUTE = '/agentic-commerce/'
+/** Spark: the introduction and films. The conversation itself lives at SPARK_CHAT_ROUTE. */
+export const AGENTIC_ROUTE = '/spark'
+export const SPARK_CHAT_ROUTE = '/spark/chat'
 
 export const nav: readonly NavItem[] = [
   { label: 'Machines', to: '/machines' },
+  { label: 'Company', to: '/#company' },
   { label: 'Aftersales', to: '/parts-services' },
   { label: 'Parts Portal', to: '/parts-store' },
-  { label: 'Parts Intelligence', to: '/parts-intelligence' },
-  { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true }, // its "See it work" step opens Agentic Shopping
-  { label: 'Design Studio', to: '/studio' },
+  { label: 'Ask Spark', to: AGENTIC_ROUTE },
   { label: 'Contact', to: `mailto:${company.email}`, external: true },
 ]
 
-/** The one Agentic E-Commerce experience, signed in or not: the Agentic Shopping screen (it hands order, shipment and warranty questions to the commerce assistant). */
-export const AGENTIC_SHOPPING_ROUTE = '/agentic-shopping'
-
-/** Navbar opens the video introduction; its calls to action lead to Agentic Shopping. */
+/** The header shows Aftersales, Parts Portal and Ask Spark; Machines and Company stay reachable from the home page and the footer. */
 export const primaryNav: readonly NavItem[] = nav.filter(
-  (item) => item.label !== 'Machines' && item.label !== 'Contact',
+  (item) => !['Contact', 'Machines', 'Company'].includes(item.label),
 )
 
 /** What each signed-in role works with. Hiding a link is presentation only: the backend checks every request. */
@@ -43,15 +40,13 @@ export const navFor = (role: 'END_USER' | 'ORDER_PROCESSOR' | null): readonly Na
     ? [
         { label: 'Aftersales', to: '/parts-services' },
         { label: 'Parts Portal', to: '/parts-store' },
-        { label: 'Parts Intelligence', to: '/parts-intelligence' },
-        // The introduction includes the films and opens Agentic Shopping from its examples.
-        { label: 'Agentic E-Commerce', to: AGENTIC_ROUTE, external: true },
+        { label: 'Ask Spark', to: AGENTIC_ROUTE },
         { label: 'My Orders', to: '/orders' },
       ]
     : role === 'ORDER_PROCESSOR'
       ? [
           { label: 'Orders', to: '/orders' },
-          { label: 'Parts Intelligence', to: '/parts-intelligence' },
+          { label: 'Ask Spark', to: AGENTIC_ROUTE },
           { label: 'Parts Portal', to: '/parts-store' },
           { label: 'Commerce Assistant', to: '/commerce' },
           { label: 'Fulfilment', to: '/orders?queue=needs_fulfilment' },

@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import copy
 
-import pytest
-
 from app.agent.service import AgentService
 from app.graph.queries import agent as q
 from app.intelligence.models import Kind, Resolved
@@ -62,7 +60,7 @@ class FakeParts:
             out.append({**{k: p[k] for k in ("part_id", "part_number", "name", "category", "subcategory")},
                         "fitment": [{"model_code": "M-1", "fitment_status": "CONFIRMED"}],
                         "price": {"amount": p["price"], "currency": "EUR", "data_status": "SYNTHETIC_DEMO"},
-                        "profile": {"availability_state": "IN_STOCK", "orderable": True, "part_status": "VERIFIED", "data_status": "SYNTHETIC_DEMO"},
+                        "profile": {"availability_state": "IN_STOCK", "orderable": True, "part_status": p.get("part_status", "VERIFIED"), "data_status": "SYNTHETIC_DEMO"},
                         "total_available": 10})
         return out
 
@@ -102,6 +100,8 @@ class FakeGraph:
                     for d, days in sorted(self._w["routes"].items()) if d in params["depots"]]
         if query == q.DEALERS_INSTALLING:
             return []
+        if query == q.PRODUCT_CLASSES:
+            return [{"names": sorted({p[k] for p in self._w["parts"].values() for k in ("category", "subcategory") if p.get(k)})}]
         raise AssertionError("the fixture world was asked something it does not hold")
 
 
@@ -142,5 +142,17 @@ def test_the_whole_response_is_repeatable_for_the_same_world():
     a = FixtureService(w, preference="fastest", delivery_place="Testburg").recommend("x").model_dump()
     b = FixtureService(w, preference="fastest", delivery_place="Testburg").recommend("x").model_dump()
     assert a == b
+
+
+def test_confirmed_fitment_does_not_override_unverified_catalogue_status():
+    w = world()
+    for part in w["parts"].values():
+        part["part_status"] = "UNVERIFIED"
+    result = FixtureService(w, preference="cheapest").recommend("a request")
+    assert result.state == "no_match" and result.recommended is None
+    assert not result.candidates
+    assert len(result.excluded) == 2
+    assert "fitment and permission to order are separate" in result.question
+    assert "No verified" not in result.question
 
 

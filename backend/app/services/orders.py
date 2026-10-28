@@ -824,6 +824,7 @@ def _direct_fulfilment_text(r: dict[str, Any]) -> str:
         "FAILED": "Allocation failed",
         "RELEASED": "Allocation released",
         "PENDING": "Allocation pending",
+        "CONSUMED": "Shipped from stock",
     }.get(alloc or "", "Allocation pending")
     ships = r.get("shipments") or []
     if ships:

@@ -25,28 +25,17 @@ const roleText = (role: string) =>
 
 /** What the invitation gives, in words a person can check before accepting. Nothing here grants anything: the server does that on accept. */
 function Offer({ invitation }: { invitation: InvitationPreview }) {
-  const creator = invitation.role !== null
   return (
     <ul className="inv-offer" aria-label="What this invitation gives you">
       {invitation.role ? (
         <li>
           <strong>{roleText(invitation.role)}</strong> in {invitation.organization.name}
-          <small>
-            {creator
-              ? 'Includes access to Design Studio according to this role, and only to projects you are assigned.'
-              : ''}
-          </small>
         </li>
       ) : null}
       {invitation.app_grants.map((grant) => (
         <li key={`${grant.app_id}:${grant.app_role}`}>
           <strong>{appName(grant.app_id)}</strong> as {roleText(grant.app_role)}
-          <small>Use this application with your own organization's data. No Design Studio.</small>
-        </li>
-      ))}
-      {invitation.project_access.map((item) => (
-        <li key={item.project_id}>
-          Project <strong>{item.project_id}</strong> as {item.level}
+          <small>Use this application with your own organization's data.</small>
         </li>
       ))}
     </ul>

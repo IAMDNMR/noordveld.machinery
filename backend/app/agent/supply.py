@@ -55,6 +55,9 @@ class Destination:
 def resolve_destination(place: str, destinations: list[dict[str, Any]]) -> Destination:
     """City first ('Hamburg', 'Hamburg, Germany'); a country alone is ambiguous (which destination?); anything else is unknown. Never guessed."""
     raw = " ".join((place or "").split())
+    *words, last = raw.split(" ") if raw else [""]
+    if "," not in raw and words and any(fold(last) in (fold(name), cc.lower()) for name, cc in COUNTRY_NAMES.items()):
+        raw = f"{' '.join(words)}, {last}"  # 'Almelo NL' reads as 'Almelo, NL'
     head, _, tail = raw.partition(",")
     key, tail_key = fold(head), fold(tail)
     wanted_cc = next(

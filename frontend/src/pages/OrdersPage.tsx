@@ -3,11 +3,13 @@ import { ClipboardList, Clock3, Truck, CircleAlert, Search } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { DIRECT_ORDER, getOrders, type OrderRow, type Queue } from '../api/orders'
 import { Restricted } from '../components/orders/Restricted'
+import { OrderPipeline } from '../components/orders/OrderPipeline'
 import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useSession } from '../store/session'
 import '../styles/wf.css'
 import '../components/orders/orders.css'
+import '../components/orders/orders-redesign.css'
 import './ProcurementPage.css'
 
 const QUEUES: { id: Queue | 'all'; label: string }[] = [
@@ -66,13 +68,15 @@ export default function OrdersPage() {
   return (
     <div className={`wf ord-page ${processor ? 'ord-page--processor' : ''}`}>
       <div className="wf-container">
-        <p className="eyebrow">{processor ? 'NOORDVELD · PROCUREMENT WORKSPACE' : 'End User'}</p>
-        <h1>{processor ? 'Order processing' : 'My orders'}</h1>
-        <p className="lede">
-          {processor
-            ? 'A clear view of what needs your attention. Review requests, coordinate fulfilment, and keep every order moving.'
-            : 'Your orders, their status and how they are being fulfilled.'}
-        </p>
+        <header className="ord-hero">
+          <p className="eyebrow">{processor ? 'NOORDVELD · PROCUREMENT WORKSPACE' : 'End User'}</p>
+          <h1>{processor ? 'Order processing' : 'My orders'}</h1>
+          <p className="lede">
+            {processor
+              ? 'A clear view of what needs your attention. Review requests, coordinate fulfilment, and keep every order moving.'
+              : 'Your orders, their status and how they are being fulfilled.'}
+          </p>
+        </header>
 
         {!user ? (
           <Restricted reason="signed_out" />
@@ -82,6 +86,27 @@ export default function OrdersPage() {
           <p className="muted ord-loading">Loading orders…</p>
         ) : (
           <>
+            <OrderPipeline orders={orders.data} />
+            {!processor && (
+              <div className="customer-order-tools">
+                <div>
+                  <strong>{orders.data.length}</strong>
+                  <span>saved {orders.data.length === 1 ? 'order' : 'orders'}</span>
+                </div>
+                <label className="proc-search">
+                  <Search size={16} aria-hidden="true" />
+                  <input
+                    aria-label="Search your orders"
+                    placeholder="Find an order or part…"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                  />
+                </label>
+                <Link className="btn btn-primary" to="/parts-store">
+                  Browse parts
+                </Link>
+              </div>
+            )}
             {processor ? (
               <>
                 <div className="proc-summary" aria-label="Order overview">

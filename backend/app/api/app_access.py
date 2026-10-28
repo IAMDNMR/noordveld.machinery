@@ -4,7 +4,7 @@ One identity, many applications: the person signs in once, and each application 
 access grant for it in the organization they are working in. Hiding a link in the workspace is a convenience; this is the control.
 
 * With an organization directory configured, an application route needs a signed-in person, an organization they belong to, and a
-  grant for that application there (or the creator permission `app.launch`, which lets Design Studio creators preview applications).
+  grant for that application there (or the organization permission `app.launch`).
   The read-only profile (`app_viewer`) can read but never change anything.
 * With no directory configured (today's public demo and every environment without an identity provider), nothing changes: the
   route behaves exactly as before. That is a stated limit, not a decision that anonymous access is acceptable for real customers.
@@ -87,3 +87,39 @@ def require_app(app_id: str):
         request.state.org_id = org
 
     return guard
+
+
+def require_any_app(*app_ids: str):
+    """Enter a combined workspace using any grant; retain each feature's denial.
+
+    Reuse the existing guards so organization selection, viewer restrictions and
+    creator previews cannot drift from the standalone applications.
+    """
+    guards = {app_id: require_app(app_id) for app_id in app_ids}
+
+    def guard(
+        request: Request,
+        directory: Annotated[OrgDirectory, Depends(get_org_directory)],
+        orders: OrdersSvc,
+        nv_session: Annotated[str | None, Cookie(alias=COOKIE)] = None,
+    ) -> None:
+        denied = {}
+        for app_id, check in guards.items():
+            try:
+                check(request, directory, orders, nv_session)
+            except HTTPException as exc:
+                if exc.status_code != 403:
+                    raise
+                denied[app_id] = exc
+        if len(denied) == len(guards):
+            raise next(iter(denied.values()))
+        request.state.app_access_denials = denied
+
+    return guard
+
+
+def check_app_operation(request: Request, app_id: str) -> None:
+    """Apply a feature denial captured by the combined-workspace entry guard."""
+    denial = request.state.app_access_denials.get(app_id)
+    if denial is not None:
+        raise denial

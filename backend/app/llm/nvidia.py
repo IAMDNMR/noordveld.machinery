@@ -1,4 +1,4 @@
-"""NVIDIA NIM provider (OpenAI-compatible chat completions) for the Design Studio conversation.
+"""NVIDIA NIM provider (OpenAI-compatible chat completions) for Spark reasoning.
 
 Selected with `AI_PROVIDER=nvidia`; the planner model (`NVIDIA_PLANNER_MODEL`) writes the plan. The key travels only in the
 Authorization header to integrate.api.nvidia.com and never appears in a log, URL, error or response. Reasoning is switched off
@@ -47,12 +47,17 @@ class NvidiaClient(StructuredLLM):
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
             ],
-            "temperature": 0.4 if kind.startswith("studio_frontend") else 0,
+            "temperature": 0,
             "max_tokens": MAX_OUTPUT_TOKENS.get(kind, 250),
             "chat_template_kwargs": {"enable_thinking": False},
         }
         if schema:
-            body["nvext"] = {"guided_json": schema}
+            # Hosted models accept the standard schema shape; guided_json in
+            # nvext is rejected by current Nemotron endpoints (HTTP 400).
+            body["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {"name": kind, "strict": True, "schema": schema},
+            }
         elif kind in JSON_KINDS:
             body["response_format"] = {"type": "json_object"}
         started, retries = time.perf_counter(), 0
@@ -62,13 +67,7 @@ class NvidiaClient(StructuredLLM):
                     ENDPOINT,
                     json=body,
                     headers={"Authorization": f"Bearer {self._key}"},
-                    timeout=480.0
-                    if kind.startswith("studio_frontend")
-                    else 300.0
-                    if kind in {"studio_blueprint", "studio_frontend"}
-                    else 240.0
-                    if kind == "studio_turn"
-                    else self._http.timeout,
+                    timeout=self._http.timeout,
                 )
             except httpx.TimeoutException as exc:
                 record(self.name, self._model, kind, started, "timeout", retries)

@@ -12,6 +12,12 @@ LIMIT 40
 
 # ── destinations, routes and service coverage (depot inventory -> route -> transport option -> ship-to) ──────────────
 # Recorded delivery destinations: a ship-to counts only when at least one transport route ends there.
+# the catalogue's product classes (category and subcategory names): the vocabulary a request's class words are checked against
+PRODUCT_CLASSES = """
+MATCH (p:Part) WITH collect(DISTINCT p.category) + collect(DISTINCT p.subcategory) AS names
+RETURN [n IN names WHERE n IS NOT NULL] AS names
+"""
+
 DESTINATIONS = """
 MATCH (s:ShipTo) WHERE s.city IS NOT NULL AND EXISTS { (:TransportRoute)-[:TO_SHIP_TO]->(s) }
 RETURN s.shipto_id AS shipto_id, s.city AS city, s.country_code AS country_code

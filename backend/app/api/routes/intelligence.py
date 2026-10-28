@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
 from app.api.app_access import require_app
 from app.api.dependencies import EntityDetails, Overviews, Questions, Workspaces
@@ -50,7 +50,9 @@ def catalog() -> list[dict]:
 
 
 @router.get("/kpis", response_model=Kpis)
-def kpis(service: Overviews) -> Kpis:
+def kpis(service: Overviews, response: Response) -> Kpis:
+    # graph-wide counts change slowly; each signed-in browser may reuse them for a few minutes
+    response.headers["Cache-Control"] = "private, max-age=300"
     return service.kpis()
 
 

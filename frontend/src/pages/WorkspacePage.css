@@ -46,26 +46,6 @@
   background: #f1f8f7;
   margin-bottom: 16px;
 }
-.ws-studio {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: space-between;
-  align-items: center;
-  background: #00463f;
-  color: #fff;
-  border-radius: 14px;
-  padding: 18px 22px;
-  margin-bottom: 18px;
-}
-.ws-studio h2 {
-  margin: 0 0 4px;
-  color: #fff;
-}
-.ws-studio p {
-  margin: 0;
-  color: #d4ebe7;
-}
 .ws-actions {
   display: flex;
   gap: 12px;
@@ -225,10 +205,6 @@
   font-size: 13px;
 }
 @media (max-width: 640px) {
-  .ws-studio {
-    flex-direction: column;
-    align-items: flex-start;
-  }
   .ws-org select {
     min-width: 0;
     width: 100%;

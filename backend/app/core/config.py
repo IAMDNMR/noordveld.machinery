@@ -53,15 +53,19 @@ class Settings:
     groq_model: str = "qwen/qwen3.8-27b"
     gemini_api_key: str = field(default="", repr=False)  # optional provider
     gemini_model: str = "gemini-3.5-flash"
-    #: language model for the Design Studio conversation (AI_PROVIDER: nvidia | groq | gemini); falls back to llm_provider when unset
+    #: language model for Spark reasoning (AI_PROVIDER: nvidia | groq | gemini); falls back to llm_provider when unset
     ai_provider: str = ""
     nvidia_api_key: str = field(default="", repr=False)
     nvidia_planner_model: str = ""
     nvidia_fast_model: str = ""
+    #: SPARK_VOICE_MODE: hands_free = a spoken message is sent and answered aloud; dictate = speech only fills the message box (the rollback)
+    spark_voice_mode: str = "hands_free"
     llm_requests_per_minute: int = 25
     llm_timeout: float = 20.0
     #: signs the demo session cookie; when SESSION_SECRET is not set a random one is made per process (sign in again after a restart)
     session_secret: str = field(default="", repr=False)
+    #: consented user profiles (a local SQLite file; the business graph is never written for profiles)
+    profile_db: str = "data/profiles.sqlite3"
     session_cookie_secure: bool = False
 
     @property
@@ -100,8 +104,10 @@ def get_settings() -> Settings:
         nvidia_api_key=os.environ.get("NVIDIA_API_KEY", ""),
         nvidia_planner_model=os.environ.get("NVIDIA_PLANNER_MODEL", "").strip(),
         nvidia_fast_model=os.environ.get("NVIDIA_FAST_MODEL", "").strip(),
+        spark_voice_mode="dictate" if os.environ.get("SPARK_VOICE_MODE", "").strip().lower() == "dictate" else "hands_free",
         llm_requests_per_minute=_number("LLM_REQUESTS_PER_MINUTE", 25, int),
         llm_timeout=_number("LLM_TIMEOUT", 20.0),
         session_secret=os.environ.get("SESSION_SECRET", "") or secrets.token_urlsafe(32),
+        profile_db=os.environ.get("PROFILE_DB", "data/profiles.sqlite3"),
         session_cookie_secure=os.environ.get("SESSION_COOKIE_SECURE", "").lower() == "true",
     )

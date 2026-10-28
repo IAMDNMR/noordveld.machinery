@@ -17,16 +17,16 @@ from app.api.routes import (
     accounts,
     agent,
     catalogue,
-    assistant,
     checkout,
     commerce,
-    design_studio,
-    domain_knowledge,
     intelligence,
-    studio_demo,
     orders,
     parts,
+    profile,
     site,
+    spark,
+    spark_order,
+    spark_voice,
     workspace,
 )
 from app.core.config import get_settings
@@ -71,12 +71,8 @@ def create_app() -> FastAPI:
     @app.exception_handler(GraphUnavailableError)
     async def graph_unavailable(request: Request, __: GraphUnavailableError) -> JSONResponse:
         path = request.url.path
-        if path.startswith(("/api/v1/studio-session", "/api/v1/auth", "/api/v1/me")):
+        if path.startswith(("/api/v1/auth", "/api/v1/me")):
             message = "Your account could not be verified because the account service is unavailable. Please try again shortly."
-        elif path.startswith("/api/v1/design-studio"):
-            message = "Design Studio could not access required account or reference data. Please try again shortly."
-        elif path.startswith("/api/v1/domain-knowledge"):
-            message = "Domain knowledge could not be loaded because the knowledge service is unavailable. Please try again shortly."
         elif path.startswith(("/api/v1/orders", "/api/v1/cart", "/api/v1/checkout")):
             message = "Order data is temporarily unavailable. Refresh the order status before submitting again."
         elif path.startswith(("/api/v1/parts", "/api/v1/catalogue")):
@@ -139,15 +135,15 @@ def create_app() -> FastAPI:
     app.include_router(catalogue.router, prefix="/api/v1")
     app.include_router(intelligence.router, prefix="/api/v1")
     app.include_router(agent.router, prefix="/api/v1")
+    app.include_router(spark.router, prefix="/api/v1")
+    app.include_router(profile.router, prefix="/api/v1")
+    app.include_router(spark_order.router, prefix="/api/v1")
+    app.include_router(spark_voice.router, prefix="/api/v1")
     app.include_router(site.router, prefix="/api/v1")
     app.include_router(accounts.router, prefix="/api/v1")
     app.include_router(orders.router, prefix="/api/v1")
     app.include_router(checkout.router, prefix="/api/v1")
-    app.include_router(design_studio.router, prefix="/api/v1")
-    app.include_router(studio_demo.router, prefix="/api/v1")
-    app.include_router(domain_knowledge.router, prefix="/api/v1")
     app.include_router(workspace.router, prefix="/api/v1")
-    app.include_router(assistant.router, prefix="/api/v1")
     app.include_router(commerce.router, prefix="/api/v1")
     return app
 

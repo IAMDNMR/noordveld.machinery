@@ -1,0 +1,208 @@
+#main.site-premium .connection-story {
+  background: #f0f2eb;
+  color: #173e36;
+  padding: clamp(48px, 7vw, 96px) 0;
+}
+.connection-story__heading {
+  max-width: 720px;
+}
+#main .connection-story__heading h2 {
+  font-size: clamp(32px, 4.6vw, 62px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  font-weight: 450;
+  margin: 22px 0;
+}
+.connection-story__heading h2 span {
+  color: #00756a;
+}
+.connection-story__heading > p:last-child {
+  color: #506258;
+  line-height: 1.7;
+}
+.connection-story__chapters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 38px;
+  border-bottom: 1px solid #bacbc0;
+}
+.connection-story__chapters button {
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #4b6256;
+  padding: 20px 12px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+.connection-story__chapters button span {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+.connection-story__chapters button[aria-pressed='true'] {
+  color: #00685d;
+  border-bottom-color: #00756a;
+  font-weight: 600;
+}
+.connection-story__stage {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  align-items: center;
+  gap: clamp(30px, 7vw, 90px);
+  padding-block: 38px;
+}
+.connection-story__part {
+  margin: 0;
+  min-width: 0;
+}
+.connection-story__part img {
+  display: block;
+  width: 100%;
+  height: clamp(200px, 24vw, 340px);
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.connection-story__part figcaption {
+  border-top: 1px solid #c5d0c6;
+  padding-top: 22px;
+  margin-top: 20px;
+  display: grid;
+  gap: 10px;
+}
+.connection-story__part figcaption > span {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #56695e;
+}
+.connection-story__part figcaption strong {
+  font-size: 18px;
+  font-weight: 500;
+}
+.connection-story__part small {
+  color: #56695e;
+}
+.connection-story__number {
+  font-size: 11px;
+  color: #00756a;
+  letter-spacing: 0.12em;
+}
+#main .connection-story__chapter h3 {
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  font-weight: 450;
+  margin: 16px 0;
+}
+.connection-story__chapter > p:not(.connection-story__number) {
+  color: #4b6256;
+  line-height: 1.75;
+  max-width: 50ch;
+}
+.connection-story__chapter ul {
+  padding: 0;
+  margin: 24px 0;
+  list-style: none;
+  min-height: 216px;
+}
+.connection-story__chapter li {
+  border-top: 1px solid #bfcec3;
+}
+.connection-story__chapter li:last-child {
+  border-bottom: 1px solid #bfcec3;
+}
+.connection-story__chapter li a,
+.connection-story__unavailable {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 0;
+  color: #173e36;
+}
+.connection-story__chapter li a > span:nth-child(2) {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+.connection-story__chapter li small {
+  color: #53675b;
+  font-size: 12px;
+}
+.connection-story__chapter li a:hover {
+  color: #00756a;
+}
+.connection-story__navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.connection-story__navigation button {
+  background: transparent;
+  border: 0;
+  color: #00685d;
+  min-height: 44px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.connection-story__navigation button:disabled {
+  color: #637469;
+  cursor: default;
+}
+.connection-story__evidence {
+  border-top: 1px solid #bfcec3;
+  padding: 22px 0 0;
+  font-size: 13px;
+  color: #4b6256;
+}
+.connection-story__evidence summary {
+  cursor: pointer;
+  color: #173e36;
+  min-height: 28px;
+}
+.connection-story__evidence p {
+  line-height: 1.7;
+  max-width: 85ch;
+}
+.connection-story__evidence li {
+  padding-block: 7px;
+}
+.connection-story__evidence a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.connection-story :is(a, button, summary):focus-visible {
+  outline: 2px solid #00756a;
+  outline-offset: 4px;
+}
+@media (max-width: 700px) {
+  .connection-story__stage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+  .connection-story__chapters button {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    padding-inline: 4px;
+  }
+  .connection-story__part {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+  }
+  .connection-story__part img {
+    height: 120px;
+  }
+  .connection-story__part figcaption {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .connection-story__part figcaption strong {
+    font-size: 15px;
+  }
+}

@@ -182,7 +182,9 @@ export function DirectDetail({
                     <td>{l.machine ?? 'Not specified'}</td>
                     <td>
                       {label(l.allocation_status)}
-                      {l.reserved_quantity ? <small>{l.reserved_quantity} reserved</small> : null}
+                      {l.reserved_quantity && l.allocation_status === 'RESERVED' ? (
+                        <small>{l.reserved_quantity} reserved</small>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

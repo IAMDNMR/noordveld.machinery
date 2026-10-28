@@ -11,6 +11,7 @@ import { roleLabel, useSession } from '../store/session'
 import { statusTone } from './OrdersPage'
 import '../styles/wf.css'
 import '../components/orders/orders.css'
+import '../components/orders/orders-redesign.css'
 import './ProcurementPage.css'
 
 const money = (amount: number | null | undefined, currency = 'EUR') =>
@@ -345,7 +346,7 @@ function Detail({
             </dl>
             <Link
               className="link-more"
-              to={`/parts-intelligence?part=${encodeURIComponent(o.lines[0]?.part_number ?? '')}`}
+              to={`/spark/chat?part=${encodeURIComponent(o.lines[0]?.part_number ?? '')}`}
             >
               Investigate in Parts Intelligence →
             </Link>

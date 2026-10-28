@@ -1,4 +1,4 @@
-import { ArrowUpRight, Boxes, ScanLine, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowUpRight, Boxes, SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getFilters, searchParts, type PartQuery } from '../api/index'
@@ -7,8 +7,11 @@ import { PartCard } from '../components/store/PartCard'
 import { EmptyView, ErrorView, LoadingView } from '../components/store/StateViews'
 import { StoreSearch } from '../components/store/StoreSearch'
 import { OverviewVideoSlot } from '../components/media/OverviewVideoSlot'
+import { ProcessFlow } from '../components/cine/Cine'
+import { BusinessJourney } from '../components/process/BusinessJourney'
 import { useApi } from '../hooks/useApi'
 import { usePageMeta } from '../hooks/usePageMeta'
+import '../components/store/store-redesign.css'
 import { humanize } from '../lib/format'
 import {
   activeFilterCount,
@@ -92,11 +95,13 @@ export default function PartsStorePage() {
         <div className="store-hero__main">
           <p className="eyebrow">Noordveld Parts Portal</p>
           <h1 id="store-title">
-            Keep your machines <br />
-            moving.
+            The right part.
+            <br />
+            Ready for the next job.
           </h1>
           <p className="lede">
-            Find the part that fits. Check availability. Order with confidence.
+            Search the catalogue, check your machine’s fitment and review supply options in one
+            place.
           </p>
           <div className="store-hero__search">
             <StoreSearch variant="hero" />
@@ -109,19 +114,11 @@ export default function PartsStorePage() {
             <summary>Help finding a part</summary>
             <aside className="store-assistance" aria-label="Help finding a part">
               <p className="eyebrow">A better way to find it</p>
-              <Link to="/agentic-shopping">
+              <Link to="/spark/chat">
                 <Boxes size={22} strokeWidth={1.5} aria-hidden="true" />
                 <span>
                   <strong>Describe what you need</strong>
                   <small>Compare suitable parts and supply options.</small>
-                </span>
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </Link>
-              <Link to="/parts-intelligence">
-                <ScanLine size={22} strokeWidth={1.5} aria-hidden="true" />
-                <span>
-                  <strong>Ask Spark before you order</strong>
-                  <small>Explore fitment, suppliers and source evidence.</small>
                 </span>
                 <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
@@ -133,17 +130,76 @@ export default function PartsStorePage() {
         </div>
       </header>
 
+      {options?.categories.length ? (
+        <nav className="store-category-rail" aria-label="Browse parts by category">
+          <button
+            type="button"
+            aria-pressed={!query.category}
+            onClick={() => update({ category: '' })}
+          >
+            All categories
+          </button>
+          {options.categories
+            .filter((category) => category.part_count > 0)
+            .map((category) => (
+              <button
+                key={category.category_id}
+                type="button"
+                aria-pressed={query.category === category.name}
+                onClick={() => update({ category: category.name })}
+              >
+                {category.name}
+                <span>{category.part_count}</span>
+              </button>
+            ))}
+        </nav>
+      ) : null}
+
+      <section className="store-flow" aria-labelledby="store-flow-title">
+        <h2 id="store-flow-title">From search to delivery</h2>
+        <ProcessFlow
+          label="How a parts order moves"
+          steps={[
+            {
+              title: 'Search',
+              text: 'By part number, description or machine model.',
+              to: '#results',
+            },
+            { title: 'Check fitment', text: 'See which machines the part is recorded as fitting.' },
+            { title: 'Compare supply', text: 'Depot stock, routes and delivery estimates.' },
+            {
+              title: 'Order',
+              text: 'Check out here, or let Spark guide the order.',
+              to: '/spark/chat',
+            },
+            { title: 'Track', text: 'Follow allocation, shipment and delivery.', to: '/orders' },
+          ]}
+        />
+      </section>
+
+      <details className="store-process">
+        <summary>Who does what at each step</summary>
+        <BusinessJourney kind="portal" />
+      </details>
       <section id="results" className="store-layout" aria-labelledby="results-title">
         <aside className="store-filters" aria-label="Filters">
-          <FilterPanel query={query} options={options} onChange={update} onClear={clear} />
+          <FilterPanel
+            query={query}
+            options={options}
+            onChange={update}
+            onClear={clear}
+            showCategories={false}
+          />
         </aside>
 
         <div className="store-main">
           <div className="store-toolbar">
             <h2 id="results-title" className="store-count" aria-live="polite">
-              {total === undefined
-                ? 'Parts'
-                : `${total} ${total === 1 ? 'part' : 'parts'}${query.category ? ` in ${query.category}` : ''}`}
+              {parts.loading
+                ? 'Finding parts…'
+                : total === undefined
+                  ? 'Parts'
+                  : `${total} ${total === 1 ? 'part' : 'parts'}${query.category ? ` in ${query.category}` : ''}`}
             </h2>
             <div className="row">
               <button
@@ -197,7 +253,7 @@ export default function PartsStorePage() {
 
           {parts.error ? (
             <ErrorView error={parts.error} onRetry={parts.reload} what="The parts list" />
-          ) : parts.data === null ? (
+          ) : parts.loading || parts.data === null ? (
             <LoadingView label="Loading parts" />
           ) : parts.data.items.length === 0 ? (
             <EmptyView

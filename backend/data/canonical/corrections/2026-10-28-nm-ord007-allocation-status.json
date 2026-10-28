@@ -1,0 +1,14 @@
+{
+  "id": "COR-2026-10-28-02",
+  "status": "PROPOSED_NOT_APPLIED",
+  "summary": "NM-ORD007 was dispatched before dispatch set the order-level allocation status, so the order still says RESERVED while its only line is SHIPPED and the order is COMPLETED.",
+  "verified_read_only": {
+    "on": "2026-10-28",
+    "order": {"order_id": "NM-ORD007", "order_status": "COMPLETED", "allocation_status": "RESERVED", "line_allocation_statuses": ["SHIPPED"], "shipment": "SHP-NM-ORD007-1 (DELIVERED)"},
+    "other_app_orders": "HCME-ORD-000001..3 and NM-ORD004..006 are consistent (RESERVED with RESERVED lines, or RELEASED with RELEASED lines); NM-ORD007 is the only stale record.",
+    "stock_effect": "None. Stock was already consumed at dispatch (on_hand and reserved reduced by the line quantity). RELEASE only touches lines still RESERVED, so the stale order status cannot release stock twice."
+  },
+  "cause_fixed_in_code": "app/graph/repositories/fulfilment.py: dispatch now runs MARK_ALLOCATION with status CONSUMED after CONSUME (tests/test_direct_order.py checks RESERVED -> CONSUMED -> CONSUMED).",
+  "to_apply_with_authorization": "MATCH (o:Order {order_id: 'NM-ORD007', source_id: 'APP-SESSION'}) WHERE o.order_status = 'COMPLETED' AND o.allocation_status = 'RESERVED' AND NOT EXISTS { (o)-[:CONTAINS_LINE]->(l:OrderLine) WHERE l.allocation_status <> 'SHIPPED' } SET o.allocation_status = 'CONSUMED', o.allocation_updated_at = '2026-10-28T00:00:00Z' RETURN o.order_id, o.allocation_status",
+  "expected_result": "One row: NM-ORD007, CONSUMED. Zero rows means the record changed since verification; do not force it."
+}

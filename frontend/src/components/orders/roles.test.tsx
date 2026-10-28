@@ -187,18 +187,10 @@ describe('roles', () => {
   it('shows the End User navigation and a subtle role label', async () => {
     mount('/orders', anna, { '/orders': () => new Response(JSON.stringify([row('O-1', 'NEW')])) })
     await waitFor(() =>
-      expect(navLabels()).toEqual([
-        'Aftersales',
-        'Parts Portal',
-        'Parts Intelligence',
-        'Agentic E-Commerce',
-        'My Orders',
-      ]),
+      expect(navLabels()).toEqual(['Aftersales', 'Parts Portal', 'Ask Spark', 'My Orders']),
     )
     expect(document.querySelector('.nav__bar .nav__role')?.textContent).toBe('End User')
-    expect(document.querySelector('.nav__links a[href="/agentic-commerce/"]')?.textContent).toBe(
-      'Agentic E-Commerce',
-    )
+    expect(document.querySelector('.nav__links a[href="/spark"]')?.textContent).toBe('Ask Spark')
   })
 
   it('shows the Order Processor navigation', async () => {
@@ -206,7 +198,7 @@ describe('roles', () => {
     await waitFor(() =>
       expect(navLabels()).toEqual([
         'Orders',
-        'Parts Intelligence',
+        'Ask Spark',
         'Parts Portal',
         'Commerce Assistant',
         'Fulfilment',
@@ -222,8 +214,8 @@ describe('roles', () => {
     expect(document.querySelector('.ord-restricted a')?.getAttribute('href')).toBe(
       '/sign-in?next=%2Forders',
     )
-    expect(navLabels()).toContain('Agentic E-Commerce') // the public navigation
-    expect(document.querySelector('.nav__links a[href="/agentic-commerce/"]')).toBeTruthy()
+    expect(navLabels()).toContain('Ask Spark') // the public navigation
+    expect(document.querySelector('.nav__links a[href="/spark"]')).toBeTruthy()
   })
 
   it('lists the End User’s own orders without customer or queue columns', async () => {

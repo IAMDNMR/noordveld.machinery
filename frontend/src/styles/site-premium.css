@@ -631,3 +631,67 @@
 .site-premium .pr__answer {
   line-height: 1.7;
 }
+
+/* A shared reading scale for public pages; application workspaces keep their own controls. */
+.site-premium .hero__copy .hero-title {
+  font-size: clamp(42px, 5.5vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+.site-premium .hero__copy .lead {
+  font-size: clamp(16px, 1.4vw, 19px);
+  max-width: 42ch;
+}
+.site-premium .section-head {
+  max-width: 72rem;
+}
+.site-premium .store-hero {
+  border-bottom: 1px solid var(--premium-line);
+  padding-bottom: 32px;
+}
+.site-premium .store-hero__media {
+  min-width: 0;
+}
+.site-premium .store-hero__help {
+  border-bottom: 1px solid var(--premium-line);
+}
+.site-premium .store-hero__help > summary {
+  padding: 14px 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+.site-premium .store-sort select {
+  min-height: 44px;
+  border-radius: 6px;
+}
+.site-premium .part-card {
+  border-radius: 8px;
+  box-shadow: none;
+}
+.site-premium .part-card:hover {
+  border-color: #91b4aa;
+  box-shadow: 0 6px 18px #15312708;
+}
+.site-premium .co__panel {
+  border-radius: 8px;
+  box-shadow: none;
+}
+.site-premium .co__panel h2 {
+  letter-spacing: -0.025em;
+}
+.site-premium .co input:focus-visible,
+.site-premium .co select:focus-visible {
+  outline: 2px solid #00756a;
+  outline-offset: 2px;
+}
+@media (max-width: 580px) {
+  .site-premium .store-hero {
+    gap: 24px;
+  }
+  .as-hero__scope {
+    gap: 12px 20px;
+  }
+  .as-hero__scope > :first-child {
+    flex-basis: 100%;
+  }
+}

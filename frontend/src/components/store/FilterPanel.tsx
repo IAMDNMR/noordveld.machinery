@@ -8,9 +8,16 @@ interface FilterPanelProps {
   options: CatalogueFilters | null
   onChange: (next: Partial<PartQuery>) => void
   onClear: () => void
+  showCategories?: boolean
 }
 
-export function FilterPanel({ query, options, onChange, onClear }: FilterPanelProps) {
+export function FilterPanel({
+  query,
+  options,
+  onChange,
+  onClear,
+  showCategories = true,
+}: FilterPanelProps) {
   const active = activeFilterCount(query)
   const toggleAvailability = (state: string) =>
     onChange({
@@ -34,25 +41,27 @@ export function FilterPanel({ query, options, onChange, onClear }: FilterPanelPr
         <p className="filters__hint">Filter options are not available right now.</p>
       ) : (
         <>
-          <fieldset className="filters__cats">
-            <legend>Category</legend>
-            {options.categories.map((c) => (
-              <label
-                key={c.category_id}
-                className={`${query.category === c.name ? 'is-on' : ''} ${c.part_count === 0 ? 'is-empty' : ''}`}
-              >
-                <input
-                  type="radio"
-                  name="category"
-                  checked={query.category === c.name}
-                  onChange={() => onChange({ category: c.name })}
-                  onClick={() => query.category === c.name && onChange({ category: '' })}
-                />
-                <span className="filters__label">{c.name}</span>
-                <span className="filters__n">{c.part_count}</span>
-              </label>
-            ))}
-          </fieldset>
+          {showCategories && (
+            <fieldset className="filters__cats">
+              <legend>Category</legend>
+              {options.categories.map((c) => (
+                <label
+                  key={c.category_id}
+                  className={`${query.category === c.name ? 'is-on' : ''} ${c.part_count === 0 ? 'is-empty' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="category"
+                    checked={query.category === c.name}
+                    onChange={() => onChange({ category: c.name })}
+                    onClick={() => query.category === c.name && onChange({ category: '' })}
+                  />
+                  <span className="filters__label">{c.name}</span>
+                  <span className="filters__n">{c.part_count}</span>
+                </label>
+              ))}
+            </fieldset>
+          )}
 
           <fieldset className="filters__select">
             <legend>Machine</legend>

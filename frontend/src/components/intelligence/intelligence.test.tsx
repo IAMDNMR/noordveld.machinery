@@ -8,6 +8,7 @@ import { ApiError, type PartOverview, type QueryResponse, type ResultItem } from
 import { errorMessage } from './Notices'
 
 import { ResultCard } from './ResultCard'
+import { AvailabilityTable } from './AvailabilityTable'
 import { ResultView } from './ResultView'
 
 import { ActionTab } from './tabs/InsightTabs'
@@ -159,6 +160,33 @@ describe('answers and recent questions (QA fixes 5 and 6)', () => {
     cleanup()
     view(false)
     expect(screen.queryByText(/Demo data\./)).toBeNull()
+    cleanup()
+    render(
+      <AvailabilityTable
+        items={[
+          item({
+            kind: 'dealer',
+            title: 'Recorded dealer',
+            data_class: 'SYNTHETIC_DEMO',
+            facts: [
+              { label: 'Available', value: '0' },
+              { label: 'Location', value: null },
+            ],
+          }),
+          item({
+            key: 'k2',
+            kind: 'warehouse',
+            title: 'Recorded warehouse',
+            facts: [{ label: 'Available', value: '8' }],
+          }),
+        ]}
+      />,
+    )
+    expect(screen.getByRole('columnheader', { name: 'Available' })).toBeTruthy()
+    expect(screen.getByRole('cell', { name: '0' })).toBeTruthy()
+    expect(screen.getByRole('cell', { name: '8' })).toBeTruthy()
+    expect(screen.getAllByRole('cell', { name: 'Not available' })).toHaveLength(2)
+    expect(screen.getByText('Synthetic demo')).toBeTruthy()
   })
 })
 
@@ -172,7 +200,7 @@ describe('parts intelligence source holds no catalogue data', () => {
   const files = [
     ...walk(__dirname),
     ...walk(join(src, 'api')).filter((f) => /intelligence/i.test(f)),
-    join(src, 'pages/PartsIntelligencePage.tsx'),
+    join(src, 'pages/SparkPage.tsx'),
   ].filter((f) => /\.(ts|tsx|css)$/.test(f) && !/\.test\./.test(f))
   const forbidden =
     /NVM-\d{4}|PRT-\d{3}|\b(NV|KFT|BTS)-\d{3,4}\b|\(demo\)|Hanselmann|Drenthe|Nordwest|Radiator assembly|\bSUP-\d|\bDLR-\d|\bWH-\d|€\s?\d|\bEUR\b/
