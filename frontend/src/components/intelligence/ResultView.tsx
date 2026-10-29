@@ -334,6 +334,7 @@ export function ResultView({
             view={evidenceGraph(response.evidence)}
             onOpen={onInvestigate}
             label="Answer relationships"
+            focus={response.question}
           />
         </details>
       ) : null}

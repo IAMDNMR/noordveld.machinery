@@ -38,7 +38,7 @@ ALL = " ".join(q for c in CATALOGS.values() for g in c for q in g["questions"])
 @pytest.mark.parametrize(("label", "key", "pattern"), [
     ("Part", "part_number", r"NVM-\d{4}-[A-Z]{2}"),
     ("Machine", "model_code", r"\b(?:NV|KFT|BTS)-\d{3,4}\b"),
-    ("Order", "order_id", r"\b(?:HCME-ORD-\d{6}|ORD-\d{4})\b"),
+    ("Order", "order_id", r"\b(?:NCME-ORD-\d{6}|ORD-\d{4})\b"),
 ])
 def test_every_record_a_question_names_exists(label, key, pattern):
     names = sorted(set(re.findall(pattern, ALL)))

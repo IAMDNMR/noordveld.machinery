@@ -1,14 +1,28 @@
-import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent,
+} from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowUp,
-  ArrowUpRight,
+  ArrowRight,
   Mic,
   ShoppingBag,
   Square,
   Volume2,
   X,
   PanelLeft,
+  Package,
+  Settings,
+  ShoppingCart,
+  FileText,
+  Wrench,
+  Store,
   Copy,
   RotateCcw,
   ArrowDown,
@@ -18,6 +32,7 @@ import {
   sparkSpeak,
   sparkTranscribe,
   sparkVoiceStatus,
+  sparkCatalog,
   type SparkResponse,
 } from '../../api/spark'
 import {
@@ -45,6 +60,7 @@ import { AnswerSources } from './AnswerSources'
 import { readPresentation } from './AnswerBlocks'
 import { OrderDraftBar, OrderJourney, type OrderChange } from './OrderJourney'
 import { SparkLogo } from './SparkLogo'
+import depot from '../../assets/editorial/machinery-at-work.webp'
 import { conversationKey, useChatHistory, type ChatHistory } from './useChatHistory'
 import '../../styles/wf.css'
 import '../intelligence/intelligence.css'
@@ -94,6 +110,35 @@ const FALLBACK_STARTERS = [
   { topic: 'Parts', text: 'Help me find the right part for my machine' },
   { topic: 'Fitment', text: 'Which machines does a part I name fit?' },
   { topic: 'Suppliers', text: 'Who can supply a part, and how fast can they deliver?' },
+]
+/** The four starters take their icon by position: parts, machines, buying, account. */
+const STARTER_ICONS = [Package, Settings, ShoppingCart, FileText]
+const WELCOME_CHIPS = [
+  {
+    key: 'parts',
+    label: 'Parts',
+    icon: Package,
+    groups: ['Finding parts', 'Price, budget and stock'],
+  },
+  {
+    key: 'machines',
+    label: 'Machines',
+    icon: Settings,
+    groups: ['Graph and connections', 'Parts and fitment'],
+  },
+  {
+    key: 'dealers',
+    label: 'Dealers & suppliers',
+    icon: Store,
+    groups: ['Dealers and suppliers', 'Delivery'],
+  },
+  { key: 'service', label: 'Service', icon: Wrench, groups: ['Warranty and service'] },
+  {
+    key: 'orders',
+    label: 'Orders',
+    icon: ShoppingCart,
+    groups: ['Ordering', 'Orders and tracking'],
+  },
 ]
 const VOICE_TRANSPORT = { transcribe: sparkTranscribe, synthesize: sparkSpeak }
 
@@ -208,12 +253,14 @@ function SparkConversation({ identity, history }: { identity: string; history: C
     return () => document.removeEventListener('keydown', close)
   }, [sidebarOpen])
   const [copied, setCopied] = useState<number | null>(null)
+  const [topic, setTopic] = useState<string | null>(null)
   const [copyError, setCopyError] = useState('')
   const [away, setAway] = useState(false)
   const nearBottom = useRef(true)
   const [saveError, setSaveError] = useState(false)
   const [dictated, setDictated] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [replacing, setReplacing] = useState<number | null>(null)
   const [pending, setPending] = useState<{
     question: string
     status: 'working' | 'stopped' | 'failed'
@@ -228,6 +275,7 @@ function SparkConversation({ identity, history }: { identity: string; history: C
   const sequence = useRef(turns.at(-1)?.id ?? 0)
   const input = useRef<HTMLTextAreaElement>(null)
   const thread = useRef<HTMLDivElement>(null)
+  const scrollTimer = useRef<number | undefined>(undefined)
   const partDialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     input.current?.focus()
@@ -240,6 +288,8 @@ function SparkConversation({ identity, history }: { identity: string; history: C
   const restoredQuestions = useRef(turns.map((turn) => turn.question.trim().toLowerCase()))
   const inputId = useId()
   const availability = useApi(sparkVoiceStatus, 'spark-voice')
+  const catalog = useApi(sparkCatalog, 'spark-catalog')
+  const questionBank = catalog.data ?? []
   const questions = useApi((signal) => getSuggestions(signal), 'suggestions')
   const requests = useApi((signal) => getAgentSuggestions(signal), 'agent-suggestions')
   const starters = [
@@ -329,9 +379,12 @@ function SparkConversation({ identity, history }: { identity: string; history: C
       limit = 12,
       context?: string,
       spoken = false,
+      /** Retry or Regenerate: the new answer takes the place of this turn instead of adding the question again */
+      replaceId?: number,
     ) => {
       if (!text.trim() || locked.current || !ready) return
       locked.current = true
+      setReplacing(replaceId ?? null)
       setBusy(true)
       nearBottom.current = true
       setAway(false)
@@ -402,11 +455,13 @@ function SparkConversation({ identity, history }: { identity: string; history: C
         )
         if (request.signal.aborted) return
         memory.current = response.context
-        const id = ++sequence.current
-        setTurns((previous) => [
-          ...previous,
-          { id, question: text.trim(), response, at: Date.now(), spoken },
-        ])
+        const id = replaceId ?? ++sequence.current
+        const fresh = { id, question: text.trim(), response, at: Date.now(), spoken }
+        setTurns((previous) =>
+          replaceId !== undefined && previous.some((turn) => turn.id === replaceId)
+            ? previous.map((turn) => (turn.id === replaceId ? fresh : turn))
+            : [...previous, fresh],
+        )
         setPending(null)
         const wanted = response.order_part
         if (wanted) {
@@ -455,6 +510,7 @@ function SparkConversation({ identity, history }: { identity: string; history: C
       } finally {
         if (controller.current === request) {
           locked.current = false
+          setReplacing(null)
           setBusy(false)
           input.current?.focus()
         }
@@ -663,11 +719,27 @@ function SparkConversation({ identity, history }: { identity: string; history: C
     voice.interrupt()
     void send(draft)
   }
+  const chip = WELCOME_CHIPS.find((item) => item.label === topic)
   const openTurn = openOrderTurn(turns)
+  /** The green dots light up around the pointer, in the thread's own coordinates. */
+  const followPointer = (event: PointerEvent<HTMLDivElement>) => {
+    const glow = event.currentTarget.querySelector('.spark-glow')
+    if (!glow) return
+    const box = glow.getBoundingClientRect()
+    const style = event.currentTarget.style
+    style.setProperty('--mx', `${event.clientX - box.left}px`)
+    style.setProperty('--my', `${event.clientY - box.top}px`)
+    event.currentTarget.classList.add('is-hot')
+  }
   return (
     <div
       className={`spark-workspace spark-workspace--redesign wf${sidebarOpen ? ' has-sidebar' : ''}`}
+      onPointerMove={followPointer}
+      onPointerLeave={(event) => event.currentTarget.classList.remove('is-hot', 'is-pressed')}
+      onPointerDown={(event) => event.currentTarget.classList.add('is-pressed')}
+      onPointerUp={(event) => event.currentTarget.classList.remove('is-pressed')}
     >
+      <div className="spark-glow" aria-hidden="true" />
       {sidebarOpen ? (
         <button
           className="spark-sidebar-backdrop"
@@ -676,9 +748,15 @@ function SparkConversation({ identity, history }: { identity: string; history: C
         />
       ) : null}
       <ChatSidebar
+        catalog={questionBank}
         open={sidebarOpen}
         history={{ ...history, create: () => reset(), select: selectChat }}
         busy={busy}
+        onPick={(question) => {
+          setDraft(question)
+          if (window.matchMedia?.('(max-width: 1000px)').matches) setSidebarOpen(false)
+          input.current?.focus()
+        }}
         onClose={() => {
           setSidebarOpen(false)
           input.current?.focus()
@@ -725,40 +803,107 @@ function SparkConversation({ identity, history }: { identity: string; history: C
         onScroll={() => {
           const node = thread.current
           if (!node) return
+          // the dot backdrop drifts with the scroll and turns green while it moves
+          const stage = node.parentElement
+          stage?.style.setProperty('--scroll-y', `${node.scrollTop}`)
+          stage?.classList.add('is-scrolling')
+          window.clearTimeout(scrollTimer.current)
+          scrollTimer.current = window.setTimeout(
+            () => stage?.classList.remove('is-scrolling'),
+            450,
+          )
           nearBottom.current = node.scrollHeight - node.scrollTop - node.clientHeight < 120
           setAway(!nearBottom.current)
         }}
       >
         {!turns.length && !busy && !failed ? (
           <div className="spark-welcome">
-            <SparkLogo size={76} className="spark-welcome__logo" />
+            <img className="spark-welcome__scene" src={depot} alt="" aria-hidden="true" />
+            <div className="spark-welcome__stage" onMouseLeave={() => setTopic(null)}>
+              <SparkLogo size={104} className="spark-welcome__logo" />
+              {WELCOME_CHIPS.map(({ key, label, icon: Icon }) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`spark-chip spark-chip--${key}${topic === label ? ' is-open' : ''}`}
+                  aria-expanded={topic === label}
+                  aria-controls="spark-chip-panel"
+                  onClick={() => setTopic(topic === label ? null : label)}
+                >
+                  <Icon size={16} aria-hidden="true" /> {label}
+                </button>
+              ))}
+              {chip ? (
+                <div
+                  className="spark-chip-panel"
+                  id="spark-chip-panel"
+                  role="group"
+                  aria-label={`${chip.label} questions`}
+                  key={chip.label}
+                >
+                  {chip.groups
+                    .flatMap((name) => questionBank.filter((group) => group.category === name))
+                    .map((group) => (
+                      <section key={group.category}>
+                        <h3>{group.category}</h3>
+                        <ul>
+                          {group.questions.map((question) => (
+                            <li key={question}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDraft(question)
+                                  setTopic(null)
+                                  input.current?.focus()
+                                }}
+                              >
+                                {question}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ))}
+                </div>
+              ) : null}
+            </div>
             <p className="spark-kicker">Spark</p>
-            <h2>Let’s find your next step.</h2>
+            <h2>
+              Let’s find your <em>next step.</em>
+            </h2>
             <p>
               Start with a part, a machine or the job at hand. We’ll work through the details
               together.
             </p>
             <ul className="spark-starters" aria-label="Example questions">
-              {starters.map((starter) => (
-                <li key={starter.text}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDraft(starter.text)
-                      input.current?.focus()
-                    }}
-                  >
-                    <span>{starter.topic}</span>
-                    {starter.text}
-                    <ArrowUpRight size={16} aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
+              {starters.map((starter, index) => {
+                const Icon = STARTER_ICONS[index % STARTER_ICONS.length]
+                return (
+                  <li key={starter.text}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraft(starter.text)
+                        input.current?.focus()
+                      }}
+                    >
+                      <i className={`spark-starter__icon spark-starter__icon--${index % 4}`}>
+                        <Icon size={22} aria-hidden="true" />
+                      </i>
+                      <span>{starter.topic}</span>
+                      {starter.text}
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         ) : null}
         <div className="spark-turns">
           {turns.map((turn, index) => {
+            // while Retry or Regenerate runs, the pending block below stands in for this turn
+            if (turn.id === replacing && pending?.status === 'working') return null
             const shown = readPresentation(turn.response.presentation)
             return (
               <article className="spark-turn" key={turn.id}>
@@ -860,7 +1005,7 @@ function SparkConversation({ identity, history }: { identity: string; history: C
                       type="button"
                       className="spark-text-button"
                       disabled={busy}
-                      onClick={() => void send(turn.question)}
+                      onClick={() => void send(turn.question, [], 12, undefined, false, turn.id)}
                     >
                       Retry this request
                     </button>
@@ -900,7 +1045,9 @@ function SparkConversation({ identity, history }: { identity: string; history: C
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() => void send(turn.question, [], 12, turn.response.context)}
+                          onClick={() =>
+                            void send(turn.question, [], 12, turn.response.context, false, turn.id)
+                          }
                         >
                           <RotateCcw size={15} /> Regenerate
                         </button>
@@ -953,7 +1100,7 @@ function SparkConversation({ identity, history }: { identity: string; history: C
         </div>
       </div>
       <div className="spark-compose-wrap">
-        {away ? (
+        {away && turns.length ? (
           <button
             type="button"
             className="spark-jump"

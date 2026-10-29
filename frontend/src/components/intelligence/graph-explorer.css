@@ -85,7 +85,7 @@
 .gx-canvas svg {
   display: block;
   width: 100%;
-  height: clamp(340px, 40vw, 500px);
+  height: clamp(460px, 66vh, 760px);
   touch-action: none;
   cursor: grab;
 }
@@ -293,4 +293,71 @@
   .gx-legend__data {
     margin-left: 0;
   }
+}
+
+/* a calmer graph: relationship names show for the selected record's links or on hover, not on every line at once */
+.gx-edge text {
+  opacity: 0;
+  transition: opacity 140ms;
+  pointer-events: none;
+}
+.gx-edge.is-active text,
+.gx-edge:hover text {
+  opacity: 1;
+}
+.gx-edge path {
+  stroke-opacity: 0.55;
+  pointer-events: stroke;
+}
+.gx-edge.is-active path,
+.gx-edge:hover path {
+  stroke-opacity: 1;
+}
+
+.gx-canvas svg .gx-node {
+  cursor: grab;
+}
+.gx-canvas svg .gx-node:hover circle {
+  filter: drop-shadow(0 4px 10px rgb(0 117 106 / 35%));
+}
+
+.gx-cluster rect {
+  fill: rgb(0 117 106 / 4%);
+  stroke: #9db8a8;
+  stroke-width: 1.2;
+  stroke-dasharray: 5 5;
+}
+.gx-cluster text {
+  font:
+    600 12px Inter,
+    sans-serif;
+  letter-spacing: 0.02em;
+  fill: #4a6a5a;
+}
+.gx-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #e6ece7;
+  font-size: 12px;
+  color: #4a5e53;
+  background: #fbfcfa;
+}
+.gx-legend i {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 6px;
+  border: 2px solid;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+.gx-legend__links {
+  margin-left: auto;
+  color: #6a7c70;
+}
+.gx-node text {
+  font-size: 13px;
 }

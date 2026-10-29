@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.api.app_access import require_any_app, check_app_operation
+from app.question_catalog import SPARK_CATALOG
 from app.api.dependencies import (
     CommerceAgentDep, Graph, OrdersSvc, Parts, current_user, get_agent, get_question_service, require,
 )
@@ -50,6 +51,12 @@ def used_profile(plan: SparkPlan, message: str, profile: dict | None) -> list[st
     norm = lambda s: "".join(ch for ch in s.casefold() if ch.isalnum())  # noqa: E731
     return [f"machine {m}" for m in [profile.get("preferred_machine"), *(profile.get("machines") or [])]
             if m and norm(m) in norm(plan.shopping) and norm(m) not in norm(message)][:1]
+
+
+@router.get("/catalog")
+def catalog() -> list[dict]:
+    """The catalogue of example questions shown beside the conversation, grouped by topic."""
+    return SPARK_CATALOG
 
 
 @router.post("/conversation", response_model=SparkResponse)

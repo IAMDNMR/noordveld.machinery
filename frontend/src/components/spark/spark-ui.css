@@ -1048,3 +1048,742 @@
   font-size: 11px;
   opacity: 0.8;
 }
+
+/* ---- mockup refresh: mascot sidebar, staged welcome ---- */
+.spark-sidebar__brand a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.spark-sidebar__brand a b {
+  font-weight: 650;
+}
+.spark-sidebar__brand a b span {
+  display: block;
+  margin: 0;
+}
+.spark-sidebar__brand a .spark-logo {
+  flex-shrink: 0;
+  height: auto;
+}
+.spark-sidebar__description {
+  font-size: 13px;
+}
+.spark-history-item > button > time {
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 11.5px;
+  color: var(--sp-muted);
+  font-variant-numeric: tabular-nums;
+}
+.spark-history-item:hover > button > time,
+.spark-history-item:focus-within > button > time {
+  visibility: hidden;
+}
+.spark-sidebar__footer {
+  border-top: 0;
+  padding: 12px 0 0;
+}
+.spark-sidebar__footer a.spark-discover {
+  display: block;
+  padding: 14px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+  color: var(--sp-ink-2);
+  box-shadow: var(--sp-shadow-1);
+}
+.spark-discover strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--sp-teal-900);
+}
+.spark-discover span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--sp-muted);
+}
+
+.spark-welcome {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100% - 40px, 960px);
+  margin: 0 auto 24px;
+  padding-top: clamp(16px, 4vh, 40px);
+  text-align: center;
+  isolation: isolate;
+}
+.spark-welcome__scene {
+  position: absolute;
+  inset: -40px -20vw auto;
+  z-index: -1;
+  width: auto;
+  height: 420px;
+  object-fit: cover;
+  opacity: 0.11;
+  filter: saturate(0.4);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(70% 85% at 50% 40%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(70% 85% at 50% 40%, #000 20%, transparent 78%);
+}
+.spark-welcome__stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: min(100%, 640px);
+  height: 190px;
+}
+.spark-welcome__logo {
+  height: auto;
+  filter: drop-shadow(0 18px 24px rgb(42 157 143 / 25%));
+}
+.spark-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-2);
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--sp-ink-2);
+}
+.spark-chip svg {
+  color: var(--sp-teal-600);
+}
+.spark-chip--parts {
+  left: 6%;
+  top: 22px;
+}
+.spark-chip--machines {
+  left: 0;
+  top: 100px;
+}
+.spark-chip--service {
+  right: 6%;
+  top: 22px;
+}
+.spark-chip--orders {
+  right: 0;
+  top: 100px;
+}
+.spark-welcome .spark-kicker {
+  justify-content: center;
+  margin: 6px 0 4px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+}
+.spark-welcome h2 {
+  max-width: none;
+  margin-bottom: 12px;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+.spark-welcome h2 em,
+#main.site-premium .spark-welcome h2 em {
+  font: inherit !important;
+  font-style: normal !important;
+  color: var(--sp-teal-600);
+}
+.spark-welcome > p:not(.spark-kicker) {
+  max-width: 50ch;
+  font-size: 16px;
+}
+.spark-starters {
+  width: 100%;
+  margin-top: 28px;
+  text-align: left;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.spark-starters button {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-areas: 'icon topic' 'icon text';
+  column-gap: 16px;
+  align-content: center;
+  padding: 14px 44px 14px 14px;
+  min-height: 92px;
+  color: var(--sp-ink-2);
+}
+.spark-starters button span {
+  grid-area: topic;
+  align-self: end;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0;
+  color: var(--sp-ink);
+}
+.spark-starters button .spark-starter__icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  font-style: normal;
+  background: var(--sp-teal-100);
+  color: var(--sp-teal-700);
+}
+.spark-starter__icon--1 {
+  background: #dfe9f3 !important;
+  color: #3a6a96 !important;
+}
+.spark-starter__icon--2 {
+  background: #fbebd9 !important;
+  color: #b0661a !important;
+}
+.spark-starter__icon--3 {
+  background: #e4e6f6 !important;
+  color: #4a55a8 !important;
+}
+.spark-starters button svg:last-child {
+  top: 50%;
+  right: 16px;
+  margin-top: -8px;
+  color: var(--sp-ink-2);
+}
+.spark-starters button:hover svg:last-child {
+  transform: translateX(2px);
+}
+.spark-starters button .spark-starter__icon svg {
+  position: static;
+  margin: 0;
+  color: inherit;
+  transform: none;
+}
+.spark-starters button {
+  grid-template-rows: auto auto;
+}
+.spark-compose-note {
+  text-align: center;
+}
+@media (max-width: 760px) {
+  .spark-welcome__stage {
+    height: 150px;
+  }
+  .spark-chip {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .spark-chip--parts {
+    left: 0;
+    top: 6px;
+  }
+  .spark-chip--machines {
+    left: 0;
+    top: 78px;
+  }
+  .spark-chip--service {
+    right: 0;
+    top: 6px;
+  }
+  .spark-chip--orders {
+    right: 0;
+    top: 78px;
+  }
+  .spark-welcome__scene {
+    inset: -20px -30vw auto;
+    height: 300px;
+  }
+  .spark-starters {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The part dialog scrolls on its own: its tab bar pins to the dialog's top, not below the site header. */
+.spark-part-dialog {
+  --dialog-pad: 24px;
+}
+.spark-part-dialog .pw {
+  padding-top: 0;
+}
+.spark-part-dialog .spark-dialog-close {
+  margin-bottom: -8px;
+}
+.spark-part-dialog .pi-tabs {
+  top: calc(var(--dialog-pad) * -1);
+  padding-top: var(--dialog-pad);
+  margin-top: 0;
+}
+@media (max-width: 640px) {
+  .spark-part-dialog {
+    --dialog-pad: 14px;
+  }
+}
+
+/* ---- conversation backdrop: a glow, an engineering dot grid that wakes green under the cursor ---- */
+@property --dot-color {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: rgb(13 59 54 / 12%);
+}
+@property --mx {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: -400px;
+}
+@property --my {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: -400px;
+}
+@property --reach {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+.wf.spark-workspace > .spark-glow {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  --scroll-y: 0;
+  --dot-size: 26px;
+  transition: --dot-color 600ms ease-out;
+  background-color: var(--sp-paper);
+  background-image:
+    radial-gradient(60% 45% at 88% 0%, rgb(42 157 143 / 14%), transparent 70%),
+    radial-gradient(50% 40% at 6% 100%, rgb(0 117 106 / 9%), transparent 70%),
+    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 1.6px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    var(--dot-size) var(--dot-size);
+  background-position:
+    0 0,
+    0 0,
+    0 calc(var(--scroll-y) * -0.5px);
+}
+.wf.spark-workspace > .spark-thread {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+.spark-workspace.is-scrolling > .spark-glow {
+  --dot-color: rgb(0 168 120 / 55%);
+  transition-duration: 120ms;
+}
+/* green dots, visible only in a soft circle around the pointer; the circle follows it and swells while pressed */
+.spark-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, #00a878 1.3px, transparent 2px);
+  background-size: var(--dot-size) var(--dot-size);
+  background-position: 0 calc(var(--scroll-y) * -0.5px);
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(
+    circle var(--reach) at var(--mx) var(--my),
+    #000 0,
+    transparent 100%
+  );
+  mask-image: radial-gradient(circle var(--reach) at var(--mx) var(--my), #000 0, transparent 100%);
+  transition:
+    --mx 90ms linear,
+    --my 90ms linear,
+    --reach 260ms var(--sp-ease),
+    opacity 200ms;
+}
+.spark-workspace.is-hot .spark-glow::after {
+  opacity: 1;
+  --reach: 150px;
+}
+.spark-workspace.is-hot.is-pressed .spark-glow::after {
+  --reach: 280px;
+}
+.spark-workspace:has(.spark-turn) > .spark-glow {
+  background-image:
+    radial-gradient(60% 45% at 88% 0%, rgb(42 157 143 / 18%), transparent 70%),
+    radial-gradient(50% 40% at 6% 100%, rgb(0 117 106 / 11%), transparent 70%),
+    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 1.6px);
+}
+.spark-workspace:has(.spark-thread[aria-busy='true']) > .spark-glow {
+  animation: sp-glow 2.6s ease-in-out infinite alternate;
+}
+@keyframes sp-glow {
+  to {
+    filter: hue-rotate(-12deg) brightness(1.03);
+  }
+}
+@media (max-width: 1000px) {
+  .wf.spark-workspace > .spark-glow {
+    grid-column: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spark-glow,
+  .spark-glow::after {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* the composer sits on the same backdrop as the conversation, not on a band of its own */
+.wf.spark-workspace > .spark-glow {
+  grid-row: 2 / 4;
+}
+.wf.spark-workspace > .spark-compose-wrap {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* ---- topic chips: click one to see questions for it, click a question to put it in the box ---- */
+.spark-chip {
+  border: 1px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  transition:
+    transform var(--sp-base) var(--sp-ease),
+    box-shadow var(--sp-base),
+    border-color var(--sp-fast),
+    background-color var(--sp-fast),
+    color var(--sp-fast);
+  animation: sp-bob 5s ease-in-out infinite;
+}
+.spark-chip--machines {
+  animation-delay: -1.2s;
+}
+.spark-chip--service {
+  animation-delay: -2.4s;
+}
+.spark-chip--orders {
+  animation-delay: -3.6s;
+}
+@keyframes sp-bob {
+  50% {
+    translate: 0 -5px;
+  }
+}
+.spark-chip:hover {
+  transform: scale(1.06);
+  border-color: var(--sp-turquoise);
+  box-shadow: 0 10px 28px rgb(0 168 120 / 22%);
+}
+.spark-chip.is-open {
+  background: var(--sp-teal-600);
+  color: #fff;
+  animation-play-state: paused;
+  box-shadow: 0 10px 30px rgb(0 117 106 / 35%);
+}
+.spark-chip.is-open svg {
+  color: #fff;
+}
+.spark-chip-panel {
+  position: absolute;
+  top: 178px;
+  left: 50%;
+  z-index: 4;
+  width: min(100%, 600px);
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-lg);
+  background: rgb(255 255 255 / 96%);
+  box-shadow: var(--sp-shadow-2);
+  text-align: left;
+  translate: -50% 0;
+  transform-origin: top center;
+  animation: sp-pop 220ms var(--sp-ease);
+}
+@keyframes sp-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+.spark-chip-panel section + section {
+  margin-top: 12px;
+}
+.spark-chip-panel h3 {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sp-teal-700);
+}
+.spark-chip-panel ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.spark-chip-panel li button {
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--sp-r-sm);
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--sp-ink-2);
+  transition:
+    background-color var(--sp-fast),
+    padding-left var(--sp-fast);
+}
+.spark-chip-panel li button:hover,
+.spark-chip-panel li button:focus-visible {
+  padding-left: 18px;
+  background: var(--sp-teal-50);
+  color: var(--sp-teal-900);
+}
+@media (max-width: 760px) {
+  .spark-chip-panel {
+    top: 150px;
+    max-height: 260px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spark-chip,
+  .spark-chip-panel {
+    animation: none;
+  }
+}
+
+/* ---- catalog in the sidebar: always there, whatever the conversation ---- */
+.spark-bank {
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-1);
+}
+.spark-bank > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--sp-teal-900);
+  cursor: pointer;
+  list-style: none;
+}
+.spark-bank > summary::-webkit-details-marker {
+  display: none;
+}
+.spark-bank > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 2px solid currentcolor;
+  border-bottom: 2px solid currentcolor;
+  transform: rotate(45deg);
+  transition: transform var(--sp-fast);
+}
+.spark-bank[open] > summary::after {
+  transform: rotate(-135deg);
+}
+.spark-bank__list {
+  max-height: min(46vh, 380px);
+  overflow-y: auto;
+  padding: 0 8px 10px;
+  border-top: 1px solid var(--sp-line);
+}
+.spark-bank__list h3 {
+  margin: 12px 6px 4px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sp-teal-700);
+}
+.spark-bank__list button {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: var(--sp-r-sm);
+  background: transparent;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--sp-ink-2);
+}
+.spark-bank__list button:hover {
+  background: var(--sp-teal-50);
+  color: var(--sp-teal-900);
+}
+
+/* five topic chips: three down the left, two down the right */
+.spark-chip--parts {
+  left: 2%;
+  top: 4px;
+}
+.spark-chip--machines {
+  left: 0;
+  top: 66px;
+}
+.spark-chip--dealers {
+  left: 5%;
+  top: 128px;
+}
+.spark-chip--service {
+  right: 4%;
+  top: 22px;
+}
+.spark-chip--orders {
+  right: 0;
+  top: 94px;
+}
+@media (max-width: 760px) {
+  .spark-welcome__stage {
+    height: 170px;
+  }
+  .spark-chip--parts {
+    left: 0;
+    top: 0;
+  }
+  .spark-chip--machines {
+    left: 0;
+    top: 56px;
+  }
+  .spark-chip--dealers {
+    left: 0;
+    top: 112px;
+  }
+  .spark-chip--service {
+    right: 0;
+    top: 14px;
+  }
+  .spark-chip--orders {
+    right: 0;
+    top: 78px;
+  }
+}
+
+/* ---- shorter windows: the start screen scales down instead of cutting off ---- */
+@media (max-height: 800px) {
+  .spark-welcome {
+    padding-top: 6px;
+  }
+  .spark-welcome__stage {
+    height: 150px;
+  }
+  .spark-welcome__logo {
+    width: 84px;
+  }
+  .spark-chip {
+    padding: 7px 13px;
+    font-size: 12.5px;
+  }
+  .spark-chip--parts {
+    top: 0;
+  }
+  .spark-chip--machines {
+    top: 50px;
+  }
+  .spark-chip--dealers {
+    top: 100px;
+  }
+  .spark-chip--service {
+    top: 12px;
+  }
+  .spark-chip--orders {
+    top: 72px;
+  }
+  .spark-chip-panel {
+    top: 140px;
+    max-height: 250px;
+  }
+  .spark-welcome h2 {
+    margin-bottom: 8px;
+    font-size: clamp(26px, 5.6vh, 44px);
+  }
+  .spark-welcome > p:not(.spark-kicker) {
+    font-size: 14.5px;
+  }
+  .spark-starters {
+    margin-top: 18px;
+    gap: 10px;
+  }
+  .spark-starters button {
+    min-height: 74px;
+    grid-template-columns: 46px minmax(0, 1fr);
+    column-gap: 12px;
+    padding: 10px 40px 10px 12px;
+  }
+  .spark-starters button .spark-starter__icon {
+    width: 46px;
+    height: 46px;
+  }
+}
+@media (max-height: 640px) {
+  .spark-welcome__scene,
+  .spark-welcome > p:not(.spark-kicker) {
+    display: none;
+  }
+  .spark-welcome__stage {
+    height: 126px;
+  }
+  .spark-welcome__logo {
+    width: 66px;
+  }
+  .spark-chip--machines {
+    top: 44px;
+  }
+  .spark-chip--dealers {
+    top: 88px;
+  }
+  .spark-chip--orders {
+    top: 60px;
+  }
+  .spark-chip-panel {
+    top: 112px;
+    max-height: 190px;
+  }
+  .spark-welcome h2 {
+    font-size: 26px;
+  }
+  .spark-starters {
+    margin-top: 12px;
+    gap: 8px;
+  }
+  .spark-starters button {
+    min-height: 58px;
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+  .spark-starters button .spark-starter__icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+  .spark-starters button span {
+    font-size: 14px;
+  }
+  .spark-starters button {
+    font-size: 13px;
+  }
+}
+@media (max-height: 520px) {
+  .spark-welcome__stage {
+    display: none;
+  }
+}
+
+/* the question bubble hugs its text: no balanced wrapping that leaves empty space inside the bubble */
+.spark-workspace .spark-question,
+#main.site-premium .spark-workspace .spark-question {
+  width: fit-content;
+  text-wrap: wrap;
+  max-width: min(82%, 720px);
+}

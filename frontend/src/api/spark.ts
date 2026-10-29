@@ -95,3 +95,8 @@ export const sparkTranscribe = async (
   (await audioRequest('transcribe', blob, blob.type, signal)).json()
 export const sparkSpeak = async (text: string, signal?: AbortSignal) =>
   (await audioRequest('speak', JSON.stringify({ text }), 'application/json', signal)).blob()
+
+export type SparkCatalogGroup = { category: string; questions: string[] }
+/** The example questions, grouped by topic. They live in the backend, next to the data they were checked against. */
+export const sparkCatalog = (signal?: AbortSignal) =>
+  apiGet<SparkCatalogGroup[]>('/spark/catalog', {}, signal)

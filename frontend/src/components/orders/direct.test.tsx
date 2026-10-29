@@ -28,7 +28,7 @@ const stages = (states: string[]) =>
   STAGES.map((stage, i) => ({ stage, state: states[i] as 'done' }))
 
 const direct = (over: Partial<OrderDetail> = {}): OrderDetail => ({
-  order_id: 'HCME-ORD-000007',
+  order_id: 'NCME-ORD-000007',
   order_date: '2026-10-05',
   status: 'ALLOCATED',
   status_label: 'Stock allocated',
@@ -197,7 +197,7 @@ let posted: { url: string; body: Record<string, string> }[] = []
 function mount(
   me: Me,
   order: OrderDetail,
-  path = '/orders/HCME-ORD-000007',
+  path = '/orders/NCME-ORD-000007',
   afterAction?: OrderDetail,
 ) {
   posted = []
@@ -232,7 +232,7 @@ describe('direct order lifecycle screen', () => {
 
   it('shows the lifecycle as the server recorded it, with every stage and the order details', async () => {
     mount(jane, direct())
-    expect(await screen.findByRole('heading', { name: 'HCME-ORD-000007' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'NCME-ORD-000007' })).toBeTruthy()
     const stageList = within(screen.getByRole('region', { name: 'Order progress' }))
     expect(stageList.getAllByRole('listitem').map((li) => li.textContent)).toEqual([
       'Orderdone',
@@ -257,7 +257,7 @@ describe('direct order lifecycle screen', () => {
     expect(document.body.textContent).not.toMatch(/purchase request|quote request/i)
     cleanup() // once the line has shipped, its stock is no longer described as reserved
     mount(jane, direct({ lines: [{ ...direct().lines[0], allocation_status: 'SHIPPED' }] }))
-    expect(await screen.findByRole('heading', { name: 'HCME-ORD-000007' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'NCME-ORD-000007' })).toBeTruthy()
     expect(screen.queryByText('2 reserved')).toBeNull()
   })
 
@@ -277,14 +277,14 @@ describe('direct order lifecycle screen', () => {
       ],
     })
     mount(jane, direct(), undefined, after)
-    await screen.findByRole('heading', { name: 'HCME-ORD-000007' })
+    await screen.findByRole('heading', { name: 'NCME-ORD-000007' })
     expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual(
       expect.arrayContaining(['Start fulfilment', 'Release allocation', 'Cancel order']),
     )
     expect(screen.queryByRole('button', { name: 'Mark delivered' })).toBeNull() // not offered: not a valid next step
     fireEvent.click(screen.getByRole('button', { name: 'Start fulfilment' }))
     await waitFor(() => expect(posted.length).toBe(1))
-    expect(posted[0].url).toContain('/orders/HCME-ORD-000007/actions')
+    expect(posted[0].url).toContain('/orders/NCME-ORD-000007/actions')
     expect(posted[0].body).toEqual({ action: 'start_fulfilment', expected_status: 'ALLOCATED' })
     expect(await screen.findByRole('button', { name: 'Begin picking and packing' })).toBeTruthy() // the screen now shows what the server returned
     expect(screen.queryByRole('button', { name: 'Start fulfilment' })).toBeNull()

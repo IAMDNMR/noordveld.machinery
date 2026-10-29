@@ -442,7 +442,7 @@ The page formats the backend's contexts and holds no business data (the existing
 
 #### Questions about one part and about orders (also answered in the same place)
 * *Which machine uses this part?* (`PART_FITMENT`) and *Where did this part come from?* (`PART_ORIGIN`): `app/commerce/part_lookup.py` reads the fitment and approved-source records (a machine is listed only when a fitment record approves it; a source only when an approved-source record exists; anything not held is "not recorded", never a confirmed negative). The result carries the common contract (decision, evidence, evidence path, source records, confidence).
-* *Where is order HCME-ORD-000001?*: an order the shop placed is recognised, and the logistics reader reads its owner through the account that placed it (`PLACED_BY` → `ACTS_FOR` → customer) after the existing `ORDERED_BY` link, so a customer sees their own shop order. It reports the order, its lines and "no shipment recorded yet" when there is none.
+* *Where is order NCME-ORD-000001?*: an order the shop placed is recognised, and the logistics reader reads its owner through the account that placed it (`PLACED_BY` → `ACTS_FOR` → customer) after the existing `ORDERED_BY` link, so a customer sees their own shop order. It reports the order, its lines and "no shipment recorded yet" when there is none.
 
 #### Added in the Waterfall audit (see WATERFALL_TRACEABILITY.md)
 * **Potential routes (`ROUTE_OPTIONS`)**: "How long to ship to Lagos?", "Can you deliver to the USA?" with no shipment or order named. `app/commerce/route_options.py` reads the transport lanes the network records to a place (city, country or region; `network_routes()` on both logistics readers, one read-only query) and lists each route with its own days, cost and legs, fastest first. They are labelled potential routes: none is assigned to a shipment, and the numbers are the route records' own demonstration values. A place with no lane gets no route. A shipment or order number in the message always wins.
@@ -486,7 +486,7 @@ shows the state the API returns. Order state is read from AuraDB on every load.
 | Machine context | `OrderLine.machine_model` (and `CartLine.machine_model`) |
 | Cost | `part_cost`, `transport_cost`, `order_total` absent; `cost_status = NOT_AVAILABLE`. The freight figure is context only (`freight_estimate_*`, synthetic) |
 
-Order numbers are `HCME-ORD-000001`…, from one counter node (`OrderSequence`); `Order.idempotency_key` is unique, so a retried or double-submitted place-order creates one order.
+Order numbers are `NCME-ORD-000001`…, from one counter node (`OrderSequence`); `Order.idempotency_key` is unique, so a retried or double-submitted place-order creates one order.
 
 ### Availability, depot, transport
 * Stock is known only for `IN_STOCK` / `LOW_STOCK` rows that carry a quantity. `UNKNOWN` stays UNKNOWN: it is shown as unknown, is never read as zero, and is never allocated.

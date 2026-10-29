@@ -147,7 +147,7 @@ def main() -> int:
 
     def shop_order(r: list[dict], p: list[str]) -> None:
         x = r[0]["_data"]["contexts"].get("LOGISTICS")
-        need(r[0]["http"] == 200 and x is not None and x["order"]["order_id"] == "HCME-ORD-000001" and x["shipment"] is None, "F: the owner must see the shop order with no shipment", p)
+        need(r[0]["http"] == 200 and x is not None and x["order"]["order_id"] == "NCME-ORD-000001" and x["shipment"] is None, "F: the owner must see the shop order with no shipment", p)
         need(x is not None and x["order"].get("status") == "ALLOCATED" and len(x["order_lines"]) >= 1 and r[0]["sections"][0]["decision"] == "NO_SHIPMENT_RECORDED", "F: order status, lines and the no-shipment statement expected", p)
         need(r[1]["http"] == 403 and r[1]["_data"].get("error", {}).get("code") == "forbidden", "F: another customer must be refused", p)
         need(r[2]["http"] == 200 and r[2]["_data"]["visibility"]["LOGISTICS"]["role"] == "OEM", "F: the OEM must see the order", p)
@@ -175,7 +175,7 @@ def main() -> int:
     c_lars, c_anna, c_jane = client("lars"), client("anna"), client("jane")
     results, problems = [], []
     for c, name in ((c_lars, "lars"), (c_anna, "anna"), (c_jane, "jane")):
-        status, data, secs = post(c, {"message": "Where is order HCME-ORD-000001?", "state": {}})
+        status, data, secs = post(c, {"message": "Where is order NCME-ORD-000001?", "state": {}})
         results.append({"request": name, "http": status, "seconds": round(secs, 1), "intent": data.get("intent"), "status": data.get("status"),
                         "sections": [{"domain": x["domain"], "decision": x["decision"], "headline": x["headline"], "lines": x["lines"]} for x in data.get("answer", {}).get("sections", [])],
                         "answer": data.get("answer", {}).get("text"), "grounding": data.get("answer", {}).get("grounding"), "source_records": len(data.get("source_records", [])), "_data": data})
@@ -185,7 +185,7 @@ def main() -> int:
         problems.append(str(exc))
     for r in results:
         r.pop("_data")
-    run.flows.append({"flow": "F shop order: Where is order HCME-ORD-000001 (owner, another customer, OEM)", "user": "lars/anna/jane", "passed": not problems, "problems": problems, "turns": results})
+    run.flows.append({"flow": "F shop order: Where is order NCME-ORD-000001 (owner, another customer, OEM)", "user": "lars/anna/jane", "passed": not problems, "problems": problems, "turns": results})
     run.flow("G part questions: which machines use it, where it came from", "lars", [{"message": "Find a hydraulic pump for KFT-200."}, {"message": "Which machine uses this part?"}, {"message": "Where did this part come from?"}], part_questions)
 
     run.flow("H route options: Lagos, USA; Japan sea-vs-air for an OEM-visible shipment", "jane", [{"message": "How long to ship a hose to Lagos?"}, {"message": "Can you deliver to the USA?"}, {"message": "Compare sea and air for shipment SHP-NET-0001"}], route_options)

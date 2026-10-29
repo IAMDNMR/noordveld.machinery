@@ -200,11 +200,11 @@ AS_CHECKS: dict[str, Check] = {
     "Where is my shipment?": lambda r: (sec(r, "LOGISTICS").get("decision") not in (None, "NOT_FOUND") and "SHP-0010" in text(sec(r, "LOGISTICS")), f"{sec(r, 'LOGISTICS').get('headline')}"),
     "Which parts are in my shipment?": lambda r: (bool(sec(r, "LOGISTICS")) and not r.get("recommended"), f"{sec(r, 'LOGISTICS').get('headline')}"),
     "Show me my order.": lambda r: (bool(sec(r, "LOGISTICS")) and "anna" not in text(r).lower(), f"{sec(r, 'LOGISTICS').get('headline')}"),
-    "Has order HCME-ORD-000001 shipped?": lambda r: (sec(r, "LOGISTICS").get("decision") == ("NO_SHIPMENT_RECORDED" if not one("MATCH (:Order {order_id: 'HCME-ORD-000001'})-[:HAS_SHIPMENT]->(s) RETURN count(s)") else sec(r, "LOGISTICS").get("decision")), f"{sec(r, 'LOGISTICS').get('headline')}"),
+    "Has order NCME-ORD-000001 shipped?": lambda r: (sec(r, "LOGISTICS").get("decision") == ("NO_SHIPMENT_RECORDED" if not one("MATCH (:Order {order_id: 'NCME-ORD-000001'})-[:HAS_SHIPMENT]->(s) RETURN count(s)") else sec(r, "LOGISTICS").get("decision")), f"{sec(r, 'LOGISTICS').get('headline')}"),
     "Is this failed part covered by warranty?": lambda r: (sec(r, "WARRANTY").get("decision") in ("REQUIRES_CLARIFICATION",) or bool(r.get("clarification")), f"{sec(r, 'WARRANTY').get('headline')}"),
     "Is my warranty still active?": lambda r: (bool(sec(r, "WARRANTY")), f"{sec(r, 'WARRANTY').get('decision')}: {sec(r, 'WARRANTY').get('headline')}"),
     "Is claim CLM-G001 covered?": lambda r: (sec(r, "WARRANTY").get("decision") == "ELIGIBLE", f"{sec(r, 'WARRANTY').get('decision')}: {sec(r, 'WARRANTY').get('headline')}"),
-    "Find a hydraulic pump for my KFT-200 delivered to Aalborg, and has order HCME-ORD-000001 shipped?": lambda r: (fits(r, "KFT-200") and "HCME-ORD-000001" in text(sec(r, "LOGISTICS")), f"recommends {r.get('recommended')}; {sec(r, 'LOGISTICS').get('headline')}"),
+    "Find a hydraulic pump for my KFT-200 delivered to Aalborg, and has order NCME-ORD-000001 shipped?": lambda r: (fits(r, "KFT-200") and "NCME-ORD-000001" in text(sec(r, "LOGISTICS")), f"recommends {r.get('recommended')}; {sec(r, 'LOGISTICS').get('headline')}"),
     "I need a hydraulic pump for my KFT-200, and is claim CLM-G001 covered?": lambda r: (fits(r, "KFT-200") and sec(r, "WARRANTY").get("decision") == "ELIGIBLE", f"recommends {r.get('recommended')}; warranty {sec(r, 'WARRANTY').get('decision')}"),
     "I need a replacement hydraulic pump urgently. Is the failed one covered by warranty and how quickly can I get a replacement?": lambda r: (no_rec(r) and bool(sec(r, "WARRANTY")), f"state {r['state']}; asks: {str(r.get('question'))[:80]}; warranty {sec(r, 'WARRANTY').get('decision')}"),
 }

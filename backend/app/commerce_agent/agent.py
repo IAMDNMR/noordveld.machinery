@@ -56,7 +56,7 @@ FOLLOW_UP = re.compile(r"\b(this|that|it|its|they|them|these|those|status|why|fa
 
 PATTERNS = {
     "shipment_id": re.compile(r"\bSHP-(?:NET-)?\d{4}\b", re.IGNORECASE),
-    "order_id": re.compile(r"\b(?:[A-Z]{2,6}-)?ORD-?(?:NET-)?\d{3,8}\b", re.IGNORECASE),  # ORD-0001, ORD-NET-0001, a shop order (HCME-ORD-000001) and a Spark order (NM-ORD006)
+    "order_id": re.compile(r"\b(?:[A-Z]{2,6}-)?ORD-?(?:NET-)?\d{3,8}\b", re.IGNORECASE),  # ORD-0001, ORD-NET-0001, a shop order (NCME-ORD-000001) and a Spark order (NM-ORD006)
     "claim_id": re.compile(r"\bCLM-[A-Z0-9]+(?:-\d+)?\b", re.IGNORECASE),
     "machine_instance_id": re.compile(r"\bMI-[A-Z]?\d{3,4}\b", re.IGNORECASE),
     "part_id": re.compile(r"\bPRT-\d{3}\b", re.IGNORECASE),
