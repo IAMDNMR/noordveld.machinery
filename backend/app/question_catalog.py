@@ -172,7 +172,7 @@ SPARK_CATALOG: list[dict] = [
   {
     "category": "Price, budget and stock",
     "questions": [
-      "Can I get the general purpose bucket (1.2 m³) for my NV-4500 for under €2,200?",
+      "Can I get the general purpose bucket for my NV-4500 for under €2,200?",
       "Is the front brake pad set for my NV-3200 in stock, and how much does it cost?",
       "Which machines does the 12V 100Ah battery NVM-1070-EL fit, and who supplies it?",
       "Which depot has the most NVM-1010-CL radiators in stock right now?"
@@ -219,7 +219,7 @@ SPARK_CATALOG: list[dict] = [
     "questions": [
       "What are the specifications of the piston pump NVM-1060-HY?",
       "Where does the data on the gear pump NVM-1050-HY come from?",
-      "Compare the 13mm and the 19mm high-pressure hoses.",
+      "Compare the 13mm and the 19mm high-pressure hoses for my NV-4500.",
       "Which filters does the NV-6000 use?",
       "Which parts are on backorder right now?"
     ]
