@@ -80,3 +80,335 @@
     transform: none;
   }
 }
+
+/* The commerce story opens the page: the idea first, as a film and a four-step timeline, then the product. */
+.sp-evolution {
+  padding: calc(var(--nav-height, 72px) + 48px) 0 56px;
+  background:
+    radial-gradient(50% 60% at 15% 0%, rgb(42 157 143 / 22%), transparent 70%),
+    radial-gradient(40% 50% at 95% 100%, rgb(0 117 106 / 25%), transparent 70%), #0b2b27;
+  color: #e8f3f0;
+}
+.sp-evolution__head {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  text-align: center;
+  margin-bottom: 36px;
+}
+.sp-evolution .sp-product-name {
+  color: #8fe0d3;
+}
+.sp-evolution .sp-display {
+  color: #fff;
+  font-size: clamp(34px, 4.2vw, 58px);
+}
+.sp-evolution .sp-display span {
+  color: #8fe0d3;
+}
+.sp-evolution__film {
+  width: min(100%, 980px);
+  margin: 0 auto;
+}
+.sp-evolution__film video {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgb(143 224 211 / 25%);
+  box-shadow:
+    0 0 0 8px rgb(255 255 255 / 4%),
+    0 30px 80px rgb(0 0 0 / 45%);
+}
+.sp-evolution__film figcaption {
+  display: none;
+}
+.sp-stages {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  margin: 52px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sp-stages::before,
+.sp-stages::after {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: 12.5%;
+  height: 2px;
+  border-radius: 2px;
+}
+.sp-stages::before {
+  width: 75%;
+  background: rgb(255 255 255 / 14%);
+}
+.sp-stages::after {
+  width: 75%;
+  background: linear-gradient(90deg, #4fb3a6, #8fe0d3);
+  transform-origin: left;
+  animation: sp-stage-line 2.4s var(--sp-ease, ease-out) 0.4s both;
+}
+@keyframes sp-stage-line {
+  from {
+    transform: scaleX(0);
+  }
+}
+.sp-stages li {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+  animation: sp-stage-in 600ms ease-out both;
+  animation-delay: calc(0.3s + var(--i) * 0.45s);
+}
+@keyframes sp-stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.sp-stages__dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #12403a;
+  border: 2px solid #4fb3a6;
+  font-weight: 650;
+  color: #8fe0d3;
+}
+.sp-stages strong {
+  font-size: 15px;
+  color: #fff;
+}
+.sp-stages p {
+  max-width: 24ch;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b7d3cd;
+}
+.sp-stages .is-now .sp-stages__dot {
+  width: 52px;
+  height: 52px;
+  margin-top: -4px;
+  background: #fff;
+  border-color: #8fe0d3;
+  box-shadow: 0 0 0 6px rgb(143 224 211 / 22%);
+}
+.sp-stages .is-now strong {
+  color: #8fe0d3;
+}
+.sp-evolution__next {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  color: #8fe0d3;
+}
+#main.site-premium .sp-hero {
+  padding-top: 64px;
+}
+@media (max-width: 900px) {
+  .sp-evolution {
+    padding: calc(var(--nav-height, 72px) + 28px) 0 36px;
+  }
+  .sp-stages {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding-left: 8px;
+  }
+  .sp-stages::before,
+  .sp-stages::after {
+    top: 22px;
+    left: 29px;
+    width: 2px;
+    height: calc(100% - 44px);
+  }
+  .sp-stages::after {
+    transform-origin: top;
+    animation-name: sp-stage-line-y;
+  }
+  .sp-stages li {
+    grid-template-columns: 44px 1fr;
+    justify-items: start;
+    text-align: left;
+    column-gap: 14px;
+  }
+  .sp-stages__dot {
+    grid-row: span 2;
+  }
+  .sp-stages p {
+    max-width: none;
+  }
+}
+@keyframes sp-stage-line-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-stages::after,
+  .sp-stages li {
+    animation: none;
+  }
+}
+
+/* Timeline, step by step: the line runs from one circle to the next, and each circle fills white as the line reaches it. */
+.sp-stages::before,
+.sp-stages::after {
+  display: none;
+}
+.sp-stages li {
+  --t: calc(0.4s + var(--i) * 1.1s);
+  animation: sp-stage-in 500ms ease-out both;
+  animation-delay: calc(var(--t) - 0.3s);
+}
+.sp-stages li:not(:last-child)::before,
+.sp-stages li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: calc(50% + 30px);
+  width: calc(100% + 20px - 60px);
+  height: 2px;
+  border-radius: 2px;
+}
+.sp-stages li:not(:last-child)::before {
+  background: rgb(255 255 255 / 14%);
+}
+.sp-stages li:not(:last-child)::after {
+  background: linear-gradient(90deg, #8fe0d3, #fff);
+  transform-origin: left;
+  animation: sp-stage-line 0.8s ease-in-out both;
+  animation-delay: calc(var(--t) + 0.4s);
+}
+.sp-stages li .sp-stages__dot {
+  animation: sp-dot-fill 0.45s ease-out both;
+  animation-delay: var(--t);
+}
+.sp-stages li:first-child .sp-stages__dot {
+  animation-delay: 0.4s;
+}
+.sp-stages li:not(:first-child) .sp-stages__dot {
+  animation-delay: calc(var(--t) - 0.25s);
+}
+@keyframes sp-dot-fill {
+  to {
+    background: #fff;
+    border-color: #fff;
+    color: #0b2b27;
+    box-shadow: 0 0 0 6px rgb(255 255 255 / 16%);
+  }
+}
+.sp-stages .is-now .sp-stages__dot {
+  animation: none;
+}
+@media (max-width: 900px) {
+  .sp-stages li:not(:last-child)::before,
+  .sp-stages li:not(:last-child)::after {
+    top: 52px;
+    left: 21px;
+    width: 2px;
+    height: calc(100% + 22px - 60px);
+  }
+  .sp-stages li:not(:last-child)::after {
+    background: linear-gradient(180deg, #8fe0d3, #fff);
+    transform-origin: top;
+    animation-name: sp-stage-line-y;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-stages li .sp-stages__dot,
+  .sp-stages li::after {
+    animation: none;
+  }
+  .sp-stages li .sp-stages__dot {
+    background: #fff;
+    color: #0b2b27;
+  }
+}
+
+/* captions under the films on dark bands: readable, with a clearer hierarchy */
+#main.site-premium :is(.sp-hero, .sp-reels) .sp-film figcaption {
+  gap: 8px;
+  padding-top: 18px;
+}
+#main.site-premium :is(.sp-hero, .sp-reels) .sp-film figcaption > span {
+  justify-self: start;
+  padding: 3px 10px;
+  border: 1px solid rgb(143 224 211 / 40%);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8fe0d3;
+}
+#main.site-premium :is(.sp-hero, .sp-reels) .sp-film figcaption > strong {
+  font-size: 20px;
+  color: #fff;
+}
+#main.site-premium :is(.sp-hero, .sp-reels) .sp-film figcaption > p {
+  font-size: 14px;
+  color: #cfe3de;
+}
+
+/* the films band: the film and its explanation side by side, centred on each other */
+.sp-reels__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 56px;
+  align-items: center;
+}
+.sp-reels__copy {
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
+#main.site-premium .sp-reels .sp-text-link {
+  color: #8fe0d3;
+}
+.sp-reels__copy .sp-body {
+  max-width: 42ch;
+}
+
+/* the closing call to action: one centred column, the button as the focus */
+.sp-close__center {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  text-align: center;
+  padding: 20px 0;
+}
+.sp-close__center .sp-body {
+  margin: 0;
+  max-width: 46ch;
+}
+.sp-close__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  margin-top: 6px;
+  padding: 0 32px;
+  font-size: 16px;
+}
+.sp-close__legal {
+  max-width: 60ch;
+  margin-top: 14px;
+  color: #6a7c70;
+}
+.sp-close__center .sp-small {
+  max-width: none;
+}
+@media (max-width: 900px) {
+  .sp-reels__layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}

@@ -501,7 +501,7 @@ def test_a_question_about_a_part_with_no_part_to_refer_to_asks_which_and_does_no
 def test_an_order_placed_in_the_shop_is_recognised_and_reads_its_owner_through_the_account_that_placed_it():
     from app.graph.queries import logistics as q
 
-    assert extract_references("Where is order HCME-ORD-000001?", ENGINE.discovery) == {"order_id": "HCME-ORD-000001"}
+    assert extract_references("Where is order NCME-ORD-000001?", ENGINE.discovery) == {"order_id": "NCME-ORD-000001"}
     assert "PLACED_BY" in q.ORDER and "ACTS_FOR" in q.ORDER and q.ORDER.index("ORDERED_BY") < q.ORDER.index("PLACED_BY")  # a customer order link still comes first
     r = ask("Where is order ORD-NET-0001?", customer("CUS-009"))
     assert r["status"] == "REQUIRES_CLARIFICATION" and r["clarification"]["domain"] == "LOGISTICS"

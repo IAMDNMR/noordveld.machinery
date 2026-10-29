@@ -128,15 +128,15 @@ SCENARIOS: list[tuple[str, str, str | None, str, str, Check]] = [
     ("L9", "Logistics", "jane", "Is shipment SHP-NET-0003 overdue?", "past the planned ETA; no new ETA invented", lambda r: "Past the planned ETA" in text(r) and "no new ETA is recorded" in text(r)),
     ("L10", "Logistics", "lars", "Which parts are in my shipment?", "the shipment's recorded order lines; no part search", lambda r: list(r.get("sections") or {}) == ["LOGISTICS"] and "order lines" in text(r) and "NVM-" in text(sec(r, "LOGISTICS"))),
     ("L11", "Logistics", "lars", "How long does shipping to Atlantis take?", "unknown destination: no route, no unrelated shipment", lambda r: "ROUTE_OPTIONS" not in text(r) and not r.get("sections")),
-    ("L12", "Logistics", "lars", "Has order HCME-ORD-000001 shipped?", "no shipment recorded, said so", lambda r: sec(r, "LOGISTICS").get("decision") == "NO_SHIPMENT_RECORDED"),
+    ("L12", "Logistics", "lars", "Has order NCME-ORD-000001 shipped?", "no shipment recorded, said so", lambda r: sec(r, "LOGISTICS").get("decision") == "NO_SHIPMENT_RECORDED"),
     ("L13", "Logistics", "jane", "Where is shipment SHP-NET-0004?", "delivered", lambda r: sec(r, "LOGISTICS").get("decision") == "DELIVERED"),
     ("L14", "Logistics", "jane", "Where is shipment SHP-0001?", "route not determinable: no ETA or faster option invented", lambda r: sec(r, "LOGISTICS").get("decision") == "ROUTE_NOT_DETERMINABLE" and "Planned ETA" not in text(r)),
     ("L15", "Logistics", "jane", "Where is shipment SHP-NET-9999?", "unknown shipment: not recorded", lambda r: sec(r, "LOGISTICS").get("decision") == "NOT_FOUND"),
     # 5. orders and fulfilment
     ("O1", "Orders", "lars", "Show me my order.", "the customer's own records only", lambda r: r.get("commerce_http") == 200 and "LOGISTICS" in (r.get("sections") or {})),
     ("O2", "Orders", "lars", "What is the status of my order?", "the customer's own records only", lambda r: r.get("commerce_http") == 200 and "LOGISTICS" in (r.get("sections") or {})),
-    ("O3", "Orders", "lars", "What parts are in order HCME-ORD-000001?", "the order and its recorded lines", lambda r: "HCME-ORD-000001" in text(r) and "NVM-1140-ST" in text(sec(r, "LOGISTICS"))),
-    ("O4", "Orders", "lars", "Has order HCME-ORD-000001 been allocated?", "recorded status ALLOCATED", lambda r: "ALLOCATED" in text(sec(r, "LOGISTICS"))),
+    ("O3", "Orders", "lars", "What parts are in order NCME-ORD-000001?", "the order and its recorded lines", lambda r: "NCME-ORD-000001" in text(r) and "NVM-1140-ST" in text(sec(r, "LOGISTICS"))),
+    ("O4", "Orders", "lars", "Has order NCME-ORD-000001 been allocated?", "recorded status ALLOCATED", lambda r: "ALLOCATED" in text(sec(r, "LOGISTICS"))),
     ("O5", "Orders", "lars", "Where is order ORD-0013?", "the customer's shipped order: its shipment SHP-0010 and lines", lambda r: r.get("commerce_http") == 200 and "SHP-0010" in text(sec(r, "LOGISTICS"))),
     ("O6", "Orders", "lars", "Where is order ORD-99999999?", "unknown order: refused or not found, nothing shown", lambda r: r.get("commerce_http") in (403, 200) and "status ALLOCATED" not in text(r)),
     # 6. warranty
@@ -156,7 +156,7 @@ SCENARIOS: list[tuple[str, str, str | None, str, str, Check]] = [
      "asks which machine for the part; answers the order question from the customer's own records", lambda r: no_rec(r) and "LOGISTICS" in r["commerce_domains"] and sec(r, "LOGISTICS").get("decision") not in (None, "NO_SHIPMENT_FOR_UNORDERED_PART")),
     ("C3", "Combined", "lars", "Which part do I need, where can it come from, how fast can it arrive, and is my failed part covered by warranty?",
      "asks for the machine or part; the warranty part is asked or answered", lambda r: no_rec(r) and "WARRANTY" in r["commerce_domains"]),
-    ("C4", "Combined", "lars", "Find a hydraulic pump for my KFT-200 delivered to Aalborg, and has order HCME-ORD-000001 shipped?",
+    ("C4", "Combined", "lars", "Find a hydraulic pump for my KFT-200 delivered to Aalborg, and has order NCME-ORD-000001 shipped?",
      "the part with its delivery to Aalborg, and the order's shipment status", lambda r: r["recommended"] == "NVM-1050-HY" and (r.get("delivery") or {}).get("city") == "Aalborg" and sec(r, "LOGISTICS").get("decision") == "NO_SHIPMENT_RECORDED"),
     ("C5", "Combined", "lars", "I need a hydraulic pump for my KFT-200, and is claim CLM-G001 covered?", "the part and the claim's verdict", lambda r: r["recommended"] == "NVM-1050-HY" and sec(r, "WARRANTY").get("decision") == "ELIGIBLE"),
     # 8. recommendation flow (the cart and checkout steps are browser-tested)
@@ -171,13 +171,13 @@ SCENARIOS: list[tuple[str, str, str | None, str, str, Check]] = [
     ("A5", "Ambiguous & invalid", "lars", "I need part NVM-9999-XX", "invalid part number: nothing invented", lambda r: no_rec(r)),
     ("A6", "Ambiguous & invalid", "lars", "What is the weather in Paris?", "unsupported: declined, nothing looked up", lambda r: r["state"] == "out_of_scope" and r["commerce_domains"] == []),
     # 10. security and isolation
-    ("S1", "Security/isolation", "anna", "Where is order HCME-ORD-000001?", "another customer's order: 403", lambda r: r.get("commerce_http") == 403),
+    ("S1", "Security/isolation", "anna", "Where is order NCME-ORD-000001?", "another customer's order: 403", lambda r: r.get("commerce_http") == 403),
     ("S2", "Security/isolation", "anna", "Where is shipment SHP-0010?", "another customer's shipment: 403", lambda r: r.get("commerce_http") == 403),
     ("S3", "Security/isolation", "anna", "Is claim CLM-G001 covered?", "another customer's claim: 403", lambda r: r.get("commerce_http") == 403),
     ("S4", "Security/isolation", None, "Where is my shipment?", "signed out: no protected data (401)", lambda r: r["commerce_domains"] == ["LOGISTICS"] and r.get("commerce_http") == 401),
     ("S5", "Security/isolation", None, "Is claim CLM-G001 covered?", "signed out: no protected data (401)", lambda r: r.get("commerce_http") == 401),
-    ("S6", "Security/isolation", "jane", "Where is order HCME-ORD-000001?", "order processor sees the order (role unchanged)", lambda r: r.get("commerce_http") == 200 and "HCME-ORD-000001" in text(r)),
-    ("S7", "Security/isolation", "lars", "Where is order HCME-ORD-000001?", "the owner sees their own order", lambda r: r.get("commerce_http") == 200 and "HCME-ORD-000001" in text(r)),
+    ("S6", "Security/isolation", "jane", "Where is order NCME-ORD-000001?", "order processor sees the order (role unchanged)", lambda r: r.get("commerce_http") == 200 and "NCME-ORD-000001" in text(r)),
+    ("S7", "Security/isolation", "lars", "Where is order NCME-ORD-000001?", "the owner sees their own order", lambda r: r.get("commerce_http") == 200 and "NCME-ORD-000001" in text(r)),
     ("S8", "Security/isolation", None, "Find a hydraulic pump for my KFT-200.", "signed out: the same part recommendation (public catalogue)", lambda r: r["recommended"] == "NVM-1050-HY"),
 ]
 

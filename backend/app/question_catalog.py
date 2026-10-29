@@ -118,7 +118,7 @@ SHOPPING_CATALOG: list[dict] = [
   {
     "category": "Orders & shipments",
     "note": SIGN_IN,
-    "questions": ["Where is my shipment?", "Which parts are in my shipment?", "Show me my order.", "Has order HCME-ORD-000001 shipped?"],
+    "questions": ["Where is my shipment?", "Which parts are in my shipment?", "Show me my order.", "Has order NCME-ORD-000001 shipped?"],
   },
   {
     "category": "Warranty",
@@ -129,9 +129,106 @@ SHOPPING_CATALOG: list[dict] = [
     "category": "Combined questions",
     "note": "Parts are answered for everyone; the order and warranty parts need sign-in.",
     "questions": [
-      "Find a hydraulic pump for my KFT-200 delivered to Aalborg, and has order HCME-ORD-000001 shipped?",
+      "Find a hydraulic pump for my KFT-200 delivered to Aalborg, and has order NCME-ORD-000001 shipped?",
       "I need a hydraulic pump for my KFT-200, and is claim CLM-G001 covered?",
       "I need a replacement hydraulic pump urgently. Is the failed one covered by warranty and how quickly can I get a replacement?",
     ],
   },
+]
+
+
+# The Spark conversation's catalogue: what a buyer might ask, by topic. A question that names a machine names one the part fits
+# (checked against the fitment data), so each one returns an answer.
+SPARK_CATALOG: list[dict] = [
+  {
+    "category": "Graph and connections",
+    "questions": [
+      "Show me everything connected to the gear pump NVM-1050-HY: machines, supplier and depots.",
+      "Which parts do the NV-3200 and the NV-4500 have in common? Show it as a graph.",
+      "Which machines does the main lift cylinder NVM-1030-HY fit? Show it as a graph",
+      "Which parts connect the most machines? Show it as a graph",
+      "Show a graph of the dealers that stock the radiator NVM-1010-CL",
+      "Show the parts supplied by Nordhaven Stahlbau as a graph"
+    ]
+  },
+  {
+    "category": "Parts and fitment",
+    "questions": [
+      "I need a radiator for my NV-6000. Which part fits?",
+      "Does the secondary air filter NVM-1020-FL also fit the NV-4500?",
+      "Does the alternator NVM-1080-EL fit the NV-3200?",
+      "Which parts fit both the NV-4500 and the NV-6000?"
+    ]
+  },
+  {
+    "category": "Finding parts",
+    "questions": [
+      "Show me the brake parts for the NV-3200: pads, discs and caliper.",
+      "I need a starter motor for my NV-6000, preferably in stock.",
+      "Compare the general purpose bucket NVM-1010-AT and the high-tip bucket NVM-1020-AT for my NV-4500.",
+      "Which parts are low on stock right now?"
+    ]
+  },
+  {
+    "category": "Price, budget and stock",
+    "questions": [
+      "Can I get the general purpose bucket (1.2 m³) for my NV-4500 for under €2,200?",
+      "Is the front brake pad set for my NV-3200 in stock, and how much does it cost?",
+      "Which machines does the 12V 100Ah battery NVM-1070-EL fit, and who supplies it?",
+      "Which depot has the most NVM-1010-CL radiators in stock right now?"
+    ]
+  },
+  {
+    "category": "Delivery",
+    "questions": [
+      "How fast can I get a hydraulic oil cooler for my NV-6000 delivered to Almelo, and what’s the cheapest way?",
+      "If I order a gear pump for my KFT-200 today, can it reach Almelo by tomorrow?",
+      "What’s the cheapest way to deliver a front brake disc for my NV-4500 to Almelo if I can wait two days?",
+      "For the general purpose bucket for my NV-4500, which depot delivers fastest to Almelo, and how much more does it cost?"
+    ]
+  },
+  {
+    "category": "Ordering",
+    "questions": [
+      "Order one front brake pad set for my NV-3200 with the cheapest delivery to Almelo."
+    ]
+  },
+  {
+    "category": "Dealers and suppliers",
+    "questions": [
+      "Which dealers stock the gear pump NVM-1050-HY?",
+      "Show the parts supplied by Veldstra Hydraulics as a graph",
+      "Which parts does Noordland Machines stock? Show it as a graph",
+      "Which dealers and suppliers are in Germany?",
+      "Who supplies the alternator NVM-1080-EL, and which dealers stock it?",
+      "Show the dealers in Groningen",
+      "Show a graph of the suppliers in Germany and the parts they supply",
+      "How many dealers are connected to the starter motor NVM-1090-EL? Show it as a graph"
+    ]
+  },
+  {
+    "category": "Orders and tracking",
+    "questions": [
+      "Where is my last order right now?",
+      "Has my last order shipped yet, and when will it arrive?",
+      "Show my open orders and their delivery dates."
+    ]
+  },
+  {
+    "category": "Specifications and sources",
+    "questions": [
+      "What are the specifications of the piston pump NVM-1060-HY?",
+      "Where does the data on the gear pump NVM-1050-HY come from?",
+      "Compare the 13mm and the 19mm high-pressure hoses.",
+      "Which filters does the NV-6000 use?",
+      "Which parts are on backorder right now?"
+    ]
+  },
+  {
+    "category": "Warranty and service",
+    "questions": [
+      "The front brake caliper assembly on my NV-3200 failed after four months. Is it covered by warranty?",
+      "Is my last order covered by warranty?"
+    ]
+  }
 ]

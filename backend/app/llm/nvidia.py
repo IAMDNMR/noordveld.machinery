@@ -8,6 +8,7 @@ whole token budget thinking. Every failure becomes LLMUnavailable or LLMInvalidR
 
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 import time
 from typing import Any
@@ -21,6 +22,9 @@ from app.llm.structured import JSON_KINDS, MAX_OUTPUT_TOKENS, StructuredLLM, rec
 log = logging.getLogger("app.llm")
 ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions"
 TRANSIENT = (500, 502, 503, 504)
+# The hosted model sometimes stalls one request for 20-45 s that would have answered in 6-9 s. A second identical request is sent
+# when the first has not answered after HEDGE_AFTER seconds, and whichever answers first wins: the stall no longer sets the wait.
+HEDGE_AFTER = 12.0
 
 
 class NvidiaClient(StructuredLLM):
@@ -41,6 +45,32 @@ class NvidiaClient(StructuredLLM):
         )  # a large planner model needs more than a classifier does
 
     def _complete(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
+        pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+        try:
+            first = pool.submit(self._complete_once, kind, system, prompt, schema)
+            done, _ = concurrent.futures.wait([first], timeout=HEDGE_AFTER)
+            if done:
+                return first.result()
+            log.info("llm call provider=%s kind=%s outcome=hedged", self.name, kind)
+            second = pool.submit(self._complete_once, kind, system, prompt, schema)
+            pending = {first, second}
+            failure: BaseException | None = None
+            while pending:
+                done, pending = concurrent.futures.wait(
+                    pending, return_when=concurrent.futures.FIRST_COMPLETED
+                )
+                for future in done:
+                    if future.exception() is None:
+                        return future.result()
+                    failure = future.exception()
+            assert failure is not None
+            raise failure
+        finally:
+            pool.shutdown(wait=False)
+
+    def _complete_once(
+        self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None
+    ) -> str:
         body: dict[str, Any] = {
             "model": self._model,
             "messages": [
@@ -73,8 +103,15 @@ class NvidiaClient(StructuredLLM):
                 record(self.name, self._model, kind, started, "timeout", retries)
                 raise LLMUnavailable("timed out") from exc
             except httpx.HTTPError as exc:
-                if isinstance(exc, (httpx.RemoteProtocolError, httpx.ConnectError, httpx.ReadError)) and retries < 2:
-                    retries += 1  # a dropped connection is not a refusal: try the same request again
+                if (
+                    isinstance(
+                        exc, (httpx.RemoteProtocolError, httpx.ConnectError, httpx.ReadError)
+                    )
+                    and retries < 2
+                ):
+                    retries += (
+                        1  # a dropped connection is not a refusal: try the same request again
+                    )
                     time.sleep(2.0 * retries)
                     continue
                 record(

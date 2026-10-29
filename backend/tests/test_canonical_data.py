@@ -245,8 +245,8 @@ def test_shipments_without_a_determinable_route_are_flagged_not_invented():
 
 
 def test_app_written_records_are_not_in_the_canonical_files():
-    assert not any(r["order_id"].startswith("HCME-ORD") for r in rows("orders"))
-    assert not any(re.match(r"^HCME-ORD", r["order_id"]) for r in rows("order_lines"))
+    assert not any(r["order_id"].startswith("NCME-ORD") for r in rows("orders"))
+    assert not any(re.match(r"^NCME-ORD", r["order_id"]) for r in rows("order_lines"))
 
 
 def test_the_film_constants_and_city_coordinates_became_canonical_records():

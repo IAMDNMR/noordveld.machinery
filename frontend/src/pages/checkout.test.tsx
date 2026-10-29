@@ -150,7 +150,7 @@ const review: CheckoutReview = {
   },
 }
 const detail = {
-  order_id: 'HCME-ORD-000001',
+  order_id: 'NCME-ORD-000001',
   status: 'ALLOCATED',
   lines: [],
   shipments: [],

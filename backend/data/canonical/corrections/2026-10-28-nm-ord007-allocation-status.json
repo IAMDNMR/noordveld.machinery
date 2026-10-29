@@ -5,7 +5,7 @@
   "verified_read_only": {
     "on": "2026-10-28",
     "order": {"order_id": "NM-ORD007", "order_status": "COMPLETED", "allocation_status": "RESERVED", "line_allocation_statuses": ["SHIPPED"], "shipment": "SHP-NM-ORD007-1 (DELIVERED)"},
-    "other_app_orders": "HCME-ORD-000001..3 and NM-ORD004..006 are consistent (RESERVED with RESERVED lines, or RELEASED with RELEASED lines); NM-ORD007 is the only stale record.",
+    "other_app_orders": "NCME-ORD-000001..3 and NM-ORD004..006 are consistent (RESERVED with RESERVED lines, or RELEASED with RELEASED lines); NM-ORD007 is the only stale record.",
     "stock_effect": "None. Stock was already consumed at dispatch (on_hand and reserved reduced by the line quantity). RELEASE only touches lines still RESERVED, so the stale order status cannot release stock twice."
   },
   "cause_fixed_in_code": "app/graph/repositories/fulfilment.py: dispatch now runs MARK_ALLOCATION with status CONSUMED after CONSUME (tests/test_direct_order.py checks RESERVED -> CONSUMED -> CONSUMED).",

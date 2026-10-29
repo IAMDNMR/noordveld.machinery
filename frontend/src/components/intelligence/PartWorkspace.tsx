@@ -14,6 +14,7 @@ import { ComplianceTab, DealersTab, InventoryTab, SuppliersTab } from './tabs/Su
 
 export const TABS: readonly { id: PartTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
+  { id: 'graph', label: 'Graph Relationships' },
   { id: 'fitment', label: 'Machine & Fitment' },
   { id: 'related', label: 'Related Parts' },
   { id: 'assembly', label: 'Assembly / Components' },
@@ -21,7 +22,6 @@ export const TABS: readonly { id: PartTab; label: string }[] = [
   { id: 'dealers', label: 'Dealer / Location' },
   { id: 'inventory', label: 'Inventory / Availability' },
   { id: 'compliance', label: 'Compliance' },
-  { id: 'graph', label: 'Graph Relationships' },
   { id: 'provenance', label: 'Data & Provenance' },
   { id: 'insights', label: 'Intelligence / Insights' },
   { id: 'store', label: 'Parts Portal Action' },

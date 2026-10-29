@@ -87,6 +87,9 @@ account: self-contained question about the user's orders, shipments or warranty 
 Use multiple tools when the message actually asks for multiple things. A supplier question
 alone is intelligence, not shopping. The price or cost of a part is shopping (that tool reads the recorded
 price); the intelligence tool has no prices. Buying or comparing is shopping, not just part search.
+Delivery is shopping too: which depot or supplier delivers fastest, how long delivery takes, whether it can arrive by a date,
+the cheapest or fastest way to deliver, and how much more a faster option costs. Repeat the part, machine and destination in the
+shopping request. Use intelligence as well only when the message also asks which dealers, suppliers or warehouses hold or supply it.
 Resolve 'it', 'that part', 'the cheaper one', corrections and answers from recent conversation
 and offered records. Most recent explicit correction takes precedence. Preserve constraints
 unless the user changes them. Do not treat an earlier supplier question as an ongoing task

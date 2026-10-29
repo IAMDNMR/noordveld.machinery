@@ -44,6 +44,7 @@ function PartGraph({ partKey, onOpen }: { partKey: string; onOpen: (part: string
         <GraphExplorer
           view={view}
           onOpen={onOpen}
+          preferOne
           renderDetail={(node) =>
             node.kind !== 'PART' ? <NodeDetail key={node.id} nodeId={node.id} /> : null
           }

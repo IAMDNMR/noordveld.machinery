@@ -44,27 +44,82 @@ const LOOKS: Record<string, { fill: string; ink: string; icon: typeof Box }> = {
 }
 const fallback = { fill: '#e8ecef', ink: '#52646f', icon: Network }
 
+/** The one relationship type whose name the question mentions, else 'all'; the filter stays open for the rest. */
+function focusedRelation(view: GraphView, focus: string, preferOne: boolean) {
+  const text = focus.toLowerCase()
+  if (!text) return preferOne ? firstRelation(view) : 'all'
+  const noise = new Set([
+    'for',
+    'by',
+    'has',
+    'with',
+    'from',
+    'the',
+    'and',
+    'of',
+    'to',
+    'in',
+    'at',
+    'is',
+    'as',
+  ])
+  const scored = [...new Set(view.edges.map((edge) => edge.type))]
+    .map((type) => {
+      const words = type
+        .toLowerCase()
+        .split('_')
+        .filter((word) => word.length > 2 && !noise.has(word))
+        .map((word) => word.replace(/(ied|ies|ing|ed|es|s|y)$/, ''))
+        .filter((stem) => stem.length >= 3)
+      return { type, hits: words.filter((stem) => text.includes(stem)).length }
+    })
+    .filter((item) => item.hits > 0)
+    .sort((a, b) => b.hits - a.hits)
+  return scored.length === 1 || (scored[0] && scored[0].hits > (scored[1]?.hits ?? 0))
+    ? scored[0].type
+    : preferOne
+      ? firstRelation(view)
+      : 'all'
+}
+
+/** One relationship to start with: fitment when the records have it, else the most common type. */
+function firstRelation(view: GraphView) {
+  const counts = new Map<string, number>()
+  for (const edge of view.edges) counts.set(edge.type, (counts.get(edge.type) ?? 0) + 1)
+  if (counts.size < 2) return 'all'
+  const fitment = [...counts.keys()].find((type) => /fit|compat/i.test(type))
+  return fitment ?? [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]
+}
+
 export function GraphExplorer({
   view,
   onOpen,
   renderDetail,
   label = 'Relationships',
   allowExpand = true,
+  focus = '',
+  preferOne = false,
 }: {
   view: GraphView
   onOpen?: (part: string) => void
   renderDetail?: (node: GraphNode) => ReactNode
   label?: string
   allowExpand?: boolean
+  /** the question being answered: a relationship type it names (suppliers, depots…) is shown on its own at first */
+  focus?: string
+  /** start on a single relationship type instead of all of them (the filter still offers the rest) */
+  preferOne?: boolean
 }) {
   const svg = useRef<SVGSVGElement>(null)
   const expanded = useRef<HTMLDialogElement>(null)
   const marker = useId().replaceAll(':', '')
   const base = useMemo(() => graphPositions(view), [view])
   const [moves, setMoves] = useState<Record<string, Point>>({})
-  const [selectedId, setSelected] = useState(view.nodes[0]?.id ?? '')
-  const [relation, setRelation] = useState('all'),
+  const [box, setBox] = useState({ w: 1000, h: 620 })
+  const [picked, setSelected] = useState(view.nodes[0]?.id ?? '')
+  const [relation, setRelation] = useState(() => focusedRelation(view, focus, preferOne)),
     [search, setSearch] = useState('')
+  const [group, setGroup] = useState(() => '0')
   const [camera, setCamera] = useState(() => {
     const points = Object.values(base)
     if (!points.length) return { x: 0, y: 0, scale: 1 }
@@ -75,23 +130,91 @@ export function GraphExplorer({
     const scale = Math.min(1.5, 940 / (maxX - minX), 560 / (maxY - minY))
     return { scale, x: 500 - ((minX + maxX) / 2) * scale, y: 300 - ((minY + maxY) / 2) * scale }
   })
-  const drag = useRef<{ id: string | null; start: Point; origin: Point } | null>(null)
+  const drag = useRef<{
+    id: string | null
+    start: Point
+    origin: Point
+    /** records pulled along with the dragged one, and how strongly (direct links follow most) */
+    pulled: { id: string; origin: Point; weight: number }[]
+  } | null>(null)
   // the drawing is 1000 units wide; in a narrow column (the chat) it shrinks, so its text is enlarged to stay legible, capped so labels do not collide
   useEffect(() => {
     const el = svg.current
     if (!el || typeof ResizeObserver === 'undefined') return
+    // the drawing is measured in real pixels, so records and labels keep their size however wide the column is
     const ro = new ResizeObserver(([entry]) => {
-      const k = Math.min(1.8, Math.max(1, 1000 / Math.max(1, entry.contentRect.width)))
-      el.style.setProperty('--gx-k', k.toFixed(2))
+      const w = Math.round(entry.contentRect.width),
+        h = Math.round(entry.contentRect.height)
+      if (w > 0 && h > 0)
+        setBox((previous) => (previous.w === w && previous.h === h ? previous : { w, h }))
     })
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+  // the mouse wheel zooms toward the pointer
+  useEffect(() => {
+    const el = svg.current
+    if (!el) return
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault()
+      const ctm = el.getScreenCTM()
+      if (!ctm) return
+      const at = new DOMPoint(event.clientX, event.clientY).matrixTransform(ctm.inverse())
+      const factor = Math.exp(-event.deltaY * 0.0015)
+      setCamera((previous) => {
+        const scale = Math.max(0.25, Math.min(3, previous.scale * factor)),
+          ratio = scale / previous.scale
+        return {
+          scale,
+          x: at.x - (at.x - previous.x) * ratio,
+          y: at.y - (at.y - previous.y) * ratio,
+        }
+      })
+    }
+    el.addEventListener('wheel', wheel, { passive: false })
+    return () => el.removeEventListener('wheel', wheel)
+  }, [])
   const positions = { ...base, ...moves }
-  const selected = view.nodes.find((node) => node.id === selectedId)
   const byId = new Map(view.nodes.map((node) => [node.id, node]))
+  // separate groups of records (e.g. one availability state each) are shown one at a time, the largest first
+  const adjacency = new Map<string, Set<string>>()
+  for (const edge of view.edges) {
+    if (!adjacency.has(edge.source)) adjacency.set(edge.source, new Set())
+    if (!adjacency.has(edge.target)) adjacency.set(edge.target, new Set())
+    adjacency.get(edge.source)!.add(edge.target)
+    adjacency.get(edge.target)!.add(edge.source)
+  }
+  const groups: string[][] = []
+  const grouped = new Set<string>()
+  for (const node of view.nodes) {
+    if (grouped.has(node.id) || !adjacency.has(node.id)) continue
+    const members = [node.id]
+    grouped.add(node.id)
+    for (let k = 0; k < members.length; k++)
+      for (const next of adjacency.get(members[k]) ?? [])
+        if (!grouped.has(next)) {
+          grouped.add(next)
+          members.push(next)
+        }
+    groups.push(members)
+  }
+  groups.sort((a, b) => b.length - a.length)
+  const groupName = (members: string[]) => {
+    const hub = members.reduce((a, b) =>
+      (adjacency.get(b)?.size ?? 0) > (adjacency.get(a)?.size ?? 0) ? b : a,
+    )
+    return `${byId.get(hub)?.label ?? 'Group'} · ${members.length} records`
+  }
+  const chosen = group === 'all' || !groups[Number(group)] ? null : new Set(groups[Number(group)])
+  // the selected record stays inside the group on show
+  const selectedId = chosen && !chosen.has(picked) ? [...chosen][0] : picked
+  const selected = view.nodes.find((node) => node.id === selectedId)
   const types = [...new Set(view.edges.map((edge) => edge.type))].sort()
-  const edges = view.edges.filter((edge) => relation === 'all' || edge.type === relation)
+  const edges = view.edges.filter(
+    (edge) =>
+      (relation === 'all' || edge.type === relation) &&
+      (!chosen || (chosen.has(edge.source) && chosen.has(edge.target))),
+  )
   const matches = new Set(
     view.nodes
       .filter((node) => node.label.toLowerCase().includes(search.toLowerCase()))
@@ -109,9 +232,10 @@ export function GraphExplorer({
   const displayedIds = new Set(displayedEdges.flatMap((edge) => [edge.source, edge.target]))
   const nodes = view.nodes.filter(
     (node) =>
-      (relation === 'all' && !search) ||
-      displayedIds.has(node.id) ||
-      (search && matches.has(node.id)),
+      (!chosen || chosen.has(node.id)) &&
+      ((relation === 'all' && !search) ||
+        displayedIds.has(node.id) ||
+        (search && matches.has(node.id))),
   )
   const connected = displayedEdges.filter(
     (edge) => edge.source === selectedId || edge.target === selectedId,
@@ -129,10 +253,31 @@ export function GraphExplorer({
     event.stopPropagation()
     if (id) setSelected(id)
     svg.current?.setPointerCapture(event.pointerId)
+    // dragging a record pulls what is linked to it: neighbours follow closely, their neighbours more loosely
+    const pulled: { id: string; origin: Point; weight: number }[] = []
+    if (id) {
+      const near = new Set<string>()
+      for (const edge of displayedEdges) {
+        if (edge.source === id) near.add(edge.target)
+        if (edge.target === id) near.add(edge.source)
+      }
+      const far = new Set<string>()
+      for (const edge of displayedEdges) {
+        if (near.has(edge.source) && edge.target !== id && !near.has(edge.target))
+          far.add(edge.target)
+        if (near.has(edge.target) && edge.source !== id && !near.has(edge.source))
+          far.add(edge.source)
+      }
+      for (const other of near)
+        if (positions[other]) pulled.push({ id: other, origin: positions[other], weight: 0.55 })
+      for (const other of far)
+        if (positions[other]) pulled.push({ id: other, origin: positions[other], weight: 0.22 })
+    }
     drag.current = {
       id,
       start: point(event),
       origin: id ? positions[id] : { x: camera.x, y: camera.y },
+      pulled,
     }
   }
   function move(event: PointerEvent<SVGSVGElement>) {
@@ -144,6 +289,15 @@ export function GraphExplorer({
     if (id)
       setMoves((previous) => ({
         ...previous,
+        ...Object.fromEntries(
+          drag.current!.pulled.map((other) => [
+            other.id,
+            {
+              x: other.origin.x + (dx / camera.scale) * other.weight,
+              y: other.origin.y + (dy / camera.scale) * other.weight,
+            },
+          ]),
+        ),
         [id]: { x: origin.x + dx / camera.scale, y: origin.y + dy / camera.scale },
       }))
     else setCamera((previous) => ({ ...previous, x: origin.x + dx, y: origin.y + dy }))
@@ -152,7 +306,11 @@ export function GraphExplorer({
     setCamera((previous) => {
       const scale = Math.max(0.25, Math.min(3, previous.scale * factor)),
         ratio = scale / previous.scale
-      return { scale, x: 500 - (500 - previous.x) * ratio, y: 300 - (300 - previous.y) * ratio }
+      return {
+        scale,
+        x: box.w / 2 - (box.w / 2 - previous.x) * ratio,
+        y: box.h / 2 - (box.h / 2 - previous.y) * ratio,
+      }
     })
   const fit = () => {
     if (!nodes.length) return
@@ -163,9 +321,22 @@ export function GraphExplorer({
       maxX = Math.max(...xs) + 100,
       minY = Math.min(...ys) - 70,
       maxY = Math.max(...ys) + 90
-    const scale = Math.min(1.5, 940 / (maxX - minX), 560 / (maxY - minY))
-    setCamera({ scale, x: 500 - ((minX + maxX) / 2) * scale, y: 300 - ((minY + maxY) / 2) * scale })
+    const scale = Math.min(1.4, (box.w - 40) / (maxX - minX), (box.h - 40) / (maxY - minY))
+    setCamera({
+      scale,
+      x: box.w / 2 - ((minX + maxX) / 2) * scale,
+      y: box.h / 2 - ((minY + maxY) / 2) * scale,
+    })
   }
+  // fit once the real size is known, and again when the canvas is resized (full screen)
+  const fitRef = useRef(fit)
+  useEffect(() => {
+    fitRef.current = fit
+  })
+  useEffect(() => {
+    if (box.w && box.h && group) fitRef.current()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- refit only when the measured size changes
+  }, [box.w, box.h, group])
   if (!view.nodes.length)
     return (
       <p className="gx-empty">
@@ -184,6 +355,23 @@ export function GraphExplorer({
             onChange={(e) => setSearch(e.target.value)}
           />
         </label>
+        {groups.length > 1 ? (
+          <label>
+            <span className="sr-only">Group of records</span>
+            <select
+              aria-label="Group of records"
+              value={chosen ? group : 'all'}
+              onChange={(e) => setGroup(e.target.value)}
+            >
+              {groups.map((members, index) => (
+                <option key={members[0]} value={String(index)}>
+                  {groupName(members)}
+                </option>
+              ))}
+              <option value="all">Show all groups</option>
+            </select>
+          </label>
+        ) : null}
         <label>
           <span className="sr-only">Relationship type</span>
           <select
@@ -225,11 +413,25 @@ export function GraphExplorer({
           </button>
         </div>
       </div>
+      <div className="gx-legend" aria-label="Record types and relationships">
+        {[...new Set(nodes.map((node) => node.kind))].map((kindName) => {
+          const look = LOOKS[kindName] ?? fallback
+          return (
+            <span key={kindName}>
+              <i style={{ background: look.fill, borderColor: look.ink }} />
+              {humanize(kindName)} · {nodes.filter((node) => node.kind === kindName).length}
+            </span>
+          )
+        })}
+        <span className="gx-legend__links">
+          Lines: {[...new Set(displayedEdges.map((edge) => humanize(edge.type)))].join(', ')}
+        </span>
+      </div>
       <div className="gx-workspace">
         <div className="gx-canvas">
           <svg
             ref={svg}
-            viewBox="0 0 1000 620"
+            viewBox={`0 0 ${box.w} ${box.h}`}
             role="group"
             aria-label={label + ' graph'}
             onPointerDown={(e) => begin(e, null)}
@@ -257,7 +459,7 @@ export function GraphExplorer({
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#7e9387" />
               </marker>
             </defs>
-            <rect width="1000" height="620" fill={`url(#${marker}-dots)`} />
+            <rect width={box.w} height={box.h} fill={`url(#${marker}-dots)`} />
             <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale})`}>
               {displayedEdges.map((edge, index) => {
                 const a = positions[edge.source],

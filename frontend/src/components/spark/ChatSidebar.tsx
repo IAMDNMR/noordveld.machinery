@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, MessageSquare, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { BookOpen, MessageSquare, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { SparkLogo } from './SparkLogo'
+import type { SparkCatalogGroup } from '../../api/spark'
 import type { ChatEntry, ChatHistory } from './useChatHistory'
 
 export function conversationDateGroup(updated: number, now: number) {
@@ -16,15 +18,30 @@ export function conversationDateGroup(updated: number, now: number) {
   return 'Earlier'
 }
 
+/** The time for a chat from today or yesterday, the weekday for anything older. */
+function chatStamp(updated: number, now: number) {
+  const group = conversationDateGroup(updated, now)
+  const date = new Date(updated)
+  return group === 'Today' || group === 'Yesterday'
+    ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+    : date.toLocaleDateString([], { weekday: 'short' })
+}
+
 export function ChatSidebar({
   history,
   busy,
   onClose,
+  onPick,
+  catalog,
   open,
 }: {
   history: ChatHistory
   busy: boolean
   onClose: () => void
+  /** a question from the bank: goes into the message box, ready to send */
+  onPick: (question: string) => void
+  /** example questions, grouped by topic, from the backend */
+  catalog: SparkCatalogGroup[]
   open: boolean
 }) {
   const [search, setSearch] = useState('')
@@ -67,14 +84,19 @@ export function ChatSidebar({
       <aside ref={sidebar} className="spark-sidebar" aria-label="Chat history">
         <div className="spark-sidebar__brand">
           <Link to="/spark">
-            Spark<span>by Noordveld</span>
+            <SparkLogo size={34} still />
+            <b>
+              Spark<span>by Noordveld</span>
+            </b>
           </Link>
           <button type="button" onClick={onClose} aria-label="Close chat history">
             <X size={18} />
           </button>
         </div>
         <p className="spark-sidebar__description">
-          Parts, machines and buying decisions. One conversation.
+          Parts, machines and buying decisions.
+          <br />
+          One conversation.
         </p>
         <button
           type="button"
@@ -94,7 +116,7 @@ export function ChatSidebar({
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search chats"
+            placeholder="Search chats…"
             type="search"
           />
         </label>
@@ -127,6 +149,7 @@ export function ChatSidebar({
                 >
                   <MessageSquare size={15} />
                   <span>{chat.title}</span>
+                  <time aria-hidden="true">{chatStamp(chat.updated, now)}</time>
                 </button>
                 <div className="spark-history-item__actions">
                   <button
@@ -160,9 +183,23 @@ export function ChatSidebar({
           ))}
         </div>
         <div className="spark-sidebar__footer">
-          <Link to="/spark">
-            Discover Spark <ArrowUpRight size={15} />
-          </Link>
+          <details className="spark-bank">
+            <summary>
+              <BookOpen size={16} aria-hidden="true" /> Catalog
+            </summary>
+            <div className="spark-bank__list">
+              {catalog.map((group) => (
+                <section key={group.category}>
+                  <h3>{group.category}</h3>
+                  {group.questions.map((question) => (
+                    <button key={question} type="button" onClick={() => onPick(question)}>
+                      {question}
+                    </button>
+                  ))}
+                </section>
+              ))}
+            </div>
+          </details>
           <p>
             {busy
               ? 'Stop the current request to switch chats.'
