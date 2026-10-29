@@ -6,6 +6,7 @@ Run (from backend/):  python -m uvicorn app.main:app --reload --port 8000
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI, Request
@@ -53,7 +54,11 @@ def create_app() -> FastAPI:
     setup_logging(settings.log_level)
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI):
+    async def lifespan(app: FastAPI):
+        if os.environ.get("SPARK_WARMUP") == "1":
+            from app.services import warmup
+
+            warmup.start(app)
         yield
         get_graph().close()
 
