@@ -317,11 +317,13 @@ export function GraphExplorer({
     const points = nodes.map((node) => positions[node.id]),
       xs = points.map((p) => p.x),
       ys = points.map((p) => p.y)
-    const minX = Math.min(...xs) - 100,
-      maxX = Math.max(...xs) + 100,
-      minY = Math.min(...ys) - 70,
-      maxY = Math.max(...ys) + 90
-    const scale = Math.min(1.4, (box.w - 40) / (maxX - minX), (box.h - 40) / (maxY - minY))
+    const minX = Math.min(...xs) - 60,
+      maxX = Math.max(...xs) + 60,
+      minY = Math.min(...ys) - 50,
+      maxY = Math.max(...ys) + 70
+    const fitted = Math.min(1.4, (box.w - 30) / (maxX - minX), (box.h - 30) / (maxY - minY))
+    // on a phone the whole graph would shrink to unreadable: keep labels legible and let the user pan
+    const scale = box.w < 600 ? Math.max(fitted, 0.62) : fitted
     setCamera({
       scale,
       x: box.w / 2 - ((minX + maxX) / 2) * scale,
