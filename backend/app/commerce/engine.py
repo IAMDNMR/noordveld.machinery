@@ -163,5 +163,11 @@ class CommerceContextEngine:
         for mid in self.lifecycle.instance_ids():
             inst = self.lifecycle.instance(mid)
             if inst and inst.get("owner_id") == p.customer_id:
-                out.append({"machine_instance_id": mid, "machine_id": inst["machine_id"], "installed_part_ids": sorted({i["part_id"] for i in self.lifecycle.installations(mid)})})
+                part_ids = sorted({i["part_id"] for i in self.lifecycle.installations(mid)})
+                machine = self.discovery.machine(inst["machine_id"]) or {}
+                names = [f"{p['part_number']} {p['name']}" for p in (self.discovery.part(pid) for pid in part_ids) if p]
+                # the identifiers stay (they are what the next question carries); the names are what a person reads
+                out.append({"machine_instance_id": mid, "serial_number": inst.get("serial_number"), "machine_id": inst["machine_id"], "installed_part_ids": part_ids,
+                            "machine_model": " ".join(x for x in (machine.get("model"), machine.get("machine_type")) if x) or None,
+                            "installed_part_names": names})
         return out

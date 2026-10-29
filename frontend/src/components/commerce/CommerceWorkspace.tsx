@@ -88,9 +88,21 @@ const errorText = (e: unknown): string =>
 /** A short, readable label for one clarification option: the identifier first, then what tells similar ones apart. */
 export const optionText = (o: Record<string, unknown>): string => {
   const first = REFERENCE_KEYS.find((k) => typeof o[k] === 'string')
+  // when the record carries names, the bare machine and part codes are left out: a person reads the names, the id stays first
+  const hidden = new Set<string>([
+    ...(o.machine_model ? ['machine_id'] : []),
+    ...(Array.isArray(o.installed_part_names) && o.installed_part_names.length
+      ? ['installed_part_ids']
+      : []),
+  ])
   const rest = Object.entries(o)
     .filter(
-      ([k, v]) => k !== first && v != null && v !== '' && !(Array.isArray(v) && v.length === 0),
+      ([k, v]) =>
+        k !== first &&
+        !hidden.has(k) &&
+        v != null &&
+        v !== '' &&
+        !(Array.isArray(v) && v.length === 0),
     )
     .map(([k, v]) =>
       LABELLED[k] ? `${LABELLED[k]} ${String(v)}` : Array.isArray(v) ? v.join(', ') : String(v),
@@ -488,10 +500,13 @@ export function CommerceAnswer({
   const r = turn.response
   const answeredSections = r.answer.sections.filter((s) => s.status !== 'REQUIRES_CLARIFICATION')
   // a question is asked once, in the clarification box: what precedes it is the part of the request that could be answered
-  const lead =
-    r.clarification && r.answer.text.endsWith(r.clarification.question)
-      ? r.answer.text.slice(0, -r.clarification.question.length).trim()
-      : r.answer.text
+  const lead = r.clarification
+    ? r.answer.text
+        .split(r.clarification.question)
+        .join(' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+    : r.answer.text
   const bundle =
     answeredSections.length && Object.keys(r.contexts).length
       ? bundleFrom(r.contexts, r.answer.synthetic_notice)
