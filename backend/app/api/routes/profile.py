@@ -1,5 +1,7 @@
 """The signed-in user's own profile. Consent-gated: GET shows what is stored, PUT stores it only with consent=true, DELETE erases it."""
 
+import logging
+import sqlite3
 from functools import lru_cache
 from typing import Annotated
 
@@ -11,6 +13,7 @@ from app.services.orders import User
 from app.services.profile import Profile, ProfileStore, ProfileWrite
 
 router = APIRouter(tags=["profile"])
+log = logging.getLogger(__name__)
 
 
 @lru_cache
@@ -19,7 +22,12 @@ def _store(path: str) -> ProfileStore:
 
 
 def get_profile_store() -> ProfileStore:
-    return _store(get_settings().profile_db)
+    try:
+        return _store(get_settings().profile_db)
+    except (OSError, sqlite3.Error):
+        # a read-only filesystem (Vercel) cannot hold the database file: keep profiles in memory for this process rather than failing Spark and the profile page
+        log.warning("profile database is not writable; profiles are kept in memory only")
+        return _store(":memory:")
 
 
 Store = Annotated[ProfileStore, Depends(get_profile_store)]

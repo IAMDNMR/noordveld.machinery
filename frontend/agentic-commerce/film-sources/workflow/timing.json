@@ -1,82 +1,61 @@
 {
- "total": 125.16,
+ "total": 98.58,
  "scenes": [
   {
    "id": "hook",
    "start": 0.0,
-   "seconds": 7.2,
+   "seconds": 8.28,
    "vo_start": 0.7,
-   "vo_seconds": 5.5
+   "vo_seconds": 6.58
   },
   {
-   "id": "store",
-   "start": 7.2,
-   "seconds": 8.16,
-   "vo_start": 7.9,
-   "vo_seconds": 6.46
+   "id": "spark",
+   "start": 8.28,
+   "seconds": 9.76,
+   "vo_start": 8.98,
+   "vo_seconds": 8.06
   },
   {
-   "id": "intel",
-   "start": 15.36,
-   "seconds": 9.74,
-   "vo_start": 16.06,
-   "vo_seconds": 8.04
+   "id": "find",
+   "start": 18.04,
+   "seconds": 17.92,
+   "vo_start": 18.74,
+   "vo_seconds": 16.22
   },
   {
-   "id": "shopping",
-   "start": 25.1,
-   "seconds": 12.12,
-   "vo_start": 25.8,
-   "vo_seconds": 10.42
+   "id": "graph",
+   "start": 35.96,
+   "seconds": 16.32,
+   "vo_start": 36.66,
+   "vo_seconds": 14.62
   },
   {
-   "id": "checkout",
-   "start": 37.22,
-   "seconds": 9.86,
-   "vo_start": 37.92,
-   "vo_seconds": 8.16
+   "id": "order",
+   "start": 52.28,
+   "seconds": 12.07,
+   "vo_start": 52.98,
+   "vo_seconds": 10.37
   },
   {
-   "id": "orders",
-   "start": 47.08,
-   "seconds": 8.73,
-   "vo_start": 47.78,
-   "vo_seconds": 7.03
+   "id": "delivery",
+   "start": 64.35,
+   "seconds": 13.27,
+   "vo_start": 65.05,
+   "vo_seconds": 11.57
   },
   {
-   "id": "assistant",
-   "start": 55.81,
-   "seconds": 15.52,
-   "vo_start": 56.51,
-   "vo_seconds": 13.82
-  },
-  {
-   "id": "warranty",
-   "start": 71.33,
-   "seconds": 10.8,
-   "vo_start": 72.03,
-   "vo_seconds": 9.1
-  },
-  {
-   "id": "seaair",
-   "start": 82.13,
-   "seconds": 21.67,
-   "vo_start": 82.83,
-   "vo_seconds": 19.97
-  },
-  {
-   "id": "routes",
-   "start": 103.8,
-   "seconds": 13.68,
-   "vo_start": 104.5,
-   "vo_seconds": 11.98
+   "id": "review",
+   "start": 77.62,
+   "seconds": 13.46,
+   "vo_start": 78.32,
+   "vo_seconds": 11.76
   },
   {
    "id": "outro",
-   "start": 117.48,
-   "seconds": 7.68,
-   "vo_start": 118.18,
-   "vo_seconds": 5.98
+   "start": 91.08,
+   "seconds": 7.5,
+   "vo_start": 91.78,
+   "vo_seconds": 5.78
   }
  ]
 }

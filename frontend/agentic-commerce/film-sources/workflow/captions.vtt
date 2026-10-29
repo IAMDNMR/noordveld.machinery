@@ -1,79 +1,67 @@
 WEBVTT
 
-00:00:00.700 --> 00:00:01.840
-A forklift stops.
+00:00:00.700 --> 00:00:03.283
+A compact wheel loader is due for service.
 
-00:00:01.840 --> 00:00:06.200
-Somewhere, a customer needs a part, and doesn't know its number.
+00:00:03.283 --> 00:00:07.280
+Its owner needs an air filter, and doesn't have the part number.
 
-00:00:07.900 --> 00:00:14.360
-If you know what you want, the Parts Store has the full catalogue: fitment, price and stock on every part.
+00:00:08.980 --> 00:00:13.357
+Spark puts Parts Intelligence and ordering in one conversation.
 
-00:00:16.060 --> 00:00:21.017
-Parts Intelligence answers questions about the catalogue from the knowledge graph.
+00:00:13.357 --> 00:00:17.040
+Start with the machine, the part or the job at hand.
 
-00:00:21.017 --> 00:00:24.100
-Every answer shows its graph path, and its source.
+00:00:18.740 --> 00:00:23.110
+Ask for an air filter for the NV-3200, preferably in stock.
 
-00:00:25.800 --> 00:00:27.071
-Don't know the part?
+00:00:23.110 --> 00:00:31.997
+Spark checks fitment, catalogue status and stock, and recommends one part: it fits, it is verified, and it is in stock.
 
-00:00:27.071 --> 00:00:28.469
-Describe the problem.
+00:00:31.997 --> 00:00:34.960
+It also says what it left out, and why.
 
-00:00:28.469 --> 00:00:36.220
-The agent identifies the machine and the part, checks fitment and stock, compares fulfilment options, and recommends one.
+00:00:36.660 --> 00:00:38.329
+Ask to see it as a graph.
 
-00:00:37.920 --> 00:00:39.313
-One step to the cart.
+00:00:38.329 --> 00:00:47.208
+Parts Intelligence draws the recorded relationships: the three machines it fits, its two suppliers, and the six depots that hold it.
 
-00:00:39.313 --> 00:00:46.080
-Checkout walks through delivery, the dealer, availability and fulfilment, before anything is ordered.
+00:00:47.208 --> 00:00:51.280
+Every link is marked as source data, or synthetic demo data.
 
-00:00:47.780 --> 00:00:54.810
-Once it's placed, the order is tracked step by step: allocation, fulfilment, shipment and delivery.
+00:00:52.980 --> 00:00:54.268
+Then say: order it.
 
-00:00:56.510 --> 00:00:57.436
-Or simply ask.
+00:00:54.268 --> 00:01:03.350
+Spark fills the order from the saved profile, with the delivery site, dealer and contact, and proposes the fastest recorded delivery.
 
-00:00:57.436 --> 00:01:02.792
-The Commerce Assistant reads a mistyped word as the catalogue word, and says so.
+00:01:05.050 --> 00:01:06.841
+Want a different delivery?
 
-00:01:02.792 --> 00:01:10.330
-It recommends only a part that fits, has an approved source and is in stock, and shows what it rejected, and why.
+00:01:06.841 --> 00:01:13.521
+Spark compares the recorded options by depot, arrival estimate and total cost, best match first.
 
-00:01:12.030 --> 00:01:15.041
-Warranty is decided by rules, not by the AI.
+00:01:13.521 --> 00:01:16.620
+Standard road arrives a day later, for less.
 
-00:01:15.041 --> 00:01:21.130
-Every check, the installation, the dealer and the evidence sit right beside the verdict.
+00:01:18.320 --> 00:01:20.917
+Every change updates the same order.
 
-00:01:22.830 --> 00:01:29.238
-A shipment from Japan is travelling by economy sea: leg one of four, due on the nineteenth of November.
+00:01:20.917 --> 00:01:26.617
+The review shows the part, delivery, dealer, contact and total, excluding VAT.
 
-00:01:29.238 --> 00:01:39.814
-The recorded air route takes six days instead of ninety-one, at twelve thousand, six hundred and seventy-five euros, against two thousand, eight hundred and thirty-five.
+00:01:26.617 --> 00:01:30.080
+Nothing is ordered until you press Place order.
 
-00:01:39.814 --> 00:01:42.800
-Every number comes from the route's own record.
-
-00:01:44.500 --> 00:01:49.793
-Even where nothing has shipped yet, it shows the routes the network records.
-
-00:01:49.793 --> 00:01:56.480
-Lagos: five days by air, or thirty-one by sea, labelled as potential routes, never as promises.
-
-00:01:58.180 --> 00:01:58.863
+00:01:31.780 --> 00:01:32.397
 Find it.
 
-00:01:58.863 --> 00:01:59.547
-Buy it.
+00:01:32.397 --> 00:01:34.015
+See how it connects.
 
-00:01:59.547 --> 00:02:00.401
-Track it.
+00:01:34.015 --> 00:01:35.942
+Order it, on your terms.
 
-00:02:00.401 --> 00:02:01.255
-Trust it.
-
-00:02:01.255 --> 00:02:04.160
-Agentic e-commerce, at Noordveld.
+00:01:35.942 --> 00:01:37.560
+Spark, at Noordveld.

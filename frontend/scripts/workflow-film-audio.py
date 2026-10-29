@@ -3,7 +3,7 @@
     python frontend/scripts/workflow-film-audio.py            # voice + timing + music
     python frontend/scripts/workflow-film-audio.py --music    # music only (timing.json must exist)
 
-Writes into frontend/agentic-commerce/film-sources/workflow/: vo/<scene>.mp3, timing.json, music.mp3. The voice text is film.json's `vo`; edge-tts sends it to
+Writes into frontend/agentic-commerce/film-sources/workflow/: vo/<scene>.mp3, timing.json, captions.vtt, music.mp3, sfx.mp3. The voice text is film.json's `vo`; edge-tts sends it to
 Microsoft's online text-to-speech service. The music is synthesised here (no samples, no licence): a four-chord pad, bass, a plucked arpeggio and soft drums.
 """
 from __future__ import annotations
@@ -159,6 +159,58 @@ def write_music(total: float) -> None:
     wav.unlink()
 
 
+# ── sound effects ──────────────────────────────────────────────────────────────────────────────
+def sfx(info: dict) -> None:
+    """Synthesised effects on the film's own cues: a whoosh into each scene, a soft tick as each highlight appears, a low hit under the opening title."""
+    n = int((info["total"] + 1.0) * SR)
+    out = np.zeros(n)
+    rng = np.random.default_rng(11)
+
+    def put(at: float, x: np.ndarray) -> None:
+        s = int(at * SR)
+        if 0 <= s < n:
+            out[s: s + len(x)] += x[: n - s]
+
+    def whoosh() -> np.ndarray:
+        ln = int(0.8 * SR)
+        tt = np.arange(ln) / SR
+        noise = rng.standard_normal(ln)
+        # rising then falling band: two low-passes blended over time
+        swept = lowpass(noise, 600) * (1 - tt / 0.8) + lowpass(noise, 3000) * (tt / 0.8)
+        env = np.sin(np.pi * np.clip(tt / 0.8, 0, 1)) ** 2
+        return highpass(swept, 120) * env * 0.5
+
+    def tick() -> np.ndarray:
+        ln = int(0.09 * SR)
+        tt = np.arange(ln) / SR
+        return (np.sin(2 * np.pi * 1760 * tt) + 0.4 * np.sin(2 * np.pi * 2640 * tt)) * np.exp(-tt * 55) * 0.22
+
+    def hit() -> np.ndarray:
+        ln = int(0.6 * SR)
+        tt = np.arange(ln) / SR
+        return np.sin(2 * np.pi * (52 * tt + 40 * (1 - np.exp(-tt * 18)) / 18)) * np.exp(-tt * 6) * 0.7
+
+    for i, (scene, tm) in enumerate(zip(FILM["scenes"], info["scenes"])):
+        if i:
+            put(tm["start"] - 0.35, whoosh())
+        if scene["kind"] == "hook":
+            put(tm["start"] + 2.6, hit())
+        for k, shot in enumerate(scene.get("shots", [])):
+            a = scene["shots"][k - 1]["until"] if k else 0
+            for h in shot["highlights"]:
+                put(tm["start"] + (a + h[0] * (shot["until"] - a)) * tm["seconds"] + 0.05, tick())
+    stereo = np.stack([out, out], axis=1)
+    data = (stereo / max(1e-9, np.max(np.abs(stereo))) * 0.8 * 32767).astype(np.int16)
+    wav = ROOT / "sfx.wav"
+    with wave.open(str(wav), "wb") as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes(data.tobytes())
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(wav), "-b:a", "192k", str(ROOT / "sfx.mp3")], check=True)
+    wav.unlink()
+
+
 def captions(info: dict) -> None:
     """WebVTT of the voice-over, sentence by sentence, timed the same way the film's burnt-in captions are (proportional to sentence length)."""
     def stamp(s: float) -> str:
@@ -183,4 +235,5 @@ if __name__ == "__main__":
         info = json.loads((ROOT / "timing.json").read_text(encoding="utf-8"))
     captions(info)
     write_music(info["total"])
+    sfx(info)
     print(json.dumps(info, indent=1))

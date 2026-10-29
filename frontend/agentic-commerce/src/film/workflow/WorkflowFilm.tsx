@@ -15,7 +15,7 @@ import timing from '../../../film-sources/workflow/timing.json'
 
 /*
   The workflow film: the real application screens (captured from the running app), the scene text and the voice-over clips all live in
-  film-sources/workflow (film.json, timing.json, shots/, vo/, music.mp3). This file is only the motion design: nothing in it is business data.
+  film-sources/workflow (film.json, timing.json, shots/, vo/, music.mp3, sfx.mp3). This file is only the motion design: nothing in it is business data.
   Render: npm run film:workflow  (public dir = film-sources/workflow)
 */
 
@@ -38,6 +38,7 @@ interface Scene {
   vo: string
   title: string
   kicker?: string
+  status?: string
   image?: string
   rail?: number
   chips?: string[]
@@ -453,7 +454,7 @@ function HookScene({ scene, t, seconds }: { scene: Scene; t: number; seconds: nu
           }}
         />
         <strong style={{ color: INK }}>{scene.kicker}</strong>
-        <span style={{ color: INK3 }}>Machine down</span>
+        <span style={{ color: INK3 }}>{scene.status ?? 'Machine down'}</span>
       </div>
       <h1
         style={{
@@ -596,6 +597,8 @@ export function WorkflowFilm(): ReactNode {
     <AbsoluteFill style={{ background: PAPER, fontFamily: FONT, color: INK, overflow: 'hidden' }}>
       <Glow t={now} />
       <Audio src={staticFile('music.mp3')} volume={(f) => musicVolume(f, fps)} />
+      {/* scene-change whooshes and highlight ticks, timed from film.json by workflow-film-audio.py */}
+      <Audio src={staticFile('sfx.mp3')} volume={0.5} />
       {SCENES.map((scene, i) => {
         const tm = timing.scenes[i]
         const from = Math.round(tm.start * fps)

@@ -14,9 +14,9 @@ const FILMS = {
     title: 'From need to order',
     kicker: 'The workflow',
     description: 'One request, followed through fitment and supply to an order for your review.',
-    src: '/agentic-workflow-film.mp4',
-    poster: '/agentic-workflow-film.jpg',
-    captions: '/agentic-workflow-film.vtt',
+    src: '/agentic-workflow-film.mp4?v=20261029',
+    poster: '/agentic-workflow-film.jpg?v=20261029',
+    captions: '/agentic-workflow-film.vtt?v=20261029',
   },
   story: {
     title: 'The commerce story',

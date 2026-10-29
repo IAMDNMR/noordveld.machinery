@@ -1,105 +1,80 @@
 {
-  "title": "Noordveld Agentic E-Commerce: the end-to-end workflow",
+  "title": "Noordveld Spark: Parts Intelligence and agentic e-commerce in one conversation",
   "voice": "en-US-AndrewNeural",
   "rate": "-4%",
   "fps": 30,
   "disclaimer": "Demonstration data. Not real operational data.",
-  "rail": ["Know", "Investigate", "Need", "Purchase", "Track", "Ask", "Trust", "Ship"],
+  "rail": ["Ask", "Find", "Connect", "Order", "Deliver", "Review"],
   "scenes": [
     {
-      "id": "hook", "kind": "hook", "image": "shots/00-machine.jpg",
-      "kicker": "KFT-200", "title": "Machine down.",
-      "vo": "A forklift stops. Somewhere, a customer needs a part, and doesn't know its number."
+      "id": "hook", "kind": "hook", "image": "shots/20-nv3200.jpg",
+      "kicker": "NV-3200", "status": "Air filter due", "title": "Service due.",
+      "vo": "A compact wheel loader is due for service. Its owner needs an air filter, and doesn't have the part number."
     },
     {
-      "id": "store", "kind": "screen", "rail": 0, "kicker": "Parts Store", "title": "Know the part? Buy it.",
-      "chips": ["Full catalogue", "Fitment", "Price and stock"],
-      "vo": "If you know what you want, the Parts Store has the full catalogue: fitment, price and stock on every part.",
+      "id": "spark", "kind": "screen", "rail": 0, "kicker": "Spark", "title": "One conversation.",
+      "chips": ["Parts Intelligence", "Agentic ordering", "You confirm"],
+      "vo": "Spark puts Parts Intelligence and ordering in one conversation. Start with the machine, the part or the job at hand.",
       "shots": [
-        { "image": "shots/02-store.jpg", "w": 1440, "h": 1000, "until": 0.5,
-          "camera": [[0, 0, 0, 1440], [1, 380, 380, 960]], "highlights": [[0.45, 1, 425, 450, 290, 340]] },
-        { "image": "shots/03-part.jpg", "w": 1440, "h": 1000, "until": 1,
-          "camera": [[0, 0, 0, 1440], [1, 560, 130, 860]], "highlights": [[0.3, 1, 728, 180, 560, 300]] }
+        { "image": "shots/21-spark-home.jpg", "w": 1440, "h": 1000, "until": 1,
+          "camera": [[0, 0, 0, 1440], [1, 250, 250, 1000]], "highlights": [[0.25, 0.6, 480, 300, 740, 130], [0.6, 1, 490, 456, 720, 195]] }
       ]
     },
     {
-      "id": "intel", "kind": "screen", "rail": 1, "kicker": "Parts Intelligence", "title": "Investigate. Verify.",
-      "chips": ["Knowledge graph", "Graph path", "Source on every answer"],
-      "vo": "Parts Intelligence answers questions about the catalogue from the knowledge graph. Every answer shows its graph path, and its source.",
+      "id": "find", "kind": "screen", "rail": 1, "kicker": "Part discovery", "title": "Describe the need.",
+      "chips": ["Fitment", "Catalogue status", "Stock"],
+      "vo": "Ask for an air filter for the NV-3200, preferably in stock. Spark checks fitment, catalogue status and stock, and recommends one part: it fits, it is verified, and it is in stock. It also says what it left out, and why.",
       "shots": [
-        { "image": "shots/04-intel.jpg", "w": 1440, "h": 1000, "until": 1,
-          "camera": [[0, 0, 0, 1440], [0.45, 140, 150, 1160], [1, 140, 260, 1160]], "highlights": [[0.2, 0.5, 160, 180, 830, 70], [0.55, 1, 160, 650, 1120, 300]] }
+        { "image": "shots/22-spark-discovery.jpg", "w": 1440, "h": 1300, "until": 1,
+          "camera": [[0, 0, 0, 1440], [0.3, 380, 100, 900], [1, 380, 150, 900]], "highlights": [[0.06, 0.3, 846, 142, 393, 45], [0.32, 0.74, 459, 205, 780, 52], [0.76, 1, 459, 338, 330, 28]] }
       ]
     },
     {
-      "id": "shopping", "kind": "screen", "rail": 2, "kicker": "Agentic Shopping", "title": "Describe the need. The agent does the rest.",
-      "chips": ["Need", "Evaluate", "Recommend"],
-      "vo": "Don't know the part? Describe the problem. The agent identifies the machine and the part, checks fitment and stock, compares fulfilment options, and recommends one.",
+      "id": "graph", "kind": "screen", "rail": 2, "kicker": "Parts Intelligence", "title": "See how it connects.",
+      "chips": ["Knowledge graph", "Suppliers", "Depots", "Source or demo data"],
+      "vo": "Ask to see it as a graph. Parts Intelligence draws the recorded relationships: the three machines it fits, its two suppliers, and the six depots that hold it. Every link is marked as source data, or synthetic demo data.",
       "shots": [
-        { "image": "shots/05-shopping.jpg", "w": 1440, "h": 1250, "until": 1,
-          "camera": [[0, 0, 60, 1440], [0.35, 140, 300, 1160], [1, 250, 620, 940]], "highlights": [[0.15, 0.4, 150, 150, 1140, 120], [0.4, 0.7, 160, 470, 1120, 90], [0.72, 1, 320, 1062, 800, 50]] }
+        { "image": "shots/23-graph.jpg", "w": 1440, "h": 1300, "until": 0.3,
+          "camera": [[0, 280, 120, 1000], [1, 380, 600, 940]], "highlights": [[0.1, 0.5, 459, 330, 780, 90], [0.6, 1, 880, 688, 175, 22]] },
+        { "image": "shots/24-graph-fits.jpg", "w": 1440, "h": 1300, "until": 0.5,
+          "camera": [[0, 440, 450, 1000], [1, 460, 460, 800]], "highlights": [[0.2, 1, 620, 630, 230, 250]] },
+        { "image": "shots/25-graph-suppliers.jpg", "w": 1440, "h": 1300, "until": 0.7,
+          "camera": [[0, 460, 460, 800], [1, 470, 470, 790]], "highlights": [[0.2, 1, 1000, 625, 230, 200]] },
+        { "image": "shots/26-graph-depots.jpg", "w": 1440, "h": 1300, "until": 1,
+          "camera": [[0, 460, 450, 800], [1, 440, 440, 820]], "highlights": [[0.15, 0.6, 550, 650, 360, 240], [0.62, 1, 915, 1060, 315, 20]] }
       ]
     },
     {
-      "id": "checkout", "kind": "screen", "rail": 3, "kicker": "Cart and checkout", "title": "One step to the cart.",
-      "chips": ["Delivery", "Dealer", "Availability", "Fulfilment"],
-      "vo": "One step to the cart. Checkout walks through delivery, the dealer, availability and fulfilment, before anything is ordered.",
+      "id": "order", "kind": "screen", "rail": 3, "kicker": "Agentic ordering", "title": "Say it.\nSpark fills the order.",
+      "chips": ["Saved profile", "One order draft"],
+      "vo": "Then say: order it. Spark fills the order from the saved profile, with the delivery site, dealer and contact, and proposes the fastest recorded delivery.",
       "shots": [
-        { "image": "shots/06-checkout.jpg", "w": 1440, "h": 1250, "until": 1,
-          "camera": [[0, 0, 0, 1440], [1, 200, 140, 1040]], "highlights": [[0.2, 0.55, 280, 340, 900, 90], [0.55, 1, 256, 212, 905, 44]] }
+        { "image": "shots/27-order-filled.jpg", "w": 1440, "h": 1300, "until": 1,
+          "camera": [[0, 320, 600, 940], [1, 380, 700, 880]], "highlights": [[0.05, 0.3, 953, 760, 286, 45], [0.3, 0.65, 459, 968, 780, 100], [0.65, 0.84, 459, 1093, 590, 24], [0.86, 1, 459, 1134, 270, 38]] }
       ]
     },
     {
-      "id": "orders", "kind": "screen", "rail": 4, "kicker": "Orders and fulfilment", "title": "Every order, tracked.",
-      "chips": ["Allocation", "Fulfilment", "Shipment", "Delivery"],
-      "vo": "Once it's placed, the order is tracked step by step: allocation, fulfilment, shipment and delivery.",
+      "id": "delivery", "kind": "screen", "rail": 4, "kicker": "Delivery options", "title": "Compare.\nThen choose.",
+      "chips": ["Arrival estimate", "Total cost", "Best match first"],
+      "vo": "Want a different delivery? Spark compares the recorded options by depot, arrival estimate and total cost, best match first. Standard road arrives a day later, for less.",
       "shots": [
-        { "image": "shots/08-order.jpg", "w": 1440, "h": 1100, "until": 1,
-          "camera": [[0, 0, 0, 1440], [1, 140, 90, 1160]], "highlights": [[0.3, 1, 165, 262, 1110, 110]] }
+        { "image": "shots/28-delivery-options.jpg", "w": 1440, "h": 1300, "until": 1,
+          "camera": [[0, 330, 520, 900], [1, 380, 640, 860]], "highlights": [[0.04, 0.24, 1051, 535, 188, 45], [0.26, 0.52, 476, 745, 746, 82], [0.54, 0.8, 476, 1007, 746, 60], [0.82, 1, 476, 1078, 400, 40]] }
       ]
     },
     {
-      "id": "assistant", "kind": "screen", "rail": 5, "kicker": "Commerce Assistant", "title": "One question. One answer.",
-      "chips": ["Reads typos", "Fits, sourced, in stock", "Shows what it rejected"],
-      "vo": "Or simply ask. The Commerce Assistant reads a mistyped word as the catalogue word, and says so. It recommends only a part that fits, has an approved source and is in stock, and shows what it rejected, and why.",
+      "id": "review", "kind": "screen", "rail": 5, "kicker": "Review", "title": "You confirm.\nThen it's ordered.",
+      "chips": ["Full summary", "Explicit confirmation"],
+      "vo": "Every change updates the same order. The review shows the part, delivery, dealer, contact and total, excluding VAT. Nothing is ordered until you press Place order.",
       "shots": [
-        { "image": "shots/09-assistant-discovery.jpg", "w": 1440, "h": 1350, "until": 1,
-          "camera": [[0, 250, 40, 1000], [0.35, 300, 440, 900], [0.72, 300, 440, 900], [1, 300, 780, 900]], "highlights": [[0.18, 0.42, 340, 600, 420, 60], [0.45, 0.72, 345, 705, 750, 210], [0.78, 1, 345, 1085, 760, 180]] }
+        { "image": "shots/29-order-review.jpg", "w": 1440, "h": 1300, "until": 1,
+          "camera": [[0, 300, 360, 900], [0.5, 380, 540, 860], [1, 400, 620, 840]], "highlights": [[0.06, 0.34, 476, 712, 746, 48], [0.36, 0.62, 880, 880, 342, 120], [0.64, 1, 476, 1070, 670, 82]] }
       ]
     },
     {
-      "id": "warranty", "kind": "screen", "rail": 6, "kicker": "Warranty and traceability", "title": "The rules decide. The evidence shows why.",
-      "chips": ["Rules, not the model", "Every check", "Evidence path"],
-      "vo": "Warranty is decided by rules, not by the AI. Every check, the installation, the dealer and the evidence sit right beside the verdict.",
-      "shots": [
-        { "image": "shots/12-assistant-warranty.jpg", "w": 1440, "h": 1350, "until": 0.62,
-          "camera": [[0, 250, 60, 1000], [0.35, 300, 440, 900], [1, 300, 760, 900]], "highlights": [[0.1, 0.38, 330, 490, 780, 90], [0.42, 0.75, 340, 710, 760, 340], [0.78, 1, 340, 1080, 760, 200]] },
-        { "image": "shots/13-assistant-evidence.jpg", "w": 1440, "h": 1100, "until": 1,
-          "camera": [[0, 200, 250, 1040], [1, 260, 520, 920]], "highlights": [[0.2, 1, 310, 590, 850, 420]] }
-      ]
-    },
-    {
-      "id": "seaair", "kind": "screen", "rail": 7, "kicker": "Logistics", "title": "Sea: 91 days.\nAir: 6 days.",
-      "chips": ["Tracked by leg", "Recorded alternatives", "No invented numbers"],
-      "vo": "A shipment from Japan is travelling by economy sea: leg one of four, due on the nineteenth of November. The recorded air route takes six days instead of ninety-one, at twelve thousand, six hundred and seventy-five euros, against two thousand, eight hundred and thirty-five. Every number comes from the route's own record.",
-      "shots": [
-        { "image": "shots/10-assistant-seaair.jpg", "w": 1440, "h": 1350, "until": 1,
-          "camera": [[0, 250, 60, 1000], [0.3, 280, 460, 920], [0.62, 300, 760, 880], [1, 300, 760, 880]], "highlights": [[0.08, 0.3, 330, 540, 780, 80], [0.32, 0.55, 330, 1020, 780, 90], [0.58, 1, 330, 1130, 440, 150]] }
-      ]
-    },
-    {
-      "id": "routes", "kind": "screen", "rail": 7, "kicker": "Logistics", "title": "Air: 5 days.\nSea: 31 days.",
-      "chips": ["Potential routes", "Never a promise"],
-      "vo": "Even where nothing has shipped yet, it shows the routes the network records. Lagos: five days by air, or thirty-one by sea, labelled as potential routes, never as promises.",
-      "shots": [
-        { "image": "shots/11-assistant-routes.jpg", "w": 1440, "h": 1350, "until": 1,
-          "camera": [[0, 250, 60, 1000], [0.4, 300, 420, 880], [1, 320, 520, 820]], "highlights": [[0.3, 0.75, 340, 700, 700, 140], [0.72, 1, 340, 855, 760, 70]] }
-      ]
-    },
-    {
-      "id": "outro", "kind": "outro", "title": "From need to fulfilment, and after.",
+      "id": "outro", "kind": "outro", "title": "Parts Intelligence and ordering, in one conversation.",
       "words": ["AGENTIC", "E-COMMERCE"],
-      "vo": "Find it. Buy it. Track it. Trust it. Agentic e-commerce, at Noordveld."
+      "vo": "Find it. See how it connects. Order it, on your terms. Spark, at Noordveld."
     }
   ]
 }
