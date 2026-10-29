@@ -44,6 +44,7 @@ class PlaceBody(BaseModel):
     depot_id: str = Field(min_length=1, max_length=40)
     route_id: str = Field(min_length=1, max_length=120)
     confirmed: bool = False
+    expected_total: float | None = None  # the total the buyer reviewed; a different current total blocks the order
     idempotency_key: str = Field(min_length=8, max_length=80)
 
 

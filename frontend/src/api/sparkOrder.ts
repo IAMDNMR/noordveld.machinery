@@ -136,6 +136,8 @@ export type OrderResponse = {
   slots: OrderSlots
   /** the user said yes to the summary they were shown: the client confirms with that summary's total */
   confirm_ready?: boolean
+  /** the server's seal on the summary shown; Place order sends it back, and any change to the order voids it */
+  confirmation?: string | null
 }
 export type OrderTurnBody = {
   slots: OrderSlots
@@ -143,6 +145,7 @@ export type OrderTurnBody = {
   message?: string
   confirm?: boolean
   reviewed_total?: number | null
+  confirmation?: string | null
   idempotency_key?: string
   /** reopen a completed step to change it; every other choice is kept */
   revisit?: 'fulfilment' | 'details'

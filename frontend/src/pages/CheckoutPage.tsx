@@ -160,7 +160,6 @@ function Flow() {
   const [receiverName, setReceiverName] = useState('')
   const [receiverPhone, setReceiverPhone] = useState('')
   const [dealerId, setDealerId] = useState('')
-  const [allDealers, setAllDealers] = useState(false)
   const [serviceRequired, setServiceRequired] = useState(false)
   const [depotId, setDepotId] = useState('')
   const [routeId, setRouteId] = useState('')
@@ -212,18 +211,17 @@ function Flow() {
     (s) => (country ? getDestinations(country, s) : Promise.resolve([] as Destination[])),
     `dest:${country}`,
   )
-  const dealers = useApi(
-    (s) => getDealers(allDealers ? null : country || null, s),
-    `dealers:${allDealers ? '*' : country}`,
-  )
+  const dealers = useApi((s) => getDealers(country || null, s), `dealers:${country}`)
   const quote = useApi((s) => quoteCart(lines, s), `quote:${cartKey}`)
 
   // availability, depots and transport for the chosen destination. It is read once per destination + cart: moving between steps keeps the choice made.
   const [review, setReview] = useState<CheckoutReview | null>(null)
   const [reviewError, setReviewError] = useState<ApiError | null>(null)
   const reviewFor = useRef('')
+  const [reviewRun, setReviewRun] = useState(0) // bumping it reads availability again (a retry, or after stock or prices moved)
+  const [notice, setNotice] = useState<{ message: string; reasons: string[] } | null>(null)
   const needsReview = step >= 5 && !!shipToId
-  const reviewKey = `${shipToId}|${cartKey}`
+  const reviewKey = `${shipToId}|${cartKey}|${reviewRun}`
   useEffect(() => {
     if (!needsReview || reviewFor.current === reviewKey) return
     const ctrl = new AbortController()
@@ -250,7 +248,8 @@ function Flow() {
   }, [needsReview, reviewKey, items, shipToId])
 
   const destination = destinations.data?.find((d) => d.ship_to_id === shipToId) ?? null
-  const dealer = dealers.data?.find((d) => d.dealer_id === dealerId) ?? null
+  const dealer =
+    dealers.data?.find((d) => d.dealer_id === dealerId && d.country_code === country) ?? null
   const depot = review?.depots.find((d) => d.depot_id === depotId) ?? null
   const option = depot?.options.find((o) => o.route_id === routeId) ?? null
   const cost = option?.cost ?? review?.cost
@@ -293,6 +292,7 @@ function Flow() {
         depot_id: depotId,
         route_id: routeId,
         confirmed,
+        expected_total: cost?.total ?? null,
         idempotency_key: idem.current,
       })
       try {
@@ -310,10 +310,26 @@ function Flow() {
         'reasons' in e.details
           ? ((e.details as { reasons: string[] }).reasons ?? [])
           : []
-      setError({
-        message: e instanceof ApiError ? e.message : 'The order could not be placed.',
-        reasons,
-      })
+      if (
+        e instanceof ApiError &&
+        ['price_changed', 'availability', 'route_mismatch'].includes(e.code)
+      ) {
+        // stock, routes or prices moved since the review: nothing was ordered; read them again and let the user choose
+        setNotice({ message: `${e.message} The options below have been refreshed.`, reasons })
+        setConfirmed(false)
+        setReviewRun((n) => n + 1)
+        setStep(5)
+        return
+      }
+      const message = !(e instanceof ApiError)
+        ? 'The order could not be placed.'
+        : e.status === 0
+          ? // the request may have reached the server: say so, and why a retry is safe
+            `${e.message} We can't confirm whether the order was placed. Check My orders before trying again; trying again here uses the same order reference, so it cannot create a second order.`
+          : e.status === 401
+            ? 'Your session has ended, so nothing was ordered. Sign in again to place the order; your cart and details are kept.'
+            : e.message
+      setError({ message, reasons })
     } finally {
       setBusy(false)
     }
@@ -331,7 +347,10 @@ function Flow() {
           type="button"
           className="btn btn-primary"
           disabled={!ok}
-          onClick={() => setStep(next)}
+          onClick={() => {
+            setNotice(null)
+            setStep(next)
+          }}
         >
           Continue
         </button>
@@ -581,14 +600,6 @@ function Flow() {
             <label className="co__check">
               <input
                 type="checkbox"
-                checked={allDealers}
-                onChange={(e) => setAllDealers(e.target.checked)}
-              />{' '}
-              Show dealers in every country (not only {country || 'the delivery country'})
-            </label>
-            <label className="co__check">
-              <input
-                type="checkbox"
                 checked={serviceRequired}
                 onChange={(e) => setServiceRequired(e.target.checked)}
               />{' '}
@@ -602,10 +613,29 @@ function Flow() {
       {step === 5 ? (
         <section className="card card-pad co__panel" aria-labelledby="co-avail">
           <h2 id="co-avail">Availability &amp; fulfilment</h2>
+          {notice ? (
+            <div className="pi-error" role="alert">
+              <p>{notice.message}</p>
+              {notice.reasons.length ? (
+                <ul>
+                  {notice.reasons.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
           {reviewError ? (
-            <p className="pi-error" role="alert">
-              {reviewError.message}
-            </p>
+            <div className="pi-error" role="alert">
+              <p>{reviewError.message}</p>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setReviewRun((n) => n + 1)}
+              >
+                Try again
+              </button>
+            </div>
           ) : !review ? (
             <p className="muted" role="status">
               Checking depot stock and transport routes…
@@ -904,7 +934,7 @@ function Flow() {
               type="button"
               className="btn btn-primary"
               onClick={submit}
-              disabled={!confirmed || busy}
+              disabled={!confirmed || busy || !detailsOk || !deliveryOk || !fulfilmentOk || blocked}
             >
               {busy ? 'Placing order…' : 'Place order'}
             </button>

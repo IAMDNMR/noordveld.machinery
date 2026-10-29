@@ -1,4 +1,12 @@
-import { useId, useMemo, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+} from 'react'
 import {
   Box,
   Building2,
@@ -68,6 +76,17 @@ export function GraphExplorer({
     return { scale, x: 500 - ((minX + maxX) / 2) * scale, y: 300 - ((minY + maxY) / 2) * scale }
   })
   const drag = useRef<{ id: string | null; start: Point; origin: Point } | null>(null)
+  // the drawing is 1000 units wide; in a narrow column (the chat) it shrinks, so its text is enlarged to stay legible, capped so labels do not collide
+  useEffect(() => {
+    const el = svg.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(([entry]) => {
+      const k = Math.min(1.8, Math.max(1, 1000 / Math.max(1, entry.contentRect.width)))
+      el.style.setProperty('--gx-k', k.toFixed(2))
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   const positions = { ...base, ...moves }
   const selected = view.nodes.find((node) => node.id === selectedId)
   const byId = new Map(view.nodes.map((node) => [node.id, node]))
@@ -81,6 +100,12 @@ export function GraphExplorer({
   const displayedEdges = edges.filter(
     (edge) => !search || matches.has(edge.source) || matches.has(edge.target),
   )
+  // edges between the same two records are fanned out; group them once instead of re-scanning every edge for each edge
+  const sameEnds = new Map<string, typeof displayedEdges>()
+  for (const edge of displayedEdges) {
+    const key = `${edge.source}\u0000${edge.target}`
+    sameEnds.set(key, [...(sameEnds.get(key) ?? []), edge])
+  }
   const displayedIds = new Set(displayedEdges.flatMap((edge) => [edge.source, edge.target]))
   const nodes = view.nodes.filter(
     (node) =>
@@ -248,9 +273,7 @@ export function GraphExplorer({
                   x2 = b.x - ux * 32,
                   y2 = b.y - uy * 32
                 const active = edge.source === selectedId || edge.target === selectedId
-                const duplicates = displayedEdges.filter(
-                  (other) => other.source === edge.source && other.target === edge.target,
-                )
+                const duplicates = sameEnds.get(`${edge.source}\u0000${edge.target}`) ?? [edge]
                 const offset = (duplicates.indexOf(edge) - (duplicates.length - 1) / 2) * 30
                 const cx = (x1 + x2) / 2 - uy * offset,
                   cy = (y1 + y2) / 2 + ux * offset

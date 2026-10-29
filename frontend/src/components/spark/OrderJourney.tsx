@@ -132,16 +132,13 @@ export function OrderJourney({ order, active, busy, onPatch }: Props) {
         />
       ) : null}
       {auto && order.stage === 'review' && order.summary && place ? (
-        <p className="so-inline-actions">
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            disabled={busy}
-            onClick={() => onPatch({}, place)}
-          >
-            Place order
-          </button>
-        </p>
+        <AutoReview
+          order={order}
+          summary={order.summary}
+          place={place}
+          busy={busy}
+          onPatch={onPatch}
+        />
       ) : order.stage === 'review' && order.summary ? (
         <Review order={order} summary={order.summary} busy={busy} onPatch={onPatch} />
       ) : ask && !order.options && ask.kind !== 'number' && ask.kind !== 'confirm' ? (
@@ -464,6 +461,44 @@ function DeliveryComparison({
         {hidden ? ` ${hidden} slower or dearer option(s) not shown.` : ''}
       </p>
     </section>
+  )
+}
+
+/** Spark filled the order: the sentence above says it all, so only the yes is a button. The full summary, with its change options, is one click away. */
+function AutoReview({
+  order,
+  summary,
+  place,
+  busy,
+  onPatch,
+}: {
+  order: OrderResponse
+  summary: OrderSummary
+  place: NonNullable<OrderResponse['ask']>['choices'][number]
+  busy: boolean
+  onPatch: OrderChange
+}) {
+  const [open, setOpen] = useState(false)
+  if (open) return <Review order={order} summary={summary} busy={busy} onPatch={onPatch} />
+  return (
+    <p className="so-inline-actions">
+      <button
+        type="button"
+        className="btn btn-primary btn-sm"
+        disabled={busy}
+        onClick={() => onPatch({}, place)}
+      >
+        Place order
+      </button>
+      <button
+        type="button"
+        className="btn btn-secondary btn-sm"
+        disabled={busy}
+        onClick={() => setOpen(true)}
+      >
+        See details or change
+      </button>
+    </p>
   )
 }
 

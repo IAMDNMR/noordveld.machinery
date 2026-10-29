@@ -54,7 +54,9 @@ export function DirectDetail({
 }) {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [confirming, setConfirming] = useState<string | null>(null) // a danger action waits for a second, explicit click
   const run = async (action: string) => {
+    setConfirming(null)
     setBusy(action)
     setError(null)
     try {
@@ -124,19 +126,42 @@ export function DirectDetail({
         <section className="card card-pad ord-actions" aria-labelledby="ord-actions">
           <h2 id="ord-actions">{processor ? 'Next steps' : 'Your options'}</h2>
           <div className="ord-actionrow">
-            {allowed.map((a) => (
-              <div key={a.action}>
-                <button
-                  type="button"
-                  className={`btn ${DANGER.has(a.action) ? 'btn-secondary' : 'btn-accent'}`}
-                  disabled={busy !== null}
-                  onClick={() => run(a.action)}
+            {allowed.map((a) =>
+              confirming === a.action ? (
+                <div
+                  key={a.action}
+                  className="ord-confirm"
+                  role="group"
+                  aria-label={`Confirm ${a.label}`}
                 >
-                  {busy === a.action ? 'Saving…' : a.label}
-                </button>
-                {a.note ? <p className="small muted">{a.note}</p> : null}
-              </div>
-            ))}
+                  <p className="small">
+                    <strong>{a.label}?</strong> This cannot be undone.
+                  </p>
+                  <button type="button" className="btn btn-accent" onClick={() => run(a.action)}>
+                    Yes, {a.label.toLowerCase()}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setConfirming(null)}
+                  >
+                    Keep as is
+                  </button>
+                </div>
+              ) : (
+                <div key={a.action}>
+                  <button
+                    type="button"
+                    className={`btn ${DANGER.has(a.action) ? 'btn-secondary' : 'btn-accent'}`}
+                    disabled={busy !== null}
+                    onClick={() => (DANGER.has(a.action) ? setConfirming(a.action) : run(a.action))}
+                  >
+                    {busy === a.action ? 'Saving…' : a.label}
+                  </button>
+                  {a.note ? <p className="small muted">{a.note}</p> : null}
+                </div>
+              ),
+            )}
           </div>
           {blockedActions.length > 0 ? (
             <ul className="small ord-blocked">
@@ -178,9 +203,9 @@ export function DirectDetail({
                       {l.part_number}
                       <small>{l.name}</small>
                     </th>
-                    <td>{l.quantity}</td>
-                    <td>{l.machine ?? 'Not specified'}</td>
-                    <td>
+                    <td data-label="Qty">{l.quantity}</td>
+                    <td data-label="Machine">{l.machine ?? 'Not specified'}</td>
+                    <td data-label="Allocation">
                       {label(l.allocation_status)}
                       {l.reserved_quantity && l.allocation_status === 'RESERVED' ? (
                         <small>{l.reserved_quantity} reserved</small>

@@ -553,6 +553,8 @@ function ProductText({
           ))}
           .
         </p>
+      ) : r.comparison ? (
+        <p>{r.comparison}</p> // no alternative exists: say so, so "what else?" is answered instead of repeated
       ) : null}
       <p>
         {best.order_action === 'add_to_cart' ? (

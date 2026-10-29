@@ -194,6 +194,8 @@ export default function OrdersPage() {
                     .includes(query.trim().toLowerCase()),
               )}
               processor={processor}
+              query={query.trim()}
+              onClear={() => setQuery('')}
             />
           </>
         )}
@@ -202,9 +204,27 @@ export default function OrdersPage() {
   )
 }
 
-function OrderTable({ rows, processor }: { rows: OrderRow[]; processor: boolean }) {
+function OrderTable({
+  rows,
+  processor,
+  query,
+  onClear,
+}: {
+  rows: OrderRow[]
+  processor: boolean
+  query: string
+  onClear: () => void
+}) {
   if (rows.length === 0)
-    return (
+    return query ? (
+      // the search found nothing: say so, rather than suggesting there are no orders
+      <p className="pi-empty">
+        No orders match “{query}”.{' '}
+        <button type="button" className="ord-clear" onClick={onClear}>
+          Clear search
+        </button>
+      </p>
+    ) : (
       <p className="pi-empty">
         {processor
           ? 'No orders in this queue.'

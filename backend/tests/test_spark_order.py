@@ -136,9 +136,10 @@ def test_review_requires_explicit_confirmation_and_creates_nothing_until_then(wo
 def test_confirm_persists_the_order_once_and_a_retry_cannot_duplicate_it(world):
     c, repo, _ = world
     slots = full(route_id=STANDARD)
-    placed = turn(c, slots, confirm=True, idempotency_key="spark-key-0001", reviewed_total=62.5)
-    assert placed["stage"] == "placed" and placed["order"]["order_id"] == "NM-ORD001"
-    again = turn(c, slots, confirm=True, idempotency_key="spark-key-0001", reviewed_total=62.5)
+    seal = turn(c, slots)["confirmation"]  # the summary the user is shown carries the server's seal
+    placed = turn(c, slots, confirm=True, idempotency_key="spark-key-0001", reviewed_total=62.5, confirmation=seal)
+    assert placed["stage"] == "placed" and placed["order"]["order_id"] == "NM-ORD001" and placed["confirmation"] is None
+    again = turn(c, slots, confirm=True, idempotency_key="spark-key-0001", reviewed_total=62.5, confirmation=seal)
     assert again["order"]["order_id"] == "NM-ORD001" and len(repo.keys) == 1
     stored = c.get("/api/v1/orders/NM-ORD001").json()  # it really exists in the backend, in the user's own orders
     assert stored["lines"][0]["quantity"] == 2 and stored["channel"] == "DIRECT_ORDER"
@@ -147,17 +148,47 @@ def test_confirm_persists_the_order_once_and_a_retry_cannot_duplicate_it(world):
 def test_confirm_without_key_changed_price_or_missing_details_places_nothing(world):
     c, repo, _ = world
     slots = full(route_id=STANDARD)
-    assert turn(c, slots, confirm=True)["order"] is None
-    changed = turn(c, slots, confirm=True, idempotency_key="spark-key-0002", reviewed_total=50.0)
+    seal = turn(c, slots)["confirmation"]
+    assert turn(c, slots, confirm=True, confirmation=seal)["order"] is None
+    changed = turn(c, slots, confirm=True, idempotency_key="spark-key-0002", reviewed_total=50.0, confirmation=seal)
     assert changed["stage"] == "review" and "changed from €50.00 to €62.50" in " ".join(changed["warnings"])
     incomplete = turn(c, {**slots, "phone": None}, confirm=True, idempotency_key="spark-key-0003")
     assert incomplete["stage"] == "details" and incomplete["order"] is None and not repo.keys
 
 
+def test_a_confirmation_places_only_the_summary_it_sealed_and_only_while_fresh(world):
+    import time
+
+    from app.services.order_journey import CONFIRM_TTL, _seal
+
+    c, repo, _ = world
+    slots = full(route_id=STANDARD)
+    review = turn(c, slots)
+    seal = review["confirmation"]
+    assert seal and review["order"] is None
+    key = iter(f"spark-seal-{n:04d}" for n in range(10))
+    for case, body in {
+        "missing": dict(slots=slots),
+        "tampered": dict(slots=slots, confirmation=seal[:-1] + ("0" if seal[-1] != "0" else "1")),
+        "quantity changed after review": dict(slots={**slots, "quantity": 3}, confirmation=seal),
+        "installation added after review": dict(slots={**slots, "service_required": True}, confirmation=seal),
+        "a change in the same turn": dict(slots=slots, patch={"quantity": 2}, confirmation=seal),
+        "expired": dict(slots=slots, confirmation=_seal(seal.split(".")[0], now=time.time() - CONFIRM_TTL - 5)),
+    }.items():
+        r = turn(c, body.pop("slots"), confirm=True, idempotency_key=next(key), **body)
+        assert r["order"] is None and r["stage"] in ("review", "details"), case
+        assert any(w.startswith("Nothing was ordered") for w in r["warnings"]) or r["stage"] != "review", case
+    assert not repo.keys and repo.writes == 0
+    placed = turn(c, slots, confirm=True, idempotency_key=next(key), confirmation=seal)  # the untouched summary still places
+    assert placed["stage"] == "placed" and len(repo.keys) == 1
+
+
 def test_stock_taken_between_review_and_confirm_refreshes_options_instead_of_ordering(world):
     c, repo, _ = world
+    slots = full(route_id="RTE-WH-C-SHT-1-STANDARD_ROAD_EU", quantity=30)
+    seal = turn(c, slots)["confirmation"]
     repo.stock[("P-AB-1", "WH-C")]["available"] = 5
-    r = turn(c, full(route_id="RTE-WH-C-SHT-1-STANDARD_ROAD_EU", quantity=30), confirm=True, idempotency_key="spark-key-0004")
+    r = turn(c, slots, confirm=True, idempotency_key="spark-key-0004", confirmation=seal)
     assert r["order"] is None and r["stage"] == "fulfilment" and r["blocked"] and not repo.keys
 
 
@@ -181,6 +212,11 @@ def test_model_failure_keeps_the_journey_intact_and_stale_values_are_dropped(wor
     assert r["slots"]["quantity"] == 2 and any("couldn't read that reply" in w for w in r["warnings"])
     stale = turn(c, {"part_id": "P-AB-1", "quantity": 2, "machine_skipped": True, "ship_to_id": "SHT-GONE", "dealer_id": "DLR-X"})
     assert stale["stage"] == "delivery" and stale["slots"]["ship_to_id"] is None
+    # a reply that could not be read says nothing about machine or place: the saved profile is not applied on its behalf
+    c.put("/api/v1/me/profile", json=PROFILE)
+    unread = turn(c, {"part_id": "P-AB-1", "quantity": 2}, message="to Almelo for my NV-4500")
+    assert unread["prefilled"] == [] and unread["slots"]["ship_to_id"] is None and unread["slots"]["machine"] is None
+    assert unread["stage"] != "review"
 
 
 def test_sign_in_and_role_are_required(world):
@@ -208,7 +244,7 @@ def test_profile_is_stored_only_with_consent_and_can_be_erased(world):
 
 
 def test_profile_prefills_what_spark_would_ask_and_the_user_still_confirms_everything(world):
-    c, repo, _ = world
+    c, repo, llm = world
     first = turn(c, {"part_id": "P-AB-1", "quantity": 2})
     assert first["stage"] == "quantity" and first["prefilled"] == []  # no profile: asked as usual
     c.put("/api/v1/me/profile", json=PROFILE)
@@ -220,19 +256,34 @@ def test_profile_prefills_what_spark_would_ask_and_the_user_still_confirms_every
     # an explicit "change delivery site" is not silently refilled from the profile
     again = turn(c, review["slots"], patch={"ship_to_id": None, "route_id": None})
     assert again["slots"]["ship_to_id"] is None and again["ask"]["choices"]
+    # a place the user named that Spark cannot resolve to one site is asked about; the saved site never replaces it
+    llm.reading = OrderMessage(relevant=True, destination="Atlantis")
+    named = turn(c, {"part_id": "P-AB-1", "quantity": 2}, message="deliver it to Atlantis")
+    assert named["slots"]["ship_to_id"] is None and not any("delivery site" in p for p in named["prefilled"])
+    llm.reading = OrderMessage(relevant=True)
     # stale profile values are validated, never trusted
     c.put("/api/v1/me/profile", json={**PROFILE, "ship_to_id": "SHT-GONE", "preferred_machine": "NV-0"})
     stale = turn(c, {"part_id": "P-AB-1", "quantity": 2})
     assert stale["slots"]["ship_to_id"] is None and stale["slots"]["machine"] is None
 
 
+def test_saved_dealer_from_another_country_is_not_applied_or_warned_about(world):
+    c, repo, _ = world
+    c.put("/api/v1/me/profile", json={**PROFILE, "ship_to_id": None})  # dealer DLR-1 is a German dealer
+    r = turn(c, {"part_id": "P-AB-1", "quantity": 2, "ship_to_id": "SHT-2", "country": "NL"})  # the user is delivering to the Netherlands
+    assert r["slots"]["dealer_id"] != "DLR-1" and "preferred dealer" not in r["prefilled"]
+    assert not any("not recorded for this delivery country" in w for w in r["warnings"])
+
+
 def test_after_an_order_a_new_profile_is_offered_not_saved(world):
     c, repo, _ = world
-    placed = turn(c, full(route_id=STANDARD), confirm=True, idempotency_key="spark-key-0009", reviewed_total=62.5)
+    seal = turn(c, full(route_id=STANDARD))["confirmation"]
+    placed = turn(c, full(route_id=STANDARD), confirm=True, idempotency_key="spark-key-0009", reviewed_total=62.5, confirmation=seal)
     assert placed["profile_offer"]["ship_to_id"] == "SHT-1" and placed["profile_offer"]["preferred_machine"] == "M-1"
     assert c.get("/api/v1/me/profile").json()["stored"] is False  # offered only; saving needs the user's own yes
     c.put("/api/v1/me/profile", json={**PROFILE, "name": CONTACT["name"]})
-    again = turn(c, full(route_id=STANDARD), confirm=True, idempotency_key="spark-key-0010", reviewed_total=62.5)
+    again = turn(c, full(route_id=STANDARD), confirm=True, idempotency_key="spark-key-0010", reviewed_total=62.5,
+                 confirmation=turn(c, full(route_id=STANDARD))["confirmation"])
     assert again["profile_offer"] is None  # nothing new to remember
 
 
@@ -255,6 +306,8 @@ def test_spark_routing_sees_only_consented_machine_facts_and_says_when_it_used_t
     assert "phone" not in _json.dumps(seen["prompt"]) and CONTACT["email"] not in _json.dumps(seen["prompt"])  # contact details never reach the model
     assert used_profile(plan, "I need a hydraulic hose", profile) == ["machine M-1"]
     assert used_profile(plan, "a hose for M-1", profile) == []  # the user said it themselves
+    assert used_profile(plan, "a hose for m1", profile) == []  # in any spelling of the model code
+    assert used_profile(plan, "need a hose for M 1 what else?", profile) == []  # or earlier in the conversation
     interpret(Model(), "hello", {}, None)
     assert "saved_profile" not in seen["prompt"]
 
@@ -293,6 +346,7 @@ def test_auto_order_fills_what_it_can_asks_only_the_gaps_and_a_yes_only_signals_
     llm.reading = OrderMessage(relevant=True, phone="+31 20 555 0100", receiver_name="Ricky Receiver", receiver_phone="+31 20 555 0100")
     b = turn(c, a["slots"], message="+31 20 555 0100, Ricky receives it, same number for both")
     assert b["stage"] == "review" and b["message"].startswith("Ready to order 1 × AB-1") and "I chose 1 unit" in b["message"]
+    assert ", dealer " in b["message"]  # the dealer the order goes through is named before the yes
     llm.reading = OrderMessage(relevant=True, proceed=True)
     before = len(repo.orders_)
     yes = turn(c, b["slots"], message="yes, place it")

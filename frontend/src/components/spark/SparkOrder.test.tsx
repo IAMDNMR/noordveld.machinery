@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
@@ -104,6 +104,10 @@ const mount = (
   return calls
 }
 const json = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status })
+// SparkHome copies its turns into a ref in a passive effect, and a click handler that runs before that effect has run finds no open order and
+// does nothing. A reply appearing on screen can be seen a moment before that happens when the machine is busy; a person cannot click in that
+// gap. Let pending effects run before acting on what was just rendered.
+const settle = () => act(async () => {})
 
 beforeEach(() => {
   sessionStorage.clear()
@@ -133,6 +137,7 @@ it('"Order this part" starts the journey with the part and quantity, shows progr
       return json(
         step('review', {
           summary,
+          confirmation: 'seal-for-this-summary',
           ask: {
             field: null,
             kind: 'confirm',
@@ -171,20 +176,27 @@ it('"Order this part" starts the journey with the part and quantity, shows progr
   expect(screen.getByText('Hydraulic hose', { exact: false })).toBeTruthy()
   expect(screen.queryByText(/is placed/)).toBeNull()
 
+  await settle()
   fireEvent.click(screen.getByRole('button', { name: /Dealer One — Hamburg/ }))
   await screen.findByRole('region', { name: 'Order summary' })
   expect(screen.queryByText(/is placed/)).toBeNull() // reviewing is not ordering
   expect(calls).toHaveLength(2)
 
+  await settle()
   fireEvent.click(screen.getByRole('button', { name: /Place order/ }))
   // a failed attempt says nothing was ordered and shows no order; the retry reuses the same idempotency key
   await screen.findByRole('alert')
   expect(screen.queryByText(/is placed/)).toBeNull()
+  await settle()
   fireEvent.click(screen.getByRole('button', { name: /Place order/ }))
   await screen.findByRole('heading', { name: 'Order NM-ORD001 is placed' })
   expect(calls[3].idempotency_key).toBe(calls[2].idempotency_key)
   const confirm = calls[3]
-  expect(confirm).toMatchObject({ confirm: true, reviewed_total: 62.5 })
+  expect(confirm).toMatchObject({
+    confirm: true,
+    reviewed_total: 62.5,
+    confirmation: 'seal-for-this-summary', // the server's seal on the summary the user saw
+  })
   expect(String(confirm.idempotency_key).length).toBeGreaterThanOrEqual(8)
   expect(screen.getByRole('link', { name: 'View order' }).getAttribute('href')).toBe(
     '/orders/NM-ORD001',
@@ -235,8 +247,11 @@ it('a question Spark answers mid-order keeps the order open: same slots, same st
   })
   // the same part: the order continues with its slots, at its current step
   await vi.waitFor(() => expect(calls.at(-1)).toEqual({ slots }))
-  expect(screen.getByRole('status', { name: 'Current order' }).textContent).toContain('Next: Quantity')
+  expect(screen.getByRole('status', { name: 'Current order' }).textContent).toContain(
+    'Next: Quantity',
+  )
   // the quantity is asked once, on the order card, with a stepper
+  await settle()
   fireEvent.click(screen.getByRole('button', { name: 'One more' }))
   fireEvent.click(screen.getByRole('button', { name: /Continue to delivery/ }))
   await vi.waitFor(() => expect(calls.at(-1)).toMatchObject({ slots, patch: { quantity: 2 } }))

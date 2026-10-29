@@ -9,9 +9,13 @@ from __future__ import annotations
 
 import datetime as dt
 import difflib
+import hashlib
+import hmac
 import json
+import time
 from typing import Any
 
+from app.core.config import get_settings
 from app.core.exceptions import NotFoundError
 from app.schemas.spark_order import OrderMessage, OrderSlots, OrderTurn
 from app.services.checkout import EMAIL, PHONE, CheckoutService
@@ -31,6 +35,7 @@ STAGES = [
 ]
 MAX_SHOWN = 5
 CONTACT = ("name", "company", "email", "phone", "receiver_name", "receiver_phone")
+CONFIRM_TTL = 15 * 60  # seconds a reviewed summary can be confirmed; after that it is shown again
 LABELS = {
     "name": "Your name", "company": "Company", "email": "Email", "phone": "Phone",
     "receiver_name": "Person receiving the delivery", "receiver_phone": "Receiver's phone",
@@ -80,6 +85,7 @@ class OrderJourney:
         self._profile = profile or {}
         self._today = today or dt.date.today()
         self._candidates: list[str] | None = None  # delivery sites matching the user's wording, asked about this turn only
+        self._unread = False  # this turn's typed reply could not be read: it may have named a machine or place, so nothing is filled in for it
 
     # ── one turn ───────────────────────────────────────────────────────────────────────────────
     def turn(self, user: User, body: OrderTurn) -> dict[str, Any]:
@@ -101,7 +107,7 @@ class OrderJourney:
             slots["route_id"] = None
         ctx.edit_details = body.revisit == "details"
         ctx.timing_first = bool(said & TIMING)
-        ctx.prefilled = self._prefill(slots, part, set(body.patch) | said)
+        ctx.prefilled = [] if self._unread else self._prefill(slots, part, set(body.patch) | said)
         out = self._advance(ctx)
         if (said - {"relevant"} == {"proceed"} and out["stage"] == "review" and out.get("summary") and not out["blocked"]
                 and not body.patch and slots["route_id"] == body.slots.route_id):  # a yes to a summary already shown, never to a new one
@@ -154,6 +160,7 @@ class OrderJourney:
         """Merge one free-text reply into the slots. Returns whether it was about this order, and which fields the user stated."""
         if self._llm is None or not hasattr(self._llm, "parse_order_message"):
             notes.append("Free-text replies are unavailable right now. Please use the buttons and fields below.")
+            self._unread = True
             return True, set()
         current = {"part": part.part.part_number if part else None, **{k: slots[k] for k in ("quantity", "machine", "preference", "budget_eur")},
                    "needed_by": slots["needed_by"].isoformat() if slots["needed_by"] else None}
@@ -162,6 +169,7 @@ class OrderJourney:
                 {"today": self._today.isoformat(), "current_order": current, "waiting_for": _waiting_for(slots), "reply": text}, ensure_ascii=False))
         except Exception:  # model unavailable or invalid: keep the journey exactly as it was
             notes.append("I couldn't read that reply right now. Please use the buttons and fields below, or try again.")
+            self._unread = True
             return True, set()
         if not read.relevant:
             return False, set()
@@ -235,14 +243,16 @@ class OrderJourney:
                     slots["machine"] = match
                     used.append(f"machine {match}")
                     break
-        if not slots["ship_to_id"] and p.get("ship_to_id") and not {"ship_to_id", "country"} & explicit:
+        if not slots["ship_to_id"] and p.get("ship_to_id") and not {"ship_to_id", "country", "destination"} & explicit:  # a place the user named is asked about, never swapped for the saved one
             site = self._repo.shipto(p["ship_to_id"])
             if site:
                 slots["ship_to_id"], slots["country"] = site["shipto_id"], site["country_code"]
                 used.append(f"delivery site {site['city']}")
-        if not slots["dealer_id"] and p.get("dealer_id") and "dealer_id" not in explicit:
-            slots["dealer_id"] = p["dealer_id"]
-            used.append("preferred dealer")
+        if not slots["dealer_id"] and p.get("dealer_id") and "dealer_id" not in explicit and slots["country"]:
+            saved = self._repo.dealer(p["dealer_id"])  # a saved dealer only applies where it is recorded for this delivery country
+            if saved and (saved.get("country_code") or "").upper() == slots["country"].upper():
+                slots["dealer_id"] = saved["dealer_id"]
+                used.append("preferred dealer")
         filled = [f for f in CONTACT if not slots[f] and p.get(f) and f not in explicit]
         for f in filled:
             slots[f] = p[f]
@@ -609,7 +619,7 @@ class OrderJourney:
     def _dealer(self, c: "_Ctx"):
         s, card = c.slots, c.card
         country = c.dest["country_code"]
-        dealers = self._checkout.dealers(c.user, country) or self._checkout.dealers(c.user, None)
+        dealers = self._checkout.dealers(c.user, country)
         if s["dealer_id"] and not any(d["dealer_id"] == s["dealer_id"] for d in dealers):
             if not s["auto"]:  # in auto mode the replacement is named in the summary instead
                 c.notes.append("That dealer is not recorded for this delivery country. Please choose again.")
@@ -680,6 +690,8 @@ class OrderJourney:
                        "budget_eur": s["budget_eur"], "within_budget": chosen["within_budget"]},
         }
         c.summary = summary
+        fingerprint = _fingerprint(c.user.id, s, chosen["depot_id"], cost.get("total"))
+        c.confirmation = _seal(fingerprint)
         if chosen["meets_date"] is False:
             c.notes.append(f"This option is estimated to arrive {chosen['arrives_by']}, after {s['needed_by']:%d %b %Y}.")
         if chosen["within_budget"] is False:
@@ -687,7 +699,16 @@ class OrderJourney:
         if cost.get("total") is None:
             c.notes.append("A price is not recorded for part of this order, so no total can be shown.")
         if c.body.confirm:
-            return self._place(c, summary)
+            # an order is placed only for the exact summary the user was shown: same part, quantity, site, route, dealer, details and total,
+            # confirmed within CONFIRM_TTL, and never in a turn that also changes something
+            problem = "changed" if c.body.patch or c.body.message else _unsealed(c.body.confirmation, fingerprint)
+            if problem is None:
+                return self._place(c, summary)
+            c.notes.append({
+                "missing": "Nothing was ordered: please confirm the summary shown.",
+                "expired": "Nothing was ordered: this summary was shown too long ago. Please check it and confirm again.",
+                "changed": "Nothing was ordered: the order details changed since you reviewed them. Please check the summary and confirm again.",
+            }[problem])
         choices = [_choice("Place order", {}, "Creates the order. No payment is taken in this demo.", confirm=True)]
         if not s["service_required"]:
             choices.append(_choice("Add dealer installation", {"service_required": True}))
@@ -703,8 +724,10 @@ class OrderJourney:
         total = f" Total {_money(summary['total'])} excl. VAT." if summary["total"] is not None else ""
         assumed = list(c.slots["assumed"].values())
         chose = f" I chose {', '.join(assumed)}." if assumed else ""
+        dealer = summary["dealer"]
+        installs = " with installation" if summary["dealer_installation"] else ""
         return (f"Ready to order {summary['quantity']} × {summary['part']['part_number']} ({summary['part']['name']}) to {d['city']}, {d['street']}, "
-                f"from {summary['depot']['name']} by {_service(c.chosen)}{when}.{total}{chose} "
+                f"from {summary['depot']['name']} by {_service(c.chosen)}{when}, dealer {dealer['name']} ({dealer['city']}){installs}.{total}{chose} "
                 "Say yes to place it, or tell me what to change.")
 
     def _place(self, c: "_Ctx", summary: dict) -> dict[str, Any]:
@@ -772,7 +795,8 @@ class OrderJourney:
                         else "current" if n == at else "todo"} for n, (i, label) in enumerate(STAGES)],
             "part": c.card, "ask": ask, "options": visible, "explanation": c.explanation if visible else None, "decision": c.decision if visible else None,
             "alternatives": alternatives or [], "reasons": reasons or [], "summary": summary or c.summary,
-            "hidden_options": c.hidden if visible else 0, "order": c.order, "warnings": c.notes, "prefilled": c.prefilled, "profile_offer": self._offer(c) if stage == "placed" else None, "slots": _json(slots), "cost_note": COST_NOTE,
+            "hidden_options": c.hidden if visible else 0, "order": c.order,
+            "confirmation": c.confirmation if stage == "review" and c.order is None else None, "warnings": c.notes, "prefilled": c.prefilled, "profile_offer": self._offer(c) if stage == "placed" else None, "slots": _json(slots), "cost_note": COST_NOTE,
         }
 
 
@@ -794,6 +818,7 @@ class _Ctx:
         self.user, self.body, self.slots, self.notes, self.part = user, body, slots, notes, part
         self.card = self.dest = self.dealer = self.chosen = self.recommended = self.summary = self.order = self.review = self.options = None
         self.explanation = None
+        self.confirmation: str | None = None  # the seal on the summary shown in this reply, if any
         self.all_options: list[dict] | None = None  # every recorded option before the shown list is cut down
         self.decision: dict | None = None  # the delivery decision shown with the options
         self.edit_details = False  # the user reopened the contact details
@@ -801,6 +826,34 @@ class _Ctx:
         self.timing_first = False  # the user asked about delivery: the site comes before the other open questions
         self.prefilled: list[str] = []
         self.hidden = 0
+
+
+def _fingerprint(user_id: str, s: dict, depot_id: str, total) -> str:
+    """Everything that makes this order this order. A confirmation is valid only while all of it is unchanged."""
+    keys = ("part_id", "quantity", "machine", "ship_to_id", "route_id", "dealer_id", "service_required", *CONTACT)
+    data = {k: s.get(k) for k in keys} | {"depot_id": depot_id, "total": total, "user": user_id}
+    return hashlib.sha256(json.dumps(data, sort_keys=True, default=str).encode()).hexdigest()[:32]
+
+
+def _mac(text: str) -> str:
+    return hmac.new(get_settings().session_secret.encode(), text.encode(), hashlib.sha256).hexdigest()[:32]
+
+
+def _seal(fingerprint: str, now: float | None = None) -> str:
+    body = f"{fingerprint}.{int((now or time.time()) + CONFIRM_TTL)}"
+    return f"{body}.{_mac(body)}"
+
+
+def _unsealed(token: str | None, fingerprint: str, now: float | None = None) -> str | None:
+    """None when `token` confirms exactly this order and is still fresh; otherwise why not: missing, expired or changed."""
+    if not token:
+        return "missing"
+    parts = token.split(".")
+    if len(parts) != 3 or not hmac.compare_digest(parts[2], _mac(f"{parts[0]}.{parts[1]}")) or not parts[1].isdigit():
+        return "changed"
+    if parts[0] != fingerprint:
+        return "changed"
+    return "expired" if int(parts[1]) < (now or time.time()) else None
 
 
 def _json(slots: dict) -> dict:

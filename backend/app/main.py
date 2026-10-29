@@ -8,9 +8,11 @@ from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi import APIRouter, FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException
 
 from app.api.dependencies import Catalogue, get_graph
 from app.api.routes import (
@@ -100,19 +102,39 @@ def create_app() -> FastAPI:
             "The question could not be understood reliably. Please rephrase it and try again.",
         )
 
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(_: Request, exc: RequestValidationError) -> JSONResponse:
+        """A malformed request gets the same {"error": {code, message, details}} shape as a refused business rule. Input values are
+        never echoed back (they can hold contact details); each problem names its field."""
+        def describe(e: dict) -> dict[str, str]:
+            if e.get("type") == "json_invalid":  # its location is a character offset, not a field
+                return {"field": "request", "message": "The request body is not valid JSON."}
+            return {
+                "field": ".".join(str(p) for p in e.get("loc", ()) if p not in ("body", "query", "path")) or "request",
+                "message": "This field is required." if e.get("type") == "missing" else str(e.get("msg", "Invalid value.")),
+            }
+
+        fields = [describe(e) for e in exc.errors()]
+        first = fields[0] if fields else {"field": "request", "message": "Invalid request."}
+        return _error(422, "validation_error", f"{first['field']}: {first['message']}", {"field": first["field"], "fields": fields})
+
+    # Starlette's HTTPException also covers unknown routes (404) and wrong methods (405), which never reach a route's own handling.
     @app.exception_handler(HTTPException)
     async def http_error(_: Request, exc: HTTPException) -> JSONResponse:
+        plain = {404: "not_found", 405: "method_not_allowed"}.get(exc.status_code, "error")
         detail = (
             exc.detail
             if isinstance(exc.detail, dict)
-            else {"code": "error", "message": str(exc.detail)}
+            else {"code": plain, "message": str(exc.detail)}
         )
-        return _error(
+        response = _error(
             exc.status_code,
             detail.get("code", "error"),
             detail.get("message", ""),
             detail.get("details"),
         )
+        response.headers.update(exc.headers or {})  # e.g. Allow on a 405
+        return response
 
     @app.exception_handler(Exception)
     async def unexpected(_: Request, exc: Exception) -> JSONResponse:

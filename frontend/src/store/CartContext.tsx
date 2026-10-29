@@ -28,6 +28,7 @@ interface CartValue {
 }
 
 const KEY = 'noordveld-parts-cart-v2'
+const OWNER_KEY = 'noordveld-parts-cart-owner' // who the saved lines belong to: a user id, or '' for a guest
 const MAX_QTY = 99
 const Cart = createContext<CartValue | null>(null)
 
@@ -58,7 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Signed in as an End User, the cart belongs to the user on the server: it is loaded once (lines added while signed out are
   // carried over) and every change is saved. Signed out, it lives in this browser as before.
-  const { user } = useSession()
+  const { user, ready } = useSession()
   const owner = user?.role === 'END_USER' ? user.id : null
   const synced = useRef<string | null>(null)
 
@@ -67,6 +68,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   if (person !== (user?.id ?? null)) {
     if (person !== null) setLines([])
     setPerson(user?.id ?? null)
+  }
+
+  // After a reload the session arrives later than the saved lines: once it is known, lines saved for another signed-in person are dropped.
+  const [checked, setChecked] = useState(false)
+  if (ready && !checked) {
+    setChecked(true)
+    let was: string | null = null
+    try {
+      was = localStorage.getItem(OWNER_KEY)
+    } catch {
+      /* storage unavailable: nothing was saved */
+    }
+    if (was && was !== (user?.id ?? '')) setLines([])
   }
 
   useEffect(() => {
@@ -99,6 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       localStorage.setItem(KEY, JSON.stringify(lines))
+      if (ready) localStorage.setItem(OWNER_KEY, user?.id ?? '')
     } catch {
       /* storage unavailable: the cart simply lives for this visit */
     }
@@ -112,7 +127,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       )
       return () => window.clearTimeout(t)
     }
-  }, [lines, owner])
+  }, [lines, owner, ready, user?.id])
 
   useEffect(() => {
     if (!justAdded) return

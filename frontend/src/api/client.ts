@@ -46,8 +46,22 @@ export const getActiveOrganization = (): string | null => activeOrganization
 // The workspace and business applications are organization-scoped: the server checks the person's access in THIS organization.
 const ORG_SCOPED = /^\/(workspace|agent|intelligence|spark|orders|cart|checkout)(\/|\?|$)/
 
+/** A request that has not answered by then has hung (a Spark answer takes well under a minute); the caller is told instead of waiting forever. */
+export const REQUEST_TIMEOUT_MS = 90_000
+
 async function request<T>(path: string, init: RequestInit): Promise<T> {
   let response: Response
+  // the caller's own signal still cancels the request; the timeout is a second reason to stop
+  const stop = new AbortController()
+  const outer = init.signal
+  const cancel = () => stop.abort()
+  outer?.addEventListener('abort', cancel)
+  if (outer?.aborted) stop.abort()
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    stop.abort()
+  }, REQUEST_TIMEOUT_MS)
   try {
     const scoped =
       activeOrganization && ORG_SCOPED.test(path)
@@ -59,10 +73,14 @@ async function request<T>(path: string, init: RequestInit): Promise<T> {
             },
           }
         : init
-    response = await fetch(`${BASE}${path}`, scoped)
+    response = await fetch(`${BASE}${path}`, { ...scoped, signal: stop.signal })
   } catch (error) {
+    if (timedOut) throw new ApiError(0, 'timeout', 'The server took too long to answer.')
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw new ApiError(0, 'network', 'The server could not be reached.')
+  } finally {
+    clearTimeout(timer)
+    outer?.removeEventListener('abort', cancel)
   }
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as {

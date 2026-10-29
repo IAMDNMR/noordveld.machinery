@@ -9,6 +9,7 @@
     "preview": "vite preview --port 5180",
     "typecheck": "tsc -b",
     "test": "vitest run",
+    "perf:ui": "vitest run --config vitest.perf.config.ts",
     "lint": "oxlint src agentic-commerce/src agentic-commerce/remotion --deny-warnings",
     "film:preview": "remotion studio agentic-commerce/remotion/index.ts",
     "film:render": "remotion render agentic-commerce/remotion/index.ts EvolutionFilm --crf=18 agentic-commerce/film-masters/16x9.mp4",

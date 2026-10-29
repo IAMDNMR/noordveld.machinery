@@ -181,7 +181,8 @@ function SparkLibrary({ identity }: { identity: string }) {
 
 function SparkConversation({ identity, history }: { identity: string; history: ChatHistory }) {
   const [params, setParams] = useSearchParams()
-  const { ready } = useSession()
+  const { ready, user } = useSession()
+  const buyer = !user || user.role === 'END_USER' // an Order Processor has no cart (the API refuses one)
   const storageKey = conversationKey(identity, history.active)
   const { count, setOpen } = useCart()
   const [turns, setTurns] = useState<Turn[]>(() => restoreConversation(storageKey))
@@ -350,7 +351,15 @@ function SparkConversation({ identity, history }: { identity: string; history: C
             {
               slots: journey.slots,
               patch: picked.patch,
-              ...(picked.confirm ? { confirm: true } : {}),
+              ...(picked.confirm
+                ? {
+                    patch: {},
+                    confirm: true,
+                    reviewed_total: journey.summary?.total ?? null,
+                    confirmation: journey.confirmation ?? null,
+                    idempotency_key: orderKey(),
+                  }
+                : {}),
             },
             request.signal,
           )
@@ -371,6 +380,7 @@ function SparkConversation({ identity, history }: { identity: string; history: C
                 slots: reply.slots,
                 confirm: true,
                 reviewed_total: journey.summary.total ?? null,
+                confirmation: reply.confirmation ?? null,
                 idempotency_key: orderKey(),
               },
               spoken,
@@ -508,6 +518,7 @@ function SparkConversation({ identity, history }: { identity: string; history: C
         patch: confirm ? {} : patch,
         confirm,
         reviewed_total: confirm ? (current.summary?.total ?? null) : undefined,
+        confirmation: confirm ? (current.confirmation ?? null) : undefined,
         idempotency_key: confirm ? orderKey() : undefined,
         ...(revisit ? { revisit } : {}),
       })
@@ -693,14 +704,16 @@ function SparkConversation({ identity, history }: { identity: string; history: C
         <div className="spark-toolbar__actions">
           <Link to="/spark">About Spark</Link>
           <Link to="/profile">My profile</Link>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label={`Open cart, ${count} items`}
-          >
-            <ShoppingBag size={17} aria-hidden="true" />
-            <span>Cart{count ? ` (${count})` : ''}</span>
-          </button>
+          {buyer ? (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label={`Open cart, ${count} items`}
+            >
+              <ShoppingBag size={17} aria-hidden="true" />
+              <span>Cart{count ? ` (${count})` : ''}</span>
+            </button>
+          ) : null}
         </div>
       </header>
       <div

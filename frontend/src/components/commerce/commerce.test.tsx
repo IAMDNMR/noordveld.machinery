@@ -797,12 +797,22 @@ describe('Commerce Assistant: one input, one answer', () => {
     replies = []
     mount()
     const input = await box()
+    // only the first question fails; other requests the page makes (the cart expects a list) get their own kind of reply, and every call gets a fresh Response
+    let failed = false
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockRejectedValueOnce(new TypeError('offline'))
-        .mockResolvedValue(new Response(JSON.stringify(discovery), { status: 200 })),
+      vi.fn(async (url: string) => {
+        if (String(url).endsWith('/commerce/agent')) {
+          if (!failed) {
+            failed = true
+            throw new TypeError('offline')
+          }
+          return new Response(JSON.stringify(discovery), { status: 200 })
+        }
+        return String(url).endsWith('/me/cart')
+          ? new Response('[]', { status: 200 })
+          : new Response('{}', { status: 404 })
+      }),
     )
     fireEvent.change(input, { target: { value: 'Find a hydraulic pump for M-1' } })
     fireEvent.submit(input.closest('form') as HTMLFormElement)

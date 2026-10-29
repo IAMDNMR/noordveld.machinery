@@ -56,6 +56,8 @@ class OrderTurn(BaseModel):
     revisit: Literal["fulfilment", "details"] | None = None
     # The total the user saw on the review card; a different current total blocks the order until it is re-confirmed.
     reviewed_total: float | None = None
+    #: the server's seal on the exact summary the user reviewed; placing needs it, and any change to the order or its age voids it
+    confirmation: str | None = Field(default=None, max_length=200)
     idempotency_key: str | None = Field(default=None, min_length=8, max_length=80)
 
 

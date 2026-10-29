@@ -288,5 +288,14 @@ describe('direct order lifecycle screen', () => {
     expect(posted[0].body).toEqual({ action: 'start_fulfilment', expected_status: 'ALLOCATED' })
     expect(await screen.findByRole('button', { name: 'Begin picking and packing' })).toBeTruthy() // the screen now shows what the server returned
     expect(screen.queryByRole('button', { name: 'Start fulfilment' })).toBeNull()
+    cleanup() // an action that cannot be undone needs a second, explicit click; backing out sends nothing
+    mount(jane, direct())
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel order' }))
+    expect(posted.length).toBe(0)
+    fireEvent.click(screen.getByRole('button', { name: 'Keep as is' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel order' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, cancel order' }))
+    await waitFor(() => expect(posted.length).toBe(1))
+    expect(posted[0].body).toEqual({ action: 'cancel', expected_status: 'ALLOCATED' })
   })
 })

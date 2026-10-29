@@ -695,3 +695,13 @@
     flex-basis: 100%;
   }
 }
+
+/* a short page (an empty workspace, a sign-in) keeps the footer at the bottom of the window instead of leaving a bare band under it */
+#root:has(> main.site-premium) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+#root > main.site-premium {
+  flex: 1 0 auto;
+}

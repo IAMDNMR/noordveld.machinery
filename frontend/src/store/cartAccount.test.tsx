@@ -8,10 +8,27 @@ import { SessionProvider, useSession } from './session'
 
 const KEY = 'noordveld-parts-cart-v2'
 const ME = {
-  'USR-EU-001': { id: 'USR-EU-001', name: 'Anna', email: 'a@x', role: 'END_USER', customer: 'C1', permissions: [] },
-  'USR-OP-001': { id: 'USR-OP-001', name: 'Jane', email: 'j@x', role: 'ORDER_PROCESSOR', customer: null, permissions: [] },
+  'USR-EU-001': {
+    id: 'USR-EU-001',
+    name: 'Anna',
+    email: 'a@x',
+    role: 'END_USER',
+    customer: 'C1',
+    permissions: [],
+  },
+  'USR-OP-001': {
+    id: 'USR-OP-001',
+    name: 'Jane',
+    email: 'j@x',
+    role: 'ORDER_PROCESSOR',
+    customer: null,
+    permissions: [],
+  },
 } as const
-const holder: { cart: ReturnType<typeof useCart> | null; session: ReturnType<typeof useSession> | null } = {
+const holder: {
+  cart: ReturnType<typeof useCart> | null
+  session: ReturnType<typeof useSession> | null
+} = {
   cart: null,
   session: null,
 }
@@ -58,6 +75,29 @@ it("switching account on this browser never shows or saves the previous person's
   await waitFor(() => expect(screen.getByTestId('count').textContent).toBe('1'))
 
   await act(async () => void (await holder.session!.signIn('USR-OP-001'))) // Anna -> Jane without signing out
+  await waitFor(() => expect(screen.getByTestId('count').textContent).toBe('0'))
+  expect(JSON.parse(localStorage.getItem(KEY) ?? '[]')).toEqual([])
+
+  // a reload: Anna's lines are still saved in this browser, and the session that comes back is Jane's
+  cleanup()
+  localStorage.setItem(KEY, JSON.stringify([{ partId: 'PRT-059', qty: 1, machine: null }]))
+  localStorage.setItem('noordveld-parts-cart-owner', 'USR-EU-001')
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) =>
+      url.endsWith('/me')
+        ? new Response(JSON.stringify(ME['USR-OP-001']), { status: 200 })
+        : new Response('{}', { status: 401 }),
+    ),
+  )
+  render(
+    <SessionProvider>
+      <CartProvider>
+        <Grab />
+      </CartProvider>
+    </SessionProvider>,
+  )
+  await waitFor(() => expect(holder.session!.user?.id).toBe('USR-OP-001'))
   await waitFor(() => expect(screen.getByTestId('count').textContent).toBe('0'))
   expect(JSON.parse(localStorage.getItem(KEY) ?? '[]')).toEqual([])
 })

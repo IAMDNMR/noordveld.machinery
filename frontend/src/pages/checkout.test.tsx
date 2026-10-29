@@ -340,19 +340,30 @@ describe('checkout', () => {
     expect(document.body.textContent).not.toMatch(/quote request|purchase request/i)
   })
 
-  it('shows why the server refused the order and keeps the cart', async () => {
+  it('when stock moved it refreshes the options, and after a network failure a retry cannot duplicate the order', async () => {
+    let reviews = 0
+    const attempts: Record<string, unknown>[] = []
     mount({
-      '/orders': () =>
-        new Response(
-          JSON.stringify({
-            error: {
-              code: 'availability',
-              message: 'The chosen depot cannot supply this order.',
-              details: { reasons: ['AB-1: only 1 available, 2 requested.'] },
-            },
-          }),
-          { status: 409 },
-        ),
+      '/checkout/review': () => {
+        reviews += 1
+        return new Response(JSON.stringify(review))
+      },
+      '/orders': (init) => {
+        attempts.push(JSON.parse(init!.body as string))
+        if (attempts.length === 1)
+          return new Response(
+            JSON.stringify({
+              error: {
+                code: 'availability',
+                message: 'The chosen depot cannot supply this order.',
+                details: { reasons: ['AB-1: only 1 available, 2 requested.'] },
+              },
+            }),
+            { status: 409 },
+          )
+        if (attempts.length === 2) throw new TypeError('Failed to fetch') // the connection dropped
+        return new Response(JSON.stringify(detail), { status: 201 })
+      },
     })
     await screen.findByRole('heading', { name: 'Cart' })
     next()
@@ -373,8 +384,30 @@ describe('checkout', () => {
     next()
     fireEvent.click(await screen.findByRole('checkbox', { name: /I confirm the details/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }))
-    expect(await screen.findByText('The chosen depot cannot supply this order.')).toBeTruthy()
+
+    // refused: back on availability with the reasons, options read again, nothing ordered, the cart kept
+    expect(
+      await screen.findByText(/cannot supply this order\. The options below have been refreshed/),
+    ).toBeTruthy()
     expect(screen.getByText('AB-1: only 1 available, 2 requested.')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /Availability/ })).toBeTruthy()
+    await waitFor(() => expect(reviews).toBe(2))
     expect(screen.getByTestId('cart').textContent).toContain('"partId":"P1"')
+
+    // the connection drops while placing: the user is told it may or may not have gone through, and why retrying is safe
+    await screen.findByText(/AB-1: Unknown/)
+    next()
+    const confirm = (await screen.findByRole('checkbox', {
+      name: /I confirm the details/,
+    })) as HTMLInputElement
+    expect(confirm.checked).toBe(false) // a refreshed order is confirmed again
+    fireEvent.click(confirm)
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }))
+    expect(await screen.findByText(/can't confirm whether the order was placed/)).toBeTruthy()
+    expect(screen.getByTestId('cart').textContent).toContain('"partId":"P1"')
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }))
+    expect(await screen.findByText('order page')).toBeTruthy()
+    expect(attempts).toHaveLength(3)
+    expect(attempts[2].idempotency_key).toBe(attempts[1].idempotency_key) // the retry is the same order, never a second one
   })
 })

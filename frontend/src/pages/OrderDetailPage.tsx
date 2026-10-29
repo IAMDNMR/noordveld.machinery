@@ -137,9 +137,9 @@ function Detail({
                       </Link>
                       <small>{l.name}</small>
                     </th>
-                    <td>{l.quantity}</td>
-                    <td>{money(l.unit_price_eur)}</td>
-                    <td>{money(l.line_total_eur)}</td>
+                    <td data-label="Qty">{l.quantity}</td>
+                    <td data-label="Unit price">{money(l.unit_price_eur)}</td>
+                    <td data-label="Line total">{money(l.line_total_eur)}</td>
                   </tr>
                 ))}
               </tbody>

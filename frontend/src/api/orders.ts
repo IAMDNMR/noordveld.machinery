@@ -370,6 +370,7 @@ export interface PlaceOrderBody {
   depot_id: string
   route_id: string
   confirmed: boolean
+  expected_total?: number | null
   idempotency_key: string
 }
 

@@ -828,3 +828,49 @@
     flex-wrap: wrap;
   }
 }
+
+/* a wide screen can still leave the map narrow (the step details sit beside it): below ~780px of map the lane cards would be
+   narrower than their step names, so the steps stack as the vertical route used on phones */
+.pj-map {
+  container-type: inline-size;
+}
+@container (max-width: 780px) {
+  .pj-board {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  .pj-lanes,
+  .pj-route {
+    display: none;
+  }
+  .pj-track {
+    height: auto;
+    background: none;
+  }
+  .pj-nodes {
+    position: relative;
+    display: grid;
+    gap: 0.7rem;
+    padding-left: 1.1rem;
+  }
+  .pj-nodes::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 1rem;
+    bottom: 1rem;
+    width: 2px;
+    background: linear-gradient(#00bfa5, rgb(0 191 165 / 0.15));
+  }
+  .pj-nodes li {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    translate: none;
+  }
+  .pj-nodes button {
+    flex-direction: row;
+    align-items: center;
+  }
+}

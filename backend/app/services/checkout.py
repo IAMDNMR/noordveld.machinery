@@ -10,6 +10,7 @@ requester's details belong to the order. Recorded catalogue and route prices are
 from __future__ import annotations
 
 import re
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from app.core.exceptions import GraphConflictError
@@ -170,9 +171,15 @@ class CheckoutService:
     # ── review: what the order would look like, before anything is placed ──────────────────────
     def review(self, user: User, items: list[dict[str, Any]], shipto_id: str) -> dict[str, Any]:
         self._need(user)
-        lines = self._lines(items)
-        dest = self._destination(shipto_id)
-        plan = self._plan(lines, shipto_id)
+        # Each graph read is a network round trip (~0.24 s to the hosted graph). The part check, the destination and the depot stock do not
+        # depend on each other, so they run at once; the routes follow the stock. Two round trips instead of five; the same checks, in the same order.
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            checked = pool.submit(self._lines, items)
+            site = pool.submit(self._destination, shipto_id)
+            stock = self._repo.depot_stock(sorted({it["part_id"] for it in items}))
+            routes = self._repo.routes(sorted({r["warehouse_id"] for r in stock}), shipto_id)
+            lines, dest = checked.result(), site.result()
+        plan = depot_plan(lines, stock, routes)
         for depot in plan:
             for option in depot["options"]:
                 option["cost"] = route_cost(lines, option)
@@ -248,6 +255,12 @@ class CheckoutService:
         dealer = self._repo.dealer(body["dealer_id"])
         if dealer is None:
             raise TransitionError("dealer_not_found", "Choose a dealer from the dealer network.")
+        if (dealer.get("country_code") or "").upper() != (dest.get("country_code") or "").upper():
+            raise TransitionError(
+                "dealer_country_mismatch",
+                f"{dealer['name']} is not recorded for the delivery country {dest['country_code']}. Choose a dealer in that country.",
+                {"field": "dealer_id", "dealer_country": dealer.get("country_code"), "delivery_country": dest["country_code"]},
+            )
         service_required = bool(body.get("dealer_service_required"))
         if service_required:
             installs = self._repo.dealer_installs(
@@ -286,6 +299,14 @@ class CheckoutService:
                 },
             )
         opt = option_view(route)
+        expected = body.get("expected_total")
+        current = route_cost(lines, opt)["total"]
+        if expected is not None and (current is None or abs(float(expected) - current) > 0.004):
+            raise TransitionError(
+                "price_changed",
+                "The total changed since you reviewed it. Nothing was ordered. Review the new total and confirm again.",
+                {"field": "expected_total", "reviewed_total": expected, "current_total": current},
+            )
 
         try:
             order_id = self._repo.create_order(

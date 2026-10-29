@@ -37,46 +37,49 @@ export function graphPositions(view: GraphView): Record<string, Point> {
     x: 500 + 240 * Math.cos(i * 2.39996),
     y: 310 + 210 * Math.sin(i * 2.39996),
   }))
-  const byId = new Map(nodes.map((node) => [node.id, node]))
+  // Same arithmetic as before, on index-addressed arrays: the pairwise loop runs ~n²/2 times per pass, so map lookups there dominated the cost.
+  const indexOf = new Map(nodes.map((node, i) => [node.id, i]))
+  const links = view.edges.flatMap((edge) => {
+    const a = indexOf.get(edge.source),
+      b = indexOf.get(edge.target)
+    return a === undefined || b === undefined || a === b ? [] : [[a, b] as const]
+  })
+  const fx = new Float64Array(nodes.length),
+    fy = new Float64Array(nodes.length)
   for (let pass = 0; pass < 160; pass++) {
-    const forces = new Map(
-      nodes.map((node) => [node.id, { x: (500 - node.x) * 0.008, y: (300 - node.y) * 0.008 }]),
-    )
+    for (let i = 0; i < nodes.length; i++) {
+      fx[i] = (500 - nodes[i].x) * 0.008
+      fy[i] = (300 - nodes[i].y) * 0.008
+    }
     for (let i = 0; i < nodes.length; i++)
       for (let j = i + 1; j < nodes.length; j++) {
-        const a = nodes[i],
-          b = nodes[j],
-          dx = a.x - b.x,
-          dy = a.y - b.y,
+        const dx = nodes[i].x - nodes[j].x,
+          dy = nodes[i].y - nodes[j].y,
           distance = Math.max(1, Math.hypot(dx, dy))
         const power = Math.min(18, 13000 / (distance * distance))
         const x = (dx / distance) * power,
           y = (dy / distance) * power
-        forces.get(a.id)!.x += x
-        forces.get(a.id)!.y += y
-        forces.get(b.id)!.x -= x
-        forces.get(b.id)!.y -= y
+        fx[i] += x
+        fy[i] += y
+        fx[j] -= x
+        fy[j] -= y
       }
-    for (const edge of view.edges) {
-      const a = byId.get(edge.source),
-        b = byId.get(edge.target)
-      if (!a || !b || a === b) continue
-      const dx = b.x - a.x,
-        dy = b.y - a.y,
+    for (const [i, j] of links) {
+      const dx = nodes[j].x - nodes[i].x,
+        dy = nodes[j].y - nodes[i].y,
         distance = Math.max(1, Math.hypot(dx, dy)),
         power = (distance - 175) * 0.012
       const x = (dx / distance) * power,
         y = (dy / distance) * power
-      forces.get(a.id)!.x += x
-      forces.get(a.id)!.y += y
-      forces.get(b.id)!.x -= x
-      forces.get(b.id)!.y -= y
+      fx[i] += x
+      fy[i] += y
+      fx[j] -= x
+      fy[j] -= y
     }
-    for (const node of nodes) {
-      const f = forces.get(node.id)!,
-        cooling = 1 - pass / 210
-      node.x += Math.max(-12, Math.min(12, f.x)) * cooling
-      node.y += Math.max(-12, Math.min(12, f.y)) * cooling
+    const cooling = 1 - pass / 210
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i].x += Math.max(-12, Math.min(12, fx[i])) * cooling
+      nodes[i].y += Math.max(-12, Math.min(12, fy[i])) * cooling
     }
   }
   return Object.fromEntries(nodes.map((node) => [node.id, { x: node.x, y: node.y }]))

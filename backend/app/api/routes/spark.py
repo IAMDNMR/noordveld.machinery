@@ -7,11 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.api.app_access import require_any_app, check_app_operation
 from app.api.dependencies import (
-    CommerceAgentDep, Graph, OrdersSvc, current_user, get_agent, get_question_service, require,
+    CommerceAgentDep, Graph, OrdersSvc, Parts, current_user, get_agent, get_question_service, require,
 )
 from app.api.routes.commerce import AgentBody, agent as account_answer
 from app.core.config import get_settings
-from app.core.exceptions import GraphUnavailableError
+from app.core.exceptions import GraphUnavailableError, NotFoundError
+from app.services.order_journey import _part_key
 from app.core.session import COOKIE, verify
 from app.llm import LLMClient, LLMError
 from app.llm import create_reasoning_llm
@@ -42,10 +43,11 @@ def spark_shopping(graph: Graph, llm: Annotated[LLMClient | None, Depends(get_sp
 
 
 def used_profile(plan: SparkPlan, message: str, profile: dict | None) -> list[str]:
-    """Name a saved machine only when the shopping request now carries it and the user did not type it."""
+    """Name a saved machine only when the shopping request now carries it and the user did not type it (in any spelling: NV-3200, nv 3200, nv3200).
+    `message` is everything the user typed in this conversation, so a machine they named earlier is theirs, not the profile's."""
     if not profile or not plan.shopping:
         return []
-    norm = lambda s: " ".join(s.casefold().replace("-", " ").split())  # noqa: E731
+    norm = lambda s: "".join(ch for ch in s.casefold() if ch.isalnum())  # noqa: E731
     return [f"machine {m}" for m in [profile.get("preferred_machine"), *(profile.get("machines") or [])]
             if m and norm(m) in norm(plan.shopping) and norm(m) not in norm(message)][:1]
 
@@ -54,7 +56,7 @@ def used_profile(plan: SparkPlan, message: str, profile: dict | None) -> list[st
 def conversation(body: SparkRequest, request: Request,
                  questions: Annotated[object, Depends(spark_questions)],
                  shopping: Annotated[object, Depends(spark_shopping)],
-                 commerce: CommerceAgentDep, orders: OrdersSvc,
+                 commerce: CommerceAgentDep, orders: OrdersSvc, catalogue: Parts,
                  llm: Annotated[LLMClient | None, Depends(get_spark_llm)]) -> SparkResponse:
     secret = get_settings().session_secret
     owner = verify(request.cookies.get(COOKIE), secret) or "anonymous"
@@ -88,7 +90,7 @@ def conversation(body: SparkRequest, request: Request,
         if plan.view == "graph" and plan.reuse_previous and memory.get("investigation") and not plan.clarification:
             # Presentation changes must not let a paraphrase change the investigation.
             plan = plan.model_copy(update={"intelligence": memory["investigation"]})
-    result = SparkResponse(message=plan.clarification or "", context="", view=plan.view, profile_used=used_profile(plan, body.message, profile), steps=[
+    result = SparkResponse(message=plan.clarification or "", context="", view=plan.view, profile_used=used_profile(plan, " ".join([*(str(h.get("message") or "") for h in memory.get("history", [])), body.message]), profile), steps=[
         SparkStep(label="Understood your request", status="completed", ms=elapsed(started)),
     ])
     tools = [("intelligence", "Checked parts and source evidence"),
@@ -100,6 +102,13 @@ def conversation(body: SparkRequest, request: Request,
         ordering = [{"kind": "PART", "part_id": current["part_id"], "label": current.get("label", "")}] if current.get("part_id") else []
         offered_parts = memory.get("offered", [])
         part = resolve_order_part(plan.order, ordering) or resolve_order_part(plan.order, offered_parts)
+        if not part and any(ch.isdigit() for ch in plan.order):
+            # an exact catalogue part number is not a guess: look it up (the order journey then checks it is orderable and fits)
+            try:
+                found = catalogue.detail(_part_key(plan.order)).part
+                part = {"kind": "PART", "part_id": found.part_id, "label": found.part_number}
+            except NotFoundError:
+                part = None
         if part:
             # the constraints the user gave the shopping step travel with a part that step offered
             carry = order_carry(memory.get("shopping")) if part in offered_parts else {}

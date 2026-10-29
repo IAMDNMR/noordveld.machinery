@@ -101,7 +101,28 @@ def review(c, **over):
 
 
 
+def test_changed_total_blocks_the_order_and_nothing_is_created(repo):
+    anna = client("U-ANNA")
+    before = len(anna.get("/api/v1/orders").json())
+    r = place(anna, expected_total=1.0)  # the buyer reviewed a total that is no longer current
+    assert r.status_code == 409 and "price_changed" in r.text
+    assert len(anna.get("/api/v1/orders").json()) == before
+    quote = review(anna).json()
+    total = next(o for d in quote["depots"] if d["depot_id"] == "WH-B" for o in d["options"] if o["route_id"] == ROUTE_B)["cost"]["total"]
+    assert place(anna, expected_total=total).status_code in (200, 201)
+
+
 # ── place order ───────────────────────────────────────────────────────────────────────────────────
+def test_dealer_outside_the_delivery_country_cannot_create_an_order(repo):
+    anna = client("U-ANNA")
+    before = len(anna.get("/api/v1/orders").json())
+    r = place(anna, dealer_id="DLR-2")  # DLR-2 is in NL, SHT-1 is in DE
+    assert r.status_code == 409
+    assert "dealer_country_mismatch" in r.text and "dealer_id" in r.text
+    assert len(anna.get("/api/v1/orders").json()) == before  # nothing was created
+    assert place(anna).status_code in (200, 201)  # the draft is intact: the valid dealer still places
+    assert len(anna.get("/api/v1/orders").json()) == before + 1
+
 
 
 def test_place_order_creates_the_order_not_a_request_and_persists_everything(repo):
@@ -203,6 +224,46 @@ def test_a_stale_status_is_rejected_and_two_actions_cannot_both_win(repo):
 
 
 # ── exceptions ────────────────────────────────────────────────────────────────────────────────────
+
+
+def test_exceptions_failures_repeats_and_forbidden_steps_each_leave_consistent_records(repo):
+    anna, jane = client("U-ANNA"), client("U-JANE")
+    row = repo.stock[("P-AB-1", "WH-B")]
+    oid = place(anna).json()["order_id"]
+    for a in ("start_fulfilment", "dispatch", "deliver", "allocate", "release_allocation", "reject"):
+        assert act(anna, oid, a).status_code == 403, a  # a buyer never runs a processor step
+    assert act(jane, oid, "teleport").json()["error"]["code"] == "invalid_action"
+
+    # shipment exception, then resumed and delivered; a repeated or out-of-order step is refused and changes nothing
+    drive(jane, oid, "start_fulfilment", "begin_fulfilling", "mark_ready", "create_shipment", "dispatch")
+    assert act(jane, oid, "dispatch").status_code == 409
+    d = drive(jane, oid, "shipment_exception")
+    assert d["status"] == "SHIPMENT_EXCEPTION" and d["shipments"][0]["status"] == "EXCEPTION"
+    assert act(jane, oid, "deliver").status_code == 409
+    d = drive(jane, oid, "resume_shipment", "deliver")
+    assert d["status"] == "DELIVERED" and d["shipments"][0]["status"] == "DELIVERED"
+    assert act(jane, oid, "deliver").status_code == 409
+
+    # a failed delivery, then cancelled: the units already left the depot, so nothing is put back as available
+    oid2 = place(anna, idempotency_key="key-0000003").json()["order_id"]
+    drive(jane, oid2, "start_fulfilment", "begin_fulfilling", "mark_ready", "create_shipment", "dispatch", "in_transit")
+    held = (row["available"], row["reserved"], row["on_hand"])
+    d = drive(jane, oid2, "delivery_failed")
+    assert d["status"] == "DELIVERY_FAILED" and d["shipments"][0]["status"] == "DELIVERY_FAILED"
+    assert act(anna, oid2, "cancel").status_code in (403, 409)  # the buyer cannot cancel a shipped order
+    d = drive(jane, oid2, "cancel")
+    assert d["status"] == "CANCELLED" and (row["available"], row["reserved"], row["on_hand"]) == held
+
+    # stock that is no longer there: released, re-allocation fails and is recorded, the order is rejected; stock is untouched throughout
+    oid3 = place(anna, idempotency_key="key-0000004").json()["order_id"]
+    assert drive(jane, oid3, "release_allocation")["status"] == "ALLOCATION_RELEASED"
+    row["available"] = 1
+    d = drive(jane, oid3, "allocate")
+    assert d["status"] == "ALLOCATION_FAILED" and (row["available"], row["reserved"]) == (1, 0)
+    d = drive(jane, oid3, "reject")
+    assert d["status"] == "REJECTED" and not any(a["allowed"] for a in d["actions"])
+    assert act(jane, oid3, "reject").status_code == 409 and row["available"] == 1
+    assert [h["status"] for h in d["history"]] == ["NEW", "ALLOCATED", "ALLOCATION_RELEASED", "ALLOCATION_FAILED", "REJECTED"]
 
 
 def test_the_owner_cannot_cancel_once_fulfilment_has_started_and_others_never_can(repo):

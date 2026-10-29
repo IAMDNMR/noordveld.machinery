@@ -174,8 +174,8 @@ def test_bucket_transcript_keeps_every_choice_while_the_user_changes_their_mind(
     assert edit["stage"] == "details" and {f["name"]: f["value"] for f in edit["ask"]["fields"]}["phone"] == CONTACT["phone"]
 
     # 12. confirm once; a retried confirm cannot create a second order; the status comes from the backend
-    placed = order(c, model, review["slots"], confirm=True, idempotency_key="flow-key-0001", reviewed_total=115.0)
-    retry = order(c, model, review["slots"], confirm=True, idempotency_key="flow-key-0001", reviewed_total=115.0)
+    placed = order(c, model, review["slots"], confirm=True, idempotency_key="flow-key-0001", reviewed_total=115.0, confirmation=review["confirmation"])
+    retry = order(c, model, review["slots"], confirm=True, idempotency_key="flow-key-0001", reviewed_total=115.0, confirmation=review["confirmation"])
     assert placed["stage"] == "placed" and retry["order"]["order_id"] == placed["order"]["order_id"] and len(repo.keys) == 1
     status = c.get(f"/api/v1/orders/{placed['order']['order_id']}").json()
     assert status["status"] == placed["order"]["status"] and status["lines"][0]["quantity"] == 3

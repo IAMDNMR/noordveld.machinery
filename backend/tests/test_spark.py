@@ -8,7 +8,8 @@ import httpx
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.dependencies import get_commerce_agent, get_orders
+from app.api.dependencies import get_commerce_agent, get_orders, get_part_service
+from app.core.exceptions import NotFoundError
 from app.api.routes import spark, spark_voice
 from app.speech.providers import get_speech
 from app.api.routes.spark import get_spark_llm
@@ -75,6 +76,13 @@ def world(monkeypatch):
     app.dependency_overrides[spark.spark_questions] = lambda: questions
     app.dependency_overrides[spark.spark_shopping] = lambda: SimpleNamespace(recommend=shop)
     app.dependency_overrides[get_commerce_agent] = Commerce
+
+    class Catalogue:  # one recorded part; any other number is not in the catalogue
+        def detail(self, key):
+            if key.upper().replace(" ", "-") != "NVM-1020-FL":
+                raise NotFoundError("Part", key)
+            return SimpleNamespace(part=SimpleNamespace(part_id="PRT-059", part_number="NVM-1020-FL"))  # the PartDetail shape
+    app.dependency_overrides[get_part_service] = Catalogue
     monkeypatch.setattr(spark, "get_settings", lambda: SimpleNamespace(session_secret=SECRET))
     client = TestClient(app)
     return client, model, questions, seen, app
@@ -322,6 +330,12 @@ def test_order_intent_starts_the_guided_order_only_for_a_part_spark_offered(worl
     model.next = plan(order="ab-1")
     r = client.post("/api/v1/spark/conversation", json={"message": "order this part", "context": context}).json()
     assert r["order_part"] == {"part_id": "P-AB-1", "label": "AB-1", "patch": {}} and not seen["shopping"] and not seen["questions"]
-    model.next = plan(order="ZZ-9")  # never offered: nothing to order, and the model cannot make an id up
+    model.next = plan(order="ZZ-9")  # never offered and not in the catalogue: nothing to order, and the model cannot make an id up
     r = client.post("/api/v1/spark/conversation", json={"message": "order ZZ-9", "context": context}).json()
     assert r["order_part"] is None and "Which part" in r["message"]
+    model.next = plan(order="nvm 1020 fl")  # an exact catalogue part number, however it is typed, is not a guess: the order starts with the catalogue's own id
+    r = client.post("/api/v1/spark/conversation", json={"message": "order 1 NVM-1020-FL for my NV-3200", "context": context}).json()
+    assert r["order_part"] == {"part_id": "PRT-059", "label": "NVM-1020-FL", "patch": {}}
+    model.next = plan(order="the filter")  # a description is not a part number: still asked, never guessed
+    r = client.post("/api/v1/spark/conversation", json={"message": "order the filter", "context": context}).json()
+    assert r["order_part"] is None or r["order_part"]["part_id"] == "P-AB-1"

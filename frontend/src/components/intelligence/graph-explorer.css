@@ -106,7 +106,7 @@
 }
 .gx-edge text {
   font:
-    10px Inter,
+    calc(10px * var(--gx-k, 1)) Inter,
     sans-serif;
   fill: #536b5c;
   paint-order: stroke;
@@ -124,7 +124,7 @@
 }
 .gx-node text {
   font:
-    600 12px Inter,
+    600 calc(12px * var(--gx-k, 1)) Inter,
     sans-serif;
   fill: #253e31;
   paint-order: stroke;
@@ -133,7 +133,7 @@
   stroke-linejoin: round;
 }
 .gx-node .gx-node-kind {
-  font-size: 10px;
+  font-size: calc(10px * var(--gx-k, 1));
   font-weight: 400;
   fill: #6a7c70;
 }

@@ -205,6 +205,20 @@
   gap: 16px;
   align-items: flex-start;
 }
+.ord-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #e3b25c;
+  border-radius: 10px;
+  background: #fbf1e0;
+}
+.ord-confirm p {
+  margin: 0;
+  color: #6b4306;
+}
 .ord-blocked {
   margin-top: 10px;
   padding-left: 18px;
@@ -334,14 +348,23 @@
     text-transform: uppercase;
     color: var(--ink-500);
     margin-bottom: 5px;
+    content: attr(
+      data-label
+    ); /* each cell names its own column: the direct and earlier order tables have different columns */
   }
-  [aria-labelledby='ord-items'] .data-table td:nth-child(2):before {
-    content: 'Qty';
-  }
-  [aria-labelledby='ord-items'] .data-table td:nth-child(3):before {
-    content: 'Unit price';
-  }
-  [aria-labelledby='ord-items'] .data-table td:nth-child(4):before {
-    content: 'Line total';
-  }
+}
+.ord-clear {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-600);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ord-clear:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 3px;
 }
