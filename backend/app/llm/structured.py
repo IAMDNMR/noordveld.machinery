@@ -31,6 +31,8 @@ log = logging.getLogger("app.llm")
 
 # Token budget: replies are short structures or two sentences, and only the evidence the wording needs is sent.
 # "question_retry" is the single second attempt after an unusable reply: temperature is 0, so the same cap would truncate the same way
+REPLY_TTL = 6 * 3600.0  # seconds a model reply is reused
+REPLY_CACHE_SIZE = 2000
 MAX_OUTPUT_TOKENS = {
     "spark": 650,
     "commerce": 120,
@@ -307,15 +309,32 @@ class StructuredLLM:
         self._limit = RateLimiter(per_minute)
         self._cache: OrderedDict[tuple[str, str], Any] = OrderedDict()
         self._cache_lock = threading.Lock()
+        self._replies: OrderedDict[tuple, tuple[float, str]] = OrderedDict()
+        self._reply_lock = threading.Lock()
 
     def _complete(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
         raise NotImplementedError
 
     def _guarded(self, kind: str, system: str, prompt: str, schema: dict[str, Any] | None) -> str:
+        # Calls run at temperature 0, so the same request gets the same reply: an identical one is answered from memory
+        # (and costs no model call, no quota and no 5-20 s wait). Only replies the model actually returned are kept.
+        key = (kind, system, prompt, json.dumps(schema, sort_keys=True) if schema else "")
+        now = time.monotonic()
+        with self._reply_lock:
+            hit = self._replies.get(key)
+            if hit and now - hit[0] < REPLY_TTL:
+                self._replies.move_to_end(key)
+                log.info("llm call provider=%s kind=%s outcome=reply_cache", self.name, kind)
+                return hit[1]
         if not self._limit.allow():
             log.warning("llm call provider=%s kind=%s outcome=local_rate_limit", self.name, kind)
             raise LLMUnavailable("rate limit reached")
-        return self._complete(kind, system, prompt, schema)
+        text = self._complete(kind, system, prompt, schema)
+        with self._reply_lock:
+            self._replies[key] = (time.monotonic(), text)
+            while len(self._replies) > REPLY_CACHE_SIZE:
+                self._replies.popitem(last=False)
+        return text
 
     def _cached(self, kind: str, text: str, make):
         key = (kind, " ".join(text.lower().split()))
